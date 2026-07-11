@@ -1,0 +1,12 @@
+std = "roblox+testez"
+[rules]
+# Forzar uso de Logger — prohibir print/warn directos
+# Excepción: Logger.lua puede usarlos internamente
+print = "deny"
+warn = "deny"
+
+[config]
+unused_variable = { allow_unused_self = true }
+
+[lints]
+roblox_manual_fromscale_or_fromoffset = "allow"

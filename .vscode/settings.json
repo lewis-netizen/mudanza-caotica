@@ -1,0 +1,17 @@
+{    
+    "[lua]": {
+  "editor.defaultFormatter": "JohnnyMorganz.stylua",
+  "editor.formatOnSave": true
+    },
+    "[luau]": {
+  "editor.defaultFormatter": "JohnnyMorganz.stylua",
+  "editor.formatOnSave": true
+    },
+    "workbench.editor.customLabels.patterns": {
+  "**/init.lua": "${dirname} (${filename}.${extname})",
+  "**/init.luau": "${dirname} (${filename}.${extname})"
+    },
+    "luau-lsp.plugins.enabled": true,
+    "luau-lsp.plugins.fileSystem.enabled": true,
+    "luau-lsp.studioPlugin.enabled": true
+}

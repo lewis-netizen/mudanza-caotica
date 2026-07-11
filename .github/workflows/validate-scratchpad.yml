@@ -1,0 +1,84 @@
+# validate-scratchpad.yml
+# Validates the structural integrity of SCRATCHPAD.md on every push.
+# Warning only — does not block. The SCRATCHPAD_INTAKE prompt is the real gate.
+# Checks: required sections present, entries have required fields.
+
+name: Validate — Scratchpad Structure
+
+on:
+  push:
+    paths:
+      - 'docs/SCRATCHPAD.md'
+
+jobs:
+  validate-structure:
+    name: Validate scratchpad structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check structure
+        id: check
+        run: |
+          FILE="docs/SCRATCHPAD.md"
+          WARNINGS=()
+
+          # Required sections
+          if ! grep -q "^## Entradas" "$FILE"; then
+            WARNINGS+=("Missing required section: '## Entradas'")
+          fi
+          if ! grep -q "^## Rechazadas" "$FILE"; then
+            WARNINGS+=("Missing required section: '## Rechazadas'")
+          fi
+
+          # Validate each entry has required fields
+          # An entry starts with ### [TYPE] Title
+          VALID_TYPES="OBSERVATION|QUESTION|HYPOTHESIS|PROPOSAL"
+          IN_ENTRIES=0
+          ENTRY_LINE=0
+          ENTRY_TITLE=""
+          HAS_CONTEXTO=0
+          HAS_CONTENIDO=0
+
+          while IFS= read -r line; do
+            if echo "$line" | grep -q "^## Entradas"; then
+              IN_ENTRIES=1
+            fi
+            if echo "$line" | grep -q "^## Rechazadas"; then
+              IN_ENTRIES=0
+            fi
+
+            if [ "$IN_ENTRIES" -eq 1 ]; then
+              if echo "$line" | grep -qE "^### \[(${VALID_TYPES})\]"; then
+                # New entry — check previous entry if exists
+                if [ -n "$ENTRY_TITLE" ]; then
+                  [ "$HAS_CONTEXTO" -eq 0 ] && WARNINGS+=("Entry '$ENTRY_TITLE' missing **Contexto:** field")
+                  [ "$HAS_CONTENIDO" -eq 0 ] && WARNINGS+=("Entry '$ENTRY_TITLE' missing **Contenido:** field")
+                fi
+                ENTRY_TITLE="$line"
+                HAS_CONTEXTO=0
+                HAS_CONTENIDO=0
+              elif echo "$line" | grep -qE "^### \["; then
+                WARNINGS+=("Entry '$line' has invalid type. Valid: OBSERVATION | QUESTION | HYPOTHESIS | PROPOSAL")
+              fi
+              echo "$line" | grep -q "^\*\*Contexto:\*\*" && HAS_CONTEXTO=1
+              echo "$line" | grep -q "^\*\*Contenido:\*\*" && HAS_CONTENIDO=1
+            fi
+          done < "$FILE"
+
+          # Check last entry
+          if [ -n "$ENTRY_TITLE" ]; then
+            [ "$HAS_CONTEXTO" -eq 0 ] && WARNINGS+=("Entry '$ENTRY_TITLE' missing **Contexto:** field")
+            [ "$HAS_CONTENIDO" -eq 0 ] && WARNINGS+=("Entry '$ENTRY_TITLE' missing **Contenido:** field")
+          fi
+
+          # Output
+          if [ ${#WARNINGS[@]} -eq 0 ]; then
+            echo "✅ SCRATCHPAD structure is valid."
+          else
+            echo "⚠ SCRATCHPAD structure warnings:"
+            for w in "${WARNINGS[@]}"; do
+              echo "  - $w"
+            done
+            echo "Note: These are warnings only. SCRATCHPAD_INTAKE will report malformed entries with context."
+          fi

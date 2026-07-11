@@ -1,0 +1,28 @@
+# Project place file
+/Mudanza Caótica.rbxlx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+# Wally packages — instalados localmente, no se commitean
+# wally.lock SÍ se commitea (equivalente a cargo.lock)
+Packages/
+
+# Rokit — los binarios se instalan globalmente, no en el repo
+# rokit.toml SÍ se commitea
+
+# Sourcemap generado — se regenera con `rojo sourcemap`
+sourcemap.json
+
+# VSCode — settings personales del desarrollador (no del proyecto)
+# .vscode/settings.json y .vscode/extensions.json SÍ se commitean
+.vscode/*.code-workspace
+.vscode/launch.json
+
+# Lefthook — overrides locales del desarrollador
+lefthook-local.yml
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,32 @@
+extends:
+  - '@commitlint/config-conventional'
+
+rules:
+  type-enum:
+    - 2
+    - always
+    - [feat, fix, refactor, docs, chore]
+
+  scope-enum:
+    - 2
+    - always
+    - [gameplay, world, networking, persistence, ui, ux, governance]
+
+  scope-empty:
+    - 2
+    - never
+
+  subject-empty:
+    - 2
+    - never
+
+  subject-case:
+    - 0
+
+  # No length limit on body — reason: field can be detailed
+  body-max-line-length:
+    - 0
+
+  # Footer for refs: DL-xxx, [DOMINIO]-xxx
+  footer-max-line-length:
+    - 0

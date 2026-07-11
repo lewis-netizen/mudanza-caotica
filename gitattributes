@@ -1,0 +1,19 @@
+# .gitattributes
+# Normaliza todos los archivos de texto a LF en el repositorio,
+# independientemente del sistema operativo del desarrollador.
+#
+# Por qué: .stylua.toml fuerza line_endings = "Unix". Sin este archivo,
+# un desarrollador en Windows con la configuración por defecto de Git
+# (core.autocrlf=true) puede terminar con CRLF en el checkout, causando
+# diffs falsos en cada archivo y conflicto directo con StyLua.
+#
+# Con esto, ningún desarrollador necesita configurar core.autocrlf
+# manualmente — el comportamiento es el mismo en cualquier OS.
+
+* text=auto eol=lf
+
+# Binarios — nunca normalizar
+*.png binary
+*.jpg binary
+*.rbxl binary
+*.rbxlx binary

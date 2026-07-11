@@ -1,0 +1,160 @@
+# p3-periodic-audit.yml
+# Lunes 9am UTC — auditoría periódica.
+#
+# Separación CI/IA en P3:
+#   Los contratos estructurales se verifican en cada PR via p2-implementation.yml.
+#   P3 no los repite. P3 audita lo que requiere visión temporal y sistémica.
+#
+# Issue TECH (Codex):
+#   - Estado del Decision Log (entradas estancadas, campos faltantes)
+#   - Contratos faltantes: reglas verificadas por juicio que podrían ser CI
+#   - Acoplamiento acumulado no capturado por contratos existentes
+#
+# Issue DESIGN (Claude, activación manual):
+#   - Coherencia de decisiones de diseño con §2 y §3
+#   - DI trajectory — ¿las últimas semanas acercan o alejan del objetivo?
+
+name: P3 — Periodic Audit
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  create-p3-issues:
+    name: Create P3 audit issues
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get context
+        id: ctx
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const today = new Date().toISOString().split('T')[0];
+            const { data: openAudits } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'codex-audit',
+              state: 'open',
+            });
+            core.setOutput('date', today);
+            core.setOutput('overdue_count', openAudits.length.toString());
+            core.setOutput('overdue_list',
+              openAudits.map(i => `- #${i.number} ${i.title}`).join('\n') || '_None_'
+            );
+            return today;
+
+      - name: Create Codex TECH audit issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = '${{ steps.ctx.outputs.date }}';
+            const overdueCount = parseInt('${{ steps.ctx.outputs.overdue_count }}');
+            const overdueList = `${{ steps.ctx.outputs.overdue_list }}`;
+
+            const overdueWarning = overdueCount > 0
+              ? `> ⚠ **${overdueCount} unresolved audit issue(s):**\n` +
+                overdueList.split('\n').map(l => `> ${l}`).join('\n') + '\n\n'
+              : '';
+
+            const body = [
+              '## Codex TECH Audit — P3 Periodic',
+              '',
+              '**AUDIT_MODE=TECH**',
+              `**Date:** ${date}`,
+              '',
+              overdueWarning,
+              '> Structural contracts (INV-001/002, §4.6, §2.4, §4.3) are verified',
+              '> automatically on every PR. Do NOT re-check them here.',
+              '',
+              '---',
+              '',
+              '### Scope',
+              '',
+              '**1. Decision Log health**',
+              'Read `docs/PROJECT_DECISION_LOG.md` in full.',
+              '- Entries in DECISION state with empty Ejecución/Costo/Pipeline',
+              '- Entries in DISCOVERY stalled >7 days',
+              '- Entries in AUDIT with "⚠ Context Master update" note',
+              '- Circuit breaker: any DL entry with 2+ consecutive T3/T4 open → C4/MANUAL',
+              '',
+              '**2. Contract gap identification (primary responsibility)**',
+              'Review recent commits and the current codebase.',
+              'For each rule currently verified by judgment:',
+              '  - Can it be expressed as a deterministic grep, AST check, or TestEZ spec?',
+              '  - If yes: describe the rule + proposed implementation as CI job or spec',
+              '  - Output format: "NEW CONTRACT CANDIDATE: [rule] → [implementation]"',
+              '',
+              '**3. Accumulated coupling**',
+              'Is there coupling between modules that has built up over the last week',
+              'that no contract prohibits but that reduces future maintainability?',
+              '',
+              '---',
+              '',
+              '### Output format',
+              'Use `docs/prompts/auditors/AUDITOR_TECH.md`.',
+              'For contract candidates: use "NEW CONTRACT CANDIDATE:" prefix.',
+              'End with VEREDICTO.',
+              '',
+              '---',
+              '_Close after review. Created by p3-periodic-audit.yml_',
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[CODEX-AUDIT] P3 TECH — ${date}`,
+              body,
+              labels: ['codex-audit', 'audit:tech', 'p3-periodic'],
+            });
+
+      - name: Create Design audit reminder
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = '${{ steps.ctx.outputs.date }}';
+            const body = [
+              '## Design Audit — P3 Periodic',
+              '',
+              '**AUDIT_MODE=DESIGN — Manual activation required**',
+              `**Date:** ${date}`,
+              '',
+              '> Activate manually using `docs/prompts/auditors/AUDITOR_DESIGN.md` with Claude.',
+              '> Provide: AI_CONTEXT_MASTER §1+§2+§3+§5+§6, PROJECT_DECISION_LOG, recent gameplay changes.',
+              '',
+              '---',
+              '',
+              '### Scope',
+              '',
+              '**1. Principle coherence**',
+              '- Recent decisions still coherent with Frozen Principles (§2.1)?',
+              '- Any new mechanic that failed the Design Test (§2.2)?',
+              '',
+              '**2. DI trajectory**',
+              '- Are changes this week increasing or decreasing interaction density?',
+              '- Is the project on track for DI objective (1 moment / 10–15s)?',
+              '',
+              '**3. Prohibited mechanics**',
+              '- Any individual-only mechanic introduced?',
+              '- Any punishment for failure introduced?',
+              '- Stable Objective violated by any event or mechanic?',
+              '',
+              '**4. DESIGN Decision Log entries**',
+              '- DESIGN entries stalled >7 days in DISCOVERY?',
+              '- D4 hypotheses with enough evidence to promote to PROPOSAL?',
+              '',
+              '---',
+              '_Close after completing with Claude. Created by p3-periodic-audit.yml_',
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[DESIGN-AUDIT] P3 DESIGN — ${date}`,
+              body,
+              labels: ['audit:design', 'p3-periodic', 'manual-activation'],
+            });

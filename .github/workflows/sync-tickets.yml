@@ -1,0 +1,181 @@
+# sync-tickets.yml
+# Sincroniza el estado de los tickets del GitHub Project hacia TICKETS.md.
+# Dirección: Project → TICKETS.md (unidireccional).
+# TICKETS.md es generado — no editar manualmente.
+#
+# IMPORTANTE: usa la API GraphQL de Projects v2, no la API REST de
+# Projects Classic (deprecada, no funciona con proyectos creados hoy).
+#
+# Prerequisitos (ver .github/PROJECT_SETUP.md):
+#   1. Repo variable PROJECT_NUMBER — el número del Project (visible en su URL)
+#   2. Repo secret PROJECTS_TOKEN — PAT con scope "project" (read).
+#      El GITHUB_TOKEN automático de Actions NO puede leer Projects v2 —
+#      es una limitación de permisos de GitHub, no un error de este workflow.
+#
+# Triggers:
+#   - Cron cada hora: sincronización automática periódica
+#   - workflow_dispatch: sincronización manual via gh workflow run sync-tickets.yml
+
+name: Sync GitHub Project → TICKETS.md
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # cada hora
+  workflow_dispatch:        # manual: gh workflow run sync-tickets.yml
+
+jobs:
+  sync-tickets:
+    name: Sync Project → TICKETS.md
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Leer estado del Project v2 via GraphQL ──────────────────────────────
+      # Usa PROJECTS_TOKEN (PAT con scope "project") — GITHUB_TOKEN no alcanza.
+      - name: Fetch Project v2 items via GraphQL
+        id: fetch
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECTS_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const projectNumber = parseInt('${{ vars.PROJECT_NUMBER }}', 10);
+
+            if (!projectNumber) {
+              core.setFailed(
+                'La variable de repo PROJECT_NUMBER no está configurada. ' +
+                'Ver .github/PROJECT_SETUP.md paso 8.'
+              );
+              return;
+            }
+
+            const query = `
+              query($owner: String!, $number: Int!, $cursor: String) {
+                user(login: $owner) {
+                  projectV2(number: $number) {
+                    items(first: 100, after: $cursor) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        content {
+                          ... on Issue { title number }
+                        }
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name
+                              field { ... on ProjectV2FieldCommon { name } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`;
+
+            const stateMap = {
+              'TODO': 'TODO', 'Todo': 'TODO',
+              'IN_PROGRESS': 'IN_PROGRESS', 'In Progress': 'IN_PROGRESS',
+              'BLOCKED': 'BLOCKED', 'Blocked': 'BLOCKED',
+              'DONE': 'DONE', 'Done': 'DONE',
+            };
+
+            let cursor = null;
+            let hasNextPage = true;
+            const ticketStates = {};
+
+            while (hasNextPage) {
+              let result;
+              try {
+                result = await github.graphql(query, { owner, number: projectNumber, cursor });
+              } catch (err) {
+                core.setFailed(
+                  `GraphQL query failed: ${err.message}. ` +
+                  `Verifica que PROJECTS_TOKEN tiene scope "project" (read) ` +
+                  `y que PROJECT_NUMBER es correcto.`
+                );
+                return;
+              }
+
+              const project = result.user && result.user.projectV2;
+              if (!project) {
+                core.setFailed(`Project número ${projectNumber} no encontrado para ${owner}.`);
+                return;
+              }
+
+              for (const item of project.items.nodes) {
+                if (!item.content || !item.content.title) continue;
+
+                const match = item.content.title.match(/^([A-Z]+-\d+)/);
+                if (!match) continue; // Issue sin formato de ticket — se ignora
+
+                const statusField = item.fieldValues.nodes.find(
+                  fv => fv.field && fv.field.name === 'Status'
+                );
+                if (!statusField) continue;
+
+                const estado = stateMap[statusField.name] || statusField.name.toUpperCase();
+                ticketStates[match[1]] = estado;
+              }
+
+              hasNextPage = project.items.pageInfo.hasNextPage;
+              cursor = project.items.pageInfo.endCursor;
+            }
+
+            core.setOutput('ticket_states', JSON.stringify(ticketStates));
+            core.info(`Encontrados ${Object.keys(ticketStates).length} ticket(s) en el Project.`);
+
+      # ── Actualizar campo Estado en TICKETS.md ───────────────────────────────
+      - name: Update TICKETS.md
+        id: update
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const ticketStates = JSON.parse('${{ steps.fetch.outputs.ticket_states }}');
+
+            if (Object.keys(ticketStates).length === 0) {
+              core.info('No hay estados que sincronizar.');
+              return;
+            }
+
+            let content = fs.readFileSync('docs/TICKETS.md', 'utf8');
+            let changed = false;
+            const updatedIds = [];
+
+            for (const [ticketId, newState] of Object.entries(ticketStates)) {
+              const regex = new RegExp(
+                `(### ${ticketId}[\\s\\S]*?Estado:\\s+)(TODO|IN_PROGRESS|BLOCKED|DONE)`,
+                'g'
+              );
+              content = content.replace(regex, (match, prefix, currentState) => {
+                if (currentState !== newState) {
+                  changed = true;
+                  updatedIds.push(`${ticketId}: ${currentState} → ${newState}`);
+                  return `${prefix}${newState}`;
+                }
+                return match;
+              });
+            }
+
+            if (changed) {
+              fs.writeFileSync('docs/TICKETS.md', content);
+              core.setOutput('changed', 'true');
+              core.setOutput('updated_ids', updatedIds.join(', '));
+              core.info(`Actualizado: ${updatedIds.join(', ')}`);
+            } else {
+              core.setOutput('changed', 'false');
+              core.info('Sin cambios — TICKETS.md ya está sincronizado.');
+            }
+
+      # ── Commit si hubo cambios ───────────────────────────────────────────────
+      - name: Commit sync
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/TICKETS.md
+          git commit -m "chore(governance): sync TICKETS.md → ${{ steps.update.outputs.updated_ids }}"
+          git push

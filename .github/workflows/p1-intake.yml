@@ -1,0 +1,88 @@
+# p1-intake.yml
+# Triggered when SCRATCHPAD.md is modified.
+# Reminds the developer to run the SCRATCHPAD_INTAKE prompt with Claude.
+# Does NOT process the scratchpad automatically — intake requires Claude
+# with full AI_CONTEXT_MASTER context, which cannot run in Actions.
+
+name: P1 — Scratchpad Intake Reminder
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/SCRATCHPAD.md'
+
+jobs:
+  notify-intake-pending:
+    name: Notify intake pending
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Count pending entries
+        id: count
+        run: |
+          # Count non-empty lines under ## Entradas (before ## Rechazadas)
+          ENTRIES=$(awk '/^## Entradas/{found=1} /^## Rechazadas/{found=0} found && /^### /{count++} END{print count+0}' docs/SCRATCHPAD.md)
+          echo "count=$ENTRIES" >> $GITHUB_OUTPUT
+
+      - name: Create intake reminder issue
+        if: steps.count.outputs.count != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const count = '${{ steps.count.outputs.count }}';
+            const sha = context.sha.substring(0, 7);
+
+            // Check if an open intake issue already exists for today
+            const today = new Date().toISOString().split('T')[0];
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'intake-pending',
+              state: 'open',
+            });
+
+            if (existing.length > 0) {
+              console.log('Intake issue already open — skipping duplicate creation.');
+              return;
+            }
+
+            const body = [
+              '## Scratchpad Intake Pending',
+              '',
+              `**Entries detected:** ${count}`,
+              `**Commit:** ${sha}`,
+              '',
+              '---',
+              '',
+              '### Next step',
+              '',
+              'Run **SCRATCHPAD_INTAKE** with Claude to filter and formalize these entries.',
+              '',
+              '**Inputs to provide:**',
+              '1. `docs/SCRATCHPAD.md` — section `## Entradas`',
+              '2. `docs/AI_CONTEXT_MASTER.md` — §2.1 (Frozen Principles) + §3.5 (Prohibitions)',
+              '3. `docs/PROJECT_DECISION_LOG.md` — for duplicate detection',
+              '4. Last DL-number in the log — for ID assignment',
+              '',
+              '**Prompt location:** `docs/prompts/roles/intake/SCRATCHPAD_INTAKE.md`',
+              '',
+              '**After running intake:**',
+              '- Approved entries → add to `PROJECT_DECISION_LOG.md` as DISCOVERY',
+              '- Rejected entries → move to `## Rechazadas` in SCRATCHPAD',
+              '- Close this issue',
+              '',
+              '---',
+              '_This issue was created automatically by p1-intake.yml_',
+            ].join('\n');
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[INTAKE] Scratchpad entries pending — ${today}`,
+              body,
+              labels: ['intake-pending'],
+            });
+
+            console.log(`Intake reminder: ${issue.html_url}`);

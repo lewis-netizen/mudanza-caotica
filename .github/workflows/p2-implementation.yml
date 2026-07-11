@@ -1,0 +1,503 @@
+# p2-implementation.yml
+# Triggered on every PR against main.
+#
+# Separación CI/IA:
+#   CI verifica contratos expresables como condiciones binarias.
+#   IA verifica lo que requiere juicio.
+#   Si un contrato está en CI, el Issue de Codex no lo repite.
+#
+# Jobs:
+#   Contratos de estructura (grep/AST)
+#     contract-networking-isolation
+#     contract-audio-isolation
+#     contract-pathfinding-banned
+#     contract-name-as-condition-banned
+#     contract-remote-event-count
+#   Convención y formato
+#     format-check (StyLua)
+#     lint-check (Selene — incluye print/warn ban)
+#     validate-commit-convention (commitlint)
+#     validate-pr-labels
+#   Notificaciones
+#     notify-self-review
+#     create-codex-audit-issue (post-merge, class:a)
+
+name: P2 — Implementation Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, ready_for_review]
+  pull_request_target:
+    types: [closed]
+
+jobs:
+  # ══════════════════════════════════════════════════════════════════════════════
+  # BLOQUE 1 — CONTRATOS DE ESTRUCTURA
+  # Cada job verifica un contrato de arquitectura expresable como condición
+  # binaria. Si falla, el PR no puede mergearse. No requiere juicio de IA.
+  # ══════════════════════════════════════════════════════════════════════════════
+
+  # INV-001
+  # Contrato: Networking.*:Connect() solo aparece en ClientStateManager.lua
+  contract-networking-isolation:
+    name: "Contract: Networking isolation (INV-001)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Networking.*:Connect() only in ClientStateManager.lua
+        run: |
+          VIOLATIONS=$(grep -rn "\.OnClientEvent:Connect\|\.OnServerEvent:Connect\|\.Event:Connect" src/ \
+            --include="*.lua" \
+            | grep -v "src/client/ClientStateManager.lua" \
+            | grep -v "src/shared/Lib/Networking.lua" \
+            || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ INV-001 VIOLATION: Networking connections outside ClientStateManager.lua"
+            echo "$VIOLATIONS"
+            echo ""
+            echo "All RemoteEvent connections must be in src/client/ClientStateManager.lua"
+            echo "See AI_CONTEXT_MASTER §4.10"
+            exit 1
+          fi
+          echo "✅ INV-001: Networking isolation verified"
+
+  # INV-002
+  # Contrato: sound:Play() y VFX directos no aparecen en módulos de gameplay
+  contract-audio-isolation:
+    name: "Contract: Audio/VFX isolation (INV-002)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify no direct sound:Play() or VFX in gameplay modules
+        run: |
+          # Excluir futuros AudioManager y VFXManager cuando existan
+          VIOLATIONS=$(grep -rn ":Play()\|:Stop()\|:Pause()" src/server/ src/shared/ \
+            --include="*.lua" \
+            | grep -v "AudioManager\|VFXManager" \
+            || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ INV-002 VIOLATION: Direct audio/VFX calls in gameplay modules"
+            echo "$VIOLATIONS"
+            echo ""
+            echo "Audio and VFX must react to RemoteEvents, never called from gameplay directly."
+            echo "See AI_CONTEXT_MASTER §4.9"
+            exit 1
+          fi
+          echo "✅ INV-002: Audio/VFX isolation verified"
+
+  # §4.6
+  # Contrato: PathfindingService no aparece en src/
+  contract-pathfinding-banned:
+    name: "Contract: PathfindingService banned (§4.6)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify PathfindingService is not used
+        run: |
+          VIOLATIONS=$(grep -rn "PathfindingService" src/ --include="*.lua" || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ §4.6 VIOLATION: PathfindingService found in src/"
+            echo "$VIOLATIONS"
+            echo ""
+            echo "PathfindingService is explicitly banned. Use TweenService + NPCNodes."
+            echo "See AI_CONTEXT_MASTER §4.6"
+            exit 1
+          fi
+          echo "✅ §4.6: PathfindingService ban verified"
+
+  # §2.4
+  # Contrato: .Name no se usa como condición lógica sobre entidades de juego
+  contract-name-as-condition-banned:
+    name: "Contract: .Name as condition banned (§2.4)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify .Name is not used as logical condition
+        run: |
+          # Detecta patrones como: if x.Name == "algo" o x.Name ~= "algo"
+          VIOLATIONS=$(grep -rEn '\.Name\s*[=~]=\s*"' src/ --include="*.lua" || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ §2.4 VIOLATION: .Name used as logical condition"
+            echo "$VIOLATIONS"
+            echo ""
+            echo "Logic must operate on IDs and properties, never on string names."
+            echo "See AI_CONTEXT_MASTER §2.4"
+            exit 1
+          fi
+          echo "✅ §2.4: .Name-as-condition ban verified"
+
+  # §4.3
+  # Contrato: RemoteEvents en Networking.lua ≤ 7
+  contract-remote-event-count:
+    name: "Contract: RemoteEvents ≤ 7 (§4.3)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Count RemoteEvents in Networking.lua
+        run: |
+          if [ ! -f "src/shared/Lib/Networking.lua" ]; then
+            echo "⚠ Networking.lua not found — skipping count (file not yet implemented)"
+            exit 0
+          fi
+          COUNT=$(grep -c "WaitForChild\|FindFirstChild" src/shared/Lib/Networking.lua || echo "0")
+          echo "RemoteEvents found: $COUNT"
+          if [ "$COUNT" -gt 7 ]; then
+            echo "❌ §4.3 VIOLATION: $COUNT RemoteEvents found, maximum is 7 without PO approval"
+            echo "See AI_CONTEXT_MASTER §4.3"
+            exit 1
+          fi
+          echo "✅ §4.3: RemoteEvent count verified ($COUNT/7)"
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # BLOQUE 1B — CONTRATOS DE MANTENIBILIDAD
+  # Propiedades de diseño objetivables como umbrales numéricos.
+  # No son funcionales — verifican cómo está organizado el código.
+  # ══════════════════════════════════════════════════════════════════════════════
+
+  # Ningún archivo en src/ supera 300 líneas
+  contract-module-size:
+    name: "Contract: Module size ≤ 300 lines"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check module line count
+        run: |
+          VIOLATIONS=""
+          while IFS= read -r file; do
+            LINES=$(wc -l < "$file")
+            if [ "$LINES" -gt 300 ]; then
+              VIOLATIONS="${VIOLATIONS}\n  $file — ${LINES} lines"
+            fi
+          done < <(find src/ -name "*.lua" -not -name "*.spec.lua")
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ MODULE SIZE VIOLATION: files exceeding 300 lines:"
+            echo -e "$VIOLATIONS"
+            echo ""
+            echo "Split the module into smaller units with single responsibilities."
+            exit 1
+          fi
+          echo "✅ Module size: all files ≤ 300 lines"
+
+  # src/server/ no puede requerir nada de src/client/
+  # Verifica separación de capas arquitectónicas
+  contract-layer-separation:
+    name: "Contract: Layer separation (server cannot require client)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify server does not require client modules
+        run: |
+          # Busca require() que apunten a StarterPlayer o client desde server
+          VIOLATIONS=$(grep -rn "require.*[Ss]tarter[Pp]layer\|require.*[Cc]lient\|require.*StarterPlayerScripts" \
+            src/server/ --include="*.lua" || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ LAYER VIOLATION: src/server/ requires src/client/ module"
+            echo "$VIOLATIONS"
+            echo ""
+            echo "Server modules cannot depend on client modules."
+            echo "See AI_CONTEXT_MASTER §4.2"
+            exit 1
+          fi
+
+          # Busca require() con paths relativos que suban a client/
+          VIOLATIONS2=$(grep -rn 'require.*"\.\./client\|require.*"\.\./\.\./client' \
+            src/server/ --include="*.lua" || true)
+          if [ -n "$VIOLATIONS2" ]; then
+            echo "❌ LAYER VIOLATION: relative require to client from server"
+            echo "$VIOLATIONS2"
+            exit 1
+          fi
+          echo "✅ Layer separation: server/client boundary verified"
+
+  # spec files no cuentan para el límite de módulo,
+  # pero sí deben existir para módulos críticos de Persistence
+  contract-test-coverage-persistence:
+    name: "Contract: Persistence modules have specs (MigrationService, PlayerDataService)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify critical Persistence modules have spec files
+        run: |
+          MISSING=""
+          # ProfileStoreConfig.lua es configuración declarativa (template de datos),
+          # no lógica — no requiere spec propio. ProfileStore (paquete externo) no
+          # se audita con contratos del proyecto.
+          CRITICAL_MODULES="MigrationService PlayerDataService"
+
+          for module in $CRITICAL_MODULES; do
+            # El módulo existe en server/Persistence/
+            MODULE_FILE="src/server/Persistence/${module}.lua"
+            SPEC_FILE="src/shared/Tests/${module}.spec.lua"
+
+            if [ -f "$MODULE_FILE" ] && [ ! -f "$SPEC_FILE" ]; then
+              MISSING="${MISSING}\n  ${module}: module exists but spec missing at ${SPEC_FILE}"
+            fi
+          done
+
+          if [ -n "$MISSING" ]; then
+            echo "❌ TEST COVERAGE VIOLATION: critical modules without specs:"
+            echo -e "$MISSING"
+            echo ""
+            echo "Persistence modules must have TestEZ specs. See AI_CONTEXT_MASTER §4.11"
+            exit 1
+          fi
+          echo "✅ Test coverage: all existing Persistence modules have specs"
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # BLOQUE 2 — FORMATO Y CONVENCIÓN
+  # ══════════════════════════════════════════════════════════════════════════════
+
+  format-check:
+    name: "Format: StyLua"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+        with:
+          token: ${{ github.token }}
+      - name: Check formatting
+        run: stylua --check src/
+
+  lint-check:
+    name: "Lint: Selene (includes print/warn ban)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+        with:
+          token: ${{ github.token }}
+      - name: Generate Roblox standard library
+        run: selene generate-roblox-std
+      - name: Run Selene
+        run: selene src/
+
+  # ── Nivel 1: Lune compatibility (mismo mecanismo que pre-commit) ────────────
+  contract-lune-compatibility:
+    name: "Contract: Lune compatibility (§4.6)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+        with:
+          token: ${{ github.token }}
+      - name: Check Lune compatibility
+        run: lune run lune/check-compatibility.luau
+
+  # ── Fase 4: specs de TestEZ headless via Lune ────────────────────────────────
+  # Solo corre specs cuyos módulos pasaron contract-lune-compatibility.
+  run-specs:
+    name: "Tests: TestEZ specs (Lune headless)"
+    runs-on: ubuntu-latest
+    needs: contract-lune-compatibility
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+        with:
+          token: ${{ github.token }}
+      - name: Run TestEZ specs
+        run: lune run lune/run-specs.luau
+
+  validate-commit-convention:
+    name: "Convention: commitlint"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install commitlint
+        run: |
+          npm install --save-dev \
+            @commitlint/cli \
+            @commitlint/config-conventional
+      - name: Write commitlint config
+        run: |
+          cat > commitlint.config.js << 'COMMITLINT'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+            rules: {
+              'type-enum': [2, 'always', ['feat','fix','refactor','docs','chore']],
+              'scope-enum': [2, 'always', [
+                'gameplay','world','networking','persistence','ui','ux','governance'
+              ]],
+              'body-max-line-length': [0],
+              'footer-max-line-length': [0],
+            },
+          };
+          COMMITLINT
+      - name: Run commitlint
+        run: |
+          npx commitlint \
+            --from ${{ github.event.pull_request.base.sha }} \
+            --to ${{ github.event.pull_request.head.sha }} \
+            --verbose
+
+  validate-pr-labels:
+    name: "Labels: domain:* and class:* required"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const hasDomain = labels.some(l =>
+              ['domain:tech','domain:design','domain:both'].includes(l)
+            );
+            const hasClass = labels.some(l =>
+              ['class:a','class:b'].includes(l)
+            );
+            if (!hasDomain || !hasClass) {
+              core.setFailed(
+                `PR requires a domain label and a class label. Found: ${labels.join(', ') || 'none'}`
+              );
+              return;
+            }
+            if (labels.includes('class:b')) {
+              const { data: files } = await github.rest.pulls.listFiles({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+              });
+              const touchesDocs = files.some(f =>
+                f.filename.startsWith('docs/') && !f.filename.startsWith('docs/human/')
+              );
+              if (touchesDocs) {
+                core.warning(
+                  '⚠ Possible misclassification: PR modifies docs/ (Type B/D) with class:b.'
+                );
+              }
+            }
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # BLOQUE 3 — NOTIFICACIONES
+  # ══════════════════════════════════════════════════════════════════════════════
+
+  notify-self-review:
+    name: "Notify: self-review reminder"
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.action == 'ready_for_review'
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: [
+                '## ✅ Self-review checklist',
+                '',
+                'CI has verified structural contracts automatically.',
+                'Before requesting review, verify the acceptance criteria from your ticket:',
+                '',
+                '- [ ] Every acceptance criterion is **true** (binary yes/no)',
+                '- [ ] No game logic outside ModuleScripts',
+                '- [ ] All DataStore calls wrapped in `pcall`',
+                '- [ ] Commit follows `tipo(dominio): desc` + `reason:` convention',
+                '- [ ] Class A commits include `refs: DL-xxx, [DOMINIO]-xxx`',
+                '',
+                '_The following are already verified by CI and do not need manual check:_',
+                '_Networking isolation · Audio isolation · PathfindingService ban_',
+                '_.Name-as-condition ban · RemoteEvent count · Format · Lint_',
+              ].join('\n'),
+            });
+
+  # Post-merge: crear Issue de Codex solo para lo que CI no puede verificar
+  create-codex-audit-issue:
+    name: "Notify: create Codex audit issue (class:a)"
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            if (!labels.includes('class:a')) {
+              console.log('class:b — no audit issue created.');
+              return;
+            }
+            const domainLabel = labels.find(l => l.startsWith('domain:')) || 'domain:tech';
+            const domain = domainLabel.replace('domain:', '').toUpperCase();
+            const pr = context.payload.pull_request;
+
+            // Los contratos estructurales ya fueron verificados por CI.
+            // Codex solo audita lo que requiere juicio sobre el código como sistema.
+            const body = [
+              '## Codex TECH Audit',
+              '',
+              '**AUDIT_MODE=TECH**',
+              `**PR:** #${pr.number} — ${pr.title}`,
+              `**Domain:** ${domain}`,
+              `**Commit:** ${pr.merge_commit_sha}`,
+              '',
+              '> **Note:** The following contracts were already verified by CI and do NOT',
+              '> need to be re-checked here:',
+              '> INV-001 (Networking isolation) · INV-002 (Audio isolation)',
+              '> §4.6 (PathfindingService) · §2.4 (.Name as condition)',
+              '> §4.3 (RemoteEvent count) · Format · Lint · Commit convention',
+              '',
+              '---',
+              '',
+              '### What Codex audits here (requires judgment)',
+              '',
+              '**1. Coupling not captured by any contract**',
+              'Does the implementation introduce implicit coupling between modules',
+              'that no current contract prohibits but that would make future changes harder?',
+              'If yes: describe the coupling and propose a new contract + test for it.',
+              '',
+              '**2. Ownership violations not detectable by grep**',
+              'Does any module access or mutate state that belongs to another module,',
+              'in a way that passes structural checks but violates the intent of §4.8?',
+              '',
+              '**3. New contract candidates**',
+              'Is there a rule in this diff that is currently verified by judgment',
+              'but could be expressed as a deterministic grep or TestEZ spec?',
+              'If yes: describe the rule and how to implement it as CI.',
+              '',
+              domain === 'BOTH'
+                ? '**4. Cross-domain boundary**\n' +
+                  'Does the TECH change alter contracts that affect DESIGN principles or player perception (§3.7)?\n\n' +
+                  '> Append `AUDITORÍA TECH COMPLETADA — DESIGN pending manual Claude activation.` at end.'
+                : '',
+              '',
+              '---',
+              '',
+              '### Output format',
+              'Use `docs/prompts/auditors/AUDITOR_TECH.md`.',
+              'Label findings T1–T4. End with VEREDICTO.',
+              '',
+              '---',
+              '_Created by p2-implementation.yml_',
+            ].join('\n');
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[CODEX-AUDIT] ${pr.title} — #${pr.number}`,
+              body,
+              labels: ['codex-audit', 'audit:tech', domainLabel],
+            });
+            console.log(`Audit issue: ${issue.html_url}`);

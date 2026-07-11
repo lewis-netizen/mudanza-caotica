@@ -1,0 +1,93 @@
+# validate-decision-log.yml
+# Validates schema integrity of PROJECT_DECISION_LOG.md on every push.
+# Warning only — does not block.
+# Checks: DECISION entries have Ejecución/Costo/Pipeline,
+#         PROPOSAL entries have Hipótesis.
+
+name: Validate — Decision Log Schema
+
+on:
+  push:
+    paths:
+      - 'docs/PROJECT_DECISION_LOG.md'
+
+jobs:
+  validate-schema:
+    name: Validate Decision Log schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check schema
+        run: |
+          FILE="docs/PROJECT_DECISION_LOG.md"
+          WARNINGS=()
+
+          CURRENT_ID=""
+          CURRENT_ESTADO=""
+          HAS_HIPOTESIS=0
+          HAS_EJECUCION=0
+          HAS_COSTO=0
+          HAS_PIPELINE=0
+
+          check_entry() {
+            local id="$1"
+            local estado="$2"
+
+            case "$estado" in
+              PROPOSAL|DECISION|AUDIT)
+                if [ "$HAS_HIPOTESIS" -eq 0 ]; then
+                  WARNINGS+=("$id [Estado=$estado] missing Hipótesis field")
+                fi
+                ;;
+            esac
+
+            case "$estado" in
+              DECISION|AUDIT)
+                [ "$HAS_EJECUCION" -eq 0 ] && WARNINGS+=("$id [Estado=$estado] missing Ejecución field")
+                [ "$HAS_COSTO" -eq 0 ]     && WARNINGS+=("$id [Estado=$estado] missing Costo field")
+                [ "$HAS_PIPELINE" -eq 0 ]  && WARNINGS+=("$id [Estado=$estado] missing Pipeline field")
+                ;;
+            esac
+          }
+
+          while IFS= read -r line; do
+            # Detect start of new entry block
+            if echo "$line" | grep -qE "^### DL-[0-9]+"; then
+              # Validate previous entry
+              if [ -n "$CURRENT_ID" ] && [ -n "$CURRENT_ESTADO" ]; then
+                check_entry "$CURRENT_ID" "$CURRENT_ESTADO"
+              fi
+              CURRENT_ID=$(echo "$line" | grep -oE "DL-[0-9]+")
+              CURRENT_ESTADO=""
+              HAS_HIPOTESIS=0
+              HAS_EJECUCION=0
+              HAS_COSTO=0
+              HAS_PIPELINE=0
+            fi
+
+            # Extract field values from code block lines
+            if echo "$line" | grep -qE "^Estado:"; then
+              CURRENT_ESTADO=$(echo "$line" | sed 's/Estado:[[:space:]]*//' | tr -d ' \r')
+            fi
+            echo "$line" | grep -qE "^Hipótesis:[[:space:]]+[^—]" && HAS_HIPOTESIS=1
+            echo "$line" | grep -qE "^Ejecución:[[:space:]]+(AUTO|CONFIRM|MANUAL)" && HAS_EJECUCION=1
+            echo "$line" | grep -qE "^Costo:[[:space:]]+C[1-4]" && HAS_COSTO=1
+            echo "$line" | grep -qE "^Pipeline:[[:space:]]+(P[1-9]|P2/P4)" && HAS_PIPELINE=1
+
+          done < "$FILE"
+
+          # Check last entry
+          if [ -n "$CURRENT_ID" ] && [ -n "$CURRENT_ESTADO" ]; then
+            check_entry "$CURRENT_ID" "$CURRENT_ESTADO"
+          fi
+
+          # Output
+          if [ ${#WARNINGS[@]} -eq 0 ]; then
+            echo "✅ Decision Log schema is valid."
+          else
+            echo "⚠ Decision Log schema warnings (${#WARNINGS[@]} issue(s)):"
+            printf '%s\n' "${WARNINGS[@]}" | sed 's/^/  - /'
+            echo ""
+            echo "Note: These are warnings only. The Orchestrator validates content during P3."
+          fi
