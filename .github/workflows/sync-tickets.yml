@@ -210,7 +210,17 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B bot/sync-tickets
           git add docs/TICKETS.md
-          git commit -m "chore(governance): sync TICKETS.md → ${UPDATED_IDS}"
+          # Subject fijo y corto — commitlint impone header-max-length de 100
+          # chars (config-conventional) y un board con muchas cards movidas
+          # produce cientos de chars. El detalle va al body (sin límite de
+          # longitud en commitlintrc.yml), un ticket por línea.
+          {
+            echo "chore(governance): sync TICKETS.md"
+            echo ""
+            echo "Estados actualizados desde el Project:"
+            echo "${UPDATED_IDS}" | tr ',' '\n' | sed 's/^ */- /'
+          } > /tmp/sync-commit-msg.txt
+          git commit -F /tmp/sync-commit-msg.txt
           git push -f origin bot/sync-tickets
 
       # ── Crear (o reutilizar) el PR de sync ───────────────────────────────────
