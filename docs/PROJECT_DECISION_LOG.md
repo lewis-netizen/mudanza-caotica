@@ -1,7 +1,7 @@
 # PROJECT_DECISION_LOG — Mudanza Caótica
 
 **Versión:** 1.0
-**Referencia:** AI_CONTEXT_MASTER v5.4 §5.4  
+**Referencia:** AI_CONTEXT_MASTER v5.5 §5.4  
 **Última actualización:** 2026-07-11
 
 ---
@@ -1180,6 +1180,58 @@ Pipeline:    P5
 Ticket:      —
 Commit:      —
 Referencias: §6.6, DL-019, DL-023
+```
+
+---
+
+### DL-031
+
+```
+ID:          DL-031
+Fecha:       2026-07-12
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Auditoria de la arquitectura de src/ (solicitada por el PO,
+             2026-07-12). El contrato entre ObjectDefinition (identidad y
+             datos) y el asset real en ServerStorage estaba sin formalizar:
+             existia un hueco ObjectDefinition -> ??? -> ServerStorage. En
+             el slice, ObjectManager construia el Part placeholder inline,
+             lo que lo habria acoplado a ServerStorage/Studio en cuanto
+             existieran modelos reales.
+Contenido:   Nuevo modulo src/server/PrefabRegistry.lua — unica capa que
+             conoce ServerStorage/ObjectPrefabs. Resuelve ObjectId -> prefab
+             (Model o BasePart) por Attribute ObjectId, nunca por .Name
+             (2.4). Si falta el prefab genera un placeholder (el arte puede
+             llegar despues del codigo sin romper rondas). instantiate(def)
+             retorna (top, root, isPlaceholder): top se parenta/destruye,
+             root es el BasePart raiz para fisica y welds — asi CarryManager
+             y TruckManager operan sobre un BasePart sin saber si el objeto
+             es Part o Model. validate() audita el contrato al bootstrap
+             (faltantes, huerfanos, duplicados, invalidos) — los errores
+             aparecen al arrancar el servidor, no a mitad de partida. El
+             nucleo de auditoria (_audit) es puro y se testea en Lune.
+Hipótesis:   Aislar la resolucion ObjectId -> asset en una capa dedicada
+             preserva el desacoplamiento datos/apariencia de 2.3 y permite
+             anadir un ObjectDefinition o un prefab nuevo sin tocar la
+             logica de ObjectManager — el acoplamiento que 4.6 prohibe.
+Razón:       Un contrato implicito ("alguien resolvera ObjectId a modelo")
+             se implementa de forma distinta en cada call site y termina
+             acoplando la logica de gameplay a Studio. Formalizarlo ahora,
+             con un solo consumidor (ObjectManager), es barato; hacerlo
+             despues de que varios modulos claven ServerStorage no lo es.
+Impacto:     ObjectManager delega spawn en PrefabRegistry y deja de leer
+             PLACEHOLDER_OBJECT_* (movido a PrefabRegistry). TruckManager
+             resuelve InstanceId por ancestria (Models multi-part).
+             Main.server.lua llama validate() al bootstrap. Nuevo contrato
+             Arte -> PrefabRegistry en 4.4. §4.1, §4.4, §4.5 actualizados.
+             PrefabRegistry.spec: 6 tests del nucleo puro (31 specs totales).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      GAM-009 (pendiente de alta en el board)
+Commit:      —
+Referencias: §2.3, §4.1, §4.4, §4.5, §4.6, DL-028
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

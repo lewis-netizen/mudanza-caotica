@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.4 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.5 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -312,11 +312,14 @@ src/
 │   ├── ObjectManager.lua
 │   ├── CarryManager.lua
 │   ├── TruckManager.lua
+│   ├── PrefabRegistry.lua            (resuelve ObjectId → asset — DL-031)
+│   ├── MapBootstrap.lua              (edificio placeholder — DL-028)
 │   ├── NPCManager.lua
 │   ├── EventManager.lua
 │   └── Persistence/
 │       ├── PlayerDataService.lua
-│       └── MigrationService.lua
+│       ├── MigrationService.lua
+│       └── ProfileStoreConfig.lua
 │
 ├── shared/                          → ReplicatedStorage/Shared/
 │   ├── Lib/
@@ -367,7 +370,7 @@ src/
 | ¿Cómo es esa entidad? (datos concretos) | `Definitions/` |
 | ¿Cómo se comporta un sistema? | `Config/` |
 | ¿Quién ejecuta el comportamiento? | `src/server/` |
-| ¿Cuál es el asset real en el servidor? | `ServerStorage` (fuera de Rojo) |
+| ¿Cuál es el asset real en el servidor? | `ServerStorage/ObjectPrefabs` (fuera de Rojo) — resuelto por PrefabRegistry (§4.4, DL-031) |
 
 **Distinción Entities vs Definitions:**
 - `Entities/` contiene los módulos de lógica y los contratos de tipo de cada entidad.
@@ -415,9 +418,10 @@ server-side (`OnServerEvent:Connect`) vive en `CarryManager.lua` — ver INV-001
 | Logger | Shared | Logging estructurado. Prerequisito de todo módulo. Niveles DEBUG/INFO/WARN/ERROR. Nivel mínimo desde GlobalConfig.LOG_LEVEL. |
 | GameManager | Sistema | Punto de entrada del ciclo de vida. Gestiona estados Lobby y Summary. |
 | RoundManager | Sistema | Gestiona la ronda activa. Propietario de RoundState y RoundSummary. |
-| ObjectManager | Sistema | Spawn, estados y tracking de ObjectInstances. No mueve objetos. |
+| ObjectManager | Sistema | Spawn, estados y tracking de ObjectInstances. No mueve objetos. Delega la resolución ObjectId → asset en PrefabRegistry. |
 | CarryManager | Sistema | Lógica de transporte. Líder ancla objeto; soporte debe mantenerse en rango. |
 | TruckManager | Sistema | Zona de entrega, conteo de objetos salvados, datos para resumen. |
+| PrefabRegistry | Sistema | Única capa que conoce `ServerStorage/ObjectPrefabs`. Resuelve `ObjectId → prefab` (o placeholder si falta). `validate()` audita el contrato al bootstrap (§4.4, DL-031). |
 | NPCManager | Sistema | TweenService sobre nodos predefinidos. Sin PathfindingService. |
 | EventManager | Sistema | Selecciona y ejecuta un evento aleatorio por ronda desde un pool. |
 | MapBootstrap | Sistema | Genera un edificio placeholder tagueado si el Workspace no contiene layout (flag ENABLE_PLACEHOLDER_MAP). Se retira cuando exista el layout real de WLD-001+. |
@@ -535,6 +539,36 @@ Tag "TruckZone"   — Part de la zona de entrega. TruckManager conecta
 Los Parts de objetos spawneados llevan Attributes `InstanceId` y `ObjectId`
 (strings) — nunca se identifica un objeto por `.Name` (§2.4).
 
+**Contrato Arte → PrefabRegistry (DL-031):**
+
+Cierra el hueco entre `ObjectDefinition` (identidad y datos) y el asset real:
+la resolución `ObjectId → prefab` vive en **una sola capa** (`PrefabRegistry`),
+no en `ObjectManager`. `ObjectDefinition` nunca referencia un modelo — el
+desacoplamiento entre datos y apariencia (§2.3) se preserva.
+
+```
+ServerStorage/ObjectPrefabs/          ← Folder poblado por arte en Studio
+  <Model | BasePart>                  ← un prefab por tipo de objeto
+    Attribute "ObjectId" (string)     ← igual a ObjectDefinition.ObjectId
+```
+
+Reglas:
+- Identificación **siempre** por Attribute `ObjectId`, nunca por `.Name` (§2.4).
+- Un `Model` debe tener `PrimaryPart` (raíz física del carry) y sus demás
+  `BasePart` soldadas a ella, sin anclar. Un prefab `BasePart` suelto es su
+  propia raíz.
+- **Prefab ausente → placeholder generado** (dimensiones/color por Size desde
+  `GameplayConfig.PLACEHOLDER_OBJECT_*`): el arte puede llegar después del
+  código sin romper rondas.
+- `PrefabRegistry.validate()` corre al bootstrap (`Main.server.lua`) y reporta
+  faltantes, huérfanos, duplicados e inválidos — los errores de contrato
+  aparecen al arrancar el servidor, nunca a mitad de partida.
+
+API: `resolve(objectId) → template?` · `instantiate(def) → (top, root, isPlaceholder)`
+· `validate() → (ok, issues)` · `refresh()`. `top` es la instancia a
+parentar/destruir (Part o Model); `root` es el `BasePart` raíz para física y
+welds. `ObjectManager` guarda ambos; `getObjectPart` devuelve `root`.
+
 ### 4.5 Orden de Construcción por Dependencias
 
 ```
@@ -542,15 +576,18 @@ Nivel -1 — prerequisito absoluto (antes de todo)
   Logger | GlobalConfig
 
 Nivel 0 — en paralelo
-  ObjectManager | Networking | Layout/Edificio | ProfileStore (externo, sin código propio)
+  ObjectDefinitions | PrefabRegistry | Networking | Layout/Edificio | ProfileStore (externo, sin código propio)
 
 Nivel 1 — dependen del nivel 0
+  ObjectManager (usa PrefabRegistry + ObjectDefinitions)
+
+Nivel 2 — dependen del nivel 1
   CarryManager | TruckManager | NPCManager | EventManager | PlayerDataService | MigrationService
 
-Nivel 2 — depende del nivel 1
+Nivel 3 — depende del nivel 2
   RoundManager
 
-Nivel 3 — depende de todo
+Nivel 4 — depende de todo
   GameManager
 ```
 
@@ -1278,7 +1315,7 @@ ServerPackages/  — generado por wally install (realm server: ProfileStore), gi
 
 **Vista virtual para Orchestrators (organización por dominio):**
 
-Las referencias de sección son al Context Master v5.4.
+Las referencias de sección son al Context Master v5.5.
 
 ```
 [DOMINIO: Gameplay]
@@ -1580,6 +1617,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.5 | 2026-07-12 | Endurecimiento de arquitectura `src/`: formalizado el contrato `ObjectId → asset` en un módulo dedicado `PrefabRegistry` (§4.4, §4.1, §4.5, DL-031) — cierra el hueco entre `ObjectDefinition` y `ServerStorage/ObjectPrefabs` sin acoplar `ObjectManager` a Studio ni referenciar modelos desde los datos. `validate()` audita el contrato al bootstrap. |
 | 5.4 | 2026-07-11 | Directrices del PO + arranque del vertical slice: estándar de calidad profesional desde la primera versión pública y reloj del roadmap reiniciado — slice al 2026-08-11 (§1.3, §5.7, DL-024). Suscripción selectiva de timer en ClientStateManager (§4.10, DL-025). Payloads: objectId en ObjectStateChanged, eventType opcional en RoundStarted (§4.3, DL-026). Contrato de restauración de WalkSpeed (DL-027). Contrato Layout → Gameplay (Tags ObjectSpawn/TruckZone) y módulo MapBootstrap (§4.4, DL-028). INV-001 enmendado: OnServerEvent:Connect solo en CarryManager (§4.3, §4.6, §4.10, §5.0, DL-029). |
 | 5.3 | 2026-07-10 | Auditoría arquitectónica: ciclo de sesión de PlayerData atado al jugador, no a la ronda (§4.4, §4.7 — se añade `releasePlayer`; `savePlayer` es flush, nunca EndSession). StoryEvent gana `Timestamp` relativo al inicio de ronda (§4.4). Definición del código G5 (§5.3). Mecanismo real del ban print/warn: grep `contract-logger-usage`, no Selene (§5.0). Roadmap Semana 1: ProfileStore, no "DataStore básico" (§5.7). Correcciones factuales de §4.1, §4.11, §6.2, §6.3 y §6.6 (paths de config, ServerPackages, commitlintrc, sync-tickets, cron UTC). Nota de prefijos GM/QA (§5.1). |
 | 5.2 | 2026-06-06 | Versión de bootstrap del proyecto. |
