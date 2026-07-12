@@ -44,7 +44,7 @@ jobs:
 
       - name: Create intake reminder issue
         if: steps.count.outputs.count != '0'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const count = '${{ steps.count.outputs.count }}';

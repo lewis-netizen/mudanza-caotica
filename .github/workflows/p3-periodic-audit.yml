@@ -34,7 +34,7 @@ jobs:
 
       - name: Get context
         id: ctx
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           result-encoding: string
           script: |
@@ -53,7 +53,7 @@ jobs:
             return today;
 
       - name: Create Codex TECH audit issue
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           # Via env — interpolar outputs multilinea dentro del script
           # rompe el JS si un título contiene backticks o comillas.
@@ -122,7 +122,7 @@ jobs:
             });
 
       - name: Create Design audit reminder
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const date = '${{ steps.ctx.outputs.date }}';
