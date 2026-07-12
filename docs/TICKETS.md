@@ -42,7 +42,7 @@ debe nacer de una entrada DECISION del Decision Log e incluir su `DL-Ref`
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  ninguna
 Domain:      TECH
 ```
@@ -65,7 +65,7 @@ Implementar `src/shared/Networking.lua` como la única fuente de referencias a R
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  ninguna
 Domain:      TECH
 ```
@@ -86,7 +86,7 @@ Añadir `lm-loleris/profilestore@1.0.3` a `[server-dependencies]` de `wally.toml
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  PER-001
 Domain:      TECH
 ```
@@ -107,7 +107,7 @@ Implementar `src/server/Persistence/MigrationService.lua`. Detecta la versión d
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  PER-001, PER-002
 Domain:      TECH
 ```
@@ -155,7 +155,7 @@ Verificar que el ciclo completo de persistencia funciona end-to-end: jugador nue
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  ninguna
 Domain:      TECH
 ```
@@ -177,7 +177,7 @@ Crear al menos un ObjectDefinition concreto por cada Size (`small`, `medium`, `l
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  NET-001, GAM-001
 Domain:      TECH
 ```
@@ -200,7 +200,7 @@ Implementar `src/server/ObjectManager.lua` con spawn aleatorio de objetos al ini
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  GAM-002, NET-001
 Domain:      TECH
 ```
@@ -222,7 +222,7 @@ Un jugador puede recoger y soltar un objeto small. La interacción se inicia des
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  GAM-003
 Domain:      TECH
 ```
@@ -421,7 +421,7 @@ Implementar `src/server/NPCManager.lua`. El NPC patrulla los NPCNodes en orden d
 
 ```
 Semana:      3
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  WLD-001, GM-002
 Domain:      BOTH
 ```
@@ -444,7 +444,7 @@ Implementar `src/server/EventManager.lua` con al menos un evento de Entropía Es
 
 ```
 Semana:      3
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  WLD-005
 Domain:      BOTH
 ```
@@ -488,7 +488,7 @@ Ajustar layout, nodos del NPC y pool de eventos basándose en playtests de Seman
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  GM-002, NET-001
 Domain:      TECH
 ```
@@ -511,7 +511,7 @@ HUD con timer de ronda en formato `MM:SS` y conteo de objetos entregados. El tim
 
 ```
 Semana:      2
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  UI-001, GAM-002
 Domain:      TECH
 ```
@@ -533,7 +533,7 @@ Prompt contextual client-side al acercarse a un objeto interactuable. Distingue 
 
 ```
 Semana:      3
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  GM-002, GAM-004
 Domain:      TECH
 ```
@@ -558,7 +558,7 @@ Pantalla de resumen al finalizar ronda. Muestra objetos salvados, objetos perdid
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  ninguna
 Domain:      TECH
 ```
@@ -579,7 +579,7 @@ Crear `src/server/Main.server.lua` y `src/client/Main.client.lua` como entry poi
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  NET-001, GM-001, GAM-002, GAM-003, GAM-004
 Domain:      TECH
 ```
@@ -603,7 +603,7 @@ Implementar `src/server/RoundManager.lua`. Propietario de RoundState y RoundSumm
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  GM-002, PER-003
 Domain:      TECH
 ```
@@ -632,7 +632,7 @@ Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Ge
 
 ```
 Semana:      1
-Estado:      TODO
+Estado:      IN_PROGRESS
 Depende de:  GM-003, PER-004, GAM-004, UI-001
 Domain:      TECH
 ```
