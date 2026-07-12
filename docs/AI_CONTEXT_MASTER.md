@@ -1228,7 +1228,8 @@ mudanza-caotica/
 │   │   ├── p3-periodic-audit.yml
 │   │   ├── validate-scratchpad.yml
 │   │   ├── validate-decision-log.yml
-│   │   └── sync-tickets.yml          ← Project → TICKETS.md (unidireccional)
+│   │   ├── sync-tickets.yml          ← Project → TICKETS.md (via PR del bot, DL-030)
+│   │   └── automerge-sync.yml        ← automerge de los PRs de bot/sync-tickets
 │   ├── commitlintrc.yml              ← fuente única de reglas de commits (CI la consume via --config)
 │   ├── dependabot.yml                ← actualizaciones semanales de GitHub Actions
 │   ├── LABELS.md                     ← instrucciones de setup de labels
@@ -1442,7 +1443,7 @@ Pipeline:   P1 | P2/P4 | P3 | P5 | P6
 
 **Principio:** Actions gestiona cuándo. Los prompts transforman artefactos. Son capas ortogonales.
 
-**Regla absoluta:** Actions nunca escribe en archivos Tipo B+D. Dispara y notifica únicamente. Única excepción de escritura: `sync-tickets.yml` actualiza el campo `Estado` de TICKETS.md (Tipo D, generado — §6.1), en dirección única Project → archivo.
+**Regla absoluta:** Actions nunca escribe en archivos Tipo B+D. Dispara y notifica únicamente. Única excepción de escritura: `sync-tickets.yml` actualiza el campo `Estado` de TICKETS.md (Tipo D, generado — §6.1), en dirección única Project → archivo, y **siempre via PR automergeado** (rama `bot/sync-tickets` + `automerge-sync.yml`) — nunca push directo a main (DL-030).
 
 **Fronteras — qué nunca automatiza Actions:**
 ```
@@ -1513,10 +1514,16 @@ jobs:
 # Warning (no bloqueo) si entradas en DECISION tienen campos vacíos.
 # Verifica: Ejecución, Costo, Pipeline en DECISION; Hipótesis en PROPOSAL.
 
-# sync-tickets.yml — cron cada hora + workflow_dispatch
+# sync-tickets.yml — cron cada 6 horas + workflow_dispatch
 # GitHub Project → campo Estado de TICKETS.md (unidireccional).
-# Requiere PROJECT_NUMBER (variable) y PROJECTS_TOKEN (PAT clásico
-# read:project). Ver .github/PROJECT_SETUP.md sección 6.
+# Nunca pushea a main: rama bot/sync-tickets + PR etiquetado (DL-030).
+# Requiere PROJECT_NUMBER (variable), PROJECTS_TOKEN (PAT clásico
+# read:project) y SYNC_BOT_TOKEN (solo repo — sin Projects).
+# Ver .github/PROJECT_SETUP.md secciones 6.2 y 6.5.
+
+# automerge-sync.yml — pull_request (head: bot/sync-tickets)
+# Mergea (squash) los PRs del bot de sync — solo si el diff toca
+# exclusivamente docs/TICKETS.md. Requiere "Allow auto-merge" activo.
 ```
 
 **Configuración de commitlint (`.github/commitlintrc.yml`):**

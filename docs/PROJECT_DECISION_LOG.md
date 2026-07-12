@@ -1140,4 +1140,46 @@ Commit:      —
 Referencias: §4.3, §4.6, §4.10, §5.0
 ```
 
+---
+
+### DL-030
+
+```
+ID:          DL-030
+Fecha:       2026-07-11
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    sync-tickets.yml pusheaba directo a main. Al activar branch
+             protection con status checks requeridos, ese push del bot
+             fallaria cada 6 horas o exigiria una excepcion permanente
+             que debilita la proteccion para todos.
+Contenido:   El sync nunca pushea a main: escribe la rama bot/sync-tickets
+             (force-push, solo contiene el delta de TICKETS.md), abre un PR
+             etiquetado (class:b, domain:tech) y automerge-sync.yml lo
+             mergea (squash) SOLO si el diff toca exclusivamente
+             docs/TICKETS.md. Requiere SYNC_BOT_TOKEN (token de repositorio
+             sin acceso a Projects — fine-grained Contents/PR write o PAT
+             clasico con scope repo) porque los PRs creados por el
+             GITHUB_TOKEN no disparan workflows; sin el secret, el propio
+             sync arma el automerge como respaldo.
+Hipótesis:   Canalizar la escritura del bot por PR hace la proteccion de
+             main universal (sin excepciones), deja auditoria visible de
+             cada sync y permite exigir los mismos checks a humanos y bots.
+Razón:       Directriz del PO (2026-07-11) al configurar branch protection:
+             es preferible que el bot pase por el mismo embudo que el resto
+             del repo a mantener un bypass permanente.
+Impacto:     sync-tickets.yml reescrito (rama + PR + respaldo de automerge),
+             nuevo workflow automerge-sync.yml con guarda de diff,
+             validate-pr-labels exime a bot/sync-tickets del warning de
+             class:b sobre docs/, PROJECT_SETUP.md documenta SYNC_BOT_TOKEN
+             y "Allow auto-merge". §6.6 actualizado.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Commit:      —
+Referencias: §6.6, DL-019, DL-023
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

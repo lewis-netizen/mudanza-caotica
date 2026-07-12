@@ -12,9 +12,19 @@
 #      Los fine-grained tokens no exponen permiso de Projects para cuentas
 #      de usuario (solo para organizaciones). El GITHUB_TOKEN automático de
 #      Actions tampoco puede leer Projects v2 — limitación de GitHub.
+#   3. (Recomendado) Repo secret SYNC_BOT_TOKEN — token SOLO de repositorio,
+#      sin Projects: fine-grained con Contents RW + Pull requests RW (sí
+#      disponible en cuentas personales), o un PAT clásico con scope "repo".
+#      Sin él, el PR de sync se crea igual pero no dispara checks/automerge
+#      (limitación del GITHUB_TOKEN) y se usa el respaldo de este workflow.
+#
+# Flujo (DL-030): el sync NUNCA pushea a main. Escribe la rama
+# bot/sync-tickets, abre un PR etiquetado (class:b, domain:tech) y
+# automerge-sync.yml lo mergea si el diff toca solo docs/TICKETS.md.
+# Compatible con branch protection sin excepciones de bot.
 #
 # Triggers:
-#   - Cron cada hora: sincronización automática periódica
+#   - Cron cada 6 horas: sincronización automática periódica
 #   - workflow_dispatch: sincronización manual via gh workflow run sync-tickets.yml
 
 name: Sync GitHub Project → TICKETS.md
@@ -30,8 +40,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Con SYNC_BOT_TOKEN los pushes/PRs del bot disparan workflows
+          # (checks de p2 + automerge-sync). El GITHUB_TOKEN de fallback
+          # funciona, pero GitHub no dispara workflows sobre sus eventos.
+          # SYNC_BOT_TOKEN NO necesita acceso a Projects — ver PROJECT_SETUP §6.5.
+          token: ${{ secrets.SYNC_BOT_TOKEN || github.token }}
 
       # ── Leer estado del Project v2 via GraphQL ──────────────────────────────
       # Usa PROJECTS_TOKEN (PAT clásico con scope read:project) — GITHUB_TOKEN no alcanza.
@@ -181,12 +198,83 @@ jobs:
               core.info('Sin cambios — TICKETS.md ya está sincronizado.');
             }
 
-      # ── Commit si hubo cambios ───────────────────────────────────────────────
-      - name: Commit sync
+      # ── Commit a rama de bot — NUNCA push directo a main (DL-030) ───────────
+      # La rama bot/sync-tickets se fuerza en cada sync: solo contiene el
+      # delta vigente de TICKETS.md. El merge lo hace automerge-sync.yml.
+      - name: Commit and push sync branch
         if: steps.update.outputs.changed == 'true'
+        env:
+          UPDATED_IDS: ${{ steps.update.outputs.updated_ids }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B bot/sync-tickets
           git add docs/TICKETS.md
-          git commit -m "chore(governance): sync TICKETS.md → ${{ steps.update.outputs.updated_ids }}"
-          git push
+          git commit -m "chore(governance): sync TICKETS.md → ${UPDATED_IDS}"
+          git push -f origin bot/sync-tickets
+
+      # ── Crear (o reutilizar) el PR de sync ───────────────────────────────────
+      # Con SYNC_BOT_TOKEN (fine-grained: Contents RW + Pull requests RW) el PR
+      # dispara los checks de p2 y automerge-sync.yml. Con el GITHUB_TOKEN de
+      # fallback, GitHub NO dispara workflows sobre el PR — por eso el paso
+      # siguiente arma el automerge como respaldo desde este mismo run.
+      - name: Create or reuse sync PR
+        if: steps.update.outputs.changed == 'true'
+        id: pr
+        uses: actions/github-script@v9
+        env:
+          UPDATED_IDS: ${{ steps.update.outputs.updated_ids }}
+        with:
+          github-token: ${{ secrets.SYNC_BOT_TOKEN || github.token }}
+          script: |
+            const head = `${context.repo.owner}:bot/sync-tickets`;
+            const { data: existing } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head,
+            });
+
+            let pr;
+            if (existing.length > 0) {
+              pr = existing[0];
+              core.info(`PR de sync ya abierto — actualizado con el push: #${pr.number}`);
+            } else {
+              const today = new Date().toISOString().split('T')[0];
+              const { data: created } = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore(governance): sync TICKETS.md — ${today}`,
+                head: 'bot/sync-tickets',
+                base: 'main',
+                body: [
+                  'Sincronización automática GitHub Project → TICKETS.md (campo Estado).',
+                  '',
+                  `**Cambios:** ${process.env.UPDATED_IDS}`,
+                  '',
+                  '_PR generado por sync-tickets.yml. Merge automático via automerge-sync.yml',
+                  '(solo si el diff toca exclusivamente docs/TICKETS.md)._',
+                ].join('\n'),
+              });
+              pr = created;
+              // Labels requeridos por validate-pr-labels (p2)
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['domain:tech', 'class:b'],
+              });
+              core.info(`PR de sync creado: ${pr.html_url}`);
+            }
+            core.setOutput('number', pr.number.toString());
+
+      # ── Automerge de respaldo (caso GITHUB_TOKEN, ver arriba) ────────────────
+      - name: Enable automerge (backup)
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_BOT_TOKEN || github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          gh pr merge --auto --squash "$PR_NUMBER" -R "${{ github.repository }}" \
+            || gh pr merge --squash "$PR_NUMBER" -R "${{ github.repository }}" \
+            || echo "::notice::Automerge no armado — revisar 'Allow auto-merge' en Settings → General."
