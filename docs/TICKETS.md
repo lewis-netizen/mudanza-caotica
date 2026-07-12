@@ -308,9 +308,8 @@ Si el soporte sale del rango por más tiempo que `ObjectDefinition.Properties.su
 
 ```
 Semana:      4
-Estado:      BLOCKED
+Estado:      TODO
 Depende de:  GAM-002, GAM-003, GAM-004, GAM-005, GAM-006, GAM-007
-Bloqueado por: INV-004 — Config schemas deben estar definidos y en uso
 Domain:      TECH
 ```
 
@@ -422,9 +421,8 @@ Implementar `src/server/NPCManager.lua`. El NPC patrulla los NPCNodes en orden d
 
 ```
 Semana:      3
-Estado:      BLOCKED
+Estado:      TODO
 Depende de:  WLD-001, GM-002
-Bloqueado por: INV-003 — StoryEvents contract debe estar definido
 Domain:      BOTH
 ```
 
@@ -446,9 +444,8 @@ Implementar `src/server/EventManager.lua` con al menos un evento de Entropía Es
 
 ```
 Semana:      3
-Estado:      BLOCKED
+Estado:      TODO
 Depende de:  WLD-005
-Bloqueado por: INV-003 — StoryEvents contract debe estar definido
 Domain:      BOTH
 ```
 
@@ -491,9 +488,8 @@ Ajustar layout, nodos del NPC y pool de eventos basándose en playtests de Seman
 
 ```
 Semana:      1
-Estado:      BLOCKED
+Estado:      TODO
 Depende de:  GM-002, NET-001
-Bloqueado por: INV-001 — ClientStateManager debe existir antes de implementar UI
 Domain:      TECH
 ```
 
@@ -515,9 +511,8 @@ HUD con timer de ronda en formato `MM:SS` y conteo de objetos entregados. El tim
 
 ```
 Semana:      2
-Estado:      BLOCKED
+Estado:      TODO
 Depende de:  UI-001, GAM-002
-Bloqueado por: INV-001 — ClientStateManager debe existir antes de implementar UI
 Domain:      TECH
 ```
 
@@ -538,9 +533,8 @@ Prompt contextual client-side al acercarse a un objeto interactuable. Distingue 
 
 ```
 Semana:      3
-Estado:      BLOCKED
+Estado:      TODO
 Depende de:  GM-002, GAM-004
-Bloqueado por: INV-001 (ClientStateManager) + INV-003 (StoryEvents contract)
 Domain:      TECH
 ```
 

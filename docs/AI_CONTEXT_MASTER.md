@@ -1207,7 +1207,7 @@ mudanza-caotica/
 ├── rokit.toml                        ← Tipo C (toolchain manager)
 ├── .stylua.toml                      ← Tipo C
 ├── selene.toml                       ← Tipo C
-├── roblox.yml                        ← generado por selene generate-roblox-std (commiteado)
+├── roblox.yml                        ← generado por selene (caché/CI) — gitignored, no se commitea
 ├── testez.yml                        ← Tipo C (oficial, no editar)
 ├── wally.toml                        ← Tipo C
 ├── .gitignore
