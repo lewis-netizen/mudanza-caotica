@@ -7,6 +7,9 @@
       "$className": "ServerScriptService",
       "Systems": {
         "$path": "src/server"
+      },
+      "ServerPackages": {
+        "$path": "ServerPackages"
       }
     },
 
@@ -17,6 +20,22 @@
       },
       "Packages": {
         "$path": "Packages"
+      },
+      "Remotes": {
+        "$className": "Folder",
+        "Gameplay": {
+          "$className": "Folder",
+          "InteractObject": { "$className": "RemoteEvent" },
+          "DeliverObject": { "$className": "RemoteEvent" },
+          "ObjectStateChanged": { "$className": "RemoteEvent" }
+        },
+        "Round": {
+          "$className": "Folder",
+          "EventTriggered": { "$className": "RemoteEvent" },
+          "RoundStarted": { "$className": "RemoteEvent" },
+          "RoundEnded": { "$className": "RemoteEvent" },
+          "TimerSync": { "$className": "RemoteEvent" }
+        }
       }
     },
 
