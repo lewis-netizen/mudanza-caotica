@@ -7,55 +7,55 @@
 -- Compatibilidad con Lune: el módulo se recibe como parámetro.
 
 return function(PlayerDataService)
-	if not PlayerDataService then
-		describe("PlayerDataService", function()
-			it("SKIP — módulo no implementado todavía", function() end)
-		end)
-		return
-	end
+    if not PlayerDataService then
+        describe("PlayerDataService", function()
+            it("SKIP — módulo no implementado todavía", function() end)
+        end)
+        return
+    end
 
-	-- ── Interfaz pública ─────────────────────────────────────────────────────
+    -- ── Interfaz pública ─────────────────────────────────────────────────────
 
-	describe("interfaz pública", function()
-		it("expone loadPlayer(player)", function()
-			expect(PlayerDataService.loadPlayer).to.be.ok()
-			expect(type(PlayerDataService.loadPlayer)).to.equal("function")
-		end)
+    describe("interfaz pública", function()
+        it("expone loadPlayer(player)", function()
+            expect(PlayerDataService.loadPlayer).to.be.ok()
+            expect(type(PlayerDataService.loadPlayer)).to.equal("function")
+        end)
 
-		it("expone savePlayer(player)", function()
-			expect(PlayerDataService.savePlayer).to.be.ok()
-			expect(type(PlayerDataService.savePlayer)).to.equal("function")
-		end)
+        it("expone savePlayer(player)", function()
+            expect(PlayerDataService.savePlayer).to.be.ok()
+            expect(type(PlayerDataService.savePlayer)).to.equal("function")
+        end)
 
-		it("expone getData(player)", function()
-			expect(PlayerDataService.getData).to.be.ok()
-			expect(type(PlayerDataService.getData)).to.equal("function")
-		end)
-	end)
+        it("expone getData(player)", function()
+            expect(PlayerDataService.getData).to.be.ok()
+            expect(type(PlayerDataService.getData)).to.equal("function")
+        end)
+    end)
 
-	-- ── No reimplementa lo que ya provee ProfileStore ────────────────────────
-	-- Estos tests documentan la invariante arquitectónica: PlayerDataService
-	-- es un wrapper de dominio, no una reimplementación de DataStore.
+    -- ── No reimplementa lo que ya provee ProfileStore ────────────────────────
+    -- Estos tests documentan la invariante arquitectónica: PlayerDataService
+    -- es un wrapper de dominio, no una reimplementación de DataStore.
 
-	describe("scope de responsabilidad", function()
-		it("no expone funciones de retry manual (responsabilidad de ProfileStore)", function()
-			expect(PlayerDataService.retryLoad).never.to.be.ok()
-			expect(PlayerDataService.retrySave).never.to.be.ok()
-		end)
+    describe("scope de responsabilidad", function()
+        it("no expone funciones de retry manual (responsabilidad de ProfileStore)", function()
+            expect(PlayerDataService.retryLoad).never.to.be.ok()
+            expect(PlayerDataService.retrySave).never.to.be.ok()
+        end)
 
-		it("no expone acceso directo a DataStoreService de Roblox", function()
-			expect(PlayerDataService.GetDataStore).never.to.be.ok()
-			expect(PlayerDataService.getDataStore).never.to.be.ok()
-		end)
-	end)
+        it("no expone acceso directo a DataStoreService de Roblox", function()
+            expect(PlayerDataService.GetDataStore).never.to.be.ok()
+            expect(PlayerDataService.getDataStore).never.to.be.ok()
+        end)
+    end)
 
-	-- ── getData nunca propaga excepción ──────────────────────────────────────
+    -- ── getData nunca propaga excepción ──────────────────────────────────────
 
-	describe("getData", function()
-		it("nunca propaga excepción al caller, incluso sin sesión activa", function()
-			expect(function()
-				PlayerDataService.getData(nil :: any)
-			end).never.to.throw()
-		end)
-	end)
+    describe("getData", function()
+        it("nunca propaga excepción al caller, incluso sin sesión activa", function()
+            expect(function()
+                PlayerDataService.getData(nil :: any)
+            end).never.to.throw()
+        end)
+    end)
 end

@@ -8,3 +8,9 @@ realm = "shared"
 TestEZ = "roblox/testez@0.4.1"
 Promise = "evaera/promise@4.0.0"
 Janitor = "howmanysmall/janitor@1.18.3"
+
+# Server realm — nunca se requiere desde el cliente (§4.7).
+# wally install los coloca en ServerPackages/ (mapeado a
+# ServerScriptService/ServerPackages en default.project.json).
+[server-dependencies]
+ProfileStore = "lm-loleris/profilestore@1.0.3"

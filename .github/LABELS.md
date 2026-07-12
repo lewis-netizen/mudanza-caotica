@@ -27,3 +27,5 @@ Crea estos labels en GitHub → Settings → Labels antes de hacer el primer PR.
 | `p3-periodic` | `#bfd4f2` | Issue de auditoría periódica semanal |
 | `manual-activation` | `#fef2c0` | Requiere activación manual de Claude |
 | `intake-pending` | `#c2e0c6` | Entradas del scratchpad pendientes de intake |
+| `audit:blocked` | `#d93f0b` | Veredicto de auditoría: Rechazado — añadido por el Auditor |
+| `audit:passed` | `#0e8a16` | Veredicto de auditoría: Aprobado — añadido por el Auditor |
