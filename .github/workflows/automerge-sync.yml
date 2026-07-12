@@ -1,0 +1,65 @@
+# automerge-sync.yml
+# Automerge exclusivo para los PRs automáticos de sync-tickets
+# (head: bot/sync-tickets). DL-030.
+#
+# Guardas:
+#   1. Solo actúa sobre PRs cuya rama head es exactamente bot/sync-tickets.
+#   2. Solo arma el automerge si el diff toca EXCLUSIVAMENTE docs/TICKETS.md —
+#      si alguien cuela otro archivo en esa rama, el merge se cancela y queda
+#      un warning visible en el run.
+#
+# Nota: si el PR fue creado con el GITHUB_TOKEN (sin SYNC_BOT_TOKEN), este
+# workflow NO se dispara — GitHub no genera runs para eventos causados por el
+# GITHUB_TOKEN. Ese caso lo cubre el paso de respaldo de sync-tickets.yml.
+#
+# Requiere en Settings → General: "Allow auto-merge" activado. Con branch
+# protection, el merge ocurre cuando los checks requeridos pasan; sin ella,
+# el fallback mergea directo.
+
+name: Automerge — sync TICKETS.md
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    name: Automerge sync PR
+    if: github.event.pull_request.head.ref == 'bot/sync-tickets'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify diff only touches TICKETS.md
+        id: guard
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            const foreign = files.filter((f) => f.filename !== 'docs/TICKETS.md');
+            if (foreign.length > 0) {
+              core.setOutput('ok', 'false');
+              core.warning(
+                'Automerge cancelado — el PR de sync toca archivos ajenos a docs/TICKETS.md: ' +
+                  foreign.map((f) => f.filename).join(', ')
+              );
+            } else {
+              core.setOutput('ok', 'true');
+            }
+
+      - name: Enable automerge (squash)
+        if: steps.guard.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr merge --auto --squash "$PR_NUMBER" -R "${{ github.repository }}" \
+            || gh pr merge --squash "$PR_NUMBER" -R "${{ github.repository }}" \
+            || echo "::notice::Automerge no armado — revisar 'Allow auto-merge' en Settings → General."

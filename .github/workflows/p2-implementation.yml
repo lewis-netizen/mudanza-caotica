@@ -411,7 +411,10 @@ jobs:
               );
               return;
             }
-            if (labels.includes('class:b')) {
+            // Los PRs del bot de sync tocan docs/TICKETS.md con class:b por
+            // diseño (DL-030) — el warning de misclasificación no aplica.
+            const headRef = context.payload.pull_request.head.ref;
+            if (labels.includes('class:b') && headRef !== 'bot/sync-tickets') {
               const { data: files } = await github.rest.pulls.listFiles({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
