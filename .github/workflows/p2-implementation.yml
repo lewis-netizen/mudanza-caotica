@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify RemoteEvent connections live in their single owners
         run: |
           # OnClientEvent → solo ClientStateManager (cliente).
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify no direct sound:Play() or VFX in gameplay modules
         run: |
           # Excluir futuros AudioManager y VFXManager cuando existan.
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify PathfindingService is not used
         run: |
           VIOLATIONS=$(grep -rn "PathfindingService" src/ --include="*.lua" || true)
@@ -138,7 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify .Name is not used as logical condition
         run: |
           # Detecta patrones como: if x.Name == "algo" o x.Name ~= "algo"
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Count RemoteEvents in Networking.lua
         run: |
           if [ ! -f "src/shared/Lib/Networking.lua" ]; then
@@ -191,7 +191,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Check module line count
         run: |
           VIOLATIONS=""
@@ -218,7 +218,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify server does not require client modules
         run: |
           # Busca require() que apunten a StarterPlayer o client desde server
@@ -250,7 +250,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify critical Persistence modules have spec files
         run: |
           MISSING=""
@@ -287,7 +287,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
@@ -300,7 +300,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
@@ -317,7 +317,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify no direct print()/warn() outside Lib/Logger.lua
         run: |
           VIOLATIONS=$(grep -rnE '(^|[^A-Za-z_.:])(print|warn)\(' src/ --include="*.lua" \
@@ -338,7 +338,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
@@ -354,7 +354,7 @@ jobs:
     needs: contract-lune-compatibility
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
@@ -367,7 +367,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v6
