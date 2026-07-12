@@ -1,8 +1,8 @@
 # PROJECT_DECISION_LOG — Mudanza Caótica
 
 **Versión:** 1.0
-**Referencia:** AI_CONTEXT_MASTER v5.2 §5.4  
-**Última actualización:** 2026-06-06
+**Referencia:** AI_CONTEXT_MASTER v5.4 §5.4  
+**Última actualización:** 2026-07-11
 
 ---
 
@@ -61,6 +61,17 @@ Referencias: [§N.N del Context Master, otros DL-, T-]
 
 ## Entradas
 
+> **Nota de bootstrap (2026-07-10):** Las entradas DL-001 a DL-019 documentan
+> decisiones fundacionales tomadas antes de que el ciclo P1 (SCRATCHPAD →
+> intake → auditoría → decisión del PO) estuviera operativo. Son retroactivas:
+> las decididas se registran con Tipo PROPOSAL (§5.4 — DECISION es un Estado,
+> no un Tipo) y las que no registraron hipótesis explícita llevan
+> "N/A — entrada retroactiva de bootstrap". Sus campos Ticket quedaron vacíos
+> porque los 30 tickets iniciales de TICKETS.md se derivaron directamente del
+> AI_CONTEXT_MASTER en el mismo bootstrap (por eso tampoco llevan DL-Ref).
+> Toda entrada posterior a esta nota debe nacer del ciclo P1 o ser creada
+> directamente por un Orchestrator (§5.4 — Origen de entradas).
+
 ---
 
 ### DL-001
@@ -69,7 +80,7 @@ Referencias: [§N.N del Context Master, otros DL-, T-]
 ID:          DL-001
 Fecha:       2026-06-06
 Domain:      BOTH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Fundación del sistema de governance del proyecto. Necesidad de
              separar arquitectura de diseño y arquitectura técnica sin dividir
@@ -103,7 +114,7 @@ Referencias: §1, §2, §3, §4, §5, §6
 ID:          DL-002
 Fecha:       2026-06-06
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Necesidad de establecer la estructura canónica del repositorio
              basada en Rojo antes de implementar cualquier código, para que
@@ -111,7 +122,9 @@ Contexto:    Necesidad de establecer la estructura canónica del repositorio
 Contenido:   La estructura de carpetas del proyecto se basa en Rojo
              (default.project.json), no en la estructura de Roblox Studio.
              La tabla de mapeo Rojo → Runtime es la fuente de verdad.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Usar Studio como referencia crearía divergencia entre el repo
              y la documentación desde el día uno. Rojo es la única fuente
              de verdad del código fuente.
@@ -133,7 +146,7 @@ Referencias: §4.1, §6.2
 ID:          DL-003
 Fecha:       2026-06-06
 Domain:      BOTH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Necesidad de definir cómo fluye una idea desde su concepción
              hasta su implementación, con trazabilidad completa y sin
@@ -166,7 +179,7 @@ Referencias: §5.4, §5.5, §6.4
 ID:          DL-004
 Fecha:       2026-06-06
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Necesidad de formalizar la distinción entre Orchestrators y
              Subagents para que los prompts de agentes tengan contratos
@@ -175,7 +188,9 @@ Contenido:   Los Orchestrators (Auditor TECH, Auditor DESIGN) tienen visión
              global y producen solo hallazgos. Los Subagents (Constructores,
              Ideadores, Intake) tienen scope acotado y producen artefactos
              específicos. Un agente no puede ocupar dos tipos en el mismo ticket.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Sin esta distinción, los agentes mezclan auditoría e
              implementación en el mismo ciclo, lo cual hace los hallazgos
              no verificables y el output no predecible.
@@ -197,7 +212,7 @@ Referencias: §5.6, §6.5
 ID:          DL-005
 Fecha:       2026-06-06
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Necesidad de integrar automatización al ciclo de governance
              sin introducir actores que escriban en archivos críticos
@@ -207,7 +222,9 @@ Contenido:   GitHub Actions gestiona triggers y gates. Los prompts
              Tipo B+D. Codex (con acceso al repo) ejecuta auditorías
              TECH automáticamente post-merge y en P3. Claude se activa
              manualmente para auditorías DESIGN y el intake de P1.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Sin esta separación de responsabilidades, la automatización
              puede modificar el Context Master o el Decision Log sin
              autorización del PO, violando §6.4 (C3 requiere CONFIRM).
@@ -230,7 +247,7 @@ Referencias: §6.3, §6.4, §6.6
 ID:          DL-006
 Fecha:       2026-06-06
 Domain:      BOTH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Necesidad de un mecanismo de ingestión de ideas que filtre
              contenido humano sin estructura antes de que entre al ciclo
@@ -240,7 +257,9 @@ Contenido:   El SCRATCHPAD.md es la zona de ingestión del desarrollador.
              antes de que lleguen al Decision Log. Las entradas rechazadas
              se mueven a ## Rechazadas — no se eliminan hasta revisión del PO.
              El mecanismo de apelación (WF-010) permite bypass via P5.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Sin este filtro, ideas no formalizadas o contradictorias con
              los Principios Congelados pueden entrar directamente al log
              y contaminar el ciclo de auditoría.
@@ -263,7 +282,7 @@ Referencias: §5.8, §6.3
 ID:          DL-007
 Fecha:       2026-06-13
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Tickets UI-001/002/003 dependían de un patrón de consumo de
              RemoteEvents no definido. Sin convención, cada módulo UI
@@ -295,7 +314,7 @@ Referencias: §4.10, §4.6
 ID:          DL-008
 Fecha:       2026-06-13
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Sin convención de audio, los módulos de gameplay implementarían
              sonidos directamente (sound:Play() en CarryManager, TruckManager,
@@ -304,7 +323,9 @@ Contexto:    Sin convención de audio, los módulos de gameplay implementarían
 Contenido:   Todo audio y VFX reacciona a RemoteEvents — nunca es llamado
              directamente desde módulos de gameplay. AudioManager se implementa
              en Semana 3 conectando los RemoteEvents existentes.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Los RemoteEvents ya existen para comunicar estado. AudioManager
              los consume igual que ClientStateManager. Ningún módulo de gameplay
              necesita modificarse cuando AudioManager se implemente.
@@ -326,7 +347,7 @@ Referencias: §4.9, §4.6
 ID:          DL-009
 Fecha:       2026-06-13
 Domain:      BOTH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    EventManager y Summary Screen (WLD-005, WLD-006, UI-003)
              necesitan un contrato de StoryEvents antes de implementarse.
@@ -336,7 +357,9 @@ Contenido:   StoryEvent = { EventType, Data, Timestamp }. Los EventTypes
              canónicos se registran en Config/Events.lua antes de usarse
              en cualquier módulo. recordStoryEvent() solo acepta EventTypes
              registrados.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Unidad atómica: el contrato de StoryEvents es una regla que
              cambia el comportamiento sistémico. Sin él, EventManager y
              Summary Screen no pueden implementarse coherentemente.
@@ -358,7 +381,7 @@ Referencias: §4.4, §3.7
 ID:          DL-010
 Fecha:       2026-06-13
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Múltiples módulos necesitaban constantes (MAX_INTERACT_RANGE,
              NPC_SPEED, ROUND_DURATION, LOG_LEVEL) sin un lugar canónico
@@ -369,7 +392,9 @@ Contenido:   Cuatro archivos Config con schemas canónicos:
              RoundConfig (ciclo de ronda), GameplayConfig (mecánicas),
              Events (StoryEvents + pool). Ningún módulo hardcodea valores
              que aparecen en más de un archivo.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       INV-004 es prerequisito de GAM-008 (balance post-playtest).
              Sin schemas definidos, el ajuste de parámetros no tiene
              un lugar canónico donde ocurrir.
@@ -392,7 +417,7 @@ Referencias: §4.1, §4.6
 ID:          DL-011
 Fecha:       2026-06-16
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    El proyecto necesitaba toolchain management, formateo y linting
              estandarizados antes del primer commit de código real, para que
@@ -403,7 +428,9 @@ Contenido:   Rokit gestiona versiones de Rojo, Wally, wally-package-types,
              selene.toml + testez.yml oficial. Wally gestiona dependencias
              externas via wally.toml, con wally-package-types generando
              tipos sobre Packages/ usando el sourcemap de Rojo.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Sin estas herramientas desde el inicio, el código divergería en
              estilo entre Constructores y no habría detección automática de
              errores comunes de Luau antes de merge.
@@ -426,7 +453,7 @@ Referencias: §4.11, §6.2, §6.6
 ID:          DL-012
 Fecha:       2026-06-16
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Los Issues de Codex contenían checklists que mezclaban contratos
              verificables por grep/conteo con juicio arquitectónico real.
@@ -442,7 +469,9 @@ Contenido:   Jerarquía de 4 niveles de verificación implementada en §5.0:
              test-coverage-persistence (specs para módulos críticos).
              AUDITOR_TECH reescrito para operar solo en Nivel 3.
              Issues de Codex adelgazados — no repiten lo que CI ya verificó.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Si una regla puede expresarse como condición binaria verificable,
              debe convertirse en CI. La IA queda para lo que genuinamente
              requiere juicio sobre el código como sistema.
@@ -465,7 +494,7 @@ Referencias: §5.0, §6.6
 ID:          DL-013
 Fecha:       2026-06-16
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    Los specs de TestEZ solo podían correr en Studio, lo que
              impedía verificación automática en pre-commit y CI headless.
@@ -483,7 +512,9 @@ Contenido:   Lune añadido a rokit.toml como runtime de Luau standalone.
              Las fases 2-4 (refactor de módulos, CI headless, formalización)
              dependen de los resultados de lune/check-compatibility.luau
              en el proyecto real.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       El objetivo es que las reglas sean verificables lo antes
              posible — pre-commit es más inmediato que CI, que es más
              inmediato que la auditoría de IA.
@@ -507,7 +538,7 @@ Referencias: §4.6, §5.0, §6.2
 ID:          DL-014
 Fecha:       2026-06-16
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    lune/check-compatibility.luau ejecutado sobre los 7 módulos
              Nivel -1/0 existentes. 3 fallaron inicialmente: Networking.lua,
@@ -524,7 +555,9 @@ Contenido:   Los 3 módulos refactorizados: Networking.lua usa inicialización
              de bloque (function/if/for/while/do) contra end, evaluando
              cada línea con la profundidad previa a sus propios cambios.
              7/7 módulos ahora compatibles con Lune.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       El checker es una heurística de patrón de texto, no un parser
              AST real. Es suficiente para el patrón de código que los
              prompts de Constructor enseñan, pero tiene falsos negativos
@@ -552,7 +585,7 @@ Referencias: §4.6, §5.0
 ID:          DL-015
 Fecha:       2026-06-17
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    El proyecto necesitaba decidir explícitamente qué paquetes de
              Wally adoptar para áreas críticas, aplicando criterio profesional
@@ -569,7 +602,9 @@ Contenido:   Adoptados: ProfileStore (lm-loleris/profilestore@1.0.3,
              Rechazados: BridgeNet2/Net — resuelven batching de alta
              frecuencia; el proyecto tiene ≤7 RemoteEvents a escala humana,
              no ese problema.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Criterios objetivos: (1) severidad del riesgo si se implementa
              a mano, (2) track record en producción, (3) mantenimiento activo,
              (4) compatibilidad con invariantes del proyecto, (5) disciplina
@@ -611,7 +646,9 @@ Contenido:   HUDManager y SummaryManager reescritos para suscribirse a
              ClientStateManager.subscribe() en lugar de conectar
              RemoteEvents directamente. Corrige la violación antes de que
              cualquier Constructor la implemente.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Un prompt con un patrón de código incorrecto es tan peligroso
              como código incorrecto en el repo — el Constructor que lo siga
              al pie de la letra reproduce la violación automáticamente.
@@ -649,7 +686,9 @@ Contenido:   .gitattributes añadido: `* text=auto eol=lf` normaliza todos
              desarrollador. Elimina la dependencia de que cada persona
              configure su Git correctamente — la regla es determinista
              a nivel de repo, no de configuración individual.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Consistente con el principio del proyecto de convertir
              reglas dependientes de disciplina individual en mecanismos
              deterministas (§5.0). Line-ending handling es exactamente
@@ -673,7 +712,7 @@ Referencias: §5.0, §6.2
 ID:          DL-018
 Fecha:       2026-06-17
 Domain:      TECH
-Tipo:        DECISION
+Tipo:        PROPOSAL
 Estado:      AUDIT
 Contexto:    El campo "Semana" del GitHub Project era un campo custom
              Single-select que había que rellenar manualmente por Issue.
@@ -687,7 +726,9 @@ Contenido:   Milestones nativos de GitHub reemplazan el campo custom
              custom del Project se reducen a Domain y DL-Ref — Semana ya
              no requiere campo custom porque GitHub Projects v2 puede
              agrupar/filtrar por Milestone nativamente.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Los Milestones dan barra de progreso y fecha límite sin
              configuración adicional — algo que el campo custom no ofrecía.
              Con el repo público, la señal de progreso por semana es útil
@@ -732,7 +773,9 @@ Contenido:   sync-tickets.yml reescrito completo con GraphQL contra
              repo variable PROJECT_NUMBER y repo secret PROJECTS_TOKEN
              (PAT con scope project:read). PROJECT_SETUP.md documenta
              ambos pasos con instrucciones exactas de creación del PAT.
-Hipótesis:   —
+Hipótesis:   N/A — entrada retroactiva de bootstrap: decisión fundacional
+             documentada post-hoc, antes de que el ciclo P1 estuviera
+             operativo (ver nota al inicio de ## Entradas)
 Razón:       Un mecanismo documentado como funcional que en realidad no
              puede ejecutarse es peor que no tener el mecanismo — genera
              falsa confianza. Se corrige antes de que el PO dependa de él.
@@ -746,6 +789,355 @@ Pipeline:    P2/P4
 Ticket:      —
 Commit:      —
 Referencias: §6.6
+```
+
+---
+
+### DL-020
+
+```
+ID:          DL-020
+Fecha:       2026-07-10
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Auditoría arquitectónica (P3, 2026-07-10) detectó una
+             contradicción de ciclo de vida en persistencia: §4.4 ordenaba
+             savePlayer() en cada transición Summary → Lobby, PER-003
+             definía savePlayer como cierre de sesión (Profile:EndSession)
+             y GM-003 lo mandaba llamar al final de cada ronda. Combinados,
+             cerraban la sesión de ProfileStore con el jugador aún
+             conectado cada ~3 minutos.
+Contenido:   El ciclo de sesión de PlayerData queda atado al jugador, no a
+             la ronda. API de PlayerDataService: loadPlayer(player) en
+             PlayerAdded (StartSessionAsync + migrate); savePlayer(player)
+             al final de ronda = Profile:Save() — flush explícito, nunca
+             cierra sesión; releasePlayer(player) en PlayerRemoving =
+             Profile:EndSession(), único punto de cierre. GameManager es
+             el único caller (§4.8).
+Hipótesis:   Atar la sesión al ciclo join/leave del jugador elimina la
+             clase de bugs de session-locking y rollback que motivó la
+             adopción de ProfileStore — cerrarla por transición de ronda
+             invalidaba sus garantías.
+Razón:       Implementar el contrato anterior al pie de la letra producía
+             pérdida de datos latente — exactamente el modo de fallo
+             severo y poco frecuente que §4.7 existe para evitar.
+Impacto:     §4.4 (flujo GameManager) y §4.7 (API mínima de sesión)
+             actualizados. PER-003 y GM-003 corregidos con criterios
+             nuevos. PlayerDataService gana releasePlayer — compatible
+             con PlayerDataService.spec (solo exige que loadPlayer/
+             savePlayer/getData existan).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      PER-003, GM-003
+Commit:      —
+Referencias: §4.4, §4.7, §4.8, DL-015
+```
+
+---
+
+### DL-021
+
+```
+ID:          DL-021
+Fecha:       2026-07-10
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    §4.4 definía StoryEvent = { EventType, Data } sin Timestamp,
+             mientras Config/Events.lua lo definía con Timestamp =
+             os.clock(). Divergencia de contrato, y además os.clock() es
+             tiempo de CPU del VM — sin significado para narrar la ronda
+             en el Summary Screen.
+Contenido:   Contrato unificado en §4.4 y Config/Events.lua: StoryEvent =
+             { EventType, Data, Timestamp } donde Timestamp = segundos
+             transcurridos desde RoundStarted, calculado por RoundManager
+             (fuente única del timer).
+Hipótesis:   Un timestamp relativo al inicio de ronda es lo único que el
+             Summary Screen necesita para ordenar y narrar momentos —
+             tiempo absoluto de servidor no aporta y complica.
+Razón:       Corregir el contrato antes de que RoundManager se implemente
+             evita un bug latente y una migración de datos posterior.
+Impacto:     RoundManager.recordStoryEvent() debe calcular el Timestamp.
+             Ningún código existente lo consumía todavía — costo cero de
+             migración.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §4.4, src/shared/Config/Events.lua
+```
+
+---
+
+### DL-022
+
+```
+ID:          DL-022
+Fecha:       2026-07-10
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    §5.5 paso 8 y AUDITOR_TECH.md ordenaban "emitir G5" para
+             notas de Context Master pendientes, pero §5.3 solo definía
+             las categorías T1–T4 y D1–D4 — G5 no existía formalmente.
+Contenido:   §5.3 define la categoría de gobernanza G5: actualización del
+             Context Master pendiente de confirmación del PO, emitida por
+             cualquier Orchestrator cuando una entrada llega a P3 con la
+             nota "⚠ Context Master update" activa. Única categoría
+             compartida entre ambos auditores.
+Hipótesis:   Un código usado por los prompts pero sin definición canónica
+             produce hallazgos inconsistentes entre auditores.
+Razón:       Los Orchestrators no pueden emitir códigos que el protocolo
+             de auditoría no define — la regla central de §5.3 lo prohíbe.
+Impacto:     §5.3 actualizado. AUDITOR_TECH y AUDITOR_DESIGN pueden emitir
+             G5 sin violar la separación de dominios.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §5.3, §5.5
+```
+
+---
+
+### DL-023
+
+```
+ID:          DL-023
+Fecha:       2026-07-10
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    §5.0 atribuía el ban de print/warn a Selene, pero selene no
+             tiene un lint para prohibir globals específicos — la sección
+             [rules] con print = "deny" en selene.toml no era configuración
+             válida y el ban nunca estuvo activo. Además §5.0 declaraba que
+             todos los contratos Nivel 1 corren en pre-commit Y CI, pero
+             los specs (run-specs.luau) solo corrían en CI.
+Contenido:   El ban de print/warn directos (fuera de Lib/Logger.lua) se
+             implementa como contrato grep contract-logger-usage en
+             lefthook.yml y p2-implementation.yml. Selene queda solo como
+             linter. Se añade el job run-specs a pre-commit para cumplir
+             la regla de doble ejecución de Nivel 1.
+Hipótesis:   Un contrato documentado cuyo mecanismo no existe es peor que
+             no tener el contrato — genera falsa confianza en el gate.
+Razón:       Alinear §5.0 con mecanismos que realmente se ejecutan; los
+             contratos grep son deterministas y verificables localmente.
+Impacto:     selene.toml simplificado. lefthook.yml y CI ganan
+             contract-logger-usage y run-specs. §5.0, AUDITOR_TECH.md,
+             _BASE_CONSTRUCTOR.md y ONBOARDING.md actualizados.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §5.0, §6.6, DL-013
+```
+
+---
+
+### DL-024
+
+```
+ID:          DL-024
+Fecha:       2026-07-11
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El plazo original "MVP: 1 mes" (bootstrap 2026-06-06) venció sin
+             código de juego — el mes se invirtió en la infraestructura de
+             gobernanza. El PO redefine el objetivo y el estándar.
+Contenido:   (1) El reloj del roadmap se reinicia el 2026-07-11: vertical
+             slice completo al 2026-08-11. (2) Estándar de calidad: el juego
+             debe ser profesionalmente funcional desde su primera versión
+             pública — "mínimo" se refiere al alcance, nunca a la calidad.
+             La misma filosofía aplica a la arquitectura: se invierte diseño
+             ahora para maximizar mantenibilidad y escalabilidad.
+Hipótesis:   Un plazo realista anclado a una fecha concreta y un estándar de
+             calidad explícito evitan tanto el scope creep como la deuda
+             estructural "temporal" que nunca se paga.
+Razón:       CONTINGENCY P1 — directriz directa del PO en sesión de
+             auditoría (2026-07-11), sin pasar por SCRATCHPAD.
+Impacto:     §1.3 y §5.7 actualizados. El plazo del header del Context
+             Master ahora es una fecha, no una duración relativa.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Commit:      —
+Referencias: §1.3, §5.7
+```
+
+---
+
+### DL-025
+
+```
+ID:          DL-025
+Fecha:       2026-07-11
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    ClientStateManager notificaba a TODOS los listeners en cada tick
+             de TimerSync (1/segundo) — re-render de módulos que no muestran
+             el timer. Observación de la auditoría arquitectónica, aprobada
+             por el PO como parte del estándar de calidad (DL-024).
+Contenido:   subscribe(id, listener, options?) acepta options.timerUpdates.
+             Por defecto los ticks de TimerSync NO notifican; solo los
+             listeners con timerUpdates = true los reciben (HUD).
+Hipótesis:   La suscripción selectiva elimina el trabajo por segundo de los
+             módulos sin timer sin cambiar el modelo de snapshots.
+Razón:       Con UI real en el slice, el coste del re-render global por
+             segundo se paga en cada frame de cada módulo suscrito.
+Impacto:     §4.10 actualizado. API retrocompatible — el tercer parámetro
+             es opcional y el comportamiento por defecto es más eficiente.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      UI-001
+Commit:      —
+Referencias: §4.10, DL-024
+```
+
+---
+
+### DL-026
+
+```
+ID:          DL-026
+Fecha:       2026-07-11
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    ObjectStateChanged no incluía objectId — ClientStateManager lo
+             rellenaba con string vacío y la UI no podía distinguir tipos de
+             objeto. RoundStarted declaraba eventType obligatorio pero es nil
+             cuando no hay evento activo (ENABLE_EVENTS = false).
+Contenido:   Payload de ObjectStateChanged: { instanceId, objectId, state,
+             leaderId, supportId }. RoundStarted: { duration, eventType? }
+             con eventType explícitamente opcional.
+Hipótesis:   Extender el payload ahora (sin consumidores server-side aún)
+             cuesta cero migración; hacerlo después exige tocar servidor,
+             cliente y contrato a la vez.
+Razón:       El slice implementa los emisores server-side — es el último
+             momento de corregir el contrato sin refactor.
+Impacto:     §4.3 actualizado. ObjectManager emite objectId en cada cambio
+             de estado. ClientStateManager ya lo consume.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      GAM-002
+Commit:      —
+Referencias: §4.3, §4.10
+```
+
+---
+
+### DL-027
+
+```
+ID:          DL-027
+Fecha:       2026-07-11
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    GameplayConfig.BASE_WALK_SPEED estaba documentado como el valor
+             al que CarryManager "restaura" la velocidad al soltar objetos —
+             restaurar a una constante pisa cualquier otro modificador de
+             velocidad activo (eventos futuros, efectos).
+Contenido:   Contrato de restauración: CarryManager guarda el WalkSpeed
+             vigente al iniciar el carry y restaura ESE valor al soltar o
+             entregar. BASE_WALK_SPEED queda solo como fallback si el valor
+             guardado no existe o no es válido (> 0).
+Hipótesis:   Guardar/restaurar el valor previo compone correctamente con
+             cualquier sistema futuro que modifique velocidad — una
+             constante de restauración no compone con nada.
+Razón:       GAM-005 ya exigía "no interferir con otras modificaciones de
+             velocidad" — el contrato lo hace implementable sin ambigüedad.
+Impacto:     GameplayConfig documenta el contrato. CarryManager lo implementa
+             desde su primera versión.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P3
+Ticket:      GAM-003, GAM-005
+Commit:      —
+Referencias: §4.4
+```
+
+---
+
+### DL-028
+
+```
+ID:          DL-028
+Fecha:       2026-07-11
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    GAM-002 exige spawn "dentro del edificio" y GAM-004 una zona de
+             entrega, pero no existía contrato de tags entre el dominio World
+             (layout) y los sistemas de Gameplay — solo existía el contrato
+             Layout → NPCManager. Además el layout real es un asset de Studio
+             (WLD-001) que no existe aún: sin él, QA-001 no es ejecutable.
+Contenido:   (1) Contrato Layout → Gameplay en §4.4: Tag "ObjectSpawn" para
+             puntos de spawn y Tag "TruckZone" para la zona de entrega; los
+             Parts de objetos llevan Attributes InstanceId/ObjectId. (2) Nuevo
+             módulo MapBootstrap: genera un edificio placeholder tagueado si
+             el Workspace no contiene layout (flag ENABLE_PLACEHOLDER_MAP);
+             se retira cuando exista el layout real.
+Hipótesis:   Con el contrato de tags, layout real y placeholder son
+             intercambiables sin tocar ningún sistema — el dominio World
+             solo necesita taguear.
+Razón:       El vertical slice necesita una ronda jugable desde el repo, sin
+             pasos manuales de Studio como prerequisito.
+Impacto:     §4.4 (contrato + tabla de módulos) actualizado. MapBootstrap en
+             src/server/. WLD-001/WLD-002 conservan sus criterios — el
+             placeholder los satisface temporalmente.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      WLD-001, GAM-002, GAM-004
+Commit:      —
+Referencias: §4.4, §4.5, DL-024
+```
+
+---
+
+### DL-029
+
+```
+ID:          DL-029
+Fecha:       2026-07-11
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    INV-001 prohibía Networking.*:Connect() fuera de
+             ClientStateManager.lua — pero InteractObject (único evento
+             cliente→servidor, §4.3) necesita un OnServerEvent:Connect en
+             el servidor. El contrato era inimplementable tal como estaba:
+             el grep de CI habría bloqueado cualquier implementación del
+             lado servidor.
+Contenido:   INV-001 enmendado con dos dueños únicos: OnClientEvent:Connect
+             solo en ClientStateManager.lua (cliente); OnServerEvent:Connect
+             solo en CarryManager.lua (servidor). Los greps de lefthook y CI
+             verifican cada dirección por separado.
+Hipótesis:   Un dueño único por dirección conserva la intención del
+             invariante (un solo punto de conexión auditable por lado) y lo
+             hace implementable.
+Razón:       Contradicción detectada al implementar GAM-003 — el vertical
+             slice la destapó; ningún contrato debe ser inimplementable.
+Impacto:     §4.3, §4.6, §4.10 y §5.0 actualizados. lefthook.yml y
+             p2-implementation.yml enmendados. AUDITOR_TECH.md actualizado.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      GAM-003
+Commit:      —
+Referencias: §4.3, §4.6, §4.10, §5.0
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

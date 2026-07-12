@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.2 | **Plataforma:** Roblox | **Plazo MVP:** 1 mes
+**Versión:** 5.4 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -26,6 +26,8 @@ Mudanza Caótica es un juego cooperativo multijugador en Roblox donde un grupo d
 ### 1.3 Definición de MVP
 
 Este MVP es shippable. No es una validación de gameplay — es la base del producto, diseñada para adquisición de jugadores, medición de retención y evolución continua. La persistencia, el versionado de datos y las migraciones son infraestructura fundamental, no features futuras.
+
+**Estándar de calidad (DL-024):** el juego debe ser profesionalmente funcional desde su primera versión pública. "Mínimo" se refiere al alcance (un mapa, las mecánicas core), nunca a la calidad de ejecución. La misma filosofía aplica a la arquitectura: se invierte el esfuerzo de diseño ahora para maximizar mantenibilidad, escalabilidad y comodidad de desarrollo futuro — no se acepta deuda estructural a cambio de velocidad de entrega.
 
 ---
 
@@ -336,9 +338,10 @@ src/
 │   │   └── Content/                 -- Reserved. Not implemented in MVP.
 │   ├── Config/
 │   │   ├── Events.lua               -- StoryEvent schema + pool de EventDefinitions
-│   │   ├── GameplayConfig.lua       -- NPC_SPEED, OBJECT_COUNTS, MAX_INTERACT_RANGE
+│   │   ├── GameplayConfig.lua       -- NPC_SPEED, OBJECT_COUNTS, MIN_SPAWN_DISTANCE
 │   │   ├── RoundConfig.lua          -- ROUND_DURATION, SUMMARY_DURATION, LOBBY_DURATION
-│   │   └── GlobalConfig.lua         -- LOG_LEVEL, FEATURE_FLAGS, IS_STUDIO
+│   │   └── GlobalConfig.lua         -- LOG_LEVEL, FEATURE_FLAGS, IS_STUDIO,
+│   │                                   MAX_INTERACT_RANGE, TIMER_SYNC_INTERVAL
 │   ├── Types/
 │   ├── Constants/
 │   └── Tests/                       -- specs de TestEZ, convención: [Módulo].spec.lua
@@ -391,13 +394,14 @@ UI / HUD               ←     Lógica de objetos
 |---|---|---|---|
 | InteractObject | Gameplay | cliente → servidor | `{ instanceId }` |
 | DeliverObject | Gameplay | servidor → clientes | `{ instanceId }` |
-| ObjectStateChanged | Gameplay | servidor → clientes | `{ instanceId, state, leaderId, supportId }` |
+| ObjectStateChanged | Gameplay | servidor → clientes | `{ instanceId, objectId, state, leaderId, supportId }` |
 | EventTriggered | Round | servidor → clientes | `{ eventType }` |
-| RoundStarted | Round | servidor → clientes | `{ duration, eventType }` |
+| RoundStarted | Round | servidor → clientes | `{ duration, eventType? }` — eventType nil si no hay evento activo |
 | RoundEnded | Round | servidor → clientes | RoundSummary serializado |
 | TimerSync | Round | servidor → clientes | `{ timeRemaining }` — baja prioridad |
 
-Solo `InteractObject` viaja de cliente a servidor.
+Solo `InteractObject` viaja de cliente a servidor. Su única conexión
+server-side (`OnServerEvent:Connect`) vive en `CarryManager.lua` — ver INV-001.
 `DeliverObject` es disparado por el servidor via `Part.Touched` server-side.
 
 **Autoridad de estado:** ObjectManager es el único propietario de `ObjectInstance.State`. Ningún otro módulo modifica el estado directamente — todos solicitan el cambio a ObjectManager.
@@ -416,6 +420,7 @@ Solo `InteractObject` viaja de cliente a servidor.
 | TruckManager | Sistema | Zona de entrega, conteo de objetos salvados, datos para resumen. |
 | NPCManager | Sistema | TweenService sobre nodos predefinidos. Sin PathfindingService. |
 | EventManager | Sistema | Selecciona y ejecuta un evento aleatorio por ronda desde un pool. |
+| MapBootstrap | Sistema | Genera un edificio placeholder tagueado si el Workspace no contiene layout (flag ENABLE_PLACEHOLDER_MAP). Se retira cuando exista el layout real de WLD-001+. |
 | PlayerDataService | Persistencia | Wrapper delgado sobre ProfileStore (externo). Aplica MigrationService al cargar y expone el schema canónico de PlayerData. |
 | ClientStateManager | Cliente | Única fuente de estado del juego en el cliente. Conecta todos los RemoteEvents. Los módulos de UI leen de él. |
 
@@ -432,17 +437,29 @@ ObjectManager.getDeliveredCount()        -- retorna number
 ```
 
 **API — GameManager → módulos:**
+
+El ciclo de sesión de PlayerData está atado al **jugador** (join/leave), no al
+ciclo de ronda. Cerrar la sesión de ProfileStore en transiciones de ronda
+invalidaría su session locking y auto-save con el jugador aún conectado (§4.7).
+
 ```lua
+-- Al unirse el jugador (PlayerAdded) — independiente del ciclo de ronda
+PlayerDataService.loadPlayer(player)      -- StartSessionAsync + migración
+
 -- Transición Lobby → Active
 RoundManager.start()
-PlayerDataService.loadPlayer(playerId)
 
 -- Transición Active → Summary
 RoundManager.stop()
+PlayerDataService.savePlayer(player)      -- Profile:Save() — flush explícito.
+                                          -- La sesión NO se cierra aquí.
 
 -- Transición Summary → Lobby
 RoundManager.reset()
-PlayerDataService.savePlayer(playerId)
+
+-- Al salir el jugador (PlayerRemoving)
+PlayerDataService.releasePlayer(player)   -- Profile:EndSession()
+                                          -- ProfileStore guarda al cerrar.
 ```
 
 **API — RoundManager → módulos de gameplay:**
@@ -494,9 +511,12 @@ RoundSummary = {
     StoryEvents  -- [ StoryEvent ]
 }
 
--- StoryEvent = { EventType, Data }
--- EventType: string — identificador registrado en Shared/Config/Events
--- Data: table opcional — usa instanceId o ObjectId, nunca strings literales
+-- StoryEvent = { EventType, Data, Timestamp }
+-- EventType:  string — identificador registrado en Shared/Config/Events
+-- Data:       table opcional — usa instanceId o ObjectId, nunca strings literales
+-- Timestamp:  number — segundos transcurridos desde RoundStarted, calculado
+--             por RoundManager (fuente única del timer). No usar os.clock():
+--             es tiempo de CPU del VM, no apto para timestamps de gameplay.
 ```
 
 **Contrato Layout → NPCManager:**
@@ -504,6 +524,16 @@ RoundSummary = {
 Tag "NPCNode"     + Attribute "NodeIndex" (number)
 Tag "NPCDropZone" — al menos uno por cuarto
 ```
+
+**Contrato Layout → Gameplay (DL-028):**
+```
+Tag "ObjectSpawn" — Parts marcadores de posición de spawn de objetos.
+                    ObjectManager elige aleatoriamente entre ellos.
+Tag "TruckZone"   — Part de la zona de entrega. TruckManager conecta
+                    su Touched server-side.
+```
+Los Parts de objetos spawneados llevan Attributes `InstanceId` y `ObjectId`
+(strings) — nunca se identifica un objeto por `.Name` (§2.4).
 
 ### 4.5 Orden de Construcción por Dependencias
 
@@ -536,7 +566,10 @@ Nivel 3 — depende de todo
 - Sistemas que mezclen identidad con apariencia
 - Acoplamiento que impida añadir un nuevo ObjectDefinition sin modificar lógica existente
 - Código malicioso, exploits, o vulnerabilidades intencionales
-- `Networking.*:Connect()` fuera de `ClientStateManager.lua` (INV-001)
+- `Networking.*:Connect()` fuera de sus dos puntos únicos (INV-001):
+  `OnClientEvent` solo en `ClientStateManager.lua` (cliente);
+  `OnServerEvent` solo en `CarryManager.lua` (servidor — InteractObject es
+  el único evento cliente→servidor)
 - `sound:Play()` o efectos VFX llamados directamente desde módulos de gameplay (INV-002)
 - EventTypes en `recordStoryEvent()` no registrados en `Config/Events.lua` (INV-003)
 - Valores de configuración hardcodeados en módulos — deben venir de `Config/` (INV-004)
@@ -551,6 +584,17 @@ Nivel 3 — depende de todo
 **ProfileStore** (paquete externo, `lm-loleris/profilestore@1.0.3`) es la única capa que interactúa directamente con DataStores. Maneja session locking, retry con backoff, y auto-save internamente. Ningún código propio del proyecto reimplementa esta lógica — reimplementarla a mano es el tipo de trabajo que produce bugs severos y poco frecuentes (pérdida o rollback de datos del jugador).
 
 **PlayerDataService** es un wrapper delgado sobre ProfileStore. Su responsabilidad es exclusivamente de dominio: aplicar `MigrationService.migrate()` a los datos cargados, y exponer el schema canónico de PlayerData (§2.5) al resto del proyecto. No reimplementa retry ni session locking — eso es responsabilidad de ProfileStore.
+
+**Ciclo de sesión (API mínima de PlayerDataService):**
+```
+loadPlayer(player)     → StartSessionAsync + migrate. En PlayerAdded.
+savePlayer(player)     → Profile:Save() — flush explícito. Al final de ronda.
+                         Nunca cierra la sesión.
+getData(player)        → Profile.Data en memoria. Sin operación de red.
+releasePlayer(player)  → Profile:EndSession(). Solo en PlayerRemoving.
+```
+La sesión vive mientras el jugador está conectado — nunca se cierra por
+transiciones de ronda.
 
 **MigrationService** detecta la versión de PlayerData al cargar y aplica las migraciones necesarias. Esto sigue siendo lógica específica del proyecto — ProfileStore no migra schemas, solo gestiona el ciclo de vida del DataStore.
 
@@ -590,7 +634,7 @@ Cuando AudioManager se implemente, solo necesita conectar los RemoteEvents exist
 
 `src/client/ClientStateManager.lua` es el único módulo del cliente que conecta RemoteEvents. Los módulos de UI leen estado de él — nunca conectan RemoteEvents directamente.
 
-**Invariante:** `Networking.*:Connect()` solo aparece en `ClientStateManager.lua`.
+**Invariante:** `OnClientEvent:Connect` solo aparece en `ClientStateManager.lua`. En el servidor, `OnServerEvent:Connect` solo aparece en `CarryManager.lua` (INV-001).
 **Invariante:** `Networking` se importa desde `src/shared/Lib/Networking.lua` — nunca directamente desde `ReplicatedStorage.Remotes.*`.
 
 **API:**
@@ -604,8 +648,11 @@ ClientStateManager.getState(): State
 ClientStateManager.getObject(instanceId): ObjectSnapshot?
 -- Retorna snapshot de un objeto específico.
 
-ClientStateManager.subscribe(id, listener): () -> ()
+ClientStateManager.subscribe(id, listener, options?): () -> ()
 -- Registra listener que recibe el estado completo en cada cambio.
+-- options = { timerUpdates: boolean? } — por defecto los ticks de TimerSync
+-- (1/segundo) NO notifican; solo los listeners con timerUpdates = true los
+-- reciben (evita re-renders por segundo en módulos sin timer — DL-025).
 -- Retorna función de cleanup. Llamar en cleanup() de cada módulo de UI.
 ```
 
@@ -651,14 +698,16 @@ State = {
 **Pipeline de instalación (orden obligatorio):**
 ```
 1. wally install
-   → genera Packages/ con el código de las dependencias
+   → genera Packages/ (realm shared) y ServerPackages/ (realm server)
+     con el código de las dependencias
 
 2. rojo sourcemap default.project.json --output sourcemap.json
    → wally-package-types necesita el sourcemap para resolver
      la jerarquía real del proyecto
 
 3. wally-package-types --sourcemap sourcemap.json Packages/
-   → genera los archivos de tipos sobre Packages/ ya instalado
+   wally-package-types --sourcemap sourcemap.json ServerPackages/
+   → genera los archivos de tipos sobre los paquetes ya instalados
 ```
 
 `wally-package-types` no puede ejecutarse antes del paso 1 — necesita paquetes instalados para tener algo que procesar.
@@ -699,14 +748,14 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 
 | Contrato | Invariante | Mecanismo |
 |---|---|---|
-| INV-001 | `Networking.*:Connect()` solo en `ClientStateManager.lua` | grep |
+| INV-001 | `OnClientEvent:Connect` solo en `ClientStateManager.lua`; `OnServerEvent:Connect` solo en `CarryManager.lua` | grep |
 | INV-002 | `sound:Play()` / VFX no en módulos de gameplay | grep |
 | §4.6 | `PathfindingService` no en `src/` | grep |
 | §2.4 | `.Name` no como condición lógica | grep |
 | §4.3 | RemoteEvents ≤ 7 en `Networking.lua` | conteo |
 | §4.6 Lune | Globals Roblox no en scope de módulo | `lune run lune/check-compatibility.luau` ⚠ heurística, no AST |
 | — | Specs de comportamiento (Persistence, ObjectManager) | `lune run lune/run-specs.luau` |
-| — | `print`/`warn` fuera de `Logger.lua` | Selene |
+| — | `print`/`warn` fuera de `Logger.lua` | grep (`contract-logger-usage`) — Selene no puede prohibir globals específicos |
 | — | Formato de código uniforme | StyLua |
 | — | Convención de commits | commitlint (Lefthook commit-msg) |
 
@@ -762,6 +811,8 @@ Define dominios de ownership. **Persona ≠ Dominio.** Los tickets pertenecen a 
 
 Un dominio de implementación recibe diseño aprobado por el Product Owner y lo implementa. No redefine el diseño. Un dominio de diseño no toca código.
 
+**Nota sobre prefijos de ticket:** `GM-xxx` agrupa los tickets de GameManager dentro del dominio Gameplay. `QA-xxx` no es un dominio — son hitos transversales de integración, playtest (P6) y publicación; QA es una función de Governance (§5.6), no tiene ownership de módulos.
+
 ### 5.2 Knowledge Domains
 
 Los prompts de agentes heredan de estos domains. No se duplica contenido entre prompts.
@@ -796,7 +847,13 @@ Los prompts de agentes heredan de estos domains. No se duplica contenido entre p
 | D3 | Oportunidad de mejora |
 | D4 | Hipótesis sistémica |
 
-**Regla central:** Un Orchestrator no puede emitir hallazgos fuera de su dominio. Auditor TECH no emite D1–D4. Auditor DESIGN no emite T1–T4.
+**Categoría de gobernanza:**
+
+| Código | Nombre |
+|---|---|
+| G5 | Actualización del Context Master pendiente de confirmación del PO — emitido por cualquier Orchestrator cuando una entrada llega a P3 con la nota "⚠ Context Master update" activa (§5.5 paso 8) |
+
+**Regla central:** Un Orchestrator no puede emitir hallazgos fuera de su dominio. Auditor TECH no emite D1–D4. Auditor DESIGN no emite T1–T4. G5 es la única categoría compartida — la puede emitir cualquiera de los dos.
 
 **Modos de auditoría:**
 ```
@@ -1013,9 +1070,11 @@ Los Auditores son Orchestrators. Los Constructores e Ideadores son Subagents. QA
 
 ### 5.7 Roadmap de Desarrollo
 
+**Reloj del roadmap (DL-024):** reiniciado el 2026-07-11. Semana 1: 11–18 jul · Semana 2: 19–25 jul · Semana 3: 26 jul–1 ago · Semana 4: 2–11 ago. Objetivo: vertical slice completo (QA-001 y sucesores) al 2026-08-11.
+
 | Semana | Técnico | Objetivo de diseño |
 |---|---|---|
-| 1 | Edificio placeholder · spawn · pickup/drop · camión · timer · fin de ronda · DataStore básico | Un jugador completa una ronda de inicio a fin. Los datos persisten. |
+| 1 | Edificio placeholder · spawn · pickup/drop · camión · timer · fin de ronda · persistencia via ProfileStore (sesión + migraciones, §4.7) | Un jugador completa una ronda de inicio a fin. Los datos persisten. |
 | 2 | Objetos grandes (líder/soporte) · multijugador · layout final | Comunicación espontánea · bloqueos recurrentes · 1 situación inesperada/min sin eventos. Si falla: revisar layout, no añadir sistemas. |
 | 3 | NPC vecino · eventos · summary screen | Las rondas se sienten distintas entre sí. |
 | 4 | Bug fixing · optimización · publicación | DI media-alta confirmada en playtest real. |
@@ -1142,11 +1201,13 @@ Si el developer está en desacuerdo con un rechazo:
 
 ```
 mudanza-caotica/
+├── README.md                         ← Tipo C (punto de entrada del repo)
 ├── lefthook.yml                      ← Tipo C (pre-commit hooks — commitear)
 ├── default.project.json
 ├── rokit.toml                        ← Tipo C (toolchain manager)
 ├── .stylua.toml                      ← Tipo C
 ├── selene.toml                       ← Tipo C
+├── roblox.yml                        ← generado por selene generate-roblox-std (commiteado)
 ├── testez.yml                        ← Tipo C (oficial, no editar)
 ├── wally.toml                        ← Tipo C
 ├── .gitignore
@@ -1168,7 +1229,8 @@ mudanza-caotica/
 │   │   ├── validate-scratchpad.yml
 │   │   ├── validate-decision-log.yml
 │   │   └── sync-tickets.yml          ← Project → TICKETS.md (unidireccional)
-│   ├── .commitlintrc.yml
+│   ├── commitlintrc.yml              ← fuente única de reglas de commits (CI la consume via --config)
+│   ├── dependabot.yml                ← actualizaciones semanales de GitHub Actions
 │   ├── LABELS.md                     ← instrucciones de setup de labels
 │   └── PROJECT_SETUP.md              ← instrucciones de setup del GitHub Project
 │
@@ -1207,13 +1269,15 @@ mudanza-caotica/
 │
 └── src/  — ver §4.1 para estructura detallada
 
-Packages/  — generado por wally install, gitignored. Ver §4.11.
-            Wally.lock sí se commitea.
+Packages/        — generado por wally install (realm shared), gitignored. Ver §4.11.
+ServerPackages/  — generado por wally install (realm server: ProfileStore), gitignored.
+                   Mapeado a ServerScriptService/ServerPackages en default.project.json.
+                   Wally.lock sí se commitea.
 ```
 
 **Vista virtual para Orchestrators (organización por dominio):**
 
-Las referencias de sección son al Context Master v5.2.
+Las referencias de sección son al Context Master v5.4.
 
 ```
 [DOMINIO: Gameplay]
@@ -1244,7 +1308,7 @@ Las referencias de sección son al Context Master v5.2.
 |---|---|---|---|---|---|---|
 | P1 | Ideación estándar | Mixto | Humano tiene idea | Entrada DISCOVERY en log | p1-intake.yml | — |
 | P2/P4 | Implementación (docs o código) | Subagent + revisión humana | Ticket en DECISION | Artefacto implementado | p2-implementation.yml | — |
-| P3 | Auditoría de proyecto | Codex (TECH, automático) + Claude (DESIGN, manual) | Lunes 9am o solicitud PO | Hallazgos en log | p3-periodic-audit.yml | — |
+| P3 | Auditoría de proyecto | Codex (TECH, automático) + Claude (DESIGN, manual) | Lunes 9:00 UTC o solicitud PO | Hallazgos en log | p3-periodic-audit.yml | — |
 | P5 | Contingencia manual | Humano | Pipeline ideal no disponible | Mismo artefacto del pipeline original | — | P1, P2/P4, P3 |
 | P6 | Playtest y observación | Humano | Round completable sin crash + N features MVP (N definido por PO en semana 2) | Entradas en SCRATCHPAD → P1 | — | — |
 
@@ -1378,7 +1442,7 @@ Pipeline:   P1 | P2/P4 | P3 | P5 | P6
 
 **Principio:** Actions gestiona cuándo. Los prompts transforman artefactos. Son capas ortogonales.
 
-**Regla absoluta:** Actions nunca escribe en archivos Tipo B+D. Dispara y notifica únicamente.
+**Regla absoluta:** Actions nunca escribe en archivos Tipo B+D. Dispara y notifica únicamente. Única excepción de escritura: `sync-tickets.yml` actualiza el campo `Estado` de TICKETS.md (Tipo D, generado — §6.1), en dirección única Project → archivo.
 
 **Fronteras — qué nunca automatiza Actions:**
 ```
@@ -1410,7 +1474,7 @@ Sigue siendo manual:
 # p2-implementation.yml — PR events
 jobs:
   validate-commit-convention:
-    # commitlint con .commitlintrc.yml
+    # commitlint con .github/commitlintrc.yml
     # Bloquea PR si algún commit no cumple la convención.
 
   validate-pr-labels:
@@ -1422,13 +1486,13 @@ jobs:
   notify-self-review:
     # Al pasar de draft a ready_for_review: recuerda ejecutar self-review.
 
-  notify-orchestrator-audit:
+  create-codex-audit-issue:
     # Post-merge con class:a:
     #   domain:tech   → Codex ejecuta AUDIT_MODE=TECH directamente.
     #   domain:design → notifica. Humano activa Claude.
     #   domain:both   → Codex ejecuta TECH. Si pasa: humano activa Claude para DESIGN.
 
-# p3-periodic-audit.yml — cron lunes 9am
+# p3-periodic-audit.yml — cron lunes 9:00 UTC
 jobs:
   create-audit-issue:
     # Crea issue "P3 Auditoría pendiente — [fecha]".
@@ -1448,9 +1512,14 @@ jobs:
 # validate-decision-log.yml — push a docs/PROJECT_DECISION_LOG.md
 # Warning (no bloqueo) si entradas en DECISION tienen campos vacíos.
 # Verifica: Ejecución, Costo, Pipeline en DECISION; Hipótesis en PROPOSAL.
+
+# sync-tickets.yml — cron cada hora + workflow_dispatch
+# GitHub Project → campo Estado de TICKETS.md (unidireccional).
+# Requiere PROJECT_NUMBER (variable) y PROJECTS_TOKEN (PAT clásico
+# read:project). Ver .github/PROJECT_SETUP.md sección 6.
 ```
 
-**Configuración de commitlint (`.commitlintrc.yml`):**
+**Configuración de commitlint (`.github/commitlintrc.yml`):**
 ```yaml
 extends:
   - '@commitlint/config-conventional'
@@ -1497,3 +1566,13 @@ VEREDICTO: Aprobado / Aprobado con observaciones / Rechazado
 ```
 
 Si no hay problemas: `"Sin problemas detectados. Aprobado."`
+
+---
+
+## Historial de versiones
+
+| Versión | Fecha | Cambios |
+|---|---|---|
+| 5.4 | 2026-07-11 | Directrices del PO + arranque del vertical slice: estándar de calidad profesional desde la primera versión pública y reloj del roadmap reiniciado — slice al 2026-08-11 (§1.3, §5.7, DL-024). Suscripción selectiva de timer en ClientStateManager (§4.10, DL-025). Payloads: objectId en ObjectStateChanged, eventType opcional en RoundStarted (§4.3, DL-026). Contrato de restauración de WalkSpeed (DL-027). Contrato Layout → Gameplay (Tags ObjectSpawn/TruckZone) y módulo MapBootstrap (§4.4, DL-028). INV-001 enmendado: OnServerEvent:Connect solo en CarryManager (§4.3, §4.6, §4.10, §5.0, DL-029). |
+| 5.3 | 2026-07-10 | Auditoría arquitectónica: ciclo de sesión de PlayerData atado al jugador, no a la ronda (§4.4, §4.7 — se añade `releasePlayer`; `savePlayer` es flush, nunca EndSession). StoryEvent gana `Timestamp` relativo al inicio de ronda (§4.4). Definición del código G5 (§5.3). Mecanismo real del ban print/warn: grep `contract-logger-usage`, no Selene (§5.0). Roadmap Semana 1: ProfileStore, no "DataStore básico" (§5.7). Correcciones factuales de §4.1, §4.11, §6.2, §6.3 y §6.6 (paths de config, ServerPackages, commitlintrc, sync-tickets, cron UTC). Nota de prefijos GM/QA (§5.1). |
+| 5.2 | 2026-06-06 | Versión de bootstrap del proyecto. |

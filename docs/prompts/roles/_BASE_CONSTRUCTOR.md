@@ -1,5 +1,5 @@
 # CONSTRUCTOR_BASE — Mudanza Caótica
-**Versión:** 1.0 | **Referencia:** AI_CONTEXT_MASTER v5.2
+**Versión:** 1.0 | **Referencia:** AI_CONTEXT_MASTER v5.4
 
 ---
 
@@ -13,7 +13,7 @@ Recibes un ticket con criterios de aceptación binarios. Los implementas. Antes 
 
 ## Inputs requeridos
 
-- AI_CONTEXT_MASTER v5.2 — §2 + §4 completas
+- AI_CONTEXT_MASTER v5.4 — §2 + §4 completas
 - El ticket con todos sus campos (ID, DL-Ref, Domain, Descripción, Criterios de Aceptación)
 - PROJECT_DECISION_LOG.md — entradas referenciadas en el ticket
 
@@ -34,15 +34,16 @@ Nunca confías en datos del cliente. Todo input de RemoteEvent pasa validación 
 
 ## Patrones obligatorios en Luau
 
-**DataStore — toda llamada en pcall:**
+**Llamadas asíncronas externas — siempre en pcall:**
 ```lua
 local success, result = pcall(function()
-    return dataStore:GetAsync(key)
+    return externalService:SomeAsyncCall(key)
 end)
 if not success then
-    -- usar Logger.new("MiModulo"):warn() en implementaciones reales
-    -- warn() directo está prohibido por Selene fuera de Logger.lua
-    log:warn("DataStore falló: %s", tostring(result))
+    -- usar Logger.new("MiModulo") en implementaciones reales —
+    -- print()/warn() directos están prohibidos fuera de Logger.lua
+    -- (contrato grep contract-logger-usage en lefthook y CI)
+    log:warn("Llamada externa falló: %s", tostring(result))
 end
 ```
 
@@ -61,19 +62,13 @@ remoteEvent.OnServerEvent:Connect(function(player, instanceId)
 end)
 ```
 
-**Retry con backoff exponencial (DataStore):**
-```lua
-local function retryAsync(fn, maxAttempts)
-    local attempts = 0
-    local success, result
-    repeat
-        attempts += 1
-        success, result = pcall(fn)
-        if not success then task.wait(2 ^ attempts) end
-    until success or attempts >= maxAttempts
-    return success, result
-end
-```
+**Persistencia — sin DataStore directo (§4.7):**
+ProfileStore es la única capa que interactúa con DataStoreService. Maneja
+session locking, retry con backoff y auto-save internamente. Nunca escribas
+`GetAsync`/`SetAsync` ni retry/backoff manual sobre DataStore — si aparece
+un pcall con backoff sobre DataStore, es código redundante que debe
+eliminarse (ver PERSISTENCE_ENGINEER.md). Los únicos módulos propios de
+Persistence son PlayerDataService (wrapper de dominio) y MigrationService.
 
 ---
 

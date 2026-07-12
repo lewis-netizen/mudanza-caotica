@@ -1,5 +1,5 @@
 # TICKETS — Mudanza Caótica
-**Referencia:** AI_CONTEXT_MASTER v5.2 §5.5
+**Referencia:** AI_CONTEXT_MASTER v5.4 §5.5
 
 Los tickets están organizados por Dominio Arquitectónico (§5.1), no por responsable.
 Un ticket pertenece a un dominio. Una persona puede cubrir múltiples dominios.
@@ -21,6 +21,18 @@ Criterios de Aceptación:
   - [ ] [condición — verificable sí/no]
 Notas:       [observaciones durante implementación]
 ```
+
+**Prefijos de ticket:** `NET`, `PER`, `GAM`, `WLD`, `UI` corresponden a los
+dominios de implementación (§5.1). `GM-xxx` pertenece al dominio Gameplay —
+es un prefijo propio solo para agrupar los tickets de GameManager (ciclo de
+vida). `QA-xxx` **no es un dominio**: son hitos transversales de integración
+semanal, playtest formal (P6) y publicación.
+
+**Nota de bootstrap:** Los 30 tickets iniciales se derivaron directamente del
+AI_CONTEXT_MASTER durante el bootstrap del proyecto — por eso no llevan
+`DL-Ref` (ver nota equivalente en PROJECT_DECISION_LOG.md). Todo ticket nuevo
+debe nacer de una entrada DECISION del Decision Log e incluir su `DL-Ref`
+(§5.5 paso 5).
 
 ---
 
@@ -105,7 +117,8 @@ Implementar `src/server/Persistence/PlayerDataService.lua` como wrapper delgado 
 
 **Criterios de Aceptación**
 - [ ] `PlayerDataService.loadPlayer(player)` inicia sesión de ProfileStore (`StartSessionAsync`), aplica `MigrationService.migrate()` al `Profile.Data`
-- [ ] `PlayerDataService.savePlayer(player)` no requiere lógica propia de guardado — ProfileStore auto-guarda; este método solo libera la sesión si aplica (`Profile:EndSession()`)
+- [ ] `PlayerDataService.savePlayer(player)` solo dispara un flush explícito (`Profile:Save()`) — no implementa lógica propia de guardado y **nunca** cierra la sesión
+- [ ] `PlayerDataService.releasePlayer(player)` cierra la sesión (`Profile:EndSession()`) — se llama únicamente en `PlayerRemoving`, nunca en transiciones de ronda (§4.4, §4.7)
 - [ ] `PlayerDataService.getData(player)` retorna `Profile.Data` en memoria sin operación de red
 - [ ] Si `StartSessionAsync` falla (perfil bloqueado por otro servidor), el jugador recibe PlayerData por defecto y un `Logger:warn()` — nunca bloquea el join
 - [ ] Los dominios reservados (`Identity`, `Creation`) se inicializan como tablas vacías en el template de PER-001, nunca nil
@@ -602,19 +615,24 @@ Domain:      TECH
 ```
 
 **Descripción**
-Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Gestiona estados Lobby y Summary. Solo llama start/stop/reset sobre RoundManager y loadPlayer/savePlayer sobre PlayerDataService.
+Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Gestiona estados Lobby y Summary. Solo llama start/stop/reset sobre RoundManager y loadPlayer/savePlayer/releasePlayer sobre PlayerDataService (§4.4).
 
 **Criterios de Aceptación**
 - [ ] El ciclo `Lobby → Active → Summary → Lobby` funciona de inicio a fin sin intervención manual
 - [ ] GameManager llama **exclusivamente** sobre RoundManager y PlayerDataService — nunca sobre módulos de gameplay directamente
 - [ ] El estado global (Lobby/Active/Summary) está centralizado en GameManager y solo GameManager puede cambiarlo
 - [ ] `RoundStarted` y `RoundEnded` se disparan con los payloads correctos definidos en §4.3
-- [ ] `PlayerDataService.loadPlayer()` se llama al inicio de sesión del jugador
-- [ ] `PlayerDataService.savePlayer()` se llama al final de la ronda y al desconectarse el jugador
+- [ ] `PlayerDataService.loadPlayer()` se llama al inicio de sesión del jugador (`PlayerAdded`)
+- [ ] `PlayerDataService.savePlayer()` (flush) se llama al final de cada ronda — la sesión no se cierra
+- [ ] `PlayerDataService.releasePlayer()` se llama al desconectarse el jugador (`PlayerRemoving`) — único punto donde se cierra la sesión
 
 ---
 
 ## QA transversal
+
+> QA no es un dominio de implementación (§5.1) — es una función de Governance
+> (§5.6). Estos tickets son los hitos de integración semanal, el playtest
+> formal (P6) y la publicación. No tienen ownership de módulos.
 
 ### QA-001 — Integración Semana 1: Flujo básico single-player
 

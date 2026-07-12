@@ -13,13 +13,15 @@ Los contratos de arquitectura expresables como condiciones binarias son verifica
 
 ```
 Verificado por CI (no auditar aquí):
-  INV-001 — Networking.*:Connect() solo en ClientStateManager.lua
+  INV-001 — OnClientEvent:Connect solo en ClientStateManager.lua;
+            OnServerEvent:Connect solo en CarryManager.lua
   INV-002 — sound:Play() / VFX no en módulos de gameplay
   §4.6    — PathfindingService no en src/
   §2.4    — .Name no como condición lógica
   §4.3    — RemoteEvents ≤ 7
   Formato — StyLua
-  Linting — Selene (incluye print/warn ban)
+  Linting — Selene
+  Logger  — print/warn fuera de Logger.lua (grep contract-logger-usage)
   Commits — commitlint
 
 Auditado aquí (requiere juicio sobre el código como sistema):
