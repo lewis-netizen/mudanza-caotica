@@ -45,13 +45,30 @@ end
 
 -- ─── Entrega ───────────────────────────────────────────────────────────────────
 
+--- Resuelve el InstanceId subiendo desde la parte tocada. Un objeto puede
+--- ser un Model multi-part (PrefabRegistry, DL-031): el Attribute vive en la
+--- raíz, no necesariamente en la parte que toca la zona.
+local function resolveInstanceId(hit: any): string?
+    local node = hit
+    local depth = 0
+    while node and depth < 5 do
+        local id = node:GetAttribute("InstanceId")
+        if type(id) == "string" then
+            return id
+        end
+        node = node.Parent
+        depth += 1
+    end
+    return nil
+end
+
 local function onZoneTouched(hit: any)
     if not active then
         return
     end
 
-    local instanceId = hit:GetAttribute("InstanceId")
-    if type(instanceId) ~= "string" then
+    local instanceId = resolveInstanceId(hit)
+    if not instanceId then
         return
     end
 

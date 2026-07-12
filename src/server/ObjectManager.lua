@@ -4,6 +4,13 @@
 -- solicitan cambios aquí, nunca mutan estado directamente.
 -- No mueve objetos: CarryManager posee el transporte.
 --
+-- La resolución ObjectId → representación física la delega en PrefabRegistry
+-- (DL-031): ObjectManager no conoce ServerStorage ni construye placeholders.
+-- Distingue `top` (instancia a parentar/destruir — Part o Model) de `root`
+-- (BasePart raíz para física y welds). getObjectPart devuelve siempre root,
+-- así CarryManager y TruckManager operan sobre un BasePart sin saber si el
+-- objeto es un Part suelto o un Model.
+--
 -- Lune-compatible (§4.6): todo acceso a game/servicios ocurre dentro de
 -- funciones. La lógica de estados es pura y se testea en ObjectManager.spec.
 
@@ -26,7 +33,8 @@ local VALID_STATES = {
 -- ─── Estado interno ────────────────────────────────────────────────────────────
 
 local instances: { [string]: ObjectInstance } = {}
-local parts: { [string]: any } = {}
+local tops: { [string]: any } = {} -- instancia a parentar/destruir (Part o Model)
+local parts: { [string]: any } = {} -- BasePart raíz (física, welds, attributes)
 local containerFolder: any = nil
 local deliveredCount = 0
 local spawnSerial = 0
@@ -52,6 +60,10 @@ local function getLog()
     return log
 end
 
+local function getPrefabRegistry()
+    return require(game:GetService("ServerScriptService").Systems.PrefabRegistry)
+end
+
 -- ─── Replicación de estado ─────────────────────────────────────────────────────
 
 local function fireStateChanged(instance: ObjectInstance)
@@ -75,24 +87,24 @@ local function spawnInstance(def: any, point: any, container: any, config: any)
     spawnSerial += 1
     local instanceId = string.format("obj_%04d", spawnSerial)
 
-    local dims = config.PLACEHOLDER_OBJECT_SIZES[def.Size] or { 2, 2, 2 }
-    local rgb = config.PLACEHOLDER_OBJECT_COLORS[def.Size] or { 200, 200, 200 }
+    -- PrefabRegistry resuelve el asset (prefab real o placeholder) — DL-031.
+    local top, root = getPrefabRegistry().instantiate(def)
+
+    -- Identificación por Attribute en la raíz física, nunca por .Name (§2.4).
+    root:SetAttribute("InstanceId", instanceId)
+    root:SetAttribute("ObjectId", def.ObjectId)
+    game:GetService("CollectionService"):AddTag(root, "CarryObject")
+
+    -- Posición sobre el punto de spawn con jitter horizontal (Entropía §3.4).
     local jitterRange = config.MIN_SPAWN_DISTANCE
-
-    local part = Instance.new("Part")
-    part.Size = Vector3.new(dims[1], dims[2], dims[3])
-    part.Color = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
-    part.Anchored = true
-    part.TopSurface = Enum.SurfaceType.Smooth
-    part.BottomSurface = Enum.SurfaceType.Smooth
-    part.Position = point.Position
-        + Vector3.new((math.random() - 0.5) * jitterRange, dims[2] / 2 + 0.5, (math.random() - 0.5) * jitterRange)
-    part:SetAttribute("InstanceId", instanceId)
-    part:SetAttribute("ObjectId", def.ObjectId)
-    part.Parent = container
-
-    local CollectionService = game:GetService("CollectionService")
-    CollectionService:AddTag(part, "CarryObject")
+    local lift = root.Size.Y / 2 + 0.5
+    local offset = Vector3.new((math.random() - 0.5) * jitterRange, lift, (math.random() - 0.5) * jitterRange)
+    if top:IsA("Model") then
+        top:PivotTo(CFrame.new(point.Position + offset))
+    else
+        top.Position = point.Position + offset
+    end
+    top.Parent = container
 
     local instance: ObjectInstance = {
         InstanceId = instanceId,
@@ -102,7 +114,8 @@ local function spawnInstance(def: any, point: any, container: any, config: any)
         SupportId = nil,
     }
     instances[instanceId] = instance
-    parts[instanceId] = part
+    tops[instanceId] = top
+    parts[instanceId] = root
     fireStateChanged(instance)
 end
 
@@ -175,11 +188,14 @@ function ObjectManager.setState(instanceId: string, state: string, leaderId: num
 
     if state == "delivered" then
         deliveredCount += 1
-        local part = parts[instanceId]
-        if part then
-            parts[instanceId] = nil
+        -- Destruir el `top` — con un Model, destruir solo la raíz dejaría el
+        -- cascarón. El objeto desaparece del Workspace (GAM-004).
+        local top = tops[instanceId]
+        tops[instanceId] = nil
+        parts[instanceId] = nil
+        if top then
             pcall(function()
-                part:Destroy()
+                top:Destroy()
             end)
         end
     end
@@ -232,9 +248,9 @@ end
 --- Limpia todo el estado interno y destruye los Parts spawneados.
 --- Idempotente — puede llamarse múltiples veces sin error.
 function ObjectManager.reset()
-    for _, part in pairs(parts) do
+    for _, top in pairs(tops) do
         pcall(function()
-            part:Destroy()
+            top:Destroy()
         end)
     end
     if containerFolder then
@@ -243,6 +259,7 @@ function ObjectManager.reset()
         end)
         containerFolder = nil
     end
+    tops = {}
     parts = {}
     instances = {}
     deliveredCount = 0

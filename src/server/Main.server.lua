@@ -20,6 +20,10 @@ local function bootstrap()
 
     require(Systems.MapBootstrap).ensure()
 
+    -- Auditar el contrato ObjectId → Prefab al arrancar (DL-031): los errores
+    -- de assets aparecen aquí, no a mitad de una partida.
+    require(Systems.PrefabRegistry).validate()
+
     local GameManager = require(Systems.GameManager)
     GameManager.init()
     GameManager.start()
