@@ -8,6 +8,8 @@
 # Wally packages — instalados localmente, no se commitean
 # wally.lock SÍ se commitea (equivalente a cargo.lock)
 Packages/
+ServerPackages/
+DevPackages/
 
 # Rokit — los binarios se instalan globalmente, no en el repo
 # rokit.toml SÍ se commitea
