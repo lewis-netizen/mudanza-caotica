@@ -13,9 +13,10 @@
 #     contract-pathfinding-banned
 #     contract-name-as-condition-banned
 #     contract-remote-event-count
+#     contract-logger-usage (print/warn ban)
 #   Convención y formato
 #     format-check (StyLua)
-#     lint-check (Selene — incluye print/warn ban)
+#     lint-check (Selene)
 #     validate-commit-convention (commitlint)
 #     validate-pr-labels
 #   Notificaciones
@@ -31,6 +32,16 @@ on:
   pull_request_target:
     types: [closed]
 
+# Mínimo privilegio por defecto — los jobs que crean issues/comentarios
+# elevan permisos individualmente.
+permissions:
+  contents: read
+
+# Cancela runs obsoletos del mismo PR cuando llegan pushes nuevos.
+concurrency:
+  group: p2-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   # ══════════════════════════════════════════════════════════════════════════════
   # BLOQUE 1 — CONTRATOS DE ESTRUCTURA
@@ -45,19 +56,28 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
-      - name: Verify Networking.*:Connect() only in ClientStateManager.lua
+      - uses: actions/checkout@v6
+      - name: Verify RemoteEvent connections live in their single owners
         run: |
-          VIOLATIONS=$(grep -rn "\.OnClientEvent:Connect\|\.OnServerEvent:Connect\|\.Event:Connect" src/ \
+          # OnClientEvent → solo ClientStateManager (cliente).
+          # OnServerEvent → solo CarryManager (servidor; InteractObject es el
+          # único evento cliente→servidor). Ver §4.3/§4.10, DL-029.
+          V1=$(grep -rn "\.OnClientEvent:Connect\|\.Event:Connect" src/ \
             --include="*.lua" \
             | grep -v "src/client/ClientStateManager.lua" \
             | grep -v "src/shared/Lib/Networking.lua" \
             || true)
-          if [ -n "$VIOLATIONS" ]; then
-            echo "❌ INV-001 VIOLATION: Networking connections outside ClientStateManager.lua"
-            echo "$VIOLATIONS"
+          V2=$(grep -rn "\.OnServerEvent:Connect" src/ \
+            --include="*.lua" \
+            | grep -v "src/server/CarryManager.lua" \
+            | grep -v "src/shared/Lib/Networking.lua" \
+            || true)
+          if [ -n "$V1$V2" ]; then
+            echo "❌ INV-001 VIOLATION: Networking connection outside its single owner"
+            echo "$V1"
+            echo "$V2"
             echo ""
-            echo "All RemoteEvent connections must be in src/client/ClientStateManager.lua"
+            echo "OnClientEvent → ClientStateManager.lua | OnServerEvent → CarryManager.lua"
             echo "See AI_CONTEXT_MASTER §4.10"
             exit 1
           fi
@@ -70,13 +90,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify no direct sound:Play() or VFX in gameplay modules
         run: |
-          # Excluir futuros AudioManager y VFXManager cuando existan
+          # Excluir futuros AudioManager y VFXManager cuando existan.
+          # Los tweens también se excluyen: TweenService es el mecanismo
+          # mandatado para el NPC (§4.4) y tween:Play() no es audio/VFX.
           VIOLATIONS=$(grep -rn ":Play()\|:Stop()\|:Pause()" src/server/ src/shared/ \
             --include="*.lua" \
-            | grep -v "AudioManager\|VFXManager" \
+            | grep -v "AudioManager\|VFXManager\|[Tt]ween" \
             || true)
           if [ -n "$VIOLATIONS" ]; then
             echo "❌ INV-002 VIOLATION: Direct audio/VFX calls in gameplay modules"
@@ -95,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify PathfindingService is not used
         run: |
           VIOLATIONS=$(grep -rn "PathfindingService" src/ --include="*.lua" || true)
@@ -116,7 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify .Name is not used as logical condition
         run: |
           # Detecta patrones como: if x.Name == "algo" o x.Name ~= "algo"
@@ -138,14 +160,17 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Count RemoteEvents in Networking.lua
         run: |
           if [ ! -f "src/shared/Lib/Networking.lua" ]; then
             echo "⚠ Networking.lua not found — skipping count (file not yet implemented)"
             exit 0
           fi
-          COUNT=$(grep -c "WaitForChild\|FindFirstChild" src/shared/Lib/Networking.lua || echo "0")
+          # Contar solo las entradas de la tabla _remotes (nombre = grupo:WaitForChild).
+          # Las búsquedas de contenedores (local Remotes = ..., local Gameplay = ...)
+          # no son RemoteEvents y no deben contar para el límite.
+          COUNT=$(grep -cE '^[[:space:]]*[A-Za-z_]+[[:space:]]*=[[:space:]]*[A-Za-z_]+:(WaitForChild|FindFirstChild)\(' src/shared/Lib/Networking.lua || true)
           echo "RemoteEvents found: $COUNT"
           if [ "$COUNT" -gt 7 ]; then
             echo "❌ §4.3 VIOLATION: $COUNT RemoteEvents found, maximum is 7 without PO approval"
@@ -166,7 +191,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check module line count
         run: |
           VIOLATIONS=""
@@ -193,7 +218,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify server does not require client modules
         run: |
           # Busca require() que apunten a StarterPlayer o client desde server
@@ -225,7 +250,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify critical Persistence modules have spec files
         run: |
           MISSING=""
@@ -262,26 +287,50 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
-      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: actions/checkout@v6
+      - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
+          cache: "true"
       - name: Check formatting
         run: stylua --check src/
 
   lint-check:
-    name: "Lint: Selene (includes print/warn ban)"
+    name: "Lint: Selene"
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
-      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: actions/checkout@v6
+      - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
+          cache: "true"
       - name: Generate Roblox standard library
         run: selene generate-roblox-std
       - name: Run Selene
         run: selene src/
+
+  # Logger obligatorio (Lib/Logger.lua) — print/warn directos prohibidos.
+  # Selene no puede prohibir globals específicos — este grep es el ban real.
+  contract-logger-usage:
+    name: "Contract: Logger usage (print/warn ban)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify no direct print()/warn() outside Lib/Logger.lua
+        run: |
+          VIOLATIONS=$(grep -rnE '(^|[^A-Za-z_.:])(print|warn)\(' src/ --include="*.lua" \
+            | grep -v "src/shared/Lib/Logger.lua" \
+            || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ LOGGER CONTRACT VIOLATION: direct print()/warn() found"
+            echo "$VIOLATIONS"
+            echo ""
+            echo "Use Lib/Logger.lua (log:debug/info/warn/error) instead."
+            exit 1
+          fi
+          echo "✅ Logger contract: no direct print()/warn() outside Logger.lua"
 
   # ── Nivel 1: Lune compatibility (mismo mecanismo que pre-commit) ────────────
   contract-lune-compatibility:
@@ -289,10 +338,11 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
-      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: actions/checkout@v6
+      - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
+          cache: "true"
       - name: Check Lune compatibility
         run: lune run lune/check-compatibility.luau
 
@@ -304,10 +354,11 @@ jobs:
     needs: contract-lune-compatibility
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
-      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: actions/checkout@v6
+      - uses: CompeyDev/setup-rokit@v0.2.1
         with:
           token: ${{ github.token }}
+          cache: "true"
       - name: Run TestEZ specs
         run: lune run lune/run-specs.luau
 
@@ -316,35 +367,23 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
       - name: Install commitlint
         run: |
           npm install --save-dev \
             @commitlint/cli \
             @commitlint/config-conventional
-      - name: Write commitlint config
-        run: |
-          cat > commitlint.config.js << 'COMMITLINT'
-          module.exports = {
-            extends: ['@commitlint/config-conventional'],
-            rules: {
-              'type-enum': [2, 'always', ['feat','fix','refactor','docs','chore']],
-              'scope-enum': [2, 'always', [
-                'gameplay','world','networking','persistence','ui','ux','governance'
-              ]],
-              'body-max-line-length': [0],
-              'footer-max-line-length': [0],
-            },
-          };
-          COMMITLINT
+      # Fuente única de verdad: .github/commitlintrc.yml (commiteado).
+      # No duplicar reglas inline aquí — divergen silenciosamente.
       - name: Run commitlint
         run: |
           npx commitlint \
+            --config .github/commitlintrc.yml \
             --from ${{ github.event.pull_request.base.sha }} \
             --to ${{ github.event.pull_request.head.sha }} \
             --verbose
@@ -353,8 +392,10 @@ jobs:
     name: "Labels: domain:* and class:* required"
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: read
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           script: |
             const labels = context.payload.pull_request.labels.map(l => l.name);
@@ -396,8 +437,11 @@ jobs:
     if: |
       github.event_name == 'pull_request' &&
       github.event.action == 'ready_for_review'
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           script: |
             await github.rest.issues.createComment({
@@ -412,13 +456,13 @@ jobs:
                 '',
                 '- [ ] Every acceptance criterion is **true** (binary yes/no)',
                 '- [ ] No game logic outside ModuleScripts',
-                '- [ ] All DataStore calls wrapped in `pcall`',
+                '- [ ] No direct DataStore access — persistence via ProfileStore (§4.7)',
                 '- [ ] Commit follows `tipo(dominio): desc` + `reason:` convention',
                 '- [ ] Class A commits include `refs: DL-xxx, [DOMINIO]-xxx`',
                 '',
                 '_The following are already verified by CI and do not need manual check:_',
                 '_Networking isolation · Audio isolation · PathfindingService ban_',
-                '_.Name-as-condition ban · RemoteEvent count · Format · Lint_',
+                '_.Name-as-condition ban · RemoteEvent count · print/warn ban · Format · Lint_',
               ].join('\n'),
             });
 
@@ -430,8 +474,10 @@ jobs:
       github.event_name == 'pull_request_target' &&
       github.event.action == 'closed' &&
       github.event.pull_request.merged == true
+    permissions:
+      issues: write
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           script: |
             const labels = context.payload.pull_request.labels.map(l => l.name);

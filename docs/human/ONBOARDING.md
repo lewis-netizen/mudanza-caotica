@@ -135,6 +135,7 @@ rojo sourcemap default.project.json --output sourcemap.json
 
 # Genera los tipos de Luau para las dependencias externas
 wally-package-types --sourcemap sourcemap.json Packages/
+wally-package-types --sourcemap sourcemap.json ServerPackages/
 ```
 
 ---
@@ -339,7 +340,8 @@ Corren automáticamente en cada `git commit`. Si algo falla, el commit se bloque
 | Hook | Qué verifica |
 |---|---|
 | `stylua` | Formato de código |
-| `selene` | Linting + print/warn directos prohibidos |
+| `selene` | Linting |
+| `contract-logger-usage` | print()/warn() directos prohibidos — usa Lib/Logger.lua |
 | `contract-networking-isolation` | Networking.*:Connect() solo en ClientStateManager |
 | `contract-audio-isolation` | sound:Play() no en módulos de gameplay |
 | `contract-pathfinding-banned` | PathfindingService no en src/ |

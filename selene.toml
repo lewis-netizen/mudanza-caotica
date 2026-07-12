@@ -1,9 +1,10 @@
 std = "roblox+testez"
-[rules]
-# Forzar uso de Logger — prohibir print/warn directos
-# Excepción: Logger.lua puede usarlos internamente
-print = "deny"
-warn = "deny"
+
+# Nota: el ban de print/warn directos (fuera de Lib/Logger.lua) NO se puede
+# expresar en selene — no existe un lint para prohibir globals específicos.
+# La sección [rules] anterior con `print = "deny"` no era configuración
+# válida. El ban vive en el contrato grep `contract-logger-usage` de
+# lefthook.yml y de p2-implementation.yml (CI).
 
 [config]
 unused_variable = { allow_unused_self = true }

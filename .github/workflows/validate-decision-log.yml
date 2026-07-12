@@ -11,12 +11,15 @@ on:
     paths:
       - 'docs/PROJECT_DECISION_LOG.md'
 
+permissions:
+  contents: read
+
 jobs:
   validate-schema:
     name: Validate Decision Log schema
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check schema
         run: |
@@ -49,6 +52,11 @@ jobs:
                 [ "$HAS_PIPELINE" -eq 0 ]  && WARNINGS+=("$id [Estado=$estado] missing Pipeline field")
                 ;;
             esac
+
+            # Actions corre bash con -e: sin esto, la función retorna el
+            # status del último test (1 si el campo SÍ está presente) y el
+            # script "warning-only" muere en la primera entrada válida.
+            return 0
           }
 
           while IFS= read -r line; do

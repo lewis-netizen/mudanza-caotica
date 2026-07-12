@@ -1,0 +1,19 @@
+# dependabot.yml
+# Mantiene actualizadas las GitHub Actions de los workflows.
+# Los PRs de dependabot se configuran para pasar las validaciones propias
+# del repo: commitlint (tipo chore, scope governance) y validate-pr-labels
+# (domain:* + class:*).
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      # Produce: "chore(governance): bump actions/checkout from 6 to 7"
+      prefix: "chore(governance)"
+    labels:
+      - "domain:tech"
+      - "class:b"

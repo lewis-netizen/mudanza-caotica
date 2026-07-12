@@ -12,6 +12,11 @@
 # Separación CI/IA (§5.0):
 #   Estos hooks verifican Nivel 1 y Nivel 2 — contratos deterministas.
 #   Lo que requiere juicio queda para el Auditor TECH en CI/PR.
+#
+# IMPORTANTE: los scripts de los contratos viven en .github/scripts/*.sh —
+# NO inline aquí. El runner de lefthook en Windows destroza el quoting de
+# scripts multilínea inline (comillas y paréntesis desaparecen). Cualquier
+# hook nuevo con lógica no trivial debe ser un archivo de script.
 
 pre-commit:
   # Ejecutar en paralelo para mayor velocidad
@@ -24,174 +29,83 @@ pre-commit:
       glob: "src/**/*.lua"
       run: stylua --check {staged_files}
 
-    # ── Nivel 1: Linting (incluye print/warn ban via selene.toml) ────────────
+    # ── Nivel 1: Linting ─────────────────────────────────────────────────────
 
     - name: selene
       glob: "src/**/*.lua"
-      run: |
-        selene generate-roblox-std 2>/dev/null || true
-        selene {staged_files}
+      run: bash .github/scripts/selene-staged.sh {staged_files}
+
+    # ── Nivel 1: Logger obligatorio — print/warn directos prohibidos ─────────
+
+    - name: contract-logger-usage
+      glob: "src/**/*.lua"
+      run: bash .github/scripts/contract-logger-usage.sh {staged_files}
 
     # ── Nivel 1: INV-001 — Networking isolation ──────────────────────────────
+    # OnClientEvent solo en ClientStateManager (cliente).
+    # OnServerEvent solo en CarryManager (servidor). §4.10, DL-029.
 
     - name: contract-networking-isolation
       glob: "src/**/*.lua"
-      run: |
-        VIOLATIONS=$(grep -n "\.OnClientEvent:Connect\|\.OnServerEvent:Connect" {staged_files} \
-          | grep -v "ClientStateManager.lua" \
-          | grep -v "Lib/Networking.lua" \
-          || true)
-        if [ -n "$VIOLATIONS" ]; then
-          echo "❌ INV-001: Networking connections outside ClientStateManager.lua"
-          echo "$VIOLATIONS"
-          echo "See AI_CONTEXT_MASTER §4.10"
-          exit 1
-        fi
+      run: bash .github/scripts/contract-networking-isolation.sh {staged_files}
 
     # ── Nivel 1: INV-002 — Audio/VFX isolation ──────────────────────────────
 
     - name: contract-audio-isolation
       glob: "src/{server,shared}/**/*.lua"
-      run: |
-        VIOLATIONS=$(grep -n ":Play()\|:Stop()\|:Pause()" {staged_files} \
-          | grep -v "AudioManager\|VFXManager" \
-          || true)
-        if [ -n "$VIOLATIONS" ]; then
-          echo "❌ INV-002: Direct audio/VFX call in gameplay module"
-          echo "$VIOLATIONS"
-          echo "See AI_CONTEXT_MASTER §4.9"
-          exit 1
-        fi
+      run: bash .github/scripts/contract-audio-isolation.sh {staged_files}
 
     # ── Nivel 1: §4.6 — PathfindingService banned ───────────────────────────
 
     - name: contract-pathfinding-banned
       glob: "src/**/*.lua"
-      run: |
-        VIOLATIONS=$(grep -n "PathfindingService" {staged_files} || true)
-        if [ -n "$VIOLATIONS" ]; then
-          echo "❌ §4.6: PathfindingService found — use TweenService + NPCNodes"
-          echo "$VIOLATIONS"
-          exit 1
-        fi
+      run: bash .github/scripts/contract-pathfinding-banned.sh {staged_files}
 
     # ── Nivel 1: §2.4 — .Name as condition banned ───────────────────────────
 
     - name: contract-name-as-condition
       glob: "src/**/*.lua"
-      run: |
-        VIOLATIONS=$(grep -En '\.Name\s*[=~]=\s*"' {staged_files} || true)
-        if [ -n "$VIOLATIONS" ]; then
-          echo "❌ §2.4: .Name used as logical condition — use IDs"
-          echo "$VIOLATIONS"
-          exit 1
-        fi
+      run: bash .github/scripts/contract-name-as-condition.sh {staged_files}
 
     # ── Nivel 2: Tamaño de módulo ≤ 300 líneas ──────────────────────────────
 
     - name: contract-module-size
       glob: "src/**/*.lua"
-      run: |
-        VIOLATIONS=""
-        for file in {staged_files}; do
-          # Excluir specs
-          if echo "$file" | grep -q "\.spec\.lua$"; then
-            continue
-          fi
-          LINES=$(wc -l < "$file")
-          if [ "$LINES" -gt 300 ]; then
-            VIOLATIONS="${VIOLATIONS}\n  $file — ${LINES} lines"
-          fi
-        done
-        if [ -n "$VIOLATIONS" ]; then
-          echo "❌ Module size violation: files exceeding 300 lines:"
-          echo -e "$VIOLATIONS"
-          echo "Split into smaller modules with single responsibilities."
-          exit 1
-        fi
+      run: bash .github/scripts/contract-module-size.sh {staged_files}
 
     # ── Nivel 2: Layer separation — server no requiere client ───────────────
 
     - name: contract-layer-separation
       glob: "src/server/**/*.lua"
-      run: |
-        VIOLATIONS=$(grep -n "require.*[Cc]lient\|require.*StarterPlayer" {staged_files} || true)
-        if [ -n "$VIOLATIONS" ]; then
-          echo "❌ Layer violation: src/server/ requires src/client/ module"
-          echo "$VIOLATIONS"
-          echo "See AI_CONTEXT_MASTER §4.2"
-          exit 1
-        fi
+      run: bash .github/scripts/contract-layer-separation.sh {staged_files}
 
     # ── Nivel 2: Persistence modules tienen specs ────────────────────────────
 
     - name: contract-test-coverage-persistence
       glob: "src/server/Persistence/**/*.lua"
-      run: |
-        MISSING=""
-        for file in {staged_files}; do
-          module=$(basename "$file" .lua)
-          spec="src/shared/Tests/${module}.spec.lua"
-          if [ ! -f "$spec" ]; then
-            MISSING="${MISSING}\n  ${module}: spec missing at ${spec}"
-          fi
-        done
-        if [ -n "$MISSING" ]; then
-          echo "❌ Test coverage: Persistence module without spec:"
-          echo -e "$MISSING"
-          exit 1
-        fi
+      run: bash .github/scripts/contract-test-coverage-persistence.sh {staged_files}
 
-    # ── Nivel 1: Compatibilidad Lune ────────────────────────────────────────
-    # Usa lune/check-compatibility.luau — verificación exacta, no heurística.
-    # Solo corre sobre archivos staged en src/shared/ y src/server/.
-    # Análisis estático via lune/check-compatibility.luau.
-    # El script lee los archivos directamente — sin require(), sin problemas de paths.
-    # Filtra el output para mostrar solo los archivos staged que fallen.
+    # ── Nivel 1: Specs de comportamiento ────────────────────────────────────
+    # §5.0 exige que los contratos de Nivel 1 corran en pre-commit Y en CI.
+    # Los specs saltan (SKIP) los módulos aún no implementados — no bloquean.
+
+    - name: run-specs
+      glob: "src/**/*.lua"
+      run: lune run lune/run-specs.luau
+
+    # ── Nivel 1: Compatibilidad Lune (§4.6) ──────────────────────────────────
+    # Usa lune/check-compatibility.luau y filtra a los archivos staged.
 
     - name: contract-lune-compatibility
       glob: "src/{shared,server}/**/*.lua"
-      run: |
-        OUTPUT=$(lune run lune/check-compatibility.luau 2>&1 || true)
-        FOUND_VIOLATIONS=""
-        for file in {staged_files}; do
-          if echo "$file" | grep -q "\.spec\.lua$"; then
-            continue
-          fi
-          if echo "$OUTPUT" | grep -q "$file"; then
-            FOUND_VIOLATIONS="${FOUND_VIOLATIONS}\n  $file"
-          fi
-        done
-        if [ -n "$FOUND_VIOLATIONS" ]; then
-          echo "❌ Lune compatibility: Roblox globals at module scope in staged files:"
-          echo -e "$FOUND_VIOLATIONS"
-          echo ""
-          echo "Move Roblox service access inside functions (inyección de dependencias)."
-          echo "Full report: lune run lune/check-compatibility.luau"
-          echo "See AI_CONTEXT_MASTER §4.6"
-          exit 1
-        fi
+      run: bash .github/scripts/contract-lune-compatibility.sh {staged_files}
 
 commit-msg:
   jobs:
     # ── Convención de commits ────────────────────────────────────────────────
     # Verifica formato: tipo(dominio): descripción
     # Tipos válidos: feat, fix, refactor, docs, chore
-    # Dominios válidos: gameplay, world, networking, persistence, ui, ux, governance
+    # Dominios: gameplay, world, networking, persistence, ui, ux, governance
 
     - name: commitlint
-      run: |
-        MSG=$(cat {1})
-        # Commits de sync automático del bot — exentos
-        if echo "$MSG" | grep -q "^chore(governance): sync "; then
-          exit 0
-        fi
-        # Validar formato
-        if ! echo "$MSG" | grep -qE "^(feat|fix|refactor|docs|chore)\((gameplay|world|networking|persistence|ui|ux|governance)\): .+"; then
-          echo "❌ Commit message format violation"
-          echo "   Got: $MSG"
-          echo "   Expected: tipo(dominio): descripción"
-          echo "   Types: feat | fix | refactor | docs | chore"
-          echo "   Scopes: gameplay | world | networking | persistence | ui | ux | governance"
-          exit 1
-        fi
+      run: bash .github/scripts/commitlint-local.sh {1}

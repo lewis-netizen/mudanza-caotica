@@ -96,21 +96,29 @@ https://github.com/users/lewis-netizen/projects/N
                                     este número
 ```
 
-### 6.2 Crear un PAT con scope "project"
+### 6.2 Crear un PAT clásico con scope read:project
+
+⚠ **Los fine-grained tokens NO sirven aquí:** el permiso de Projects en
+fine-grained tokens solo existe para proyectos de **organizaciones**
+("Organization permissions → Projects"). Para un Project de **cuenta de
+usuario** (este caso) no hay apartado equivalente — solo funciona el PAT
+clásico.
 
 ```
 GitHub → tu avatar → Settings → Developer settings
-→ Personal access tokens → Fine-grained tokens → Generate new token
+→ Personal access tokens → Tokens (classic) → Generate new token (classic)
 
 Nombre: mudanza-caotica-projects-sync
 Expiration: 90 días (renovar cuando expire)
-Repository access: Only select repositories → mudanza-caotica
-Permissions:
-  Repository permissions → Contents: Read and write
-  Account permissions → Projects: Read-only
+Scopes:
+  read:project    ← lo único que el workflow necesita (solo lee el Project;
+                    el push a TICKETS.md lo hace el GITHUB_TOKEN de Actions)
 ```
 
 Copia el token generado — no se vuelve a mostrar.
+
+Si el Project migra a una organización en el futuro, un fine-grained token
+con `Organization permissions → Projects: Read-only` es la opción preferida.
 
 ### 6.3 Configurar el repo
 
@@ -130,7 +138,7 @@ gh workflow run sync-tickets.yml
 gh run watch
 ```
 
-Verificar que TICKETS.md se actualizó correctamente con los estados del Project. Si falla con error de permisos, revisar que el PAT tiene scope `project: read` y que `PROJECT_NUMBER` coincide con la URL del Project.
+Verificar que TICKETS.md se actualizó correctamente con los estados del Project. Si falla con error de permisos, revisar que el PAT clásico tiene el scope `read:project` y que `PROJECT_NUMBER` coincide con la URL del Project.
 
 ---
 
