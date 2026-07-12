@@ -395,7 +395,7 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const labels = context.payload.pull_request.labels.map(l => l.name);
@@ -441,7 +441,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             await github.rest.issues.createComment({
@@ -477,7 +477,7 @@ jobs:
     permissions:
       issues: write
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const labels = context.payload.pull_request.labels.map(l => l.name);

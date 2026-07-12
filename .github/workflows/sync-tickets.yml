@@ -37,7 +37,7 @@ jobs:
       # Usa PROJECTS_TOKEN (PAT clásico con scope read:project) — GITHUB_TOKEN no alcanza.
       - name: Fetch Project v2 items via GraphQL
         id: fetch
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.PROJECTS_TOKEN }}
           script: |
@@ -137,7 +137,7 @@ jobs:
       # ── Actualizar campo Estado en TICKETS.md ───────────────────────────────
       - name: Update TICKETS.md
         id: update
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           # Via env — interpolar el output dentro del literal JS rompería
           # el script si algún valor contiene comillas.
