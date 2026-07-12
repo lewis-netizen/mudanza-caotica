@@ -12,9 +12,12 @@ for file in "$@"; do
     case "$file" in
         *.spec.lua) continue ;;
     esac
-    # Normalizar separadores de Windows para el match contra el reporte
+    # Normalizar separadores de Windows para el match contra el reporte.
+    # Solo cuentan las líneas de la sección de INCOMPATIBLES (❌) — el
+    # reporte también lista los módulos compatibles (✅) y un match plano
+    # daría falso positivo con cualquier archivo compatible staged.
     normalized=$(echo "$file" | tr '\\' '/')
-    if echo "$OUTPUT" | grep -q "$normalized"; then
+    if echo "$OUTPUT" | grep -q "❌.*$normalized"; then
         FOUND="${FOUND}
   $normalized"
     fi
