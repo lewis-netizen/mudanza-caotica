@@ -1288,4 +1288,106 @@ Commit:      —
 Referencias: §1.3, §5.0, §5.5, §5.9, §4.3, DL-028, DL-031
 ```
 
+---
+
+### DL-033
+
+```
+ID:          DL-033
+Fecha:       2026-07-12
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    DL-032 identifico dos umbrales gobernados por el supuesto de
+             coste-humano-implementador y los marco para reexaminar: el
+             limite de 300 lineas por modulo y el <=7 RemoteEvents (este
+             ademas con una inconsistencia: gate duro N1 en CI pero descrito
+             como blando en §4.3).
+Contenido:   (1) Tamano de modulo: 300 -> 400 lineas. El limite existe por
+             coste-REVISOR (un humano revisa el modulo), no coste-escritor;
+             una IA lee el modulo entero sin importar su tamano. El guard
+             real contra god-modules es la responsabilidad unica (juicio del
+             Auditor, Nivel 3); el conteo es un backstop coarse. Ningun
+             modulo actual supera 286 lineas — el cambio elimina la presion
+             de fragmentacion artificial sin efecto inmediato.
+             (2) RemoteEvents: se resuelve la inconsistencia. Es un gate
+             duro N1 contra el cap actual (7), justificado por una
+             restriccion de RUNTIME (superficie cliente-servidor: exploit +
+             replicacion), no de esfuerzo humano. El numero 7 es la
+             heuristica: elevar el cap es una decision Clase A que actualiza
+             el gate. Se elimina el bypass ad-hoc "con aprobacion del PO" —
+             la aprobacion ES la decision que cambia el cap.
+Hipótesis:   Recalibrar bajo el coste correcto (DL-032) elimina un sesgo que
+             degradaba la calidad (splits artificiales) sin abrir la puerta
+             a god-modules (el guard de responsabilidad unica sigue activo)
+             ni a superficie de red descontrolada (el cap sigue siendo gate
+             duro, solo cambiable por decision registrada).
+Razón:       Primera aplicacion concreta de DL-032. Un umbral sin
+             justificacion de coste documentada es deuda de gobernanza;
+             estos dos quedan justificados o resueltos, y el marco de §5.9
+             aplica de oficio a los futuros.
+Impacto:     Sincronizado en 5 ubicaciones: master §4.3 (regla de
+             RemoteEvents), §5.0 (tablas N1/N2), §5.9 (tabla de veredictos);
+             p2-implementation.yml (contract-module-size); lefthook +
+             .github/scripts/contract-module-size.sh; ONBOARDING. El gate de
+             RemoteEvents no cambia de valor (sigue 7); el de modulo pasa a
+             400. Cero modulos afectados hoy.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §4.3, §5.0, §5.9, DL-032
+```
+
+---
+
+### DL-034
+
+```
+ID:          DL-034
+Fecha:       2026-07-12
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    La auditoria del PO (y una instancia previa) senalo un eje de
+             gobernanza no cubierto: el master gobierna lo estructural
+             ("quien puede que") pero no lo no-funcional ("que complejidad,
+             que escala, quien limpia"). Evaluado bajo los 9 principios de
+             la propia auditoria: la mayoria de los 8 documentos propuestos
+             ya existen implicitos (invariantes, grafo de dependencias,
+             ownership) — enriquecer > crear. Pero complejidad, sobre de
+             escala y ownership de destruccion son gaps genuinos (nadie
+             puede responder hoy "a partir de que punto un cambio deja de
+             ser lento y pasa a violar arquitectura").
+Contenido:   Nueva §4.12 (Contratos No Funcionales), NO un archivo aparte —
+             el master es la fuente unica, se enriquece (principio #1). Tres
+             contratos: (A) invariantes de complejidad por operacion (O(1)
+             lookups, O(n) enumeracion) + prohibicion de loops por-objeto
+             por-frame; (B) sobre de escala de diseno (4-6 jugadores, ~15-30
+             objetos) — superarlo es Clase A, no optimizacion; (C) ownership
+             de destruccion/cleanup (cada modulo libera lo que crea), el
+             paralelo de §4.8 para el ciclo de vida de recursos. Se rechazan
+             explicitamente los budgets de tiempo de pared: a esta escala
+             son teatro.
+Hipótesis:   Formalizar el eje no-funcional como invariantes verificables
+             por juicio (no umbrales temporales teatrales) cierra el gap real
+             sin fragmentar la fuente de verdad ni inventar problemas de
+             escala que el diseno no tiene.
+Razón:       Una regresion de complejidad (O(1)->O(n)) o un supuesto de
+             escala fuera del sobre son defectos de arquitectura que hoy
+             ningun contrato detecta. Documentarlos los hace auditables por
+             el Auditor TECH (Nivel 3) y por el PO (Nivel 4).
+Impacto:     Nueva §4.12. No cambia codigo ni CI — son contratos de juicio
+             (Nivel 3), no gates deterministas. El Auditor TECH los usa en
+             P3; una propuesta que asuma escala fuera del sobre se audita
+             como rediseno.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §1.2, §4.6, §4.8, §4.11, §5.0, DL-032, DL-031
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

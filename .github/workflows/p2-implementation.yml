@@ -185,9 +185,9 @@ jobs:
   # No son funcionales — verifican cómo está organizado el código.
   # ══════════════════════════════════════════════════════════════════════════════
 
-  # Ningún archivo en src/ supera 300 líneas
+  # Ningún archivo en src/ supera 400 líneas (DL-033: coste-revisor)
   contract-module-size:
-    name: "Contract: Module size ≤ 300 lines"
+    name: "Contract: Module size ≤ 400 lines"
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
@@ -197,19 +197,20 @@ jobs:
           VIOLATIONS=""
           while IFS= read -r file; do
             LINES=$(wc -l < "$file")
-            if [ "$LINES" -gt 300 ]; then
+            if [ "$LINES" -gt 400 ]; then
               VIOLATIONS="${VIOLATIONS}\n  $file — ${LINES} lines"
             fi
           done < <(find src/ -name "*.lua" -not -name "*.spec.lua")
 
           if [ -n "$VIOLATIONS" ]; then
-            echo "❌ MODULE SIZE VIOLATION: files exceeding 300 lines:"
+            echo "❌ MODULE SIZE VIOLATION: files exceeding 400 lines:"
             echo -e "$VIOLATIONS"
             echo ""
-            echo "Split the module into smaller units with single responsibilities."
+            echo "The real guard is single responsibility (Auditor, Nivel 3);"
+            echo "this line count is a coarse backstop. See DL-033."
             exit 1
           fi
-          echo "✅ Module size: all files ≤ 300 lines"
+          echo "✅ Module size: all files ≤ 400 lines"
 
   # src/server/ no puede requerir nada de src/client/
   # Verifica separación de capas arquitectónicas
