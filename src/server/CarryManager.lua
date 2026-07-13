@@ -52,6 +52,14 @@ local function getObjectManager()
     return require(game:GetService("ServerScriptService").Systems.ObjectManager)
 end
 
+local ObjectState: any = nil
+local function states()
+    if not ObjectState then
+        ObjectState = require(game:GetService("ReplicatedStorage").Shared.Constants.ObjectState)
+    end
+    return ObjectState
+end
+
 local function getShared(moduleName: string)
     return require(game:GetService("ReplicatedStorage").Shared.Config[moduleName])
 end
@@ -144,7 +152,7 @@ local function pickup(player: any, instanceId: string)
     }
     userIdByInstance[instanceId] = player.UserId
 
-    ObjectManager.setState(instanceId, "being_carried", player.UserId, nil)
+    ObjectManager.setState(instanceId, states().BEING_CARRIED, player.UserId, nil)
     if recordStoryEvent then
         recordStoryEvent("CarryStarted", { instanceId = instanceId, playerId = player.UserId })
     end
@@ -165,7 +173,7 @@ local function drop(player: any)
         part.Massless = false
     end
 
-    ObjectManager.setState(entry.instanceId, "free", nil, nil)
+    ObjectManager.setState(entry.instanceId, states().FREE, nil, nil)
     if recordStoryEvent then
         recordStoryEvent("ObjectDropped", { instanceId = entry.instanceId, playerId = player.UserId })
     end
@@ -188,7 +196,7 @@ local function onInteractObject(player: any, instanceId: any)
         return
     end
 
-    if obj.State == "being_carried" then
+    if obj.State == states().BEING_CARRIED then
         -- Solo el líder puede soltar su propio objeto
         if obj.LeaderId == player.UserId then
             drop(player)
@@ -196,7 +204,7 @@ local function onInteractObject(player: any, instanceId: any)
         return
     end
 
-    if obj.State ~= "free" then
+    if obj.State ~= states().FREE then
         return
     end
 

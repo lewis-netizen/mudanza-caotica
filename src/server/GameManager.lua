@@ -55,6 +55,14 @@ local function getRoundConfig()
     return require(game:GetService("ReplicatedStorage").Shared.Config.RoundConfig)
 end
 
+local RoundPhase: any = nil
+local function phases()
+    if not RoundPhase then
+        RoundPhase = require(game:GetService("ReplicatedStorage").Shared.Constants.RoundPhase)
+    end
+    return RoundPhase
+end
+
 -- ─── Stats de ronda (§2.5) ─────────────────────────────────────────────────────
 
 local function applyMatchStarted()
@@ -117,7 +125,7 @@ local function lifecycleLoop()
 
     while running do
         -- LOBBY: espera fija + mínimo de jugadores (RoundConfig)
-        setPhase("Lobby")
+        setPhase(phases().LOBBY)
         task.wait(RoundConfig.LOBBY_DURATION)
         waitForPlayers(RoundConfig.MIN_PLAYERS_TO_START)
         if not running then
@@ -126,7 +134,7 @@ local function lifecycleLoop()
 
         -- ACTIVE: RoundManager posee la ronda; GameManager solo espera el
         -- aviso de fin de timer (RoundManager nunca transiciona el estado)
-        setPhase("Active")
+        setPhase(phases().ACTIVE)
         applyMatchStarted()
         roundOver = false
         RoundManager.start({
@@ -141,7 +149,7 @@ local function lifecycleLoop()
         -- SUMMARY: compilar resultados, aplicar stats, flush de PlayerData
         local summary = RoundManager.stop()
         applyRoundStats(summary)
-        setPhase("Summary")
+        setPhase(phases().SUMMARY)
         task.wait(RoundConfig.SUMMARY_DURATION)
 
         RoundManager.reset()

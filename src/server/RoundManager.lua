@@ -66,6 +66,14 @@ local function getNetworking()
     return require(game:GetService("ReplicatedStorage").Shared.Lib.Networking)
 end
 
+local ObjectState: any = nil
+local function states()
+    if not ObjectState then
+        ObjectState = require(game:GetService("ReplicatedStorage").Shared.Constants.ObjectState)
+    end
+    return ObjectState
+end
+
 -- ─── StoryEvents ───────────────────────────────────────────────────────────────
 
 --- Registra un StoryEvent en RoundState. El EventType debe estar registrado
@@ -184,7 +192,7 @@ function RoundManager.stop(): RoundSummary
     local saved = TruckManager.getDeliveredCount()
     local lost = 0
     for _, obj in ipairs(ObjectManager.getAllObjects()) do
-        if obj.State ~= "delivered" then
+        if obj.State ~= states().DELIVERED then
             lost += 1
         end
     end

@@ -24,6 +24,11 @@ export type ObjectInstance = {
     SupportId: number?,
 }
 
+-- Dueño del set de estados (§4.8). Los mismos literales viven en
+-- Shared/Constants/ObjectState (fuente para los consumidores) — aquí se
+-- mantienen locales porque ObjectManager se carga standalone en los specs de
+-- Lune, donde no puede requerir siblings. ObjectState.spec y este spec fijan
+-- la coherencia entre ambos extremos.
 local VALID_STATES = {
     free = true,
     being_carried = true,
