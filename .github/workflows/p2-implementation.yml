@@ -185,9 +185,12 @@ jobs:
   # No son funcionales — verifican cómo está organizado el código.
   # ══════════════════════════════════════════════════════════════════════════════
 
-  # Ningún archivo en src/ supera 400 líneas (DL-033: coste-revisor)
+  # Ningún archivo en src/ supera 400 líneas (DL-033: coste-revisor).
+  # El nombre del check NO embebe el umbral: es un required status check
+  # y su identidad debe ser estable ante recalibraciones (el umbral es un
+  # valor Clase B; renombrar el job rompería el ruleset). Ancla: DL-033.
   contract-module-size:
-    name: "Contract: Module size ≤ 400 lines"
+    name: "Contract: Module size backstop (DL-033)"
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
