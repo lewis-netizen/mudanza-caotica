@@ -16,6 +16,8 @@
 
 local Networking = nil
 local log = nil
+local Phase = nil -- Constants.RoundPhase
+local State_ = nil -- Constants.ObjectState
 
 -- ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -149,7 +151,7 @@ end
 
 local function onRoundStarted(data: { duration: number, eventType: string? })
     log:info("RoundStarted — duration: %d, event: %s", data.duration, data.eventType or "none")
-    state.phase = "Active"
+    state.phase = Phase.ACTIVE
     state.timeRemaining = data.duration
     state.deliveredCount = 0
     state.activeEventType = data.eventType
@@ -160,7 +162,7 @@ end
 
 local function onRoundEnded(summary: RoundSummary)
     log:info("RoundEnded — saved: %d, lost: %d", summary.SavedObjects, summary.LostObjects)
-    state.phase = "Summary"
+    state.phase = Phase.SUMMARY
     state.summary = summary
     notify()
 end
@@ -196,7 +198,7 @@ end
 local function onDeliverObject(data: { instanceId: string })
     local obj = state.objects[data.instanceId]
     if obj then
-        obj.state = "delivered"
+        obj.state = State_.DELIVERED
     end
     state.deliveredCount += 1
     notify()
@@ -234,6 +236,8 @@ function ClientStateManager.init()
     Networking = require(ReplicatedStorage.Shared.Lib.Networking)
     local Logger = require(ReplicatedStorage.Shared.Lib.Logger)
     log = Logger.new("ClientStateManager")
+    Phase = require(ReplicatedStorage.Shared.Constants.RoundPhase)
+    State_ = require(ReplicatedStorage.Shared.Constants.ObjectState)
 
     Networking.RoundStarted.OnClientEvent:Connect(onRoundStarted)
     Networking.RoundEnded.OnClientEvent:Connect(onRoundEnded)
