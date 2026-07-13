@@ -43,6 +43,14 @@ local function getCarryManager()
     return require(game:GetService("ServerScriptService").Systems.CarryManager)
 end
 
+local ObjectState: any = nil
+local function states()
+    if not ObjectState then
+        ObjectState = require(game:GetService("ReplicatedStorage").Shared.Constants.ObjectState)
+    end
+    return ObjectState
+end
+
 -- ─── Entrega ───────────────────────────────────────────────────────────────────
 
 --- Resuelve el InstanceId subiendo desde la parte tocada. Un objeto puede
@@ -76,7 +84,7 @@ local function onZoneTouched(hit: any)
     local obj = ObjectManager.getObject(instanceId)
     -- Solo objetos being_carried se entregan — un objeto free dentro de la
     -- zona no cuenta (GAM-004)
-    if not obj or obj.State ~= "being_carried" then
+    if not obj or obj.State ~= states().BEING_CARRIED then
         return
     end
 
@@ -85,7 +93,7 @@ local function onZoneTouched(hit: any)
     -- Orden: liberar el weld (restaura WalkSpeed), luego el cambio de estado
     -- (delivered destruye el Part — GAM-004: desaparece del Workspace)
     getCarryManager().forceRelease(instanceId)
-    ObjectManager.setState(instanceId, "delivered", nil, nil)
+    ObjectManager.setState(instanceId, states().DELIVERED, nil, nil)
     deliveredCount += 1
 
     pcall(function()

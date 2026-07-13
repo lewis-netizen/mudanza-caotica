@@ -12,6 +12,7 @@ local janitor: any = nil
 local rootFrame: any = nil
 local timerLabel: any = nil
 local deliveredLabel: any = nil
+local Phase: any = nil -- Constants.RoundPhase, resuelto en init()
 
 local function formatTime(totalSeconds: number): string
     local seconds = math.max(0, math.floor(totalSeconds))
@@ -74,7 +75,7 @@ local function onState(state: any)
         return
     end
     -- El HUD solo es visible durante la ronda activa (UI-001)
-    rootFrame.Visible = state.phase == "Active"
+    rootFrame.Visible = state.phase == Phase.ACTIVE
     timerLabel.Text = formatTime(state.timeRemaining)
     deliveredLabel.Text = string.format("Entregados: %d", state.deliveredCount)
 end
@@ -87,6 +88,7 @@ function HUDManager.init()
 
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local Janitor = require(ReplicatedStorage.Packages.Janitor)
+    Phase = require(ReplicatedStorage.Shared.Constants.RoundPhase)
     janitor = Janitor.new()
 
     local player = game:GetService("Players").LocalPlayer

@@ -347,6 +347,8 @@ src/
 │   │                                   MAX_INTERACT_RANGE, TIMER_SYNC_INTERVAL
 │   ├── Types/
 │   ├── Constants/
+│   │   ├── ObjectState.lua          -- estados de wire: free/being_carried/delivered
+│   │   └── RoundPhase.lua           -- fases globales: Lobby/Active/Summary
 │   └── Tests/                       -- specs de TestEZ, convención: [Módulo].spec.lua
 │       ├── MigrationService.spec.lua
 │       ├── ObjectManager.spec.lua

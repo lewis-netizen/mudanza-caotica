@@ -22,6 +22,7 @@ local rootFrame: any = nil
 local statsLabel: any = nil
 local commentLabel: any = nil
 local storyContainer: any = nil
+local Phase: any = nil -- Constants.RoundPhase, resuelto en init()
 
 local function makeLabel(parent: any, height: number, text: string, bold: boolean): any
     local label = Instance.new("TextLabel")
@@ -116,7 +117,7 @@ local function onState(state: any)
     if not rootFrame then
         return
     end
-    local showing = state.phase == "Summary" and state.summary ~= nil
+    local showing = state.phase == Phase.SUMMARY and state.summary ~= nil
     rootFrame.Visible = showing
     if not showing then
         return
@@ -136,6 +137,7 @@ function SummaryManager.init()
 
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local Janitor = require(ReplicatedStorage.Packages.Janitor)
+    Phase = require(ReplicatedStorage.Shared.Constants.RoundPhase)
     janitor = Janitor.new()
 
     local player = game:GetService("Players").LocalPlayer
