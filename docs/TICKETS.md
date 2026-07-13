@@ -1,5 +1,5 @@
 # TICKETS — Mudanza Caótica
-**Referencia:** AI_CONTEXT_MASTER v5.5 §5.5
+**Referencia:** AI_CONTEXT_MASTER v5.6 §5.5
 
 Los tickets están organizados por Dominio Arquitectónico (§5.1), no por responsable.
 Un ticket pertenece a un dominio. Una persona puede cubrir múltiples dominios.
@@ -12,6 +12,7 @@ Un ticket pertenece a un dominio. Una persona puede cubrir múltiples dominios.
 ID:          [DOMINIO]-[número]
 Fecha:       YYYY-MM-DD
 DL-Ref:      DL-[número]
+Deriva de:   DL-[número] | Principio §2.1: [nombre] | Hito §5.7: Semana [n]
 Domain:      TECH | DESIGN | BOTH
 Estado:      TODO | IN_PROGRESS | DONE | BLOCKED
 Semana:      1 | 2 | 3 | 4
@@ -21,6 +22,10 @@ Criterios de Aceptación:
   - [ ] [condición — verificable sí/no]
 Notas:       [observaciones durante implementación]
 ```
+
+**Campo `Deriva de` (§5.5, DL-032):** todo ticket nuevo declara su origen —
+una DECISIÓN del Decision Log, o el Principio/hito que habilita. Un ticket sin
+`Deriva de` es incompleto. Los 30 tickets de bootstrap están grandfathered.
 
 **Prefijos de ticket:** `NET`, `PER`, `GAM`, `WLD`, `UI` corresponden a los
 dominios de implementación (§5.1). `GM-xxx` pertenece al dominio Gameplay —
@@ -150,6 +155,33 @@ Verificar que el ciclo completo de persistencia funciona end-to-end: jugador nue
 ---
 
 ## Dominio: Gameplay
+
+### GAM-009 — PrefabRegistry: Resolución ObjectId → asset
+
+```
+DL-Ref:      DL-031
+Deriva de:   DL-031
+Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  GAM-001
+```
+
+**Descripción**
+Implementar `src/server/PrefabRegistry.lua` como única capa que conoce `ServerStorage/ObjectPrefabs`. Resuelve `ObjectId → prefab` por Attribute (nunca `.Name`, §2.4), con placeholder de fallback si falta el prefab, y `validate()` que audita el contrato al bootstrap. Cierra el hueco entre `ObjectDefinition` y el asset real sin acoplar `ObjectManager` a Studio (§4.4, contrato Arte → PrefabRegistry).
+
+**Criterios de Aceptación**
+- [ ] `PrefabRegistry.resolve(objectId)` retorna el template o nil; el caller clona — el template nunca sale de ServerStorage
+- [ ] `instantiate(def)` retorna `(top, root, isPlaceholder)`: `root` siempre es un BasePart
+- [ ] Prefab ausente → placeholder generado desde `GameplayConfig.PLACEHOLDER_OBJECT_*`
+- [ ] Identificación por Attribute `ObjectId`, nunca por `.Name`
+- [ ] `validate()` reporta faltantes, huérfanos, duplicados e inválidos al bootstrap
+- [ ] Núcleo `_audit` puro y testeado en Lune (`PrefabRegistry.spec`)
+
+**Notas**
+Implementado en PR #31. Estado real: IN_PROGRESS hasta merge. Ticket de alta retroactiva (DL-032) — primer caso de la Regla de derivación: deriva de la decisión DL-031, no de un problema encontrado en el camino.
+
+---
 
 ### GAM-001 — ObjectDefinitions: Datos de objetos small/medium/large
 
@@ -327,6 +359,32 @@ Ajustar los parámetros de `ObjectDefinition.Properties` y cantidades de spawn b
 ---
 
 ## Dominio: World
+
+### WLD-000 — MapBootstrap: Harness de layout reproducible
+
+```
+DL-Ref:      DL-028
+Deriva de:   Principio §2.1 (Entidades Estables) + Hito §5.7 Semana 1
+Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  ninguna
+```
+
+**Descripción**
+Implementar `src/server/MapBootstrap.lua`: genera un edificio placeholder tagueado (`ObjectSpawn`, `TruckZone`, `NPCNode`, `NPCDropZone`) si el Workspace no contiene layout real, detrás del flag `ENABLE_PLACEHOLDER_MAP`. Se auto-desactiva cuando existe el layout real de WLD-001 (detectado por `TruckZone`). Hace el juego ejecutable desde `rojo serve` sin pasos manuales de Studio.
+
+**Criterios de Aceptación**
+- [ ] Genera todos los tags de contrato (§4.4): `ObjectSpawn`, `TruckZone`, `NPCNode`+`NodeIndex`, `NPCDropZone`
+- [ ] Idempotente; no genera nada si ya existe layout real (detección por `TruckZone`)
+- [ ] Detrás del flag `ENABLE_PLACEHOLDER_MAP`; sin él y sin layout, avisa con warning
+- [ ] El edificio es navegable (2 niveles, rampa, chokepoint central) y tiene SpawnLocation
+- [ ] `Main.server.lua` lo llama una vez al bootstrap
+
+**Notas**
+Implementado en PR #31. Estado real: IN_PROGRESS hasta merge. Ticket de alta retroactiva (DL-032). **Caso canónico de la Regla de derivación bajo coste-IA (§5.9):** un roadmap con supuesto humano habría dicho "haz arte mínimo en Studio"; bajo coste-IA, generar el mapa en código es más barato y mejor (versionable, reproducible, sin pasos manuales). Deriva del principio de reproducibilidad, no de un problema encontrado.
+
+---
 
 ### WLD-001 — Edificio placeholder: Estructura navegable
 

@@ -1,7 +1,7 @@
 # PROJECT_DECISION_LOG — Mudanza Caótica
 
 **Versión:** 1.0
-**Referencia:** AI_CONTEXT_MASTER v5.5 §5.4  
+**Referencia:** AI_CONTEXT_MASTER v5.6 §5.4  
 **Última actualización:** 2026-07-11
 
 ---
@@ -1232,6 +1232,60 @@ Pipeline:    P3
 Ticket:      GAM-009 (pendiente de alta en el board)
 Commit:      —
 Referencias: §2.3, §4.1, §4.4, §4.5, §4.6, DL-028
+```
+
+---
+
+### DL-032
+
+```
+ID:          DL-032
+Fecha:       2026-07-12
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Auditoria de gobernanza (PO, 2026-07-12). Varias decisiones han
+             estado gobernadas por un supuesto no documentado: que el coste
+             relevante es el de un implementador HUMANO. Sintomas: (1)
+             heuristicas como "modulo < 300 lineas" y "RemoteEvents <= 7"
+             calibradas silenciosamente a limites humanos; (2) el limite <=7
+             se ejecuta como gate duro Nivel 1 en CI pero §4.3 lo describe
+             como blando (inconsistencia); (3) tickets que no nombran
+             infraestructura AI-optima — MapBootstrap y el vertical slice
+             aparecieron por principios, no por tickets, porque un roadmap
+             con supuesto humano habria preferido "arte minimo" a "escribir
+             un generador".
+Contenido:   Se documenta explicitamente que el implementador es una IA y que
+             toda heuristica/umbral de gobernanza se calibra a coste-IA +
+             coste-humano-revisor + coste-runtime, nunca a
+             coste-humano-implementador (nueva §5.9). Se distingue la
+             restriccion del numero: la superficie cliente-servidor (razon
+             del <=7) es runtime-real; el 7 es heuristica. Se deriva una
+             Regla de derivacion de tickets (§5.5): todo ticket traza a una
+             DECISION del DL o a un Principio/hito, con el conjunto completo
+             de tickets de habilitacion derivado bajo coste-IA. Primera
+             aplicacion: alta retroactiva de WLD-000 (MapBootstrap) y GAM-009
+             (PrefabRegistry).
+Hipótesis:   Hacer explicito el modelo de coste convierte un sesgo silencioso
+             en una decision auditable, y corrige de raiz dos gaps a la vez:
+             umbrales mal calibrados y tickets incompletos. Sin esto, cada
+             heuristica humana importada seguiria degradando la calidad sin
+             que nadie pueda senalar la causa.
+Razón:       Un principio que gobierna decisiones sin estar escrito no puede
+             auditarse ni contrarrestarse. El PO lo detecto operando; se
+             formaliza para que futuras heuristicas se justifiquen contra el
+             coste correcto, no contra el habito humano.
+Impacto:     Nueva §5.9 y Regla de derivacion de tickets en §5.5. TICKETS.md
+             gana el campo "Deriva de" y dos tickets retroactivos. NO relaja
+             umbrales por defecto — establece el marco para reexaminarlos uno
+             a uno (la reexaminacion de <300 y <=7, con sus efectos sobre CI,
+             es una decision posterior).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      WLD-000, GAM-009
+Commit:      —
+Referencias: §1.3, §5.0, §5.5, §5.9, §4.3, DL-028, DL-031
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

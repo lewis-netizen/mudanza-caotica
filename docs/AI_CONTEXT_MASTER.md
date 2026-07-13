@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.5 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.6 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1081,6 +1081,20 @@ Si una auditoría aprueba y la otra rechaza:
 
 **Regla de Cambios:** Cualquier modificación a contratos, principios o arquitectura debe notificarse antes de implementarse, ser acordada por todos los responsables afectados, y actualizar este documento con nueva versión. Ningún agente aprueba cambios a este documento. Solo el Product Owner.
 
+**Regla de derivación de tickets (DL-032):**
+
+Un ticket no aparece de forma oportunista durante la implementación — se *deriva*. Todo ticket debe trazar a exactamente una de estas dos fuentes, declarada en su campo `Deriva de`:
+
+```
+(a) una DECISIÓN del Decision Log (DL-xxx), o
+(b) un Principio Congelado (§2.1) / hito de roadmap (§5.7) que el ticket habilita.
+```
+
+Reglas:
+- **Completitud.** Antes de arrancar un hito de roadmap, se deriva el conjunto *completo* de tickets que lo realizan — incluyendo los tickets de **habilitación/infraestructura** que un principio *implica* pero que ningún ticket de feature nombra. Si una pieza de infraestructura es necesaria para cumplir un principio y ningún ticket la nombra, recibe su propio ticket explícito **antes** de implementarse.
+- **Coste-IA.** El ticket especifica el artefacto **AI-óptimo**, no el humano-mínimo (§5.9). El caso de referencia es `MapBootstrap`: derivado del principio "el slice debe ser ejecutable sin pasos manuales de Studio", no de un problema encontrado en el camino.
+- **Trazabilidad.** Un ticket sin `Deriva de` es incompleto y no puede recibir self-review válido. Los 30 tickets de bootstrap están grandfathered (nota de bootstrap en TICKETS.md); todo ticket nuevo cumple esta regla.
+
 ### 5.6 Taxonomía de Tipos de Agentes
 
 **Definiciones canónicas:**
@@ -1206,6 +1220,31 @@ Si el developer está en desacuerdo con un rechazo:
   Costo: C1. Pipeline: P5.
 ```
 
+### 5.9 Modelo de Coste del Implementador (DL-032)
+
+**Principio.** El implementador de este proyecto es una IA. Toda heurística o umbral de gobernanza debe calibrarse a la suma de tres costes:
+
+```
+coste-IA-implementador  +  coste-humano-revisor  +  coste-runtime
+```
+
+y **nunca** a `coste-humano-implementador`. Un umbral que existe solo para reducir la carga de un humano que *escribe* u *hojea* código es un tradeoff importado de otro contexto: puede reducir la calidad cuando el implementador es una IA, y debe reexaminarse.
+
+**Por qué importa.** Muchas convenciones de ingeniería nacieron para gestionar límites humanos (memoria de trabajo, tiempo de escritura, fatiga de lectura). Una IA no comparte esos límites: lee el módulo entero sin importar su tamaño, y generar un artefacto de código es tan barato como describir uno mínimo. Calibrar a coste-humano-implementador introduce sesgos silenciosos que degradan la profesionalidad exigida (§1.3).
+
+**Ejemplo canónico — MapBootstrap.** Un roadmap escrito con supuesto de implementador humano diría "haz arte placeholder mínimo en Studio" (barato para un humano, evita escribir y mantener un generador). Bajo el coste-IA, generar el edificio en código (`MapBootstrap`) es *más barato y mejor*: versionable, reproducible, sin pasos manuales. El artefacto AI-óptimo diverge del humano-mínimo — y el ticket, si se deriva con el supuesto equivocado, ni siquiera lo nombra (ver §5.5, Regla de derivación de tickets).
+
+**Matiz — no toda restricción es antropocéntrica.** Distinguir siempre la *restricción* del *número*:
+
+| Umbral | Qué es realmente | Veredicto |
+|---|---|---|
+| `módulo < 300 líneas` | Proxy de "responsabilidad única" calibrado al humano que *hojea*. Una IA lee el módulo completo. | Antropocéntrico — recalibrar al alza o sustituir por una medida de cohesión real. |
+| `RemoteEvents ≤ 7` | La *restricción* (minimizar superficie cliente-servidor) es de **runtime** — superficie de exploit + coste de replicación, independiente de quién codea. El *número 7* es la heurística. | La restricción se mantiene; el número se justifica o recalibra. |
+
+**Inconsistencia detectada (a resolver).** `RemoteEvents ≤ 7` se ejecuta como gate duro de **Nivel 1** en CI (`contract-remote-event-count`), pero §4.3 lo describe como límite blando "sin aprobación del PO". No puede ser ambas cosas: o es un invariante duro (y §4.3 no debería ofrecer escape), o es un umbral Nivel 2 con escape a PO (y no debería ser un gate de bloqueo). Resolver en la reexaminación de umbrales (pipeline posterior).
+
+**Alcance.** Esta decisión NO relaja umbrales por defecto — establece el marco para reexaminarlos uno a uno bajo el coste correcto. Cada reexaminación de un umbral concreto es su propia entrada de decisión.
+
 ---
 
 ## 6. Operational Architecture
@@ -1317,7 +1356,7 @@ ServerPackages/  — generado por wally install (realm server: ProfileStore), gi
 
 **Vista virtual para Orchestrators (organización por dominio):**
 
-Las referencias de sección son al Context Master v5.5.
+Las referencias de sección son al Context Master v5.6.
 
 ```
 [DOMINIO: Gameplay]
@@ -1619,6 +1658,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.6 | 2026-07-12 | Gobernanza del eje no-funcional y del coste del implementador. Nueva §5.9 (Modelo de Coste del Implementador, DL-032): las heurísticas se calibran a coste-IA + revisor + runtime, nunca a coste-humano-implementador — distingue restricción de número y detecta la inconsistencia N1/N2 del límite ≤7 RemoteEvents. Nueva Regla de derivación de tickets en §5.5: todo ticket traza a una DECISIÓN del DL o a un Principio/hito, con conjunto completo de tickets de habilitación derivados bajo coste-IA (campo `Deriva de`). Alta retroactiva de WLD-000 (MapBootstrap) y GAM-009 (PrefabRegistry) como primera aplicación de la regla. |
 | 5.5 | 2026-07-12 | Endurecimiento de arquitectura `src/`: formalizado el contrato `ObjectId → asset` en un módulo dedicado `PrefabRegistry` (§4.4, §4.1, §4.5, DL-031) — cierra el hueco entre `ObjectDefinition` y `ServerStorage/ObjectPrefabs` sin acoplar `ObjectManager` a Studio ni referenciar modelos desde los datos. `validate()` audita el contrato al bootstrap. |
 | 5.4 | 2026-07-11 | Directrices del PO + arranque del vertical slice: estándar de calidad profesional desde la primera versión pública y reloj del roadmap reiniciado — slice al 2026-08-11 (§1.3, §5.7, DL-024). Suscripción selectiva de timer en ClientStateManager (§4.10, DL-025). Payloads: objectId en ObjectStateChanged, eventType opcional en RoundStarted (§4.3, DL-026). Contrato de restauración de WalkSpeed (DL-027). Contrato Layout → Gameplay (Tags ObjectSpawn/TruckZone) y módulo MapBootstrap (§4.4, DL-028). INV-001 enmendado: OnServerEvent:Connect solo en CarryManager (§4.3, §4.6, §4.10, §5.0, DL-029). |
 | 5.3 | 2026-07-10 | Auditoría arquitectónica: ciclo de sesión de PlayerData atado al jugador, no a la ronda (§4.4, §4.7 — se añade `releasePlayer`; `savePlayer` es flush, nunca EndSession). StoryEvent gana `Timestamp` relativo al inicio de ronda (§4.4). Definición del código G5 (§5.3). Mecanismo real del ban print/warn: grep `contract-logger-usage`, no Selene (§5.0). Roadmap Semana 1: ProfileStore, no "DataStore básico" (§5.7). Correcciones factuales de §4.1, §4.11, §6.2, §6.3 y §6.6 (paths de config, ServerPackages, commitlintrc, sync-tickets, cron UTC). Nota de prefijos GM/QA (§5.1). |
