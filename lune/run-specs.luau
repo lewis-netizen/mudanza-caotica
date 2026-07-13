@@ -40,6 +40,9 @@ local MODULE_MAP = {
     ["PrefabRegistry.spec"] = "src/server/PrefabRegistry",
     ["ObjectState.spec"] = "src/shared/Constants/ObjectState",
     ["RoundPhase.spec"] = "src/shared/Constants/RoundPhase",
+    ["CarryRules.spec"] = "src/shared/Rules/CarryRules",
+    ["RoundRules.spec"] = "src/shared/Rules/RoundRules",
+    ["StatRules.spec"] = "src/shared/Rules/StatRules",
 }
 
 -- ─── Utilidades ───────────────────────────────────────────────────────────────
