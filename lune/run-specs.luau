@@ -37,6 +37,7 @@ local MODULE_MAP = {
     ["ObjectManager.spec"] = "src/server/ObjectManager",
     ["PlayerDataService.spec"] = "src/server/Persistence/PlayerDataService",
     ["ProfileStoreConfig.spec"] = "src/server/Persistence/ProfileStoreConfig",
+    ["PrefabRegistry.spec"] = "src/server/PrefabRegistry",
 }
 
 -- ─── Utilidades ───────────────────────────────────────────────────────────────

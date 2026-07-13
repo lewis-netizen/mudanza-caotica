@@ -1,0 +1,200 @@
+-- GameManager
+-- Punto de entrada del ciclo de vida (§4.4, GM-003). Único propietario del
+-- estado global Lobby/Active/Summary. Llama start/stop/reset solo sobre
+-- RoundManager y loadPlayer/savePlayer/releasePlayer sobre PlayerDataService
+-- (§4.8) — nunca sobre módulos de gameplay directamente.
+--
+-- Ciclo de sesión de PlayerData (DL-020): atado al jugador, no a la ronda.
+--   PlayerAdded    → loadPlayer   (StartSessionAsync + migración)
+--   fin de ronda   → savePlayer   (flush — la sesión NO se cierra)
+--   PlayerRemoving → releasePlayer (EndSession — único punto de cierre)
+--
+-- Lune-compatible (§4.6): servicios y módulos se resuelven dentro de funciones.
+
+local GameManager = {}
+
+type GamePhase = "Lobby" | "Active" | "Summary"
+
+-- ─── Estado interno ────────────────────────────────────────────────────────────
+
+local phase: GamePhase = "Lobby"
+local running = false
+local initialized = false
+local roundOver = false
+
+-- ─── Dependencias lazy ─────────────────────────────────────────────────────────
+
+local NOOP_LOG = {
+    debug = function() end,
+    info = function() end,
+    warn = function() end,
+    error = function() end,
+}
+
+local log: any = nil
+local function getLog()
+    if log then
+        return log
+    end
+    local ok, result = pcall(function()
+        return require(game:GetService("ReplicatedStorage").Shared.Lib.Logger).new("GameManager")
+    end)
+    log = if ok then result else NOOP_LOG
+    return log
+end
+
+local function getRoundManager()
+    return require(game:GetService("ServerScriptService").Systems.RoundManager)
+end
+
+local function getPlayerDataService()
+    return require(game:GetService("ServerScriptService").Systems.Persistence.PlayerDataService)
+end
+
+local function getRoundConfig()
+    return require(game:GetService("ReplicatedStorage").Shared.Config.RoundConfig)
+end
+
+-- ─── Stats de ronda (§2.5) ─────────────────────────────────────────────────────
+
+local function applyMatchStarted()
+    local PlayerDataService = getPlayerDataService()
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        local data = PlayerDataService.getData(player)
+        if data then
+            data.Stats.MatchesStarted += 1
+        end
+    end
+end
+
+--- Atribuye stats desde los StoryEvents del summary: ObjectsSaved y
+--- ObjectsSavedByType (indexado por ObjectId — §2.4) al líder que entregó.
+local function applyRoundStats(summary: any)
+    local Players = game:GetService("Players")
+    local PlayerDataService = getPlayerDataService()
+
+    for _, event in ipairs(summary.StoryEvents) do
+        if event.EventType == "ObjectDelivered" and event.Data and event.Data.playerId then
+            local player = Players:GetPlayerByUserId(event.Data.playerId)
+            local data = if player then PlayerDataService.getData(player) else nil
+            if data then
+                data.Stats.ObjectsSaved += 1
+                local objectId = event.Data.objectId
+                if type(objectId) == "string" then
+                    data.Stats.ObjectsSavedByType[objectId] = (data.Stats.ObjectsSavedByType[objectId] or 0) + 1
+                end
+            end
+        end
+    end
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        local data = PlayerDataService.getData(player)
+        if data then
+            data.Stats.MatchesCompleted += 1
+        end
+        -- Flush explícito al final de ronda (DL-020) — nunca EndSession aquí
+        PlayerDataService.savePlayer(player)
+    end
+end
+
+-- ─── Ciclo de vida ─────────────────────────────────────────────────────────────
+
+local function setPhase(newPhase: GamePhase)
+    phase = newPhase
+    getLog():info("Fase global → %s", newPhase)
+end
+
+local function waitForPlayers(minPlayers: number)
+    local Players = game:GetService("Players")
+    while running and #Players:GetPlayers() < minPlayers do
+        task.wait(1)
+    end
+end
+
+local function lifecycleLoop()
+    local RoundConfig = getRoundConfig()
+    local RoundManager = getRoundManager()
+
+    while running do
+        -- LOBBY: espera fija + mínimo de jugadores (RoundConfig)
+        setPhase("Lobby")
+        task.wait(RoundConfig.LOBBY_DURATION)
+        waitForPlayers(RoundConfig.MIN_PLAYERS_TO_START)
+        if not running then
+            break
+        end
+
+        -- ACTIVE: RoundManager posee la ronda; GameManager solo espera el
+        -- aviso de fin de timer (RoundManager nunca transiciona el estado)
+        setPhase("Active")
+        applyMatchStarted()
+        roundOver = false
+        RoundManager.start({
+            onTimeExpired = function()
+                roundOver = true
+            end,
+        })
+        while running and not roundOver do
+            task.wait(0.25)
+        end
+
+        -- SUMMARY: compilar resultados, aplicar stats, flush de PlayerData
+        local summary = RoundManager.stop()
+        applyRoundStats(summary)
+        setPhase("Summary")
+        task.wait(RoundConfig.SUMMARY_DURATION)
+
+        RoundManager.reset()
+    end
+end
+
+-- ─── API pública — llamada solo por Main.server.lua ───────────────────────────
+
+--- Conecta el ciclo de sesión de jugadores. Idempotente.
+function GameManager.init()
+    if initialized then
+        getLog():warn("init() llamado más de una vez — ignorado")
+        return
+    end
+    initialized = true
+
+    local Players = game:GetService("Players")
+    local PlayerDataService = getPlayerDataService()
+
+    Players.PlayerAdded:Connect(function(player)
+        PlayerDataService.loadPlayer(player)
+    end)
+    Players.PlayerRemoving:Connect(function(player)
+        PlayerDataService.releasePlayer(player)
+    end)
+
+    -- Jugadores que entraron antes de conectar la señal (arranque en Studio)
+    for _, player in ipairs(Players:GetPlayers()) do
+        task.spawn(function()
+            PlayerDataService.loadPlayer(player)
+        end)
+    end
+
+    getLog():info("Inicializado — ciclo de sesión conectado")
+end
+
+--- Arranca el loop Lobby → Active → Summary → Lobby.
+function GameManager.start()
+    if running then
+        return
+    end
+    running = true
+    task.spawn(lifecycleLoop)
+end
+
+--- Detiene el loop al final del ciclo actual (para tests/shutdown).
+function GameManager.stop()
+    running = false
+end
+
+--- Fase global actual — solo lectura.
+function GameManager.getPhase(): GamePhase
+    return phase
+end
+
+return GameManager

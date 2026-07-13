@@ -95,4 +95,40 @@ return function(MigrationService)
             expect(type(migrated.Creation)).to.equal("table")
         end)
     end)
+
+    -- ── Template canónico (§2.5) ──────────────────────────────────────────────
+    -- MigrationService es el dueño del template — PER-001 exige que coincida
+    -- exactamente con el schema canónico de PlayerData.
+
+    describe("template canónico (§2.5)", function()
+        it("migrate({}) produce el schema completo", function()
+            local data = MigrationService.migrate({})
+            expect(data.Version).to.equal(1)
+            expect(type(data.Profile)).to.equal("table")
+            expect(data.Stats.TimePlayed).to.equal(0)
+            expect(data.Stats.MatchesStarted).to.equal(0)
+            expect(data.Stats.MatchesCompleted).to.equal(0)
+            expect(data.Stats.ObjectsSaved).to.equal(0)
+            expect(type(data.Stats.ObjectsSavedByType)).to.equal("table")
+            expect(type(data.Identity.Titles)).to.equal("table")
+            expect(type(data.Identity.Cosmetics)).to.equal("table")
+            expect(type(data.Identity.Auras)).to.equal("table")
+            expect(data.Settings.MusicVolume).to.equal(1)
+            expect(data.Settings.SFXVolume).to.equal(1)
+        end)
+
+        it("getTemplate() retorna una tabla fresca en cada llamada", function()
+            local first = MigrationService.getTemplate()
+            local second = MigrationService.getTemplate()
+            expect(first == second).to.equal(false)
+            expect(first.Version).to.equal(second.Version)
+        end)
+
+        it("dato de versión futura se retorna intacto — nunca se degrada", function()
+            local future = { Version = 99, Stats = { ObjectsSaved = 42 } }
+            local result = MigrationService.migrate(future)
+            expect(result.Version).to.equal(99)
+            expect(result.Stats.ObjectsSaved).to.equal(42)
+        end)
+    end)
 end
