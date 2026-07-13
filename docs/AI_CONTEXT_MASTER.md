@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.6 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.7 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -426,7 +426,7 @@ server-side (`OnServerEvent:Connect`) vive en `CarryManager.lua` — ver INV-001
 | PrefabRegistry | Sistema | Única capa que conoce `ServerStorage/ObjectPrefabs`. Resuelve `ObjectId → prefab` (o placeholder si falta). `validate()` audita el contrato al bootstrap (§4.4, DL-031). |
 | NPCManager | Sistema | TweenService sobre nodos predefinidos. Sin PathfindingService. |
 | EventManager | Sistema | Selecciona y ejecuta un evento aleatorio por ronda desde un pool. |
-| MapBootstrap | Sistema | Genera un edificio placeholder tagueado si el Workspace no contiene layout (flag ENABLE_PLACEHOLDER_MAP). Se retira cuando exista el layout real de WLD-001+. |
+| MapBootstrap | Sistema | Arbitra el layout activo según `GlobalConfig.MAP_MODE` (DL-036): `"placeholder"` genera el edificio en código y descarta `Workspace/RealMap`; `"real"` usa el layout de Studio. |
 | PlayerDataService | Persistencia | Wrapper delgado sobre ProfileStore (externo). Aplica MigrationService al cargar y expone el schema canónico de PlayerData. |
 | ClientStateManager | Cliente | Única fuente de estado del juego en el cliente. Conecta todos los RemoteEvents. Los módulos de UI leen de él. |
 
@@ -540,6 +540,8 @@ Tag "TruckZone"   — Part de la zona de entrega. TruckManager conecta
 ```
 Los Parts de objetos spawneados llevan Attributes `InstanceId` y `ObjectId`
 (strings) — nunca se identifica un objeto por `.Name` (§2.4).
+
+**Arbitración de mapa activo (DL-036):** `GlobalConfig.MAP_MODE` (`"placeholder"` | `"real"`) es la fuente única de qué layout usa el servidor — un solo valor, sin dos flags que puedan contradecirse. El mapa real de Studio vive bajo `Workspace/RealMap`. En modo `"placeholder"`, `MapBootstrap` destruye la copia *runtime* de `Workspace/RealMap` (seguro: el `.rbxlx` guardado no se toca; necesario porque `CollectionService:GetTagged` es agnóstico al parent y parkear no ocultaría los tags) y genera el edificio. En `"real"`, se usa `Workspace/RealMap` tal cual. Sustituye la detección por presencia de `TruckZone` de DL-028 (frágil con el mapa real incompleto).
 
 **Contrato Arte → PrefabRegistry (DL-031):**
 
@@ -1705,6 +1707,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.7 | 2026-07-13 | Arbitración de mapa activo (§4.4, DL-036): `GlobalConfig.MAP_MODE` (`"placeholder"`\|`"real"`) como fuente única — reemplaza la detección frágil por `TruckZone` (DL-028) y la idea de flag-que-apaga-flag. El mapa real vive bajo `Workspace/RealMap`; en `"placeholder"` MapBootstrap destruye su copia runtime y genera el edificio. Tickets WLD-000/WLD-001 actualizados. |
 | 5.6 | 2026-07-12 | Gobernanza completa del eje no-funcional y del coste del implementador (DL-032, DL-033, DL-034). **§5.9 Modelo de Coste del Implementador (DL-032):** las heurísticas se calibran a coste-IA + revisor + runtime, nunca a coste-humano-implementador. **Regla de derivación de tickets (§5.5, DL-032):** todo ticket traza a una DECISIÓN del DL o a un Principio/hito (campo `Deriva de`); alta retroactiva de WLD-000 y GAM-009. **Recalibración de umbrales (DL-033):** módulo 300→400 líneas (coste-revisor); resuelta la inconsistencia del ≤7 RemoteEvents (gate duro contra cap; elevarlo es Clase A). **§4.12 Contratos No Funcionales (DL-034):** invariantes de complejidad, sobre de escala de diseño y ownership de destrucción/cleanup — el eje no-funcional, enriqueciendo el master en vez de fragmentarlo. **Invariante de dirección de dependencias (§4.5, DL-035):** las dependencias apuntan hacia abajo, sin ciclos; se rechaza el fan-out como métrica (anti-correlaciona con los orquestadores de §4.8) y se registra el gate automático como candidato diferido. **Convención de nombres de required checks (§5.0, DL-033):** el umbral vive en el nombre del check solo si cambiarlo es Clase A — los caps N1 (≤7) lo conservan; los backstops N2 (tamaño de módulo) no, para que su recalibración Clase B no rompa el ruleset. |
 | 5.5 | 2026-07-12 | Endurecimiento de arquitectura `src/`: formalizado el contrato `ObjectId → asset` en un módulo dedicado `PrefabRegistry` (§4.4, §4.1, §4.5, DL-031) — cierra el hueco entre `ObjectDefinition` y `ServerStorage/ObjectPrefabs` sin acoplar `ObjectManager` a Studio ni referenciar modelos desde los datos. `validate()` audita el contrato al bootstrap. |
 | 5.4 | 2026-07-11 | Directrices del PO + arranque del vertical slice: estándar de calidad profesional desde la primera versión pública y reloj del roadmap reiniciado — slice al 2026-08-11 (§1.3, §5.7, DL-024). Suscripción selectiva de timer en ClientStateManager (§4.10, DL-025). Payloads: objectId en ObjectStateChanged, eventType opcional en RoundStarted (§4.3, DL-026). Contrato de restauración de WalkSpeed (DL-027). Contrato Layout → Gameplay (Tags ObjectSpawn/TruckZone) y módulo MapBootstrap (§4.4, DL-028). INV-001 enmendado: OnServerEvent:Connect solo en CarryManager (§4.3, §4.6, §4.10, §5.0, DL-029). |

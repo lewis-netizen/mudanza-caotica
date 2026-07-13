@@ -37,6 +37,16 @@ local TIMER_SYNC_INTERVAL = 1
 -- Usado por CarryManager para validar InteractObject server-side.
 local MAX_INTERACT_RANGE = 10
 
+-- ─── Mapa activo (DL-036) ──────────────────────────────────────────────────────
+-- Fuente ÚNICA de qué layout usa el servidor. Un solo valor — imposible que
+-- "placeholder" y "real" se contradigan (por eso NO son dos flags).
+--   "placeholder" → MapBootstrap genera el edificio en código y descarta el
+--                   mapa real de Workspace/RealMap si existe (default: seguro,
+--                   siempre jugable mientras WLD-001 está incompleto).
+--   "real"        → se usa Workspace/RealMap tal cual; MapBootstrap no genera
+--                   nada. Cambiar a "real" cuando WLD-001 esté completo.
+local MAP_MODE: "placeholder" | "real" = "placeholder"
+
 -- ─── Feature Flags ────────────────────────────────────────────────────────────
 -- Flags estáticos — booleanos con nombre descriptivo.
 -- Deploy para cambiar. Sin DataStore, sin RemoteConfig.
@@ -46,7 +56,6 @@ local FEATURE_FLAGS = {
     ENABLE_NPC = false, -- NPCManager — desactivado hasta que exista (Semana 3, WLD-004)
     ENABLE_EVENTS = false, -- EventManager — desactivado hasta Semana 3
     ENABLE_SUMMARY_SCREEN = true, -- Summary Screen al finalizar ronda
-    ENABLE_PLACEHOLDER_MAP = true, -- MapBootstrap genera edificio placeholder si falta layout real (WLD-001)
     DEBUG_OBJECT_STATES = IS_STUDIO, -- Logging verbose de ObjectInstance.State
 }
 
@@ -57,5 +66,6 @@ return {
     LOG_LEVEL = LOG_LEVEL,
     TIMER_SYNC_INTERVAL = TIMER_SYNC_INTERVAL,
     MAX_INTERACT_RANGE = MAX_INTERACT_RANGE,
+    MAP_MODE = MAP_MODE,
     FEATURE_FLAGS = FEATURE_FLAGS,
 }
