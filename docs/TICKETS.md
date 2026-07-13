@@ -12,7 +12,7 @@ Un ticket pertenece a un dominio. Una persona puede cubrir múltiples dominios.
 ID:          [DOMINIO]-[número]
 Fecha:       YYYY-MM-DD
 DL-Ref:      DL-[número]
-Deriva de:   DL-[número] | Principio §2.1: [nombre] | Hito §5.7: Semana [n]
+Deriva de:   DL-[número] | Principio §2.1: [nombre] | §N.N (contrato) | Hito §5.7: Semana [n]
 Domain:      TECH | DESIGN | BOTH
 Estado:      TODO | IN_PROGRESS | DONE | BLOCKED
 Semana:      1 | 2 | 3 | 4
@@ -23,44 +23,96 @@ Criterios de Aceptación:
 Notas:       [observaciones durante implementación]
 ```
 
-**Campo `Deriva de` (§5.5, DL-032):** todo ticket nuevo declara su origen —
-una DECISIÓN del Decision Log, o el Principio/hito que habilita. Un ticket sin
-`Deriva de` es incompleto. Los 30 tickets de bootstrap están grandfathered.
+**Campo `Deriva de` (§5.5, DL-032):** todo ticket declara su origen — una
+DECISIÓN del Decision Log, o el Principio/contrato/hito que habilita. Un ticket
+sin `Deriva de` es incompleto.
 
-**Prefijos de ticket:** `NET`, `PER`, `GAM`, `WLD`, `UI` corresponden a los
-dominios de implementación (§5.1). `GM-xxx` pertenece al dominio Gameplay —
-es un prefijo propio solo para agrupar los tickets de GameManager (ciclo de
-vida). `QA-xxx` **no es un dominio**: son hitos transversales de integración
-semanal, playtest formal (P6) y publicación.
+**Prefijos de ticket:** `FND` (fundación Shared/Lib + Config), `NET`, `PER`,
+`GAM`, `WLD`, `UI` corresponden a dominios de implementación (§5.1). `GM-xxx`
+pertenece al dominio Gameplay — prefijo propio para agrupar los tickets de
+GameManager (ciclo de vida). `QA-xxx` **no es un dominio**: son hitos
+transversales de integración semanal, playtest formal (P6) y publicación.
 
-**Nota de bootstrap:** Los 30 tickets iniciales se derivaron directamente del
-AI_CONTEXT_MASTER durante el bootstrap del proyecto — por eso no llevan
-`DL-Ref` (ver nota equivalente en PROJECT_DECISION_LOG.md). Todo ticket nuevo
-debe nacer de una entrada DECISION del Decision Log e incluir su `DL-Ref`
-(§5.5 paso 5).
+**Nota de bootstrap:** Los tickets iniciales se derivaron del AI_CONTEXT_MASTER
+durante el bootstrap — por eso no llevan `DL-Ref`. Se les retrofiteó `Deriva de`
+(auditoría 2026-07-12, aplicación de DL-032): su origen es el contrato §4.4/§4.5
+que definen y su hito de roadmap. Todo ticket **nuevo** debe nacer de una
+entrada DECISION del Decision Log e incluir `DL-Ref` (§5.5 paso 5).
+
+---
+
+## Fundación (Shared/Lib + Config)
+
+### FND-001 — Logger: logging estructurado
+
+```
+Deriva de:   §4.4 (Logger, prerequisito de todo módulo) + §4.5 Nivel -1
+Domain:      TECH
+Estado:      DONE
+Semana:      1
+Depende de:  ninguna
+```
+
+**Descripción**
+`src/shared/Lib/Logger.lua` — logging estructurado que reemplaza `print`/`warn` directos en todo el proyecto. Niveles DEBUG/INFO/WARN/ERROR; nivel mínimo desde `GlobalConfig.LOG_LEVEL`. Prerequisito absoluto (§4.5 Nivel -1). El ban de `print`/`warn` fuera de este módulo lo impone el contrato grep `contract-logger-usage`.
+
+**Criterios de Aceptación**
+- [x] `Logger.new(moduleName)` retorna instancia con `debug`/`info`/`warn`/`error`
+- [x] El nivel mínimo se lee de `GlobalConfig.LOG_LEVEL` (WARN por defecto sin DataModel)
+- [x] Lune-compatible: `GlobalConfig` se resuelve lazy, no en scope de módulo (§4.6)
+- [x] `print`/`warn` directos prohibidos fuera de este módulo (verificado por `contract-logger-usage`)
+
+**Notas**
+Ticket de alta retroactiva (auditoría 2026-07-12, completitud §5.5/DL-032). Módulo foundational implementado en bootstrap sin ticket propio — se registra para trazabilidad.
+
+---
+
+### FND-002 — Config: schemas de configuración
+
+```
+Deriva de:   §4.6 (INV-004: config no hardcodeada) + §4.5 Nivel -1/0
+Domain:      TECH
+Estado:      DONE
+Semana:      1
+Depende de:  ninguna
+```
+
+**Descripción**
+Módulos de `src/shared/Config/`: `GlobalConfig` (LOG_LEVEL, FEATURE_FLAGS, IS_STUDIO, MAX_INTERACT_RANGE, TIMER_SYNC_INTERVAL), `GameplayConfig` (NPC_SPEED, OBJECT_COUNTS, placeholders), `RoundConfig` (duraciones), `Events` (schema de StoryEvents + pool). Todo valor de balance/timing transversal vive aquí — nunca hardcodeado en módulos (INV-004).
+
+**Criterios de Aceptación**
+- [x] Cada módulo de Config expone solo valores/constantes, sin lógica de juego
+- [x] Lune-compatible: `game` solo se accede dentro de funciones (§4.6)
+- [x] `Events.STORY_EVENT_TYPES` es la fuente canónica de EventTypes (INV-003)
+- [x] Ningún valor de configuración transversal está duplicado en módulos de Sistema (INV-004)
+
+**Notas**
+Ticket de alta retroactiva (auditoría 2026-07-12). Foundational implementado en bootstrap. Los estados de wire (ObjectState/RoundPhase) viven en `Shared/Constants` (refactor class:b, sin ticket propio).
 
 ---
 
 ## Dominio: Networking
 
-### NET-001 — Módulo Networking.lua: Fuente única de RemoteEvents
+### NET-001 — Networking.lua: Fuente única de RemoteEvents
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  ninguna
+Deriva de:   §4.3 (RemoteEvents y Contratos) + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  ninguna
 ```
 
 **Descripción**
-Implementar `src/shared/Networking.lua` como la única fuente de referencias a RemoteEvents en el proyecto. Crear los 7 RemoteEvents en la jerarquía de Studio. Ningún otro módulo referencia RemoteEvents directamente — todos los importan desde este módulo.
+Implementar `src/shared/Lib/Networking.lua` como la única fuente de referencias a RemoteEvents. Los 7 RemoteEvents se **declaran en `default.project.json`** (Rojo) — versionables y reproducibles, sin pasos manuales de Studio (coste-IA, §5.9). Ningún otro módulo referencia RemoteEvents directamente — todos los importan desde este módulo.
 
 **Criterios de Aceptación**
-- [ ] `src/shared/Networking.lua` expone referencias a los 7 RemoteEvents definidos en §4.3
-- [ ] Los 7 RemoteEvents existen en Studio: `InteractObject`, `DeliverObject`, `ObjectStateChanged`, `EventTriggered`, `RoundStarted`, `RoundEnded`, `TimerSync`
+- [ ] `src/shared/Lib/Networking.lua` expone referencias a los 7 RemoteEvents definidos en §4.3
+- [ ] Los 7 RemoteEvents se declaran en `default.project.json` bajo `ReplicatedStorage/Remotes`: `InteractObject`, `DeliverObject`, `ObjectStateChanged`, `EventTriggered`, `RoundStarted`, `RoundEnded`, `TimerSync`
 - [ ] Ningún módulo referencia `ReplicatedStorage.Remotes.*` directamente — todos usan `Networking.*`
 - [ ] La dirección de cada evento (cliente→servidor o servidor→clientes) está comentada en el módulo
 - [ ] El módulo no contiene lógica de juego, solo referencias
+- [ ] El conteo de RemoteEvents no supera el cap de §4.3 (verificado por `contract-remote-event-count`)
 
 ---
 
@@ -69,10 +121,11 @@ Implementar `src/shared/Networking.lua` como la única fuente de referencias a R
 ### PER-001 — ProfileStore: Integración y configuración
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  ninguna
+Deriva de:   §4.7 (Persistencia y Migraciones) + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  ninguna
 ```
 
 **Descripción**
@@ -90,10 +143,11 @@ Añadir `lm-loleris/profilestore@1.0.3` a `[server-dependencies]` de `wally.toml
 ### PER-002 — MigrationService: Versionado de PlayerData
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  PER-001
+Deriva de:   §4.7 (Persistencia — migraciones de schema) + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  PER-001
 ```
 
 **Descripción**
@@ -111,10 +165,11 @@ Implementar `src/server/Persistence/MigrationService.lua`. Detecta la versión d
 ### PER-003 — PlayerDataService: Wrapper sobre ProfileStore
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  PER-001, PER-002
+Deriva de:   §4.7 (wrapper de dominio) + DL-020 (ciclo de sesión atado al jugador)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  PER-001, PER-002
 ```
 
 **Descripción**
@@ -134,10 +189,11 @@ Implementar `src/server/Persistence/PlayerDataService.lua` como wrapper delgado 
 ### PER-004 — QA: Integración de Persistencia
 
 ```
-Semana:      1
-Estado:      TODO
-Depende de:  PER-003, GM-002
+Deriva de:   §3.8 (Criterio de Éxito: los datos sobreviven entre sesiones) + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      TODO
+Semana:      1
+Depende de:  PER-003, GM-002
 ```
 
 **Descripción**
@@ -186,10 +242,11 @@ Implementado en PR #31. Estado real: IN_PROGRESS hasta merge. Ticket de alta ret
 ### GAM-001 — ObjectDefinitions: Datos de objetos small/medium/large
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  ninguna
+Deriva de:   §2.3 (Entidad Object: ObjectDefinition) + §4.1 (Definitions)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  ninguna
 ```
 
 **Descripción**
@@ -208,19 +265,21 @@ Crear al menos un ObjectDefinition concreto por cada Size (`small`, `medium`, `l
 ### GAM-002 — ObjectManager: Spawn y estados
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  NET-001, GAM-001
+Deriva de:   §4.4 (ObjectManager) + §4.8 (único propietario de ObjectInstance.State)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  NET-001, GAM-001, GAM-009
 ```
 
 **Descripción**
-Implementar `src/server/ObjectManager.lua` con spawn aleatorio de objetos al inicio de ronda y tracking de estados por ObjectInstance. Exponer la API completa definida en §4.4.
+Implementar `src/server/ObjectManager.lua` con spawn de objetos al inicio de ronda en los Parts tagueados `ObjectSpawn` (§4.4), resolviendo la representación física via PrefabRegistry (GAM-009, DL-031), y tracking de estados por ObjectInstance. Exponer la API completa definida en §4.4.
 
 **Criterios de Aceptación**
-- [ ] Al iniciar ronda, los objetos spawnean en posiciones aleatorias dentro del edificio
-- [ ] `ObjectManager.getObject(instanceId)` retorna `ObjectInstance` completo sin nil errors
-- [ ] `ObjectManager.setState(instanceId, state, leaderId?, supportId?)` actualiza estado y dispara `ObjectStateChanged` con payload correcto
+- [ ] Al iniciar ronda, los objetos spawnean en los Parts con Tag `ObjectSpawn` (posición aleatoria entre ellos)
+- [ ] La representación física se obtiene de `PrefabRegistry.instantiate` — ObjectManager no construye placeholders ni conoce ServerStorage
+- [ ] `ObjectManager.getObject(instanceId)` retorna una copia de `ObjectInstance` sin nil errors
+- [ ] `ObjectManager.setState(instanceId, state, leaderId?, supportId?)` actualiza estado y dispara `ObjectStateChanged` con `{instanceId, objectId, state, leaderId, supportId}` (§4.3, DL-026)
 - [ ] `ObjectManager.reset()` elimina todos los objetos del Workspace y limpia el estado interno
 - [ ] `ObjectManager.getFreeObjects()` retorna únicamente objetos en estado `free`
 - [ ] No pueden existir dos ObjectInstances con el mismo InstanceId
@@ -231,18 +290,20 @@ Implementar `src/server/ObjectManager.lua` con spawn aleatorio de objetos al ini
 ### GAM-003 — CarryManager: Pickup y drop (objeto small)
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  GAM-002, NET-001
+Deriva de:   Principio §2.1 (Dependencia Social) + §4.4 (CarryManager) + DL-027 (WalkSpeed)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  GAM-002, NET-001
 ```
 
 **Descripción**
-Un jugador puede recoger y soltar un objeto small. La interacción se inicia desde el cliente vía `InteractObject`. Toda validación y cambio de estado corre server-side. El objeto sigue al jugador mientras lo carga.
+Un jugador puede recoger y soltar un objeto small. La interacción se inicia desde el cliente vía `InteractObject`. Toda validación y cambio de estado corre server-side. `CarryManager` es el único punto que conecta `OnServerEvent` (INV-001, DL-029). El objeto sigue al jugador mientras lo carga.
 
 **Criterios de Aceptación**
 - [ ] El servidor valida `InteractObject` antes de cambiar estado — tipo, existencia, rango, estado `free`
-- [ ] El objeto en `being_carried` sigue la posición del jugador server-side
+- [ ] `OnServerEvent:Connect` de `InteractObject` vive **solo** en CarryManager (INV-001, DL-029)
+- [ ] El objeto en `being_carried` sigue la posición del jugador server-side (WeldConstraint, no Heartbeat)
 - [ ] Dos jugadores no pueden cargar el mismo objeto simultáneamente
 - [ ] Al soltar, el objeto queda en posición actual del jugador y vuelve a `free`
 - [ ] Un jugador solo puede cargar un objeto a la vez
@@ -253,33 +314,36 @@ Un jugador puede recoger y soltar un objeto small. La interacción se inicia des
 ### GAM-004 — TruckManager: Zona de entrega y conteo
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  GAM-003
+Deriva de:   §4.4 (TruckManager) + §3.1 (core loop: entrega al camión)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  GAM-003
 ```
 
 **Descripción**
 Implementar `src/server/TruckManager.lua`. Zona de entrega detectada server-side via `Part.Touched`. Al entregar, el objeto pasa a `delivered`, se dispara `DeliverObject` y se registra un StoryEvent.
 
 **Criterios de Aceptación**
-- [ ] La entrega se detecta server-side via `Part.Touched` — nunca por RemoteEvent del cliente
+- [ ] La entrega se detecta server-side via `Part.Touched` sobre el Part tagueado `TruckZone` — nunca por RemoteEvent del cliente
+- [ ] El `instanceId` se resuelve subiendo por ancestría desde la parte tocada (soporta Models multi-part, DL-031)
 - [ ] `DeliverObject` se dispara con `instanceId` correcto al entregar
 - [ ] `TruckManager.getDeliveredCount()` retorna conteo correcto en tiempo real
 - [ ] `TruckManager.reset()` limpia el conteo sin residuos
 - [ ] El objeto desaparece del Workspace al ser entregado
 - [ ] Solo objetos en `being_carried` pueden entregarse — objetos `free` en la zona no cuentan
-- [ ] Se registra StoryEvent via `RoundManager.recordStoryEvent("ObjectDelivered", {instanceId, objectId})`
+- [ ] Se registra StoryEvent via `RoundManager.recordStoryEvent("ObjectDelivered", {instanceId, objectId, playerId})` — `playerId` es el líder, para atribución de stats (§2.5)
 
 ---
 
 ### GAM-005 — CarryManager: Velocidad reducida en objetos medium
 
 ```
-Semana:      2
-Estado:      TODO
-Depende de:  GAM-003, GAM-001
+Deriva de:   §3.3 (fricción de cooperación) + §4.4 (CarryManager) + DL-027 (WalkSpeed)
 Domain:      TECH
+Estado:      TODO
+Semana:      2
+Depende de:  GAM-003, GAM-001
 ```
 
 **Descripción**
@@ -287,9 +351,9 @@ Cargar un objeto medium reduce el `WalkSpeed` del jugador según `ObjectDefiniti
 
 **Criterios de Aceptación**
 - [ ] `WalkSpeed` se reduce al recoger un objeto medium según `carrySpeedMultiplier` de la definición
-- [ ] `WalkSpeed` se restaura al valor original al soltar o entregar
+- [ ] `WalkSpeed` se restaura al valor **previo guardado** al soltar o entregar (DL-027) — nunca a una constante
 - [ ] El valor viene de `ObjectDefinition.Properties` — no hardcodeado en CarryManager
-- [ ] La reducción no interfiere con otras modificaciones activas de velocidad
+- [ ] La reducción no pisa otras modificaciones activas de velocidad (DL-027)
 - [ ] Compatible con GAM-003 sin modificar su lógica central
 
 ---
@@ -297,10 +361,11 @@ Cargar un objeto medium reduce el `WalkSpeed` del jugador según `ObjectDefiniti
 ### GAM-006 — CarryManager: Sistema líder/soporte para objetos large
 
 ```
-Semana:      2
-Estado:      TODO
-Depende de:  GAM-003, GAM-001
+Deriva de:   Principio §2.1 (Dependencia Social — cooperación forzada) + §3.3
 Domain:      TECH
+Estado:      TODO
+Semana:      2
+Depende de:  GAM-003, GAM-001
 ```
 
 **Descripción**
@@ -312,16 +377,18 @@ Un objeto large requiere un jugador líder (inicia el carry) y al menos un jugad
 - [ ] `ObjectStateChanged` incluye `leaderId` y `supportId` correctamente
 - [ ] El objeto se ancla al líder server-side — sin sincronización física entre clientes
 - [ ] El sistema no usa Heartbeat para movimiento del objeto
+- [ ] Sustituye el rechazo temporal de large de GAM-003 (el slice rechaza pickup de large con log hasta este ticket)
 
 ---
 
 ### GAM-007 — CarryManager: Caída por pérdida de soporte
 
 ```
-Semana:      2
-Estado:      TODO
-Depende de:  GAM-006
+Deriva de:   §3.3 (cooperación con consecuencia) + §4.4 (timeout por definición)
 Domain:      TECH
+Estado:      TODO
+Semana:      2
+Depende de:  GAM-006
 ```
 
 **Descripción**
@@ -331,7 +398,7 @@ Si el soporte sale del rango por más tiempo que `ObjectDefinition.Properties.su
 - [ ] Timer de tolerancia configurable desde `ObjectDefinition.Properties.supportTimeout`
 - [ ] Si el soporte vuelve al rango antes del timeout, el carry continúa sin interrupción
 - [ ] Al caer, el objeto vuelve a `free` y se dispara `ObjectStateChanged`
-- [ ] El loop de verificación no genera carga innecesaria — usa `task.wait()` apropiado entre checks
+- [ ] El loop de verificación no genera carga innecesaria — usa `task.wait()` apropiado entre checks (§4.12: sin loops por-objeto por-frame)
 - [ ] Se registra StoryEvent via `RoundManager.recordStoryEvent("SupportLost", {instanceId})`
 
 ---
@@ -339,10 +406,11 @@ Si el soporte sale del rango por más tiempo que `ObjectDefinition.Properties.su
 ### GAM-008 — Balance: Ajuste de parámetros post-playtest
 
 ```
-Semana:      4
-Estado:      TODO
-Depende de:  GAM-002, GAM-003, GAM-004, GAM-005, GAM-006, GAM-007
+Deriva de:   §3.2 (DI) + Hito §5.7 Semana 4 (balance post-playtest)
 Domain:      TECH
+Estado:      TODO
+Semana:      4
+Depende de:  GAM-002, GAM-003, GAM-004, GAM-005, GAM-006, GAM-007
 ```
 
 **Descripción**
@@ -382,43 +450,46 @@ Implementar `src/server/MapBootstrap.lua`: genera un edificio placeholder taguea
 - [ ] `Main.server.lua` lo llama una vez al bootstrap
 
 **Notas**
-Implementado en PR #31. Estado real: IN_PROGRESS hasta merge. Ticket de alta retroactiva (DL-032). **Caso canónico de la Regla de derivación bajo coste-IA (§5.9):** un roadmap con supuesto humano habría dicho "haz arte mínimo en Studio"; bajo coste-IA, generar el mapa en código es más barato y mejor (versionable, reproducible, sin pasos manuales). Deriva del principio de reproducibilidad, no de un problema encontrado.
+Implementado en PR #31. Estado real: IN_PROGRESS hasta merge. Ticket de alta retroactiva (DL-032). **Caso canónico de la Regla de derivación bajo coste-IA (§5.9):** un roadmap con supuesto humano habría dicho "haz arte mínimo en Studio"; bajo coste-IA, generar el mapa en código es más barato y mejor (versionable, reproducible, sin pasos manuales). WLD-001/WLD-002 lo reemplazan con el layout real cuando exista.
 
 ---
 
-### WLD-001 — Edificio placeholder: Estructura navegable
+### WLD-001 — Edificio placeholder: Estructura navegable (Studio)
 
 ```
-Semana:      1
-Estado:      TODO
-Depende de:  ninguna
+Deriva de:   Principio §2.1 (Compresión Social) + §3.3 + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      TODO
+Semana:      1
+Depende de:  ninguna
 ```
 
 **Descripción**
-Construir el edificio placeholder funcional en Studio. No necesita assets finales. Debe ser navegable, producir fricción espacial básica y tener salida clara hacia la zona del camión. Escala para 4–6 jugadores.
+Construir el edificio **real** en Studio — el layout de arte que **reemplaza** el placeholder generado por WLD-000/MapBootstrap. No necesita assets finales, pero es trabajo de Studio (geometría/navegación pulida), no de código. Al existir (detectado por su Tag `TruckZone`), MapBootstrap se auto-desactiva. Debe ser navegable, producir fricción espacial básica y tener salida clara hacia la zona del camión. Escala para 4–6 jugadores.
 
 **Criterios de Aceptación**
 - [ ] El edificio tiene al menos 2 niveles con escaleras o rampas accesibles
 - [ ] Hay al menos un pasillo que produce fricción natural entre jugadores cargando objetos
-- [ ] Hay una salida y zona de camión claramente identificable
+- [ ] Hay una salida y zona de camión claramente identificable, con Tag `TruckZone`
 - [ ] La escala funciona para 4 jugadores sin sentirse solos ni atrapados
 - [ ] No hay huecos que permitan caer fuera del mapa
 - [ ] Un jugador puede completar una ronda básica sin quedarse atascado
+- [ ] Al cargar el place, MapBootstrap detecta el `TruckZone` real y no genera el placeholder
 
 ---
 
-### WLD-002 — Layout: NPCNodes y NPCDropZones
+### WLD-002 — Layout: NPCNodes y NPCDropZones (Studio)
 
 ```
-Semana:      1
-Estado:      TODO
-Depende de:  WLD-001
+Deriva de:   §4.4 (contrato Layout → NPCManager) + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      TODO
+Semana:      1
+Depende de:  WLD-001
 ```
 
 **Descripción**
-Colocar los nodos de tránsito de NPCs en Studio siguiendo el contrato de §4.4. Los nodos son el contrato entre el dominio World y NPCManager. Deben existir aunque no haya NPC implementado todavía.
+Colocar los nodos de tránsito de NPCs en el layout **real** de Studio (WLD-001), siguiendo el contrato de §4.4. Reemplazan los nodos que MapBootstrap genera en el placeholder. Los nodos son el contrato entre el dominio World y NPCManager. Deben existir aunque no haya NPC implementado todavía.
 
 **Criterios de Aceptación**
 - [ ] Todos los nodos tienen Tag `NPCNode` exacto
@@ -433,10 +504,11 @@ Colocar los nodos de tránsito de NPCs en Studio siguiendo el contrato de §4.4.
 ### WLD-003 — Layout final: Compresión Social
 
 ```
-Semana:      2
-Estado:      TODO
-Depende de:  WLD-001
+Deriva de:   Principio §2.1 (Compresión Social) + §3.4 (Entropía Social)
 Domain:      BOTH
+Estado:      TODO
+Semana:      2
+Depende de:  WLD-001
 ```
 
 **Descripción**
@@ -455,10 +527,11 @@ Revisar y ajustar el layout para maximizar Compresión Social antes de los playt
 ### WLD-004 — NPCManager: Movimiento con TweenService
 
 ```
-Semana:      3
-Estado:      TODO
-Depende de:  WLD-002, GM-002
+Deriva de:   §4.4 (NPCManager) + §3.4 (Entropía: NPC vecino)
 Domain:      TECH
+Estado:      TODO
+Semana:      3
+Depende de:  WLD-002, GM-002
 ```
 
 **Descripción**
@@ -472,16 +545,18 @@ Implementar `src/server/NPCManager.lua`. El NPC patrulla los NPCNodes en orden d
 - [ ] `NPCManager.reset()` devuelve el NPC a posición inicial limpiamente
 - [ ] El NPC bloquea el paso físicamente (colisión activa con jugadores)
 - [ ] RoundManager es el único punto que llama start/stop/reset sobre NPCManager
+- [ ] Al implementarse, se activa `FEATURE_FLAGS.ENABLE_NPC` (hoy `false` hasta que el módulo exista)
 
 ---
 
 ### WLD-005 — EventManager: Entropía Espacial
 
 ```
-Semana:      3
-Estado:      IN_PROGRESS
-Depende de:  WLD-001, GM-002
+Deriva de:   §3.4 (Entropía Espacial) + §4.4 (EventManager)
 Domain:      BOTH
+Estado:      IN_PROGRESS
+Semana:      3
+Depende de:  WLD-001, GM-002
 ```
 
 **Descripción**
@@ -495,16 +570,18 @@ Implementar `src/server/EventManager.lua` con al menos un evento de Entropía Es
 - [ ] El evento supera los 5 criterios del Test Oficial de Diseño (§2.2)
 - [ ] El evento no viola la Lista Prohibida (§3.5)
 - [ ] `EventManager.reset()` devuelve el entorno exactamente al estado anterior — sin residuos
+- [ ] Al implementarse, se activa `FEATURE_FLAGS.ENABLE_EVENTS` (hoy `false` hasta que el módulo exista)
 
 ---
 
 ### WLD-006 — EventManager: Entropía Informacional
 
 ```
-Semana:      3
-Estado:      IN_PROGRESS
-Depende de:  WLD-005
+Deriva de:   §3.4 (Entropía Informacional) + §4.4 (EventManager)
 Domain:      BOTH
+Estado:      IN_PROGRESS
+Semana:      3
+Depende de:  WLD-005
 ```
 
 **Descripción**
@@ -523,10 +600,11 @@ Al menos un evento que modifique lo que los jugadores saben o creen, sin alterar
 ### WLD-007 — Ajuste de DI post-playtest
 
 ```
-Semana:      4
-Estado:      TODO
-Depende de:  WLD-003, WLD-004, WLD-005, WLD-006
+Deriva de:   §3.2 (DI) + Hito §5.7 Semana 4
 Domain:      BOTH
+Estado:      TODO
+Semana:      4
+Depende de:  WLD-003, WLD-004, WLD-005, WLD-006
 ```
 
 **Descripción**
@@ -545,33 +623,35 @@ Ajustar layout, nodos del NPC y pool de eventos basándose en playtests de Seman
 ### UI-001 — HUD: Timer e indicadores básicos
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  GM-002, NET-001
+Deriva de:   §3.7 (Percepción y Feedback: contrato de estado visible) + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  GM-002, NET-001
 ```
 
 **Descripción**
-HUD con timer de ronda en formato `MM:SS` y conteo de objetos entregados. El timer se sincroniza con `TimerSync`. El HUD no bloquea la visión del gameplay.
+HUD con timer de ronda en formato `MM:SS` y conteo de objetos entregados. Lee estado **exclusivamente de ClientStateManager** (§4.10) — nunca conecta RemoteEvents (INV-001). Se suscribe con `timerUpdates = true` para recibir los ticks de `TimerSync` (DL-025). Usa Janitor para el lifecycle de sus recursos (§4.11). El HUD no bloquea la visión del gameplay.
 
 **Criterios de Aceptación**
 - [ ] Timer visible en formato `MM:SS` desde cualquier posición del mapa
-- [ ] Conteo de objetos entregados se actualiza en tiempo real al recibir `DeliverObject`
+- [ ] Conteo de objetos entregados se actualiza en tiempo real (estado de ClientStateManager)
 - [ ] El HUD no ocupa el centro de pantalla ni interfiere con la visión del juego
-- [ ] `TimerSync` corrige la diferencia cliente/servidor sin saltos bruscos
-- [ ] El HUD se oculta correctamente al entrar en estado Lobby
-- [ ] El HUD se activa correctamente al recibir `RoundStarted`
-- [ ] Las conexiones de RemoteEvents se limpian correctamente en respawn (sin memory leaks)
+- [ ] El timer refleja `TimerSync` sin saltos bruscos (suscripción selectiva `timerUpdates`, DL-025)
+- [ ] El HUD se oculta en fase Lobby y se muestra en Active (lee `phase` de ClientStateManager)
+- [ ] El módulo **no** conecta RemoteEvents — solo se suscribe a ClientStateManager (INV-001)
+- [ ] La suscripción y la GUI se limpian con Janitor en `cleanup()`; la GUI sobrevive respawns (`ResetOnSpawn = false`) sin fugas
 
 ---
 
 ### UI-002 — HUD: Prompt de interacción contextual
 
 ```
-Semana:      2
-Estado:      IN_PROGRESS
-Depende de:  UI-001, GAM-002
+Deriva de:   §3.7 (feedback: el jugador sabe qué puede interactuar)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      2
+Depende de:  UI-001, GAM-002
 ```
 
 **Descripción**
@@ -583,29 +663,30 @@ Prompt contextual client-side al acercarse a un objeto interactuable. Distingue 
 - [ ] La representación visual distingue `free` de `being_carried` — o simplemente no aparece para `being_carried`
 - [ ] El sistema corre completamente client-side sin disparar RemoteEvents para consultas
 - [ ] No hay loop costoso de detección — usa distancia calculada eficientemente
-- [ ] Se actualiza correctamente al recibir `ObjectStateChanged` de otro jugador
+- [ ] Se actualiza correctamente al recibir cambios de estado de ClientStateManager
 
 ---
 
 ### UI-003 — Summary Screen
 
 ```
-Semana:      3
-Estado:      IN_PROGRESS
-Depende de:  GM-002, GAM-004
+Deriva de:   §3.7 (¿el Summary narra o informa?) + §3.8 (Summary prioriza eventos memorables)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      3
+Depende de:  GM-002, GAM-004
 ```
 
 **Descripción**
 Pantalla de resumen al finalizar ronda. Muestra objetos salvados, objetos perdidos, StoryEvents de la ronda, y comentario narrativo generado por el servidor. No contiene rankings, puntuaciones ni recompensas.
 
 **Criterios de Aceptación**
-- [ ] La Summary Screen se muestra al recibir `RoundEnded`
-- [ ] Los datos provienen del payload de `RoundEnded` (RoundSummary compilado por RoundManager)
+- [ ] La Summary Screen se muestra en fase Summary (estado de ClientStateManager, derivado de `RoundEnded`)
+- [ ] Los datos provienen del `RoundSummary` compilado por RoundManager (payload de `RoundEnded`)
 - [ ] Se muestran los StoryEvents de la ronda en lenguaje narrativo, no estadístico
 - [ ] El comentario varía según el resultado (al menos 3 umbrales: bajo, medio, alto)
 - [ ] La pantalla tiene transición limpia de regreso a Lobby después del tiempo definido
-- [ ] Se limpia completamente antes de la siguiente ronda
+- [ ] Se limpia completamente antes de la siguiente ronda (Janitor)
 - [ ] No contiene rankings individuales, puntuaciones por jugador ni recompensas de ningún tipo
 
 ---
@@ -615,18 +696,19 @@ Pantalla de resumen al finalizar ronda. Muestra objetos salvados, objetos perdid
 ### GM-001 — Entry points: Main.server.lua y Main.client.lua
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  ninguna
+Deriva de:   §4.1 (entry points — Scripts que Roblox ejecuta) + Hito §5.7 Semana 1
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  ninguna
 ```
 
 **Descripción**
-Crear `src/server/Main.server.lua` y `src/client/Main.client.lua` como entry points de Roblox. Son Scripts/LocalScripts que solo hacen bootstrapping — toda la lógica vive en ModuleScripts. Main.server.lua inicializa GameManager. Main.client.lua inicializa los módulos de cliente.
+Crear `src/server/Main.server.lua` y `src/client/Main.client.lua` como entry points de Roblox. Son Scripts/LocalScripts que solo hacen bootstrapping — toda la lógica vive en ModuleScripts. Main.server.lua inicializa MapBootstrap, PrefabRegistry.validate y GameManager. Main.client.lua inicializa los módulos de cliente.
 
 **Criterios de Aceptación**
-- [ ] `Main.server.lua` es un Script que requiere GameManager y llama su inicialización
-- [ ] `Main.client.lua` es un LocalScript que requiere los módulos de cliente
+- [ ] `Main.server.lua` es un Script que hace bootstrapping (MapBootstrap, PrefabRegistry.validate, GameManager.init/start)
+- [ ] `Main.client.lua` es un LocalScript que inicializa ClientStateManager y los módulos de UI
 - [ ] Ninguno de los dos contiene lógica de juego — solo bootstrapping y require
 - [ ] El servidor no tiene ningún Script con lógica de juego fuera de ModuleScripts
 - [ ] El cliente no tiene ningún LocalScript con lógica fuera de ModuleScripts
@@ -636,10 +718,11 @@ Crear `src/server/Main.server.lua` y `src/client/Main.client.lua` como entry poi
 ### GM-002 — RoundManager: Ciclo de ronda activa
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  NET-001, GM-001, GAM-002, GAM-003, GAM-004
+Deriva de:   §4.4 (RoundManager) + §4.8 (orquestación de gameplay)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  NET-001, GM-001, GAM-002, GAM-003, GAM-004
 ```
 
 **Descripción**
@@ -649,21 +732,22 @@ Implementar `src/server/RoundManager.lua`. Propietario de RoundState y RoundSumm
 - [ ] `RoundManager.start()` inicializa módulos de gameplay en orden de dependencias (§4.5) y arranca el timer
 - [ ] `RoundManager.stop()` detiene módulos activos y compila `RoundSummary` desde `RoundState`
 - [ ] `RoundManager.reset()` llama `reset()` sobre todos los módulos de gameplay y limpia `RoundState`
-- [ ] `RoundManager.recordStoryEvent(eventType, data?)` añade un StoryEvent a `RoundState.StoryEvents`
-- [ ] `RoundState.ActiveEvent` se establece al inicio de ronda con el EventType seleccionado
+- [ ] `RoundManager.recordStoryEvent(eventType, data?)` añade un StoryEvent con `Timestamp` relativo al inicio de ronda (DL-021); descarta EventTypes no registrados en `Config/Events` (INV-003)
+- [ ] `RoundState.ActiveEvent` se establece al inicio de ronda con el EventType seleccionado (nil si no hay evento)
 - [ ] `RoundEnded` se dispara con `RoundSummary` serializado como payload
 - [ ] RoundManager **nunca** cambia el estado global (Lobby/Active/Summary) — eso es GameManager
-- [ ] GameManager **nunca** llama start/stop/reset sobre módulos de gameplay directamente
+- [ ] El timer es la fuente única del tiempo; `TimerSync` es baja prioridad (§4.3), 1 tick por `TIMER_SYNC_INTERVAL`
 
 ---
 
 ### GM-003 — GameManager: Ciclo de vida y transiciones de estado
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  GM-002, PER-003
+Deriva de:   §4.8 (GameManager, orquestación del ciclo de vida) + DL-020 (ciclo de sesión)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  GM-002, PER-003
 ```
 
 **Descripción**
@@ -677,6 +761,7 @@ Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Ge
 - [ ] `PlayerDataService.loadPlayer()` se llama al inicio de sesión del jugador (`PlayerAdded`)
 - [ ] `PlayerDataService.savePlayer()` (flush) se llama al final de cada ronda — la sesión no se cierra
 - [ ] `PlayerDataService.releasePlayer()` se llama al desconectarse el jugador (`PlayerRemoving`) — único punto donde se cierra la sesión
+- [ ] Atribuye `ObjectsSaved`/`ObjectsSavedByType` por ObjectId (§2.4) desde los StoryEvents del summary
 
 ---
 
@@ -689,10 +774,11 @@ Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Ge
 ### QA-001 — Integración Semana 1: Flujo básico single-player
 
 ```
-Semana:      1
-Estado:      IN_PROGRESS
-Depende de:  GM-003, PER-004, GAM-004, UI-001
+Deriva de:   §3.8 (Criterios de Éxito del MVP) + Hito §5.7 Semana 1 (Pipeline P6)
 Domain:      TECH
+Estado:      IN_PROGRESS
+Semana:      1
+Depende de:  GM-003, PER-004, GAM-004, UI-001
 ```
 
 **Descripción**
@@ -711,10 +797,11 @@ Verificar que un solo jugador puede completar una ronda completa de inicio a fin
 ### QA-002 — Integración Semana 2: Multijugador y objetos large
 
 ```
-Semana:      2
-Estado:      TODO
-Depende de:  QA-001, GAM-006, GAM-007
+Deriva de:   §3.3 (cooperación) + §3.8 + Hito §5.7 Semana 2 (Pipeline P6)
 Domain:      TECH
+Estado:      TODO
+Semana:      2
+Depende de:  QA-001, GAM-006, GAM-007
 ```
 
 **Descripción**
@@ -733,10 +820,11 @@ Verificar que 2–4 jugadores pueden jugar simultáneamente sin conflictos de es
 ### QA-003 — Playtest formal: Medición de DI con 4+ jugadores
 
 ```
-Semana:      4
-Estado:      TODO
-Depende de:  QA-002, WLD-007, GAM-008, UI-003
+Deriva de:   §3.2 (DI: criterio de avance) + §3.8 + Pipeline P6
 Domain:      BOTH
+Estado:      TODO
+Semana:      4
+Depende de:  QA-002, WLD-007, GAM-008, UI-003
 ```
 
 **Descripción**
@@ -755,10 +843,11 @@ Playtest formal con al menos 4 jugadores reales. Verificar los Criterios de Éxi
 ### QA-004 — Publicación: Deploy y verificación final
 
 ```
-Semana:      4
-Estado:      TODO
-Depende de:  QA-003
+Deriva de:   Hito §5.7 Semana 4 (publicación) + §1.3 (shippable)
 Domain:      TECH
+Estado:      TODO
+Semana:      4
+Depende de:  QA-003
 ```
 
 **Descripción**
