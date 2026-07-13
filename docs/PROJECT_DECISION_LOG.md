@@ -1390,4 +1390,63 @@ Commit:      —
 Referencias: §1.2, §4.6, §4.8, §4.11, §5.0, DL-032, DL-031
 ```
 
+---
+
+### DL-035
+
+```
+ID:          DL-035
+Fecha:       2026-07-12
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Follow-up del PO tras DL-033: evaluar si un gate de fan-out
+             (numero de dependencias salientes por modulo) aportaria como
+             segundo backstop de cohesion, dado que el conteo de lineas es
+             un proxy coarse. Se midio la estructura real de requires del
+             codigo antes de decidir.
+Contenido:   RECHAZADO como gate. Evidencia: los 6 modulos de mayor fan-out
+             (RoundManager 5, ObjectManager 5, Main.server 5, TruckManager 4,
+             GameManager 4, CarryManager 4) son precisamente los
+             orquestadores, sistemas y el bootstrap; las hojas (Config,
+             Definitions) tienen fan-out 0. Un gate de fan-out
+             ANTI-CORRELACIONA con la arquitectura correcta: penalizaria a
+             los orquestadores que §4.8 MANDA que coordinen. Una version con
+             whitelist/tiers solo re-codificaria §4.5/§4.8 sin valor
+             independiente.
+             POSITIVO: el guard de acoplamiento correcto es la DIRECCION, no
+             la cantidad. Se eleva a invariante explicito en §4.5: las
+             dependencias apuntan hacia abajo por nivel, sin ciclos ni
+             ascensos; la referencia inversa se rompe con inyeccion de
+             dependencias (RoundManager inyecta recordStoryEvent en
+             CarryManager.start(ctx)) — captura como principio la disciplina
+             que ya existia como comentario en el codigo.
+             CANDIDATO DIFERIDO: la promocion de este invariante a gate
+             determinista (deteccion de ciclos / direccion sobre el grafo de
+             requires) queda registrada como NEW CONTRACT CANDIDATE, diferida
+             por coste: los idiomas de require dinamicos actuales
+             (getSystems("X"), Systems[var]) hacen fragil un parser estatico
+             fiable. Se implementa cuando el numero de modulos crezca y los
+             idiomas se uniformen (coste-IA justificado, §5.9).
+Hipótesis:   Medir la propiedad equivocada (cantidad) produce un gate que
+             castiga el diseno correcto. La propiedad util (direccion) es un
+             invariante real pero su gate fiable no es cost-justified hoy;
+             nombrarlo explicitamente da al Auditor un contrato al que
+             apuntar sin el coste de un parser fragil.
+Razón:       Registrar el rechazo evita que se re-proponga el fan-out
+             (conocimiento arquitectonico: por que NO). Elevar la direccion
+             a invariante convierte una disciplina de codigo en contrato
+             auditable a coste cero.
+Impacto:     Nueva declaracion en §4.5 (invariante de direccion + fan-out no
+             es metrica). Sin cambio de CI ni de codigo. El Auditor TECH
+             verifica direccion en Nivel 3; el gate automatico es candidato
+             diferido.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §4.5, §4.8, §5.0, §5.9, DL-032, DL-033
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
