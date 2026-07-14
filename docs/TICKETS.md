@@ -1,5 +1,5 @@
 # TICKETS — Mudanza Caótica
-**Referencia:** AI_CONTEXT_MASTER v5.6 §5.5
+**Referencia:** AI_CONTEXT_MASTER v5.7 §5.5
 
 Los tickets están organizados por Dominio Arquitectónico (§5.1), no por responsable.
 Un ticket pertenece a un dominio. Una persona puede cubrir múltiples dominios.
@@ -440,12 +440,12 @@ Depende de:  ninguna
 ```
 
 **Descripción**
-Implementar `src/server/MapBootstrap.lua`: genera un edificio placeholder tagueado (`ObjectSpawn`, `TruckZone`, `NPCNode`, `NPCDropZone`) si el Workspace no contiene layout real, detrás del flag `ENABLE_PLACEHOLDER_MAP`. Se auto-desactiva cuando existe el layout real de WLD-001 (detectado por `TruckZone`). Hace el juego ejecutable desde `rojo serve` sin pasos manuales de Studio.
+Implementar `src/server/MapBootstrap.lua`: arbitra el layout activo según `GlobalConfig.MAP_MODE` (DL-036). En `"placeholder"` genera un edificio tagueado (`ObjectSpawn`, `TruckZone`, `NPCNode`, `NPCDropZone`) y descarta la copia runtime de `Workspace/RealMap`; en `"real"` usa el layout de Studio. Hace el juego ejecutable desde `rojo serve` sin pasos manuales de Studio.
 
 **Criterios de Aceptación**
 - [ ] Genera todos los tags de contrato (§4.4): `ObjectSpawn`, `TruckZone`, `NPCNode`+`NodeIndex`, `NPCDropZone`
-- [ ] Idempotente; no genera nada si ya existe layout real (detección por `TruckZone`)
-- [ ] Detrás del flag `ENABLE_PLACEHOLDER_MAP`; sin él y sin layout, avisa con warning
+- [ ] `MAP_MODE="placeholder"` → destruye la copia runtime de `Workspace/RealMap` (si existe) y genera el placeholder
+- [ ] `MAP_MODE="real"` → no genera nada; usa `Workspace/RealMap` (avisa con warning si falta)
 - [ ] El edificio es navegable (2 niveles, rampa, chokepoint central) y tiene SpawnLocation
 - [ ] `Main.server.lua` lo llama una vez al bootstrap
 
@@ -465,7 +465,7 @@ Depende de:  ninguna
 ```
 
 **Descripción**
-Construir el edificio **real** en Studio — el layout de arte que **reemplaza** el placeholder generado por WLD-000/MapBootstrap. No necesita assets finales, pero es trabajo de Studio (geometría/navegación pulida), no de código. Al existir (detectado por su Tag `TruckZone`), MapBootstrap se auto-desactiva. Debe ser navegable, producir fricción espacial básica y tener salida clara hacia la zona del camión. Escala para 4–6 jugadores.
+Construir el edificio **real** en Studio bajo un contenedor `Workspace/RealMap` (Folder o Model) — el layout de arte que **reemplaza** el placeholder generado por WLD-000/MapBootstrap. No necesita assets finales, pero es trabajo de Studio (geometría/navegación pulida), no de código. Se activa poniendo `GlobalConfig.MAP_MODE = "real"` (DL-036) cuando esté completo. Mientras tanto se desarrolla con `"placeholder"`. Debe ser navegable, producir fricción espacial básica y tener salida clara hacia la zona del camión. Escala para 4–6 jugadores.
 
 **Criterios de Aceptación**
 - [ ] El edificio tiene al menos 2 niveles con escaleras o rampas accesibles

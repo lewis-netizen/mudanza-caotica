@@ -1,7 +1,7 @@
 # PROJECT_DECISION_LOG — Mudanza Caótica
 
 **Versión:** 1.0
-**Referencia:** AI_CONTEXT_MASTER v5.6 §5.4  
+**Referencia:** AI_CONTEXT_MASTER v5.7 §5.4  
 **Última actualización:** 2026-07-11
 
 ---
@@ -1447,6 +1447,57 @@ Pipeline:    P3
 Ticket:      —
 Commit:      —
 Referencias: §4.5, §4.8, §5.0, §5.9, DL-032, DL-033
+```
+
+---
+
+### DL-036
+
+```
+ID:          DL-036
+Fecha:       2026-07-13
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El mapa real (WLD-001) se empezo a construir en Studio pero esta
+             incompleto. La arbitracion de MapBootstrap (DL-028) decidia
+             "existe mapa real" por presencia del Tag TruckZone: como el mapa
+             WIP ya tiene un TruckZone pero esta incompleto, MapBootstrap se
+             retiraba -> sin placeholder -> juego roto. El PO propuso un flag
+             en el mapa que el placeholder "apague" automaticamente.
+Contenido:   Se reemplaza la deteccion por-tag y la propuesta de flag-que-
+             apaga-flag por una fuente unica: GlobalConfig.MAP_MODE
+             ("placeholder" | "real"). Un solo valor no puede contradecirse,
+             asi que no hace falta mutar un flag en runtime (eso rompia el
+             contrato de flags estaticos: el valor leido no coincidiria con la
+             realidad). El mapa real vive bajo Workspace/RealMap. En modo
+             "placeholder", MapBootstrap DESTRUYE la copia runtime de
+             Workspace/RealMap y genera el edificio; en "real" lo usa tal cual.
+             Destruir es seguro (el DataModel de Play/servidor es una copia; el
+             .rbxlx guardado no se toca) y necesario porque
+             CollectionService:GetTagged es agnostico al parent — parkear a
+             ServerStorage no ocultaria los tags del mapa real, mezclandolos
+             con los del placeholder.
+Hipótesis:   Un enum de un solo valor elimina de raiz la posibilidad de estado
+             inconsistente que el auto-apagado intentaba parchear; y destruir
+             la copia runtime es la unica forma limpia de exclusion dado que
+             los tags persisten al reparentar.
+Razón:       La deteccion por TruckZone es fragil justo cuando mas se necesita
+             (mapa real a medias). Mutar un flag estatico en runtime crea
+             estado oculto e imposible de depurar. El control explicito por
+             MAP_MODE es predecible y respeta el contrato de flags.
+Impacto:     GlobalConfig: nuevo MAP_MODE, se elimina ENABLE_PLACEHOLDER_MAP.
+             MapBootstrap reescrito (arbitracion por MAP_MODE + destruccion de
+             RealMap). §4.4 (contrato Layout, tabla de modulos) y tickets
+             WLD-000/WLD-001 actualizados. Introduce la convencion
+             Workspace/RealMap para el mapa real. Supersede el mecanismo de
+             DL-028 (la deteccion por TruckZone), no el resto de DL-028.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      WLD-000, WLD-001
+Commit:      —
+Referencias: §4.4, DL-028, DL-031
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

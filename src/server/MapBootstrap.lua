@@ -1,12 +1,25 @@
 -- MapBootstrap
--- Genera un edificio placeholder si el Workspace no contiene layout real
--- (§4.4, flag ENABLE_PLACEHOLDER_MAP, DL-028). Produce todos los contratos
--- de tags que los sistemas esperan: ObjectSpawn, TruckZone, NPCNode,
--- NPCDropZone. Se retira cuando exista el layout real de WLD-001+.
+-- Arbitra qué layout usa el servidor según GlobalConfig.MAP_MODE (DL-036).
+-- Produce todos los contratos de tags que los sistemas esperan: ObjectSpawn,
+-- TruckZone, NPCNode, NPCDropZone.
 --
--- La geometría inline es DATO DE MAPA temporal, no parámetro de balance —
--- INV-004 no aplica. El layout real se construye en Studio (WLD-001) y se
--- detecta por la presencia del Tag TruckZone.
+-- Contrato del mapa real (WLD-001): se construye en Studio bajo un contenedor
+-- Workspace/RealMap (Folder o Model). MAP_MODE decide, explícitamente:
+--   "real"        → se usa Workspace/RealMap tal cual; no se genera nada.
+--   "placeholder" → se DESTRUYE la copia runtime de Workspace/RealMap (si
+--                   existe) y se genera el placeholder. Destruir es seguro:
+--                   en Play/servidor el DataModel es una copia — el .rbxlx
+--                   guardado que editas en Studio queda intacto. Necesario
+--                   porque CollectionService:GetTagged es agnóstico al parent:
+--                   parkear el mapa real no ocultaría sus tags.
+--
+-- Por qué MAP_MODE y no dos flags: un solo valor no puede contradecirse, así
+-- que no hace falta que un flag "apague" a otro en runtime (eso rompería el
+-- contrato de flags estáticos). Reemplaza la antigua detección por presencia
+-- de TruckZone (frágil con el mapa real incompleto).
+--
+-- La geometría inline del placeholder es DATO DE MAPA temporal, no parámetro
+-- de balance — INV-004 no aplica.
 --
 -- Lune-compatible (§4.6): servicios se resuelven dentro de funciones.
 
@@ -183,21 +196,37 @@ end
 --- Genera el mapa placeholder si no existe layout real (detectado por el
 --- Tag TruckZone). Idempotente. Llamado una vez desde Main.server.lua.
 function MapBootstrap.ensure()
-    local CollectionService = game:GetService("CollectionService")
-    if #CollectionService:GetTagged("TruckZone") > 0 then
-        getLog():info("Layout existente detectado — no se genera placeholder")
+    local Workspace = game:GetService("Workspace")
+    local GlobalConfig = require(game:GetService("ReplicatedStorage").Shared.Config.GlobalConfig)
+    local mode = GlobalConfig.MAP_MODE
+    local realMap = Workspace:FindFirstChild("RealMap")
+
+    if mode == "real" then
+        if realMap then
+            getLog():info("MAP_MODE=real — usando Workspace/RealMap")
+        else
+            getLog():warn("MAP_MODE=real pero no existe Workspace/RealMap — la ronda no tendrá spawns ni entregas")
+        end
         return
     end
 
-    local GlobalConfig = require(game:GetService("ReplicatedStorage").Shared.Config.GlobalConfig)
-    if not GlobalConfig.FEATURE_FLAGS.ENABLE_PLACEHOLDER_MAP then
-        getLog():warn("Sin layout y ENABLE_PLACEHOLDER_MAP = false — la ronda no tendrá spawns ni entregas")
-        return
+    if mode ~= "placeholder" then
+        getLog():warn("MAP_MODE no reconocido (%s) — se asume placeholder", tostring(mode))
+    end
+
+    -- placeholder: excluir el mapa real destruyendo su copia runtime (seguro —
+    -- no toca el .rbxlx guardado). Necesario para que sus tags no se mezclen
+    -- con los del placeholder (GetTagged es agnóstico al parent).
+    if realMap then
+        pcall(function()
+            realMap:Destroy()
+        end)
+        getLog():info("MAP_MODE=placeholder — Workspace/RealMap descartado en runtime")
     end
 
     local container = Instance.new("Folder")
     container.Name = "PlaceholderMap"
-    container.Parent = game:GetService("Workspace")
+    container.Parent = Workspace
 
     buildFloors(container)
     buildWalls(container)
@@ -206,7 +235,7 @@ function MapBootstrap.ensure()
     buildNPCContract(container)
     buildPlayerSpawn(container)
 
-    getLog():info("Mapa placeholder generado (retirar con WLD-001 real)")
+    getLog():info("Mapa placeholder generado (MAP_MODE=real lo desactiva cuando WLD-001 esté listo)")
 end
 
 return MapBootstrap
