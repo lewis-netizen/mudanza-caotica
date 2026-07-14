@@ -64,6 +64,10 @@ local function getShared(moduleName: string)
     return require(game:GetService("ReplicatedStorage").Shared.Config[moduleName])
 end
 
+local function getCarryRules()
+    return require(game:GetService("ReplicatedStorage").Shared.Rules.CarryRules)
+end
+
 -- ─── Helpers ───────────────────────────────────────────────────────────────────
 
 local function getCharacterParts(player: any): (any?, any?)
@@ -119,12 +123,8 @@ local function pickup(player: any, instanceId: string)
     local Catalog = require(game:GetService("ReplicatedStorage").Shared.Definitions.Objects)
     local def = if obj then Catalog.get(obj.ObjectId) else nil
 
-    -- Objetos large requieren líder + soporte (GAM-006, Semana 2) — todavía
-    -- no soportados por el slice. Se rechaza con log, sin cambiar estado.
-    if def and def.Size == "large" then
-        getLog():debug("Pickup de large rechazado — GAM-006 pendiente (%s)", instanceId)
-        return
-    end
+    -- El rechazo de large (GAM-006 pendiente) ya lo decidió CarryRules antes de
+    -- llegar aquí — pickup solo se llama con una decisión "pickup" válida.
 
     -- Posicionar frente al jugador y soldar — autoridad física del servidor (§4.2)
     part.Anchored = false
@@ -137,12 +137,11 @@ local function pickup(player: any, instanceId: string)
     weld.Part1 = part
     weld.Parent = part
 
-    -- DL-027: guardar la velocidad vigente ANTES de modificarla
+    -- DL-027: guardar la velocidad vigente ANTES de modificarla; el cálculo
+    -- del multiplicador es puro (CarryRules.carrySpeed).
     local previousWalkSpeed = humanoid.WalkSpeed
     local multiplier = if def then def.Properties.carrySpeedMultiplier else nil
-    if type(multiplier) == "number" and multiplier > 0 and multiplier < 1 then
-        humanoid.WalkSpeed = previousWalkSpeed * multiplier
-    end
+    humanoid.WalkSpeed = getCarryRules().carrySpeed(previousWalkSpeed, multiplier)
 
     carriersByUserId[player.UserId] = {
         instanceId = instanceId,
@@ -185,46 +184,41 @@ local function onInteractObject(player: any, instanceId: any)
     if not active then
         return
     end
-    -- Validación server-side: tipo, existencia, rango, estado (§4.2)
     if type(instanceId) ~= "string" then
         return
     end
 
+    -- Cáscara effectful: reúne los hechos del mundo (§4.2) y delega la DECISIÓN
+    -- en el núcleo puro CarryRules (testeado en Lune). Luego ejecuta el efecto.
     local ObjectManager = getObjectManager()
     local obj = ObjectManager.getObject(instanceId)
-    if not obj then
-        return
-    end
-
-    if obj.State == states().BEING_CARRIED then
-        -- Solo el líder puede soltar su propio objeto
-        if obj.LeaderId == player.UserId then
-            drop(player)
-        end
-        return
-    end
-
-    if obj.State ~= states().FREE then
-        return
-    end
-
-    -- Un jugador solo carga un objeto a la vez
-    if carriersByUserId[player.UserId] then
-        return
-    end
-
-    -- Rango de interacción (GlobalConfig.MAX_INTERACT_RANGE)
     local part = ObjectManager.getObjectPart(instanceId)
     local hrp = getCharacterParts(player)
-    if not part or not hrp then
-        return
-    end
-    local GlobalConfig = getShared("GlobalConfig")
-    if (part.Position - hrp.Position).Magnitude > GlobalConfig.MAX_INTERACT_RANGE then
-        return
+
+    local Catalog = require(game:GetService("ReplicatedStorage").Shared.Definitions.Objects)
+    local def = if obj then Catalog.get(obj.ObjectId) else nil
+
+    local inRange = false
+    if part and hrp then
+        local maxRange = getShared("GlobalConfig").MAX_INTERACT_RANGE
+        inRange = (part.Position - hrp.Position).Magnitude <= maxRange
     end
 
-    pickup(player, instanceId)
+    local decision = getCarryRules().decideInteraction({
+        exists = obj ~= nil,
+        state = if obj then obj.State else "",
+        leaderId = if obj then obj.LeaderId else nil,
+        isLarge = def ~= nil and def.Size == "large",
+        alreadyCarrying = carriersByUserId[player.UserId] ~= nil,
+        inRange = inRange,
+        playerId = player.UserId,
+    }, states())
+
+    if decision == "drop" then
+        drop(player)
+    elseif decision == "pickup" then
+        pickup(player, instanceId)
+    end
 end
 
 -- ─── API pública — llamada solo por RoundManager (§4.8) ────────────────────────

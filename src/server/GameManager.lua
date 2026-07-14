@@ -63,6 +63,10 @@ local function phases()
     return RoundPhase
 end
 
+local function getStatRules()
+    return require(game:GetService("ReplicatedStorage").Shared.Rules.StatRules)
+end
+
 -- ─── Stats de ronda (§2.5) ─────────────────────────────────────────────────────
 
 local function applyMatchStarted()
@@ -75,22 +79,21 @@ local function applyMatchStarted()
     end
 end
 
---- Atribuye stats desde los StoryEvents del summary: ObjectsSaved y
---- ObjectsSavedByType (indexado por ObjectId — §2.4) al líder que entregó.
+--- Aplica al PlayerData los deltas de stats. El CÁLCULO (summary → deltas por
+--- jugador, indexado por ObjectId §2.4) es puro y vive en Rules/StatRules;
+--- aquí solo se aplican los efectos sobre el dato en memoria.
 local function applyRoundStats(summary: any)
     local Players = game:GetService("Players")
     local PlayerDataService = getPlayerDataService()
 
-    for _, event in ipairs(summary.StoryEvents) do
-        if event.EventType == "ObjectDelivered" and event.Data and event.Data.playerId then
-            local player = Players:GetPlayerByUserId(event.Data.playerId)
-            local data = if player then PlayerDataService.getData(player) else nil
-            if data then
-                data.Stats.ObjectsSaved += 1
-                local objectId = event.Data.objectId
-                if type(objectId) == "string" then
-                    data.Stats.ObjectsSavedByType[objectId] = (data.Stats.ObjectsSavedByType[objectId] or 0) + 1
-                end
+    local deltas = getStatRules().computeStatDeltas(summary.StoryEvents)
+    for playerId, delta in pairs(deltas) do
+        local player = Players:GetPlayerByUserId(playerId)
+        local data = if player then PlayerDataService.getData(player) else nil
+        if data then
+            data.Stats.ObjectsSaved += delta.saved
+            for objectId, count in pairs(delta.byType) do
+                data.Stats.ObjectsSavedByType[objectId] = (data.Stats.ObjectsSavedByType[objectId] or 0) + count
             end
         end
     end

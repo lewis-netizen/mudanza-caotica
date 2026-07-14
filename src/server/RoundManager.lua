@@ -74,6 +74,10 @@ local function states()
     return ObjectState
 end
 
+local function getRoundRules()
+    return require(game:GetService("ReplicatedStorage").Shared.Rules.RoundRules)
+end
+
 -- ─── StoryEvents ───────────────────────────────────────────────────────────────
 
 --- Registra un StoryEvent en RoundState. El EventType debe estar registrado
@@ -94,22 +98,8 @@ function RoundManager.recordStoryEvent(eventType: string, data: any?)
     })
 end
 
--- ─── Summary ───────────────────────────────────────────────────────────────────
-
---- Comentario narrativo del servidor — 3 umbrales (UI-003). Sin puntuaciones.
-local function buildClientComment(saved: number, lost: number): string
-    local total = saved + lost
-    if total == 0 then
-        return "No había nada que mudar. El camión se fue igual."
-    end
-    local ratio = saved / total
-    if ratio >= 0.8 then
-        return "El camión se fue lleno. Mudanza de profesionales — casi."
-    elseif ratio >= 0.4 then
-        return "Se salvó lo importante. Probablemente."
-    end
-    return "El camión se fue casi vacío. El vecino sigue riéndose."
-end
+-- El comentario narrativo (3 umbrales, UI-003) y el conteo de perdidos viven
+-- en Rules/RoundRules (núcleo puro, testeado en Lune).
 
 -- ─── Ciclo de ronda — llamado solo por GameManager (§4.8) ──────────────────────
 
@@ -189,18 +179,14 @@ function RoundManager.stop(): RoundSummary
     TruckManager.stop()
     roundActive = false
 
+    local RoundRules = getRoundRules()
     local saved = TruckManager.getDeliveredCount()
-    local lost = 0
-    for _, obj in ipairs(ObjectManager.getAllObjects()) do
-        if obj.State ~= states().DELIVERED then
-            lost += 1
-        end
-    end
+    local lost = RoundRules.countLost(ObjectManager.getAllObjects(), states().DELIVERED)
 
     local summary: RoundSummary = {
         SavedObjects = saved,
         LostObjects = lost,
-        ClientComment = buildClientComment(saved, lost),
+        ClientComment = RoundRules.buildClientComment(saved, lost),
         StoryEvents = storyEvents,
     }
 
