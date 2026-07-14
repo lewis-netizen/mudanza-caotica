@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.5 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.6 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -411,7 +411,7 @@ server-side (`OnServerEvent:Connect`) vive en `CarryManager.lua` — ver INV-001
 
 **Autoridad de estado:** ObjectManager es el único propietario de `ObjectInstance.State`. Ningún otro módulo modifica el estado directamente — todos solicitan el cambio a ObjectManager.
 
-**Regla de RemoteEvents:** No más de 7 RemoteEvents sin aprobación del Product Owner.
+**Regla de RemoteEvents (DL-033):** el CI impone un gate duro (Nivel 1) contra el **cap actual = 7**. El límite existe por una restricción de *runtime* (superficie cliente-servidor: exploit + replicación), no de esfuerzo humano — por eso es un gate, no una guía. El *número* 7 es la heurística: **elevar el cap es una decisión Clase A** que se registra en el Decision Log y actualiza el valor del gate. No hay bypass ad-hoc "con aprobación del PO" — la aprobación ES la decisión que cambia el cap.
 
 ### 4.4 Módulos del Servidor y APIs
 
@@ -593,6 +593,10 @@ Nivel 4 — depende de todo
   GameManager
 ```
 
+**Invariante de dirección de dependencias (DL-035).** Un módulo solo requiere módulos de un nivel *inferior* al suyo — las dependencias apuntan hacia abajo. **No hay requires circulares ni ascendentes.** Cuando dos módulos necesitarían referenciarse mutuamente (p. ej. RoundManager ↔ CarryManager), la referencia hacia arriba se rompe con **inyección de dependencias** — RoundManager inyecta `recordStoryEvent` en `CarryManager.start(ctx)`, nunca con un `require` inverso.
+
+**El fan-out NO es métrica de gobernanza (DL-035).** El número de dependencias salientes de un módulo *anti-correlaciona* con la arquitectura correcta: los orquestadores (RoundManager, GameManager) y el bootstrap tienen fan-out alto **por mandato de §4.8**. Un gate de fan-out penalizaría el diseño correcto — por eso el guard de acoplamiento es la *dirección* (arriba/abajo), no la *cantidad*. Hoy esta dirección la garantizan la disciplina de DI y el juicio del Auditor (Nivel 3); su promoción a gate determinista está registrada como candidato diferido (ver DL-035).
+
 ### 4.6 Prohibiciones Técnicas
 
 - PathfindingService para el NPC
@@ -751,6 +755,47 @@ State = {
 
 `wally-package-types` no puede ejecutarse antes del paso 1 — necesita paquetes instalados para tener algo que procesar.
 
+### 4.12 Contratos No Funcionales (DL-034)
+
+Las secciones §4.1–§4.11 gobiernan el eje **estructural** ("quién puede qué", "quién es dueño de qué"). Esta sección añade el eje **no-funcional** ("qué complejidad", "qué escala", "quién limpia") — el complemento que faltaba. No duplica ningún contrato existente: opera sobre propiedades que ningún otro contrato expresa.
+
+**Nota de honestidad:** a la escala de este juego (§1.2: 4–6 jugadores, ~15 objetos por ronda spawneados una vez cada 3 minutos), los *budgets de tiempo de pared* ("spawn < 2 ms") serían teatro — no gobiernan nada real. Lo que sí es arquitectónico son tres cosas: complejidad algorítmica, el sobre de escala de diseño, y el ownership de destrucción/cleanup.
+
+**A. Invariantes de complejidad.** Una regresión de complejidad (p. ej. O(1)→O(n)) es un defecto de *estructura*, independiente de la escala actual — por eso es contrato, no optimización.
+
+| Operación | Complejidad | Dónde |
+|---|---|---|
+| `ObjectManager.getObject` / `getObjectPart` / `setState` | O(1) | lookup por `InstanceId` en tabla hash |
+| `ObjectManager.getFreeObjects` / `getAllObjects` | O(n) | enumeración — n = objetos de la ronda |
+| `TruckManager` entrega (`Touched`) | O(1) por evento + O(altura) resolución de ancestría (acotada a 5) |
+| `PrefabRegistry.resolve` | O(1) | cache `ObjectId → template` |
+| `ClientStateManager` notificación | O(listeners) | por cambio de estado |
+
+**Invariante — Sin loops por-objeto por-frame.** Ningún sistema corre un loop `Heartbeat`/`RenderStepped` que itere objetos cada frame (generaliza la prohibición de §4.6 sobre objetos large). El movimiento del objeto cargado usa un `WeldConstraint` (física del motor), no un loop. El único loop temporal es el timer de ronda de `RoundManager` (1 tick/segundo, O(1) por tick).
+
+**B. Sobre de escala de diseño.** El diseño se dimensiona para:
+
+```
+Jugadores:  4–6        (§1.2)
+Objetos:    ~15–30 por ronda   (GameplayConfig.OBJECT_COUNTS)
+RemoteEvents: ≤ cap actual (§4.3)
+```
+
+Superar este sobre (p. ej. soportar 50 jugadores, o 500 objetos) **no es una optimización — es un cambio de arquitectura (Clase A)**. Una propuesta que asuma una escala fuera de este sobre se audita como rediseño, no como tweak.
+
+**C. Ownership de destrucción y cleanup.** El §4.8 define quién *muta* estado; esto define quién lo *destruye y libera*:
+
+| Recurso | Quién lo crea | Quién lo destruye/libera |
+|---|---|---|
+| Parts/Models de objetos (`top`) | `ObjectManager` (via `PrefabRegistry`) | `ObjectManager`: al entregar (setState "delivered") y en `reset()` |
+| Contenedor `RoundObjects` | `ObjectManager.initialize` | `ObjectManager.reset` |
+| Welds de carry | `CarryManager` (pickup) | `CarryManager`: `releaseEntry` / `forceRelease` / `stop` |
+| Conexiones de RemoteEvent (servidor) | `CarryManager.start`, `TruckManager.start` | su propio `stop()` — desconectan lo que conectaron |
+| Suscripciones y GUI (cliente) | módulos de UI en `init()` | `Janitor` en su `cleanup()` (§4.11) |
+| Mapa placeholder | `MapBootstrap.ensure` | se retira con el layout real de WLD-001 |
+
+**Invariante — Cada módulo libera lo que crea.** Un módulo que conecta una señal o instancia un recurso es responsable de liberarlo en su `stop()`/`reset()`/`cleanup()`. Ningún módulo libera recursos de otro (el paralelo de destrucción a la regla de ownership de estado, §4.8).
+
 ---
 
 ## 5. Governance
@@ -791,7 +836,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | INV-002 | `sound:Play()` / VFX no en módulos de gameplay | grep |
 | §4.6 | `PathfindingService` no en `src/` | grep |
 | §2.4 | `.Name` no como condición lógica | grep |
-| §4.3 | RemoteEvents ≤ 7 en `Networking.lua` | conteo |
+| §4.3 | RemoteEvents ≤ cap actual (7) en `Networking.lua` — elevar el cap es Clase A (DL-033) | conteo |
 | §4.6 Lune | Globals Roblox no en scope de módulo | `lune run lune/check-compatibility.luau` ⚠ heurística, no AST |
 | — | Specs de comportamiento (Persistence, ObjectManager) | `lune run lune/run-specs.luau` |
 | — | `print`/`warn` fuera de `Logger.lua` | grep (`contract-logger-usage`) — Selene no puede prohibir globals específicos |
@@ -802,9 +847,11 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 
 | Contrato | Umbral | Mecanismo |
 |---|---|---|
-| Tamaño de módulo | Ningún archivo en `src/` > 300 líneas | `wc -l` |
+| Tamaño de módulo | Ningún archivo en `src/` > 400 líneas (DL-033) | `wc -l` |
 | Separación de capas | `src/server/` no requiere `src/client/` | grep |
 | Cobertura mínima | Módulos de Persistence tienen spec | existencia de archivo |
+
+**Nombres de los required checks (DL-033).** El nombre de un status check *requerido* embebe su umbral **si y solo si** cambiar ese umbral es una decisión Clase A. Los *caps* de Nivel 1 (p. ej. `Contract: RemoteEvents ≤ 7 (§4.3)`) conservan el número: elevarlos es Clase A, y el renombre + re-sync manual del ruleset que ello exige es un freno deliberado, no fricción. Los *backstops* de Nivel 2 (p. ej. `Contract: Module size backstop (DL-033)`) usan nombres **sin umbral** y guardan el número solo en el script: su recalibración es Clase B y no debe romper el ruleset. Razón: renombrar un required check obliga a editar el ruleset a mano (dos sitios que no se actualizan atómicamente → bloqueo transitorio del merge); esta regla confina esas ediciones a los cambios que de verdad lo ameritan.
 
 **Nivel 3 — Patrones sospechosos (Auditor TECH en P3)**
 
@@ -1081,6 +1128,20 @@ Si una auditoría aprueba y la otra rechaza:
 
 **Regla de Cambios:** Cualquier modificación a contratos, principios o arquitectura debe notificarse antes de implementarse, ser acordada por todos los responsables afectados, y actualizar este documento con nueva versión. Ningún agente aprueba cambios a este documento. Solo el Product Owner.
 
+**Regla de derivación de tickets (DL-032):**
+
+Un ticket no aparece de forma oportunista durante la implementación — se *deriva*. Todo ticket debe trazar a exactamente una de estas dos fuentes, declarada en su campo `Deriva de`:
+
+```
+(a) una DECISIÓN del Decision Log (DL-xxx), o
+(b) un Principio Congelado (§2.1) / hito de roadmap (§5.7) que el ticket habilita.
+```
+
+Reglas:
+- **Completitud.** Antes de arrancar un hito de roadmap, se deriva el conjunto *completo* de tickets que lo realizan — incluyendo los tickets de **habilitación/infraestructura** que un principio *implica* pero que ningún ticket de feature nombra. Si una pieza de infraestructura es necesaria para cumplir un principio y ningún ticket la nombra, recibe su propio ticket explícito **antes** de implementarse.
+- **Coste-IA.** El ticket especifica el artefacto **AI-óptimo**, no el humano-mínimo (§5.9). El caso de referencia es `MapBootstrap`: derivado del principio "el slice debe ser ejecutable sin pasos manuales de Studio", no de un problema encontrado en el camino.
+- **Trazabilidad.** Un ticket sin `Deriva de` es incompleto y no puede recibir self-review válido. Los 30 tickets de bootstrap están grandfathered (nota de bootstrap en TICKETS.md); todo ticket nuevo cumple esta regla.
+
 ### 5.6 Taxonomía de Tipos de Agentes
 
 **Definiciones canónicas:**
@@ -1206,6 +1267,31 @@ Si el developer está en desacuerdo con un rechazo:
   Costo: C1. Pipeline: P5.
 ```
 
+### 5.9 Modelo de Coste del Implementador (DL-032)
+
+**Principio.** El implementador de este proyecto es una IA. Toda heurística o umbral de gobernanza debe calibrarse a la suma de tres costes:
+
+```
+coste-IA-implementador  +  coste-humano-revisor  +  coste-runtime
+```
+
+y **nunca** a `coste-humano-implementador`. Un umbral que existe solo para reducir la carga de un humano que *escribe* u *hojea* código es un tradeoff importado de otro contexto: puede reducir la calidad cuando el implementador es una IA, y debe reexaminarse.
+
+**Por qué importa.** Muchas convenciones de ingeniería nacieron para gestionar límites humanos (memoria de trabajo, tiempo de escritura, fatiga de lectura). Una IA no comparte esos límites: lee el módulo entero sin importar su tamaño, y generar un artefacto de código es tan barato como describir uno mínimo. Calibrar a coste-humano-implementador introduce sesgos silenciosos que degradan la profesionalidad exigida (§1.3).
+
+**Ejemplo canónico — MapBootstrap.** Un roadmap escrito con supuesto de implementador humano diría "haz arte placeholder mínimo en Studio" (barato para un humano, evita escribir y mantener un generador). Bajo el coste-IA, generar el edificio en código (`MapBootstrap`) es *más barato y mejor*: versionable, reproducible, sin pasos manuales. El artefacto AI-óptimo diverge del humano-mínimo — y el ticket, si se deriva con el supuesto equivocado, ni siquiera lo nombra (ver §5.5, Regla de derivación de tickets).
+
+**Matiz — no toda restricción es antropocéntrica.** Distinguir siempre la *restricción* del *número*:
+
+| Umbral | Qué es realmente | Veredicto |
+|---|---|---|
+| `módulo < 300 → 400 líneas` | Proxy de "responsabilidad única" calibrado al humano que *hojea*. Una IA lee el módulo completo. | **Recalibrado a 400 (DL-033):** límite de coste-revisor, no de coste-escritor. El guard real contra god-modules es la responsabilidad única (juicio del Auditor, Nivel 3); el conteo de líneas es un backstop coarse. |
+| `RemoteEvents ≤ 7` | La *restricción* (minimizar superficie cliente-servidor) es de **runtime** — superficie de exploit + coste de replicación, independiente de quién codea. El *número 7* es la heurística. | **Resuelto (DL-033):** gate duro contra el cap actual (7); elevar el cap es Clase A. Sin bypass ad-hoc. |
+
+**Estado de la reexaminación.** Los dos umbrales nombrados arriba quedaron resueltos en **DL-033**. Todo umbral futuro se justifica contra el coste correcto (coste-IA + revisor + runtime) en el momento de introducirse — el marco de esta sección aplica de oficio, sin necesidad de una reexaminación aparte.
+
+**Alcance.** Esta sección NO autoriza relajar umbrales de forma genérica — obliga a *justificar* cada uno contra el coste correcto. Un umbral sin justificación de coste documentada es deuda de gobernanza.
+
 ---
 
 ## 6. Operational Architecture
@@ -1317,7 +1403,7 @@ ServerPackages/  — generado por wally install (realm server: ProfileStore), gi
 
 **Vista virtual para Orchestrators (organización por dominio):**
 
-Las referencias de sección son al Context Master v5.5.
+Las referencias de sección son al Context Master v5.6.
 
 ```
 [DOMINIO: Gameplay]
@@ -1619,6 +1705,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.6 | 2026-07-12 | Gobernanza completa del eje no-funcional y del coste del implementador (DL-032, DL-033, DL-034). **§5.9 Modelo de Coste del Implementador (DL-032):** las heurísticas se calibran a coste-IA + revisor + runtime, nunca a coste-humano-implementador. **Regla de derivación de tickets (§5.5, DL-032):** todo ticket traza a una DECISIÓN del DL o a un Principio/hito (campo `Deriva de`); alta retroactiva de WLD-000 y GAM-009. **Recalibración de umbrales (DL-033):** módulo 300→400 líneas (coste-revisor); resuelta la inconsistencia del ≤7 RemoteEvents (gate duro contra cap; elevarlo es Clase A). **§4.12 Contratos No Funcionales (DL-034):** invariantes de complejidad, sobre de escala de diseño y ownership de destrucción/cleanup — el eje no-funcional, enriqueciendo el master en vez de fragmentarlo. **Invariante de dirección de dependencias (§4.5, DL-035):** las dependencias apuntan hacia abajo, sin ciclos; se rechaza el fan-out como métrica (anti-correlaciona con los orquestadores de §4.8) y se registra el gate automático como candidato diferido. **Convención de nombres de required checks (§5.0, DL-033):** el umbral vive en el nombre del check solo si cambiarlo es Clase A — los caps N1 (≤7) lo conservan; los backstops N2 (tamaño de módulo) no, para que su recalibración Clase B no rompa el ruleset. |
 | 5.5 | 2026-07-12 | Endurecimiento de arquitectura `src/`: formalizado el contrato `ObjectId → asset` en un módulo dedicado `PrefabRegistry` (§4.4, §4.1, §4.5, DL-031) — cierra el hueco entre `ObjectDefinition` y `ServerStorage/ObjectPrefabs` sin acoplar `ObjectManager` a Studio ni referenciar modelos desde los datos. `validate()` audita el contrato al bootstrap. |
 | 5.4 | 2026-07-11 | Directrices del PO + arranque del vertical slice: estándar de calidad profesional desde la primera versión pública y reloj del roadmap reiniciado — slice al 2026-08-11 (§1.3, §5.7, DL-024). Suscripción selectiva de timer en ClientStateManager (§4.10, DL-025). Payloads: objectId en ObjectStateChanged, eventType opcional en RoundStarted (§4.3, DL-026). Contrato de restauración de WalkSpeed (DL-027). Contrato Layout → Gameplay (Tags ObjectSpawn/TruckZone) y módulo MapBootstrap (§4.4, DL-028). INV-001 enmendado: OnServerEvent:Connect solo en CarryManager (§4.3, §4.6, §4.10, §5.0, DL-029). |
 | 5.3 | 2026-07-10 | Auditoría arquitectónica: ciclo de sesión de PlayerData atado al jugador, no a la ronda (§4.4, §4.7 — se añade `releasePlayer`; `savePlayer` es flush, nunca EndSession). StoryEvent gana `Timestamp` relativo al inicio de ronda (§4.4). Definición del código G5 (§5.3). Mecanismo real del ban print/warn: grep `contract-logger-usage`, no Selene (§5.0). Roadmap Semana 1: ProfileStore, no "DataStore básico" (§5.7). Correcciones factuales de §4.1, §4.11, §6.2, §6.3 y §6.6 (paths de config, ServerPackages, commitlintrc, sync-tickets, cron UTC). Nota de prefijos GM/QA (§5.1). |

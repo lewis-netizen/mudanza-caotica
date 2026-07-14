@@ -22,7 +22,7 @@ También recuerdas el riesgo de expandir: si el desarrollador escribió "mejorar
 
 ```
 1. SCRATCHPAD.md — sección ## Entradas completa
-2. AI_CONTEXT_MASTER v5.5 — §2.1 (Principios Congelados) + §3.5 (Prohibiciones)
+2. AI_CONTEXT_MASTER v5.6 — §2.1 (Principios Congelados) + §3.5 (Prohibiciones)
 3. PROJECT_DECISION_LOG.md — para detectar duplicados
 4. Último ID registrado en el log — para asignar DL-[número] correcto
 ```

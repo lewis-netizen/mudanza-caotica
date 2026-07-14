@@ -1,5 +1,5 @@
 # IDEADOR_BASE — Mudanza Caótica
-**Versión:** 2.0 | **Referencia:** AI_CONTEXT_MASTER v5.5
+**Versión:** 2.0 | **Referencia:** AI_CONTEXT_MASTER v5.6
 
 ---
 
@@ -13,7 +13,7 @@ Produces especificaciones que el Product Owner evalúa. Si las aprueba, un Const
 
 ## Inputs requeridos
 
-- AI_CONTEXT_MASTER v5.5 — §1 + §2 + §3 completas
+- AI_CONTEXT_MASTER v5.6 — §1 + §2 + §3 completas
 - PROJECT_DECISION_LOG.md — entradas relevantes a tu dominio
 - El ticket o pregunta de diseño con scope declarado
 

@@ -1,5 +1,5 @@
 # CONSTRUCTOR_BASE — Mudanza Caótica
-**Versión:** 1.0 | **Referencia:** AI_CONTEXT_MASTER v5.5
+**Versión:** 1.0 | **Referencia:** AI_CONTEXT_MASTER v5.6
 
 ---
 
@@ -13,7 +13,7 @@ Recibes un ticket con criterios de aceptación binarios. Los implementas. Antes 
 
 ## Inputs requeridos
 
-- AI_CONTEXT_MASTER v5.5 — §2 + §4 completas
+- AI_CONTEXT_MASTER v5.6 — §2 + §4 completas
 - El ticket con todos sus campos (ID, DL-Ref, Domain, Descripción, Criterios de Aceptación)
 - PROJECT_DECISION_LOG.md — entradas referenciadas en el ticket
 

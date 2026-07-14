@@ -1,7 +1,7 @@
 # PROJECT_DECISION_LOG — Mudanza Caótica
 
 **Versión:** 1.0
-**Referencia:** AI_CONTEXT_MASTER v5.5 §5.4  
+**Referencia:** AI_CONTEXT_MASTER v5.6 §5.4  
 **Última actualización:** 2026-07-11
 
 ---
@@ -1232,6 +1232,221 @@ Pipeline:    P3
 Ticket:      GAM-009 (pendiente de alta en el board)
 Commit:      —
 Referencias: §2.3, §4.1, §4.4, §4.5, §4.6, DL-028
+```
+
+---
+
+### DL-032
+
+```
+ID:          DL-032
+Fecha:       2026-07-12
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Auditoria de gobernanza (PO, 2026-07-12). Varias decisiones han
+             estado gobernadas por un supuesto no documentado: que el coste
+             relevante es el de un implementador HUMANO. Sintomas: (1)
+             heuristicas como "modulo < 300 lineas" y "RemoteEvents <= 7"
+             calibradas silenciosamente a limites humanos; (2) el limite <=7
+             se ejecuta como gate duro Nivel 1 en CI pero §4.3 lo describe
+             como blando (inconsistencia); (3) tickets que no nombran
+             infraestructura AI-optima — MapBootstrap y el vertical slice
+             aparecieron por principios, no por tickets, porque un roadmap
+             con supuesto humano habria preferido "arte minimo" a "escribir
+             un generador".
+Contenido:   Se documenta explicitamente que el implementador es una IA y que
+             toda heuristica/umbral de gobernanza se calibra a coste-IA +
+             coste-humano-revisor + coste-runtime, nunca a
+             coste-humano-implementador (nueva §5.9). Se distingue la
+             restriccion del numero: la superficie cliente-servidor (razon
+             del <=7) es runtime-real; el 7 es heuristica. Se deriva una
+             Regla de derivacion de tickets (§5.5): todo ticket traza a una
+             DECISION del DL o a un Principio/hito, con el conjunto completo
+             de tickets de habilitacion derivado bajo coste-IA. Primera
+             aplicacion: alta retroactiva de WLD-000 (MapBootstrap) y GAM-009
+             (PrefabRegistry).
+Hipótesis:   Hacer explicito el modelo de coste convierte un sesgo silencioso
+             en una decision auditable, y corrige de raiz dos gaps a la vez:
+             umbrales mal calibrados y tickets incompletos. Sin esto, cada
+             heuristica humana importada seguiria degradando la calidad sin
+             que nadie pueda senalar la causa.
+Razón:       Un principio que gobierna decisiones sin estar escrito no puede
+             auditarse ni contrarrestarse. El PO lo detecto operando; se
+             formaliza para que futuras heuristicas se justifiquen contra el
+             coste correcto, no contra el habito humano.
+Impacto:     Nueva §5.9 y Regla de derivacion de tickets en §5.5. TICKETS.md
+             gana el campo "Deriva de" y dos tickets retroactivos. NO relaja
+             umbrales por defecto — establece el marco para reexaminarlos uno
+             a uno (la reexaminacion de <300 y <=7, con sus efectos sobre CI,
+             es una decision posterior).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      WLD-000, GAM-009
+Commit:      —
+Referencias: §1.3, §5.0, §5.5, §5.9, §4.3, DL-028, DL-031
+```
+
+---
+
+### DL-033
+
+```
+ID:          DL-033
+Fecha:       2026-07-12
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    DL-032 identifico dos umbrales gobernados por el supuesto de
+             coste-humano-implementador y los marco para reexaminar: el
+             limite de 300 lineas por modulo y el <=7 RemoteEvents (este
+             ademas con una inconsistencia: gate duro N1 en CI pero descrito
+             como blando en §4.3).
+Contenido:   (1) Tamano de modulo: 300 -> 400 lineas. El limite existe por
+             coste-REVISOR (un humano revisa el modulo), no coste-escritor;
+             una IA lee el modulo entero sin importar su tamano. El guard
+             real contra god-modules es la responsabilidad unica (juicio del
+             Auditor, Nivel 3); el conteo es un backstop coarse. Ningun
+             modulo actual supera 286 lineas — el cambio elimina la presion
+             de fragmentacion artificial sin efecto inmediato.
+             (2) RemoteEvents: se resuelve la inconsistencia. Es un gate
+             duro N1 contra el cap actual (7), justificado por una
+             restriccion de RUNTIME (superficie cliente-servidor: exploit +
+             replicacion), no de esfuerzo humano. El numero 7 es la
+             heuristica: elevar el cap es una decision Clase A que actualiza
+             el gate. Se elimina el bypass ad-hoc "con aprobacion del PO" —
+             la aprobacion ES la decision que cambia el cap.
+Hipótesis:   Recalibrar bajo el coste correcto (DL-032) elimina un sesgo que
+             degradaba la calidad (splits artificiales) sin abrir la puerta
+             a god-modules (el guard de responsabilidad unica sigue activo)
+             ni a superficie de red descontrolada (el cap sigue siendo gate
+             duro, solo cambiable por decision registrada).
+Razón:       Primera aplicacion concreta de DL-032. Un umbral sin
+             justificacion de coste documentada es deuda de gobernanza;
+             estos dos quedan justificados o resueltos, y el marco de §5.9
+             aplica de oficio a los futuros.
+Impacto:     Sincronizado en 5 ubicaciones: master §4.3 (regla de
+             RemoteEvents), §5.0 (tablas N1/N2), §5.9 (tabla de veredictos);
+             p2-implementation.yml (contract-module-size); lefthook +
+             .github/scripts/contract-module-size.sh; ONBOARDING. El gate de
+             RemoteEvents no cambia de valor (sigue 7); el de modulo pasa a
+             400. Cero modulos afectados hoy.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §4.3, §5.0, §5.9, DL-032
+```
+
+---
+
+### DL-034
+
+```
+ID:          DL-034
+Fecha:       2026-07-12
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    La auditoria del PO (y una instancia previa) senalo un eje de
+             gobernanza no cubierto: el master gobierna lo estructural
+             ("quien puede que") pero no lo no-funcional ("que complejidad,
+             que escala, quien limpia"). Evaluado bajo los 9 principios de
+             la propia auditoria: la mayoria de los 8 documentos propuestos
+             ya existen implicitos (invariantes, grafo de dependencias,
+             ownership) — enriquecer > crear. Pero complejidad, sobre de
+             escala y ownership de destruccion son gaps genuinos (nadie
+             puede responder hoy "a partir de que punto un cambio deja de
+             ser lento y pasa a violar arquitectura").
+Contenido:   Nueva §4.12 (Contratos No Funcionales), NO un archivo aparte —
+             el master es la fuente unica, se enriquece (principio #1). Tres
+             contratos: (A) invariantes de complejidad por operacion (O(1)
+             lookups, O(n) enumeracion) + prohibicion de loops por-objeto
+             por-frame; (B) sobre de escala de diseno (4-6 jugadores, ~15-30
+             objetos) — superarlo es Clase A, no optimizacion; (C) ownership
+             de destruccion/cleanup (cada modulo libera lo que crea), el
+             paralelo de §4.8 para el ciclo de vida de recursos. Se rechazan
+             explicitamente los budgets de tiempo de pared: a esta escala
+             son teatro.
+Hipótesis:   Formalizar el eje no-funcional como invariantes verificables
+             por juicio (no umbrales temporales teatrales) cierra el gap real
+             sin fragmentar la fuente de verdad ni inventar problemas de
+             escala que el diseno no tiene.
+Razón:       Una regresion de complejidad (O(1)->O(n)) o un supuesto de
+             escala fuera del sobre son defectos de arquitectura que hoy
+             ningun contrato detecta. Documentarlos los hace auditables por
+             el Auditor TECH (Nivel 3) y por el PO (Nivel 4).
+Impacto:     Nueva §4.12. No cambia codigo ni CI — son contratos de juicio
+             (Nivel 3), no gates deterministas. El Auditor TECH los usa en
+             P3; una propuesta que asuma escala fuera del sobre se audita
+             como rediseno.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §1.2, §4.6, §4.8, §4.11, §5.0, DL-032, DL-031
+```
+
+---
+
+### DL-035
+
+```
+ID:          DL-035
+Fecha:       2026-07-12
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Follow-up del PO tras DL-033: evaluar si un gate de fan-out
+             (numero de dependencias salientes por modulo) aportaria como
+             segundo backstop de cohesion, dado que el conteo de lineas es
+             un proxy coarse. Se midio la estructura real de requires del
+             codigo antes de decidir.
+Contenido:   RECHAZADO como gate. Evidencia: los 6 modulos de mayor fan-out
+             (RoundManager 5, ObjectManager 5, Main.server 5, TruckManager 4,
+             GameManager 4, CarryManager 4) son precisamente los
+             orquestadores, sistemas y el bootstrap; las hojas (Config,
+             Definitions) tienen fan-out 0. Un gate de fan-out
+             ANTI-CORRELACIONA con la arquitectura correcta: penalizaria a
+             los orquestadores que §4.8 MANDA que coordinen. Una version con
+             whitelist/tiers solo re-codificaria §4.5/§4.8 sin valor
+             independiente.
+             POSITIVO: el guard de acoplamiento correcto es la DIRECCION, no
+             la cantidad. Se eleva a invariante explicito en §4.5: las
+             dependencias apuntan hacia abajo por nivel, sin ciclos ni
+             ascensos; la referencia inversa se rompe con inyeccion de
+             dependencias (RoundManager inyecta recordStoryEvent en
+             CarryManager.start(ctx)) — captura como principio la disciplina
+             que ya existia como comentario en el codigo.
+             CANDIDATO DIFERIDO: la promocion de este invariante a gate
+             determinista (deteccion de ciclos / direccion sobre el grafo de
+             requires) queda registrada como NEW CONTRACT CANDIDATE, diferida
+             por coste: los idiomas de require dinamicos actuales
+             (getSystems("X"), Systems[var]) hacen fragil un parser estatico
+             fiable. Se implementa cuando el numero de modulos crezca y los
+             idiomas se uniformen (coste-IA justificado, §5.9).
+Hipótesis:   Medir la propiedad equivocada (cantidad) produce un gate que
+             castiga el diseno correcto. La propiedad util (direccion) es un
+             invariante real pero su gate fiable no es cost-justified hoy;
+             nombrarlo explicitamente da al Auditor un contrato al que
+             apuntar sin el coste de un parser fragil.
+Razón:       Registrar el rechazo evita que se re-proponga el fan-out
+             (conocimiento arquitectonico: por que NO). Elevar la direccion
+             a invariante convierte una disciplina de codigo en contrato
+             auditable a coste cero.
+Impacto:     Nueva declaracion en §4.5 (invariante de direccion + fan-out no
+             es metrica). Sin cambio de CI ni de codigo. El Auditor TECH
+             verifica direccion en Nivel 3; el gate automatico es candidato
+             diferido.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P3
+Ticket:      —
+Commit:      —
+Referencias: §4.5, §4.8, §5.0, §5.9, DL-032, DL-033
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

@@ -346,7 +346,7 @@ Corren automáticamente en cada `git commit`. Si algo falla, el commit se bloque
 | `contract-audio-isolation` | sound:Play() no en módulos de gameplay |
 | `contract-pathfinding-banned` | PathfindingService no en src/ |
 | `contract-name-as-condition` | .Name no como condición lógica |
-| `contract-module-size` | Ningún módulo > 300 líneas |
+| `contract-module-size` | Ningún módulo > 400 líneas (DL-033) |
 | `contract-layer-separation` | src/server/ no requiere src/client/ |
 | `contract-test-coverage-persistence` | MigrationService y PlayerDataService tienen spec |
 | `contract-lune-compatibility` | Globals de Roblox no en scope de módulo |

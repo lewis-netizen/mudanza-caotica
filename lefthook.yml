@@ -67,7 +67,7 @@ pre-commit:
       glob: "src/**/*.lua"
       run: bash .github/scripts/contract-name-as-condition.sh {staged_files}
 
-    # ── Nivel 2: Tamaño de módulo ≤ 300 líneas ──────────────────────────────
+    # ── Nivel 2: Tamaño de módulo ≤ 400 líneas (DL-033) ─────────────────────
 
     - name: contract-module-size
       glob: "src/**/*.lua"
