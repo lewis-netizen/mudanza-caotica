@@ -483,7 +483,7 @@ Ajustar los parámetros de `ObjectDefinition.Properties` y cantidades de spawn b
 DL-Ref:      DL-039
 Deriva de:   §4.2/§4.3 (InteractObject cliente→servidor) + §3.1 (core loop) + DL-039 (completitud)
 Domain:      TECH
-Estado:      TODO
+Estado:      IN_PROGRESS
 Semana:      1
 Depende de:  GM-001, NET-001, GAM-003
 ```

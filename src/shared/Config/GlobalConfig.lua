@@ -37,6 +37,13 @@ local TIMER_SYNC_INTERVAL = 1
 -- Usado por CarryManager para validar InteractObject server-side.
 local MAX_INTERACT_RANGE = 10
 
+-- ─── Input del cliente ─────────────────────────────────────────────────────────
+
+-- Tecla de interacción (recoger/soltar). String — el cliente la mapea con
+-- Enum.KeyCode[INTERACT_KEY]. No usar Enum aquí: rompería la carga en Lune
+-- (§4.6). Usado por InteractionController (GAM-010).
+local INTERACT_KEY = "E"
+
 -- ─── Mapa activo (DL-036) ──────────────────────────────────────────────────────
 -- Fuente ÚNICA de qué layout usa el servidor. Un solo valor — imposible que
 -- "placeholder" y "real" se contradigan (por eso NO son dos flags).
@@ -66,6 +73,7 @@ return {
     LOG_LEVEL = LOG_LEVEL,
     TIMER_SYNC_INTERVAL = TIMER_SYNC_INTERVAL,
     MAX_INTERACT_RANGE = MAX_INTERACT_RANGE,
+    INTERACT_KEY = INTERACT_KEY,
     MAP_MODE = MAP_MODE,
     FEATURE_FLAGS = FEATURE_FLAGS,
 }
