@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.8 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.9 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -28,6 +28,8 @@ Mudanza Caótica es un juego cooperativo multijugador en Roblox donde un grupo d
 Este MVP es shippable. No es una validación de gameplay — es la base del producto, diseñada para adquisición de jugadores, medición de retención y evolución continua. La persistencia, el versionado de datos y las migraciones son infraestructura fundamental, no features futuras.
 
 **Estándar de calidad (DL-024):** el juego debe ser profesionalmente funcional desde su primera versión pública. "Mínimo" se refiere al alcance (un mapa, las mecánicas core), nunca a la calidad de ejecución. La misma filosofía aplica a la arquitectura: se invierte el esfuerzo de diseño ahora para maximizar mantenibilidad, escalabilidad y comodidad de desarrollo futuro — no se acepta deuda estructural a cambio de velocidad de entrega.
+
+**Alcance de la infraestructura (DL-039): todo el ciclo de vida, no el MVP.** La infraestructura, la arquitectura y la gobernanza de este documento se diseñan para el **ciclo de vida completo** del juego. El MVP (§3.8) y el vertical slice (§5.7) son el **primer hito** dentro de ese ciclo, no el horizonte de diseño. Consecuencia operativa: la regla de Completitud (§5.5) se aplica a **escala ciclo-de-vida** — al derivar los tickets de un hito se incluyen los de habilitación/infraestructura que el ciclo de vida implica (lobby, autoría y versionado de prefabs, input del cliente, configuración del place), aunque ningún ticket de feature del slice los nombre. Tratar el MVP como horizonte fue la causa raíz de un conjunto de tickets incompleto (auditoría 2026-07-15).
 
 ---
 
@@ -374,7 +376,7 @@ src/
 | ¿Cómo es esa entidad? (datos concretos) | `Definitions/` |
 | ¿Cómo se comporta un sistema? | `Config/` |
 | ¿Quién ejecuta el comportamiento? | `src/server/` |
-| ¿Cuál es el asset real en el servidor? | `ServerStorage/ObjectPrefabs` (fuera de Rojo) — resuelto por PrefabRegistry (§4.4, DL-031) |
+| ¿Cuál es el asset real en el servidor? | `ServerStorage/ObjectPrefabs` — resuelto por PrefabRegistry (§4.4, DL-031). Se versiona como `assets/ObjectPrefabs.rbxmx` mapeado por Rojo (DL-040); *hoy fuera de Rojo hasta FND-003* |
 
 **Distinción Entities vs Definitions:**
 - `Entities/` contiene los módulos de lógica y los contratos de tipo de cada entidad.
@@ -1197,6 +1199,8 @@ Los Auditores son Orchestrators. Los Constructores e Ideadores son Subagents. QA
 | 3 | NPC vecino · eventos · summary screen | Las rondas se sienten distintas entre sí. |
 | 4 | Bug fixing · optimización · publicación | DI media-alta confirmada en playtest real. |
 
+**Este roadmap de 4 semanas es el PRIMER hito (el vertical slice), no el plan completo del juego (DL-039).** Más allá del slice, el ciclo de vida incluye —como horizonte, sin fechas aún— lobby y matchmaking reales, pipeline de contenido (más mapas/objetos/eventos), progresión no-competitiva (§3.5) y live-ops. La infraestructura del slice ya debe soportar esa evolución (§1.3). Los tickets de **habilitación** que el slice necesita pero ningún feature nombraba se derivan explícitamente: `GAM-010` (input del cliente), `WLD-008` (autoría de prefabs), `FND-003` (versionado de prefabs via Rojo), `FND-004` (config del place), `GM-004` (flujo de lobby).
+
 ### 5.8 Scratchpad e Intake
 
 Dos archivos en `/docs/`:
@@ -1522,7 +1526,10 @@ Dominios: `gameplay` | `world` | `networking` | `persistence` | `ui` | `ux` | `g
 Decision Log  = conocimiento arquitectónico — por qué importa
 Git           = historial técnico — qué cambió
 Tickets       = trabajo operativo — qué hay que hacer
-              (generado por sync-tickets.yml — no editar manualmente)
+              (docs/TICKETS.md es autoría de gobernanza: se derivan y editan
+              manualmente vía PR, §5.5. Solo el campo Estado se sincroniza
+              desde el GitHub Project por sync-tickets.yml — unidireccional
+              Project→TICKETS.md, DL-030. El resto NO lo toca la automatización.)
 ```
 
 **Costo de corrección:**
@@ -1726,6 +1733,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.9 | 2026-07-15 | **Reencuadre a ciclo de vida + completitud de tickets (auditoría PO, DL-039).** La infra/arquitectura/gobernanza apuntan al **ciclo de vida completo**; el MVP/slice es el **primer hito**, no el horizonte (§1.3, §5.7). La regla de Completitud (§5.5) se aplica a escala ciclo-de-vida — se derivan los habilitadores que faltaban: `GAM-010` (input del cliente, dueño del bug de QA-001), `WLD-008` (autoría de prefabs), `FND-003` (versionado de prefabs via Rojo), `FND-004` (config del place), `GM-004` (flujo de lobby). **Versionado de prefabs (§4.1, DL-040):** `ServerStorage/ObjectPrefabs` deja de estar "fuera de Rojo" — se versiona como `assets/ObjectPrefabs.rbxmx` mapeado por Rojo. **Corrección §6.4:** `TICKETS.md` es autoría de gobernanza; `sync-tickets` solo sincroniza el campo `Estado` (unidireccional Project→TICKETS.md). |
 | 5.8 | 2026-07-15 | **Verdad-en-docs — sincronización master↔realidad (auditoría PO).** **Núcleo funcional / shell imperativo (§4.13, DL-037):** se formaliza retroactivamente la capa `src/shared/Rules/` (CarryRules/RoundRules/StatRules) que #44 introdujo como `class:b` sin DL ni update de master — mis-clasificación de un cambio Clase A; §4.1 (árbol) corregido con `Rules/` y la convención de Tests. **Realidad del pipeline de IA (§6.3, §5.5, DL-038):** los workflows solo crean Issues — ninguna Action invoca una IA; toda ejecución (intake, construcción, auditoría) es **manual via Claude**. Se corrigen las afirmaciones de "Codex automático" y se añade la Nota de ejecución: el acoplamiento a un runner de IA desatendido está diseñado pero **no implementado** (requiere IA de pago). |
 | 5.7 | 2026-07-13 | Arbitración de mapa activo (§4.4, DL-036): `GlobalConfig.MAP_MODE` (`"placeholder"`\|`"real"`) como fuente única — reemplaza la detección frágil por `TruckZone` (DL-028) y la idea de flag-que-apaga-flag. El mapa real vive bajo `Workspace/RealMap`; en `"placeholder"` MapBootstrap destruye su copia runtime y genera el edificio. Tickets WLD-000/WLD-001 actualizados. |
 | 5.6 | 2026-07-12 | Gobernanza completa del eje no-funcional y del coste del implementador (DL-032, DL-033, DL-034). **§5.9 Modelo de Coste del Implementador (DL-032):** las heurísticas se calibran a coste-IA + revisor + runtime, nunca a coste-humano-implementador. **Regla de derivación de tickets (§5.5, DL-032):** todo ticket traza a una DECISIÓN del DL o a un Principio/hito (campo `Deriva de`); alta retroactiva de WLD-000 y GAM-009. **Recalibración de umbrales (DL-033):** módulo 300→400 líneas (coste-revisor); resuelta la inconsistencia del ≤7 RemoteEvents (gate duro contra cap; elevarlo es Clase A). **§4.12 Contratos No Funcionales (DL-034):** invariantes de complejidad, sobre de escala de diseño y ownership de destrucción/cleanup — el eje no-funcional, enriqueciendo el master en vez de fragmentarlo. **Invariante de dirección de dependencias (§4.5, DL-035):** las dependencias apuntan hacia abajo, sin ciclos; se rechaza el fan-out como métrica (anti-correlaciona con los orquestadores de §4.8) y se registra el gate automático como candidato diferido. **Convención de nombres de required checks (§5.0, DL-033):** el umbral vive en el nombre del check solo si cambiarlo es Clase A — los caps N1 (≤7) lo conservan; los backstops N2 (tamaño de módulo) no, para que su recalibración Clase B no rompa el ruleset. |

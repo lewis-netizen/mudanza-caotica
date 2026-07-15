@@ -91,6 +91,57 @@ Ticket de alta retroactiva (auditoría 2026-07-12). Foundational implementado en
 
 ---
 
+### FND-003 — Versionado de ObjectPrefabs via Rojo
+
+```
+DL-Ref:      DL-040
+Deriva de:   DL-040 (asset dentro de Rojo)
+Domain:      TECH
+Estado:      TODO
+Semana:      1
+Depende de:  ninguna
+```
+
+**Descripción**
+Traer `ServerStorage/ObjectPrefabs` a Rojo. Añadir en `default.project.json` un mapeo de `ServerStorage/ObjectPrefabs` a un archivo de modelo versionado `assets/ObjectPrefabs.rbxmx`. Elimina el estado "fuera de Rojo" (§4.1): los prefabs pasan a ser versionables y reproducibles con `rojo build`/`serve`. Actualizar §4.1 en consecuencia.
+
+**Criterios de Aceptación**
+- [ ] `default.project.json` mapea `ServerStorage/ObjectPrefabs` a `assets/ObjectPrefabs.rbxmx`
+- [ ] `rojo build` incluye ObjectPrefabs en ServerStorage sin pasos manuales de Studio
+- [ ] `assets/ObjectPrefabs.rbxmx` está versionado en el repo (aunque inicie vacío/placeholder hasta WLD-008)
+- [ ] §4.1 deja de declarar ObjectPrefabs "fuera de Rojo"; refleja el mapeo (DL-040)
+- [ ] PrefabRegistry sigue resolviendo desde `ServerStorage/ObjectPrefabs` sin cambios de código
+
+**Notas**
+Habilitador de versionado (DL-040, completitud DL-039). WLD-008 llena el `.rbxmx` con modelos reales.
+
+---
+
+### FND-004 — Configuración del place de Roblox
+
+```
+DL-Ref:      DL-039
+Deriva de:   §4.1 (infraestructura de repo) + DL-039 (completitud) + Hito §5.7 Semana 1
+Domain:      TECH
+Estado:      TODO
+Semana:      1
+Depende de:  GM-001
+```
+
+**Descripción**
+Documentar y versionar (donde sea posible) la configuración del place/juego de Roblox que el slice requiere y que ningún ticket nombraba: RemoteEvents en `default.project.json` (NET-001), Tags de CollectionService, SpawnLocations (lobby y ronda), y settings del place (StreamingEnabled acorde a §4.12, colisiones). Lo reproducible via Rojo/project.json se versiona; lo que solo vive en Studio se documenta en `docs/PROJECT_SETUP.md`.
+
+**Criterios de Aceptación**
+- [ ] `default.project.json` refleja el árbol canónico de §4.1 (Remotes, Systems, Shared, Packages, ObjectPrefabs)
+- [ ] Los settings del place no versionables via Rojo están documentados en `docs/PROJECT_SETUP.md`
+- [ ] StreamingEnabled y colisiones fijados acorde al sobre de escala (§4.12)
+- [ ] Un desarrollador nuevo puede levantar el place desde el repo siguiendo PROJECT_SETUP sin adivinar configuración
+
+**Notas**
+Deriva de la completitud (DL-039): la "correcta configuración de Roblox" era infra implícita sin ticket.
+
+---
+
 ## Dominio: Networking
 
 ### NET-001 — Networking.lua: Fuente única de RemoteEvents
@@ -426,6 +477,34 @@ Ajustar los parámetros de `ObjectDefinition.Properties` y cantidades de spawn b
 
 ---
 
+### GAM-010 — Client Input: dispara InteractObject
+
+```
+DL-Ref:      DL-039
+Deriva de:   §4.2/§4.3 (InteractObject cliente→servidor) + §3.1 (core loop) + DL-039 (completitud)
+Domain:      TECH
+Estado:      TODO
+Semana:      1
+Depende de:  GM-001, NET-001, GAM-003
+```
+
+**Descripción**
+Módulo de cliente (`src/client/InteractionController.lua` o equivalente) que captura el input del jugador y dispara `InteractObject:FireServer({instanceId})` sobre el objeto interactuable en rango/mira. Cierra el hueco detectado en QA-001: el servidor escucha `InteractObject` (CarryManager, INV-001) pero **ningún cliente lo disparaba** — el slice no era jugable. Lee estado de ClientStateManager (§4.10) para elegir el objeto objetivo; no consulta al servidor para eso.
+
+**Criterios de Aceptación**
+- [ ] Una tecla configurable (o ProximityPrompt) dispara `InteractObject:FireServer` con el `instanceId` del objeto objetivo
+- [ ] El objeto objetivo se determina client-side por rango (`GlobalConfig.MAX_INTERACT_RANGE`) y/o mira, leyendo estado de ClientStateManager — sin round-trip al servidor
+- [ ] El módulo **no** conecta ningún RemoteEvent servidor→cliente (INV-001; esos viven en ClientStateManager)
+- [ ] Se inicializa desde `Main.client.lua` (bootstrapping, §4.1)
+- [ ] Debounce/anti-spam client-side; el servidor sigue siendo la autoridad y revalida (GAM-003)
+- [ ] Lune-compatible: sin acceso a `game`/`workspace` en scope de módulo (§4.6)
+- [ ] Un jugador recoge y entrega un objeto small end-to-end en Studio (desbloquea QA-001)
+
+**Notas**
+Dueño del bug de QA-001. Deriva de la completitud (DL-039): el camino input→interacción era un habilitador que GAM-003 (server-side) y UI-002 ("no genera llamadas al servidor") asumían pero ninguno implementaba.
+
+---
+
 ## Dominio: World
 
 ### WLD-000 — MapBootstrap: Harness de layout reproducible
@@ -618,6 +697,32 @@ Ajustar layout, nodos del NPC y pool de eventos basándose en playtests de Seman
 
 ---
 
+### WLD-008 — Prefabs de objeto: autoría de modelos
+
+```
+DL-Ref:      DL-040
+Deriva de:   DL-040 (versionado de prefabs) + §4.4 (contrato Arte→PrefabRegistry, DL-031)
+Domain:      TECH
+Estado:      TODO
+Semana:      2
+Depende de:  GAM-001, FND-003
+```
+
+**Descripción**
+Modelar los prefabs de objeto (al menos uno por Size: small/medium/large) como Models con Attribute `ObjectId` (nunca `.Name`, §2.4), ubicados en el archivo de modelo versionado `assets/ObjectPrefabs.rbxmx` (FND-003) que Rojo mapea a `ServerStorage/ObjectPrefabs`. No requiere assets finales de arte, pero reemplaza los placeholders que PrefabRegistry genera hoy.
+
+**Criterios de Aceptación**
+- [ ] Existe al menos un Model por Size con Attribute `ObjectId` que casa con un ObjectDefinition (GAM-001)
+- [ ] Cada Model tiene un `root` BasePart bien definido (`PrefabRegistry.instantiate` retorna root BasePart)
+- [ ] Los prefabs viven en `assets/ObjectPrefabs.rbxmx`, versionado en el repo (FND-003)
+- [ ] `PrefabRegistry.validate()` no reporta faltantes/huérfanos/duplicados para los ObjectIds del slice
+- [ ] Identificación por Attribute `ObjectId`, nunca por `.Name` (§2.4)
+
+**Notas**
+Trabajo de Studio (modelado) + export a `.rbxmx`. La resolución la hace PrefabRegistry (GAM-009); este ticket provee los assets reales que hoy no existen.
+
+---
+
 ## Dominio: UI
 
 ### UI-001 — HUD: Timer e indicadores básicos
@@ -762,6 +867,32 @@ Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Ge
 - [ ] `PlayerDataService.savePlayer()` (flush) se llama al final de cada ronda — la sesión no se cierra
 - [ ] `PlayerDataService.releasePlayer()` se llama al desconectarse el jugador (`PlayerRemoving`) — único punto donde se cierra la sesión
 - [ ] Atribuye `ObjectsSaved`/`ObjectsSavedByType` por ObjectId (§2.4) desde los StoryEvents del summary
+
+---
+
+### GM-004 — Flujo de Lobby
+
+```
+DL-Ref:      DL-039
+Deriva de:   §4.4 (GameManager gestiona Lobby) + §3.1 (core loop) + DL-039 (completitud)
+Domain:      TECH
+Estado:      TODO
+Semana:      1
+Depende de:  GM-002, GM-003
+```
+
+**Descripción**
+Implementar el flujo de la fase Lobby que GM-003 asume pero no detalla: los jugadores aparecen en un área de lobby (SpawnLocation de lobby distinta de la zona de ronda), y la ronda arranca por un disparador definido (timer `RoundConfig.LOBBY_DURATION` y/o mínimo de jugadores). GameManager es el dueño de la transición Lobby→Active (§4.4). El lobby "rico" del ciclo de vida (matchmaking, social, cosmético) es una decisión de diseño futura (§3.9) — este ticket cubre la habilitación mínima jugable.
+
+**Criterios de Aceptación**
+- [ ] Los jugadores aparecen en un área de Lobby identificable (SpawnLocation con Tag), separada de la zona de ronda
+- [ ] La transición Lobby→Active la dispara GameManager según `RoundConfig.LOBBY_DURATION` y/o umbral de jugadores — nunca otro módulo (§4.4)
+- [ ] Tras Summary, el ciclo vuelve a Lobby y puede reiniciar (§4.4, GM-003)
+- [ ] El HUD se oculta en Lobby y aparece en Active (coherente con UI-001)
+- [ ] Sin PathfindingService ni sistemas nuevos fuera de GameManager/RoundManager
+
+**Notas**
+El lobby completo del ciclo de vida (matchmaking real) queda como horizonte de diseño (DL-039, §3.9); este ticket es el habilitador mínimo del slice.
 
 ---
 
