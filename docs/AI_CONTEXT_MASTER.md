@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.14 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.15 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1431,6 +1431,7 @@ mudanza-caotica/
 │   ├── PROJECT_DECISION_LOG.md       ← Tipo B+D
 │   ├── TICKETS.md                    ← Tipo D
 │   ├── SCRATCHPAD.md                 ← Tipo A
+│   ├── ROBLOX_SETUP.md               ← setup del place de Roblox (Tipo C, FND-004)
 │   │
 │   ├── prompts/
 │   │   ├── auditors/                 ← Tipo B
@@ -1777,6 +1778,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.15 | 2026-07-15 | **Configuración del place (FND-004, DL-039).** Nuevo `docs/ROBLOX_SETUP.md`: cómo levantar el juego desde el repo, qué versiona Rojo vs. qué es solo-Studio, y el contrato de tags de CollectionService (§4.4). `Workspace.StreamingEnabled = false` fijado en `default.project.json` (sobre de escala §4.12). §6.2 lista el nuevo doc. La "correcta configuración de Roblox" era infra implícita sin ticket — cerrada por completitud (DL-039). |
 | 5.14 | 2026-07-15 | **Flujo de Lobby (GM-004, DL-039).** Área de lobby propia con `SpawnLocation` (`LobbySpawn`), separada de la zona de ronda, generada por MapBootstrap en placeholder. GameManager teletransporta a los jugadores lobby↔edificio en las transiciones de fase (`RoundSpawn` dentro del edificio). Nuevo contrato de tags Layout→GameManager en §4.4. El disparador de ronda (`LOBBY_DURATION` + `MIN_PLAYERS_TO_START`) ya existía (GM-003). El lobby rico (matchmaking) sigue como horizonte (§3.9). Pendiente: verificación en Studio. |
 | 5.13 | 2026-07-15 | **Migración de UI a Fusion (UI-004, DL-042).** `HUDManager` y `SummaryManager` reescritos en Fusion 0.3 declarativo: `Value`s alimentados por un único `subscribe` a ClientStateManager, GUI vía `scope:New`, lista de StoryEvents con `ForValues`, lifecycle con `scope:doCleanup()`. Cero `Instance.new`/mutación manual de labels. INV-001 intacto. §4.14 actualizado (ya no "imperativos"). Pendiente: verificación en Studio. |
 | 5.12 | 2026-07-15 | **Framework de UI: Fusion (§4.14, DL-042).** Decisión del PO — la UI se adopta declarativa-reactiva (`elttob/fusion`): los módulos derivan de `Value`s que reflejan ClientStateManager (§4.10), sin mutar Instances a mano; `UI = f(estado)` mapea 1:1 sobre el estado único del cliente y es AI-óptimo (§5.9). Se prefirió sobre React-lua (peso/ceremonia). Nueva §4.14 fija el contrato. El alta de la dependencia Wally y la migración de HUDManager/SummaryManager son **UI-004** (hoy siguen imperativos — marcado pendiente para no adelantar la realidad). |
