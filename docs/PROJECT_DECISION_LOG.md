@@ -1668,4 +1668,49 @@ Commit:      —
 Referencias: §4.1, §4.4, §5.9, DL-031
 ```
 
+---
+
+### DL-041
+
+```
+ID:          DL-041
+Fecha:       2026-07-15
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El flujo de gobernanza (§5.5) definia que/por que se cambia, pero
+             nada gobernaba COMO se versiona en Git. La ausencia produjo desorden
+             real y repetido: PRs apilados y divergentes, rebases manuales
+             frágiles, un deadlock de ruleset por renombre de check, y el caso
+             #44 (capa arquitectonica mergeada como class:b sin DL ni master —
+             DL-037). El PO pidio un protocolo con enforcement.
+Contenido:   Nueva §5.10 Protocolo de Versionado, obligatoria: (1) una unidad =
+             una rama desde main = un PR, sin apilar; (2) rebase (no merge) antes
+             de integrar, squash, borrar rama; (3) master↔codigo en el mismo PR —
+             un PR class:a referencia su DL y toca docs/; (4) nombres de checks
+             estables (DL-033); (5) el PO sincroniza el ruleset al añadir checks.
+             Enforcement automatico: nuevo gate "Contract: class:a traceability
+             (DL-041)" en p2-implementation.yml — si el PR es class:a y no
+             referencia un DL o no toca docs/, falla. Se registra un gate futuro
+             (detectar capa nueva bajo src/ con label class:b) como candidato
+             diferido.
+Hipótesis:   Un protocolo explicito + un gate que ata class:a a su DL y a docs/
+             convierte la disciplina (que fallo) en enforcement (que no depende
+             de memoria), cerrando la clase de fallo de #44 sin frenar el trabajo.
+Razón:       El desorden de versionado no es cosmetico: produjo trabajo
+             desperdiciado, un master desincronizado del codigo y un deadlock de
+             merge. Codificar el protocolo y hacer cumplir la trazabilidad Clase A
+             es la unica forma de que no se repita.
+Impacto:     Master: nueva §5.10. CI: nuevo required check "Contract: class:a
+             traceability (DL-041)" en p2-implementation.yml — el PO debe añadirlo
+             al ruleset de main (Regla 5). Sin cambio de codigo de gameplay. El
+             gate se auto-valida en su propio PR (class:a, con DL y docs).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P2/P4
+Ticket:      —
+Commit:      —
+Referencias: §5.5, §5.0, §6.4, DL-033, DL-037
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

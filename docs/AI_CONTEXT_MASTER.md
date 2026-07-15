@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.9 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.10 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -862,6 +862,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | `print`/`warn` fuera de `Logger.lua` | grep (`contract-logger-usage`) — Selene no puede prohibir globals específicos |
 | — | Formato de código uniforme | StyLua |
 | — | Convención de commits | commitlint (Lefthook commit-msg) |
+| §5.10 | PR `class:a` referencia un `DL-xxx` y toca `docs/` (trazabilidad, DL-041) | github-script en CI (labels + cuerpo/commits + archivos del PR) — solo CI, requiere contexto de PR |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
 
@@ -1314,6 +1315,24 @@ y **nunca** a `coste-humano-implementador`. Un umbral que existe solo para reduc
 
 **Alcance.** Esta sección NO autoriza relajar umbrales de forma genérica — obliga a *justificar* cada uno contra el coste correcto. Un umbral sin justificación de coste documentada es deuda de gobernanza.
 
+### 5.10 Protocolo de Versionado (DL-041)
+
+El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocolo dice *cómo* se versiona en Git. Su ausencia produjo desorden real (PRs apilados, rebases manuales, deadlocks de ruleset). Es de cumplimiento obligatorio.
+
+**Regla 1 — Una unidad, una rama, un PR.** Un cambio coherente = una rama desde `main` **actualizado** = un PR. **No se apilan PRs** (una rama sobre otra rama no mergeada). Si un cambio B depende de A no mergeado: o esperas a que A entre a `main` y ramificas B desde ahí, o incluyes A y B en el mismo PR si son una sola unidad coherente.
+
+**Regla 2 — Rebase, no merge, antes de integrar.** Antes de pedir merge, la rama se **rebasa** sobre `main` (nunca `git merge main` dentro de la rama). Historia lineal (el ruleset la exige). Merge = **squash**; se borra la rama tras mergear.
+
+**Regla 3 — master↔código en el mismo PR (trazabilidad).** Un PR **Clase A** formaliza una decisión: en el mismo PR referencia su `DL-xxx` (cuerpo o commit) y actualiza la documentación (`docs/`: §4/DL/tickets). Nunca se mergea código Clase A dejando el master desincronizado — ese fue el fallo de #44 (capa nueva como `class:b` sin DL ni §4; ver DL-037). Enforcement: gate `Contract: class:a traceability (DL-041)`.
+
+**Regla 4 — Nombres de checks estables.** Al añadir un required check, su nombre no embebe umbrales (§5.0, DL-033): identidad estable ante recalibraciones, para no romper el ruleset.
+
+**Regla 5 — Sincronía del ruleset.** Añadir/renombrar un required check exige actualizar el ruleset de `main` (acción del PO — es un ajuste de protección de rama). El PR que introduce el check documenta el nombre exacto a añadir.
+
+**Gate automático (Nivel 1).** `Contract: class:a traceability (DL-041)`: si el PR es `class:a`, debe (a) referenciar un `DL-xxx` y (b) tocar `docs/`; si no, falla. Si el cambio no es arquitectónico, se reclasifica a `class:b`.
+
+**Candidato diferido.** Un gate que detecte "el PR añade un directorio/capa nuevo bajo `src/` pero está etiquetado `class:b`" cazaría el caso #44 en origen. Es heurístico (falsos positivos en adiciones `class:b` legítimas) — se registra como candidato a gate futuro, no se implementa aún (mismo criterio que DL-035).
+
 ---
 
 ## 6. Operational Architecture
@@ -1733,6 +1752,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.10 | 2026-07-15 | **Protocolo de Versionado + gate de trazabilidad (§5.10, DL-041).** Nueva §5.10 obligatoria: 1 unidad = 1 rama desde `main` = 1 PR (sin apilar); rebase (no merge) antes de integrar, squash, borrar rama; **master↔código en el mismo PR** (un `class:a` referencia su DL y toca `docs/`); nombres de checks estables; el PO sincroniza el ruleset. **Gate de CI `Contract: class:a traceability (DL-041)`** en p2-implementation.yml: falla si un PR `class:a` no referencia un `DL-xxx` o no toca `docs/` — cierra el fallo de #44 (§5.0 actualizado). Requiere que el PO añada el check al ruleset. |
 | 5.9 | 2026-07-15 | **Reencuadre a ciclo de vida + completitud de tickets (auditoría PO, DL-039).** La infra/arquitectura/gobernanza apuntan al **ciclo de vida completo**; el MVP/slice es el **primer hito**, no el horizonte (§1.3, §5.7). La regla de Completitud (§5.5) se aplica a escala ciclo-de-vida — se derivan los habilitadores que faltaban: `GAM-010` (input del cliente, dueño del bug de QA-001), `WLD-008` (autoría de prefabs), `FND-003` (versionado de prefabs via Rojo), `FND-004` (config del place), `GM-004` (flujo de lobby). **Versionado de prefabs (§4.1, DL-040):** `ServerStorage/ObjectPrefabs` deja de estar "fuera de Rojo" — se versiona como `assets/ObjectPrefabs.rbxmx` mapeado por Rojo. **Corrección §6.4:** `TICKETS.md` es autoría de gobernanza; `sync-tickets` solo sincroniza el campo `Estado` (unidireccional Project→TICKETS.md). |
 | 5.8 | 2026-07-15 | **Verdad-en-docs — sincronización master↔realidad (auditoría PO).** **Núcleo funcional / shell imperativo (§4.13, DL-037):** se formaliza retroactivamente la capa `src/shared/Rules/` (CarryRules/RoundRules/StatRules) que #44 introdujo como `class:b` sin DL ni update de master — mis-clasificación de un cambio Clase A; §4.1 (árbol) corregido con `Rules/` y la convención de Tests. **Realidad del pipeline de IA (§6.3, §5.5, DL-038):** los workflows solo crean Issues — ninguna Action invoca una IA; toda ejecución (intake, construcción, auditoría) es **manual via Claude**. Se corrigen las afirmaciones de "Codex automático" y se añade la Nota de ejecución: el acoplamiento a un runner de IA desatendido está diseñado pero **no implementado** (requiere IA de pago). |
 | 5.7 | 2026-07-13 | Arbitración de mapa activo (§4.4, DL-036): `GlobalConfig.MAP_MODE` (`"placeholder"`\|`"real"`) como fuente única — reemplaza la detección frágil por `TruckZone` (DL-028) y la idea de flag-que-apaga-flag. El mapa real vive bajo `Workspace/RealMap`; en `"placeholder"` MapBootstrap destruye su copia runtime y genera el edificio. Tickets WLD-000/WLD-001 actualizados. |
