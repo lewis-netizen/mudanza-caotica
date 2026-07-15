@@ -434,6 +434,60 @@ jobs:
               }
             }
 
+  # class:a ⇒ referencia un DL y toca docs/ (trazabilidad — DL-041).
+  # Nombre estable, sin umbral (§5.0, DL-033). Cierra el fallo de #44:
+  # una capa arquitectonica no puede entrar como class:b sin DL ni master.
+  validate-classa-traceability:
+    name: "Contract: class:a traceability (DL-041)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            if (!labels.includes('class:a')) {
+              core.info('PR no es class:a — gate de trazabilidad no aplica.');
+              return;
+            }
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const number = pr.number;
+            const dlRe = /DL-\d+/;
+
+            // (1) Referencia a un DL: en el cuerpo del PR o en algún commit.
+            let hasDL = dlRe.test(pr.body || '');
+            if (!hasDL) {
+              const commits = await github.paginate(github.rest.pulls.listCommits, {
+                owner, repo, pull_number: number, per_page: 100,
+              });
+              hasDL = commits.some(c => dlRe.test(c.commit.message || ''));
+            }
+
+            // (2) Toca docs/ (§4 / DL / tickets).
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: number, per_page: 100,
+            });
+            const touchesDocs = files.some(f => f.filename.startsWith('docs/'));
+
+            const problems = [];
+            if (!hasDL) problems.push('no referencia ningún DL-xxx (ni en el cuerpo del PR ni en los commits)');
+            if (!touchesDocs) problems.push('no modifica docs/ (un cambio Clase A actualiza §4/DL — §6.4)');
+
+            if (problems.length > 0) {
+              core.setFailed(
+                'Gate de trazabilidad Clase A (DL-041) falló:\n  - ' +
+                problems.join('\n  - ') +
+                '\n\nUn PR class:a formaliza una decisión: referencia su DL y actualiza la ' +
+                'documentación. Si el cambio no es arquitectónico, reclasifícalo a class:b.'
+              );
+              return;
+            }
+            core.info('✅ Trazabilidad Clase A: referencia DL y toca docs/.');
+
   # ══════════════════════════════════════════════════════════════════════════════
   # BLOQUE 3 — NOTIFICACIONES
   # ══════════════════════════════════════════════════════════════════════════════
