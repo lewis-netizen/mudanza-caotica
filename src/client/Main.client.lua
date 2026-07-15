@@ -13,6 +13,10 @@ local function bootstrap()
     require(modules:WaitForChild("ClientStateManager")).init()
     require(modules:WaitForChild("HUDManager")).init()
 
+    -- Input de interacción — dispara InteractObject (GAM-010). No conecta
+    -- RemoteEvents server→cliente; solo FireServer (INV-001).
+    require(modules:WaitForChild("InteractionController")).init()
+
     local GlobalConfig = require(ReplicatedStorage.Shared.Config.GlobalConfig)
     if GlobalConfig.FEATURE_FLAGS.ENABLE_SUMMARY_SCREEN then
         require(modules:WaitForChild("SummaryManager")).init()

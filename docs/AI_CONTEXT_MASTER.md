@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.10 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.11 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -360,7 +360,10 @@ src/
 │
 ├── client/                          → StarterPlayer/StarterPlayerScripts/
 │   ├── Main.client.lua              (LocalScript — entry point del cliente)
-│   └── ClientStateManager.lua       (única fuente de estado del juego en cliente)
+│   ├── ClientStateManager.lua       (única fuente de estado del juego en cliente)
+│   ├── InteractionController.lua    (input → InteractObject:FireServer — GAM-010)
+│   ├── HUDManager.lua               (HUD de ronda: timer + entregas — UI-001)
+│   └── SummaryManager.lua           (pantalla de resumen de ronda — UI-003)
 │
 └── gui/                             → StarterGui/
 ```
@@ -1752,6 +1755,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.11 | 2026-07-15 | **Input de interacción del cliente (GAM-010, DL-039).** Nuevo `src/client/InteractionController.lua`: captura el input (`GlobalConfig.INTERACT_KEY`) y dispara `InteractObject:FireServer` — cierra el bug de QA-001 (el servidor escuchaba pero ningún cliente disparaba). No conecta RemoteEvents (INV-001); lee estado de ClientStateManager y localiza objetos por Tag `CarryObject` + Attribute `InstanceId`. Árbol de §4.1 sincronizado con los módulos de cliente reales (InteractionController, HUDManager, SummaryManager). Pendiente: verificación en Studio (QA-001). |
 | 5.10 | 2026-07-15 | **Protocolo de Versionado + gate de trazabilidad (§5.10, DL-041).** Nueva §5.10 obligatoria: 1 unidad = 1 rama desde `main` = 1 PR (sin apilar); rebase (no merge) antes de integrar, squash, borrar rama; **master↔código en el mismo PR** (un `class:a` referencia su DL y toca `docs/`); nombres de checks estables; el PO sincroniza el ruleset. **Gate de CI `Contract: class:a traceability (DL-041)`** en p2-implementation.yml: falla si un PR `class:a` no referencia un `DL-xxx` o no toca `docs/` — cierra el fallo de #44 (§5.0 actualizado). Requiere que el PO añada el check al ruleset. |
 | 5.9 | 2026-07-15 | **Reencuadre a ciclo de vida + completitud de tickets (auditoría PO, DL-039).** La infra/arquitectura/gobernanza apuntan al **ciclo de vida completo**; el MVP/slice es el **primer hito**, no el horizonte (§1.3, §5.7). La regla de Completitud (§5.5) se aplica a escala ciclo-de-vida — se derivan los habilitadores que faltaban: `GAM-010` (input del cliente, dueño del bug de QA-001), `WLD-008` (autoría de prefabs), `FND-003` (versionado de prefabs via Rojo), `FND-004` (config del place), `GM-004` (flujo de lobby). **Versionado de prefabs (§4.1, DL-040):** `ServerStorage/ObjectPrefabs` deja de estar "fuera de Rojo" — se versiona como `assets/ObjectPrefabs.rbxmx` mapeado por Rojo. **Corrección §6.4:** `TICKETS.md` es autoría de gobernanza; `sync-tickets` solo sincroniza el campo `Estado` (unidireccional Project→TICKETS.md). |
 | 5.8 | 2026-07-15 | **Verdad-en-docs — sincronización master↔realidad (auditoría PO).** **Núcleo funcional / shell imperativo (§4.13, DL-037):** se formaliza retroactivamente la capa `src/shared/Rules/` (CarryRules/RoundRules/StatRules) que #44 introdujo como `class:b` sin DL ni update de master — mis-clasificación de un cambio Clase A; §4.1 (árbol) corregido con `Rules/` y la convención de Tests. **Realidad del pipeline de IA (§6.3, §5.5, DL-038):** los workflows solo crean Issues — ninguna Action invoca una IA; toda ejecución (intake, construcción, auditoría) es **manual via Claude**. Se corrigen las afirmaciones de "Codex automático" y se añade la Nota de ejecución: el acoplamiento a un runner de IA desatendido está diseñado pero **no implementado** (requiere IA de pago). |
