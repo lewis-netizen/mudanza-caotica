@@ -807,7 +807,7 @@ Pantalla de resumen al finalizar ronda. Muestra objetos salvados, objetos perdid
 DL-Ref:      DL-042
 Deriva de:   DL-042 (framework de UI) + §4.14 (contrato de renderizado)
 Domain:      TECH
-Estado:      TODO
+Estado:      IN_PROGRESS
 Semana:      2
 Depende de:  UI-001, UI-003
 ```

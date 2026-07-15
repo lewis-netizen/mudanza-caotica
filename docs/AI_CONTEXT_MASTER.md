@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.12 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.13 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -829,7 +829,7 @@ El framework de UI del proyecto es **Fusion** (`elttob/fusion`) — declarativo 
 
 **Por qué Fusion (DL-042).** El modelo `UI = f(estado)` mapea 1:1 sobre la arquitectura ya existente (ClientStateManager como estado único) y elimina el glue imperativo que DL-025 (suscripción selectiva) mitigaba a mano. Es AI-óptimo (§5.9): una IA genera y modifica UI declarativa con menos error que `Instance.new` + updates manuales. Es ligero e idiomático de Roblox — se prefirió sobre React-lua (más ceremonia y peso) para la escala de §1.2.
 
-**Estado de migración.** Hoy `HUDManager` (UI-001) y `SummaryManager` (UI-003) son **imperativos** (`Instance.new` + Janitor). El alta de la dependencia Wally y su migración a Fusion son **UI-004** — hasta completarse, esta sección describe el objetivo, no el código actual (los módulos existentes siguen funcionando). Toda UI **nueva** nace en Fusion.
+**Estado de migración.** `HUDManager` (UI-001) y `SummaryManager` (UI-003) están **migrados a Fusion** (UI-004): derivan de `Value`s que un único `subscribe` a ClientStateManager actualiza, con la GUI declarativa vía `scope:New`; `SummaryManager` renderiza la lista de StoryEvents con `ForValues`. La dependencia `elttob/fusion@0.3.0` vive en `wally.toml`. Su lifecycle usa `scope:doCleanup()` (Janitor queda para lo no-UI, p. ej. `InteractionController`). Pendiente solo la verificación en Studio (UI-004/QA-001). Toda UI **nueva** nace en Fusion.
 
 ---
 
@@ -1767,6 +1767,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.13 | 2026-07-15 | **Migración de UI a Fusion (UI-004, DL-042).** `HUDManager` y `SummaryManager` reescritos en Fusion 0.3 declarativo: `Value`s alimentados por un único `subscribe` a ClientStateManager, GUI vía `scope:New`, lista de StoryEvents con `ForValues`, lifecycle con `scope:doCleanup()`. Cero `Instance.new`/mutación manual de labels. INV-001 intacto. §4.14 actualizado (ya no "imperativos"). Pendiente: verificación en Studio. |
 | 5.12 | 2026-07-15 | **Framework de UI: Fusion (§4.14, DL-042).** Decisión del PO — la UI se adopta declarativa-reactiva (`elttob/fusion`): los módulos derivan de `Value`s que reflejan ClientStateManager (§4.10), sin mutar Instances a mano; `UI = f(estado)` mapea 1:1 sobre el estado único del cliente y es AI-óptimo (§5.9). Se prefirió sobre React-lua (peso/ceremonia). Nueva §4.14 fija el contrato. El alta de la dependencia Wally y la migración de HUDManager/SummaryManager son **UI-004** (hoy siguen imperativos — marcado pendiente para no adelantar la realidad). |
 | 5.11 | 2026-07-15 | **Input de interacción del cliente (GAM-010, DL-039).** Nuevo `src/client/InteractionController.lua`: captura el input (`GlobalConfig.INTERACT_KEY`) y dispara `InteractObject:FireServer` — cierra el bug de QA-001 (el servidor escuchaba pero ningún cliente disparaba). No conecta RemoteEvents (INV-001); lee estado de ClientStateManager y localiza objetos por Tag `CarryObject` + Attribute `InstanceId`. Árbol de §4.1 sincronizado con los módulos de cliente reales (InteractionController, HUDManager, SummaryManager). Pendiente: verificación en Studio (QA-001). |
 | 5.10 | 2026-07-15 | **Protocolo de Versionado + gate de trazabilidad (§5.10, DL-041).** Nueva §5.10 obligatoria: 1 unidad = 1 rama desde `main` = 1 PR (sin apilar); rebase (no merge) antes de integrar, squash, borrar rama; **master↔código en el mismo PR** (un `class:a` referencia su DL y toca `docs/`); nombres de checks estables; el PO sincroniza el ruleset. **Gate de CI `Contract: class:a traceability (DL-041)`** en p2-implementation.yml: falla si un PR `class:a` no referencia un `DL-xxx` o no toca `docs/` — cierra el fallo de #44 (§5.0 actualizado). Requiere que el PO añada el check al ruleset. |
