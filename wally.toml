@@ -8,6 +8,9 @@ realm = "shared"
 TestEZ = "roblox/testez@0.4.1"
 Promise = "evaera/promise@4.0.0"
 Janitor = "howmanysmall/janitor@1.18.3"
+# Framework de UI declarativo-reactivo (§4.14, DL-042). Repo: dphfox/Fusion
+# (el scope de Wally sigue siendo elttob). Realm shared → ReplicatedStorage/Packages.
+Fusion = "elttob/fusion@0.3.0"
 
 # Server realm — nunca se requiere desde el cliente (§4.7).
 # wally install los coloca en ServerPackages/ (mapeado a
