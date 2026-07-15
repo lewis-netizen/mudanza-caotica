@@ -522,7 +522,7 @@ Depende de:  ninguna
 Implementar `src/server/MapBootstrap.lua`: arbitra el layout activo según `GlobalConfig.MAP_MODE` (DL-036). En `"placeholder"` genera un edificio tagueado (`ObjectSpawn`, `TruckZone`, `NPCNode`, `NPCDropZone`) y descarta la copia runtime de `Workspace/RealMap`; en `"real"` usa el layout de Studio. Hace el juego ejecutable desde `rojo serve` sin pasos manuales de Studio.
 
 **Criterios de Aceptación**
-- [ ] Genera todos los tags de contrato (§4.4): `ObjectSpawn`, `TruckZone`, `NPCNode`+`NodeIndex`, `NPCDropZone`
+- [ ] Genera todos los tags de contrato (§4.4): `ObjectSpawn`, `TruckZone`, `NPCNode`+`NodeIndex`, `NPCDropZone`, `LobbySpawn`, `RoundSpawn` (GM-004)
 - [ ] `MAP_MODE="placeholder"` → destruye la copia runtime de `Workspace/RealMap` (si existe) y genera el placeholder
 - [ ] `MAP_MODE="real"` → no genera nada; usa `Workspace/RealMap` (avisa con warning si falta)
 - [ ] El edificio es navegable (2 niveles, rampa, chokepoint central) y tiene SpawnLocation
@@ -908,7 +908,7 @@ Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Ge
 DL-Ref:      DL-039
 Deriva de:   §4.4 (GameManager gestiona Lobby) + §3.1 (core loop) + DL-039 (completitud)
 Domain:      TECH
-Estado:      TODO
+Estado:      IN_PROGRESS
 Semana:      1
 Depende de:  GM-002, GM-003
 ```
