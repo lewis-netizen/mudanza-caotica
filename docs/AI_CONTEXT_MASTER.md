@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.7 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.8 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -349,10 +349,12 @@ src/
 │   ├── Constants/
 │   │   ├── ObjectState.lua          -- estados de wire: free/being_carried/delivered
 │   │   └── RoundPhase.lua           -- fases globales: Lobby/Active/Summary
-│   └── Tests/                       -- specs de TestEZ, convención: [Módulo].spec.lua
-│       ├── MigrationService.spec.lua
-│       ├── ObjectManager.spec.lua
-│       └── PlayerDataService.spec.lua
+│   ├── Rules/                       -- núcleo funcional: decisión pura, sin efectos (§4.13, DL-037)
+│   │   ├── CarryRules.lua           -- decideInteraction, carrySpeed
+│   │   ├── RoundRules.lua           -- buildClientComment, countLost
+│   │   └── StatRules.lua            -- computeStatDeltas
+│   └── Tests/                       -- specs de TestEZ: un [Módulo].spec.lua por
+│                                       cada módulo con núcleo puro testeable en Lune
 │
 ├── client/                          → StarterPlayer/StarterPlayerScripts/
 │   ├── Main.client.lua              (LocalScript — entry point del cliente)
@@ -798,6 +800,20 @@ Superar este sobre (p. ej. soportar 50 jugadores, o 500 objetos) **no es una opt
 
 **Invariante — Cada módulo libera lo que crea.** Un módulo que conecta una señal o instancia un recurso es responsable de liberarlo en su `stop()`/`reset()`/`cleanup()`. Ningún módulo libera recursos de otro (el paralelo de destrucción a la regla de ownership de estado, §4.8).
 
+### 4.13 Núcleo Funcional / Shell Imperativo (DL-037)
+
+La lógica de **decisión** de gameplay que puede ser pura vive en `src/shared/Rules/` — funciones sin efectos, sin acceso a `game`/`workspace`/`script`, deterministas y testeables en Lune headless (§4.6). Los módulos de servidor son el **shell imperativo**: consultan al núcleo puro *qué* hacer y ejecutan el *cómo* (mutar estado, disparar RemoteEvents, mover Parts).
+
+| Módulo (núcleo puro) | Función pura | Shell que lo consume |
+|---|---|---|
+| `CarryRules` | `decideInteraction(facts, states) → "pickup"\|"drop"\|"ignore"`; `carrySpeed(prev, mult)` | `CarryManager` (GAM-003) |
+| `RoundRules` | `buildClientComment(saved, lost) → string` (3 umbrales, §3.5); `countLost(objects, deliveredState)` | `RoundManager` (UI-003) |
+| `StatRules` | `computeStatDeltas(storyEvents) → { [playerId]: PlayerDelta }` | `GameManager` (GAM-004, §2.5) |
+
+**Invariante — la decisión que puede ser pura, lo es.** Toda lógica de gameplay expresable como función pura de datos (sin I/O ni estado del DataModel) vive en `Rules/` con su `.spec.lua` en `Tests/`. El shell no embebe decisiones de gameplay: delega en el núcleo y solo orquesta efectos. Así la lógica de gameplay se verifica en CI (Lune) sin un runtime de Roblox — hoy 62 specs.
+
+**Nota de trazabilidad (DL-037).** Esta capa entró en el código con el PR #44 etiquetado `class:b`. Fue una **mis-clasificación**: introducir una capa arquitectónica es Clase A (§6.4). DL-037 la formaliza retroactivamente; es el caso que motiva reforzar el enforcement de trazabilidad Clase A (protocolo de versionado).
+
 ---
 
 ## 5. Governance
@@ -1088,7 +1104,7 @@ CLASE A — Cambio arquitectónico
   7. AUDITORÍA TÉCNICA (Orchestrator)
      Domain TECH   → AUDIT_MODE=TECH
      Domain DESIGN → AUDIT_MODE=DESIGN
-     Domain BOTH   → TECH primero (automático via Codex).
+     Domain BOTH   → TECH primero (Issue automático; auditoría MANUAL — §6.3).
                      Si pasa TECH: humano activa Claude para DESIGN.
                      El segundo Orchestrator (DESIGN) revisa explícitamente
                      fronteras entre dominios: ¿el cambio TECH altera
@@ -1436,7 +1452,7 @@ Las referencias de sección son al Context Master v5.6.
 |---|---|---|---|---|---|---|
 | P1 | Ideación estándar | Mixto | Humano tiene idea | Entrada DISCOVERY en log | p1-intake.yml | — |
 | P2/P4 | Implementación (docs o código) | Subagent + revisión humana | Ticket en DECISION | Artefacto implementado | p2-implementation.yml | — |
-| P3 | Auditoría de proyecto | Codex (TECH, automático) + Claude (DESIGN, manual) | Lunes 9:00 UTC o solicitud PO | Hallazgos en log | p3-periodic-audit.yml | — |
+| P3 | Auditoría de proyecto | **Issue automático; auditoría manual** (TECH y DESIGN via Claude) — ver nota de ejecución | Lunes 9:00 UTC o solicitud PO | Hallazgos en log | p3-periodic-audit.yml | — |
 | P5 | Contingencia manual | Humano | Pipeline ideal no disponible | Mismo artefacto del pipeline original | — | P1, P2/P4, P3 |
 | P6 | Playtest y observación | Humano | Round completable sin crash + N features MVP (N definido por PO en semana 2) | Entradas en SCRATCHPAD → P1 | — | — |
 
@@ -1451,21 +1467,24 @@ P1 — Ideación estándar
   Ticket:               Humano o Subagent
 
 P2/P4 — Implementación (Clase A)
-  Implementación:       Subagent Constructor del dominio
+  Implementación:       Constructor (Claude, disparado por humano)
   Self-review:          Constructor (modo auditor)
   Revisión:             Humano
-  Auditoría TECH:       Codex (automático post-merge)
-  Auditoría DESIGN:     Claude (manual si domain:design o domain:both)
+  Auditoría TECH:       Codex — el Action crea el Issue automático post-merge;
+                        la auditoría se ejecuta MANUAL (hoy no corre)
+  Auditoría DESIGN:     Claude, manual, si domain:design o domain:both
 
 P3 — Auditoría de proyecto
-  TECH:   Codex ejecuta automáticamente en el cron
-  DESIGN: Humano activa Claude manualmente
-  Contexto actual: manual via Claude chat para DESIGN
+  TECH:   el cron crea el Issue automáticamente; la auditoría se ejecuta MANUAL
+  DESIGN: humano activa Claude manualmente
+  Contexto actual: TODA la auditoría es manual via Claude chat (ver nota)
 
 P5 — Contingencia manual
   Ejecutor único: Humano
   Documentar en Decision Log con nota CONTINGENCY
 ```
+
+**Nota de ejecución — automatización real vs. aspiracional (DL-038).** Ninguna GitHub Action invoca una IA. Los workflows solo **crean Issues y comentarios** (`issues.create`, `createComment`): lo que está automatizado es el *disparo del artefacto*, no su *procesamiento*. "Automático" en este registro se refiere a la creación del Issue, nunca a la ejecución de la auditoría o la construcción. Toda ejecución de IA — intake, construcción, auditoría TECH y DESIGN — es **manual**: un humano dispara Claude en chat. El acoplamiento a un runner de Codex/IA desatendido está **diseñado pero no implementado** (requiere IA de pago); mientras no exista, el pipeline opera de facto en modo P5 (contingencia manual) para todo lo que este registro llamaba "automático via Codex", y los Issues `codex-audit` sin procesar son backlog, no auditorías hechas.
 
 ### 6.4 Execution Authority
 
@@ -1707,6 +1726,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.8 | 2026-07-15 | **Verdad-en-docs — sincronización master↔realidad (auditoría PO).** **Núcleo funcional / shell imperativo (§4.13, DL-037):** se formaliza retroactivamente la capa `src/shared/Rules/` (CarryRules/RoundRules/StatRules) que #44 introdujo como `class:b` sin DL ni update de master — mis-clasificación de un cambio Clase A; §4.1 (árbol) corregido con `Rules/` y la convención de Tests. **Realidad del pipeline de IA (§6.3, §5.5, DL-038):** los workflows solo crean Issues — ninguna Action invoca una IA; toda ejecución (intake, construcción, auditoría) es **manual via Claude**. Se corrigen las afirmaciones de "Codex automático" y se añade la Nota de ejecución: el acoplamiento a un runner de IA desatendido está diseñado pero **no implementado** (requiere IA de pago). |
 | 5.7 | 2026-07-13 | Arbitración de mapa activo (§4.4, DL-036): `GlobalConfig.MAP_MODE` (`"placeholder"`\|`"real"`) como fuente única — reemplaza la detección frágil por `TruckZone` (DL-028) y la idea de flag-que-apaga-flag. El mapa real vive bajo `Workspace/RealMap`; en `"placeholder"` MapBootstrap destruye su copia runtime y genera el edificio. Tickets WLD-000/WLD-001 actualizados. |
 | 5.6 | 2026-07-12 | Gobernanza completa del eje no-funcional y del coste del implementador (DL-032, DL-033, DL-034). **§5.9 Modelo de Coste del Implementador (DL-032):** las heurísticas se calibran a coste-IA + revisor + runtime, nunca a coste-humano-implementador. **Regla de derivación de tickets (§5.5, DL-032):** todo ticket traza a una DECISIÓN del DL o a un Principio/hito (campo `Deriva de`); alta retroactiva de WLD-000 y GAM-009. **Recalibración de umbrales (DL-033):** módulo 300→400 líneas (coste-revisor); resuelta la inconsistencia del ≤7 RemoteEvents (gate duro contra cap; elevarlo es Clase A). **§4.12 Contratos No Funcionales (DL-034):** invariantes de complejidad, sobre de escala de diseño y ownership de destrucción/cleanup — el eje no-funcional, enriqueciendo el master en vez de fragmentarlo. **Invariante de dirección de dependencias (§4.5, DL-035):** las dependencias apuntan hacia abajo, sin ciclos; se rechaza el fan-out como métrica (anti-correlaciona con los orquestadores de §4.8) y se registra el gate automático como candidato diferido. **Convención de nombres de required checks (§5.0, DL-033):** el umbral vive en el nombre del check solo si cambiarlo es Clase A — los caps N1 (≤7) lo conservan; los backstops N2 (tamaño de módulo) no, para que su recalibración Clase B no rompa el ruleset. |
 | 5.5 | 2026-07-12 | Endurecimiento de arquitectura `src/`: formalizado el contrato `ObjectId → asset` en un módulo dedicado `PrefabRegistry` (§4.4, §4.1, §4.5, DL-031) — cierra el hueco entre `ObjectDefinition` y `ServerStorage/ObjectPrefabs` sin acoplar `ObjectManager` a Studio ni referenciar modelos desde los datos. `validate()` audita el contrato al bootstrap. |

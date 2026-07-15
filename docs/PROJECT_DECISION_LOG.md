@@ -1500,4 +1500,92 @@ Commit:      —
 Referencias: §4.4, DL-028, DL-031
 ```
 
+---
+
+### DL-037
+
+```
+ID:          DL-037
+Fecha:       2026-07-15
+Domain:      TECH
+Tipo:        OBSERVATION
+Estado:      DECISION
+Contexto:    El PR #44 introdujo la capa src/shared/Rules/ (CarryRules,
+             RoundRules, StatRules) — nucleo funcional puro consumido por los
+             shells de servidor — con etiqueta class:b y sin entrada de DL ni
+             actualizacion del master. La auditoria del PO (2026-07-15) detecto
+             que §4.1 y §4.4 no mencionaban la capa: el master quedo
+             desincronizado del codigo. Introducir una capa arquitectonica es
+             Clase A (§6.4), no un refactor local.
+Contenido:   Se formaliza retroactivamente el patron nucleo funcional / shell
+             imperativo. La logica de decision de gameplay que puede ser pura
+             vive en src/shared/Rules/ — sin efectos, sin game/workspace/script,
+             determinista y testeable en Lune (§4.6). Los managers de servidor
+             son el shell: consultan al nucleo que hacer y ejecutan los efectos.
+             Invariante: la decision que puede ser pura, lo es (vive en Rules/
+             con su .spec.lua). Documentado en nueva §4.13; corregido el arbol
+             de §4.1 (capa Rules + convencion de Tests).
+Hipótesis:   Documentar el patron cierra la brecha master-codigo y convierte la
+             testabilidad en Lune (62 specs) en un contrato explicito, no en un
+             accidente de implementacion.
+Razón:       La mis-clasificacion de #44 es el ejemplo canonico del fallo de
+             enforcement de trazabilidad: un cambio Clase A pasó como class:b sin
+             rastro en DL ni master. Formalizar la capa restaura la coherencia;
+             el gate que evita la recurrencia se decide aparte (protocolo de
+             versionado).
+Impacto:     Master: nueva §4.13; §4.1 (arbol) con Rules/ y convencion de Tests.
+             Sin cambio de codigo — la capa ya existe. Motiva el gate de
+             trazabilidad Clase A del protocolo de versionado.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Commit:      —
+Referencias: §4.13, §4.1, §6.4, DL-032
+```
+
+---
+
+### DL-038
+
+```
+ID:          DL-038
+Fecha:       2026-07-15
+Domain:      TECH
+Tipo:        OBSERVATION
+Estado:      DECISION
+Contexto:    §6.3 y §5.5 describian la auditoria TECH como "Codex automatico
+             post-merge" y "Codex ejecuta automaticamente en el cron". La
+             auditoria del PO (2026-07-15) verifico los workflows: ninguno
+             invoca una IA — solo crean Issues y comentarios (issues.create /
+             createComment). No existe runner de Codex desatendido. La ejecucion
+             real de toda IA (intake, construccion, auditoria) es manual: un
+             humano dispara Claude.
+Contenido:   Se documenta la verdad: lo automatizado es el DISPARO del artefacto
+             (crear el Issue), no su PROCESAMIENTO. Se corrigen §6.3 (tabla P3,
+             bloque de ejecutores) y §5.5 paso 7 para no afirmar automatizacion
+             inexistente, y se añade la Nota de ejecucion en §6.3. El
+             acoplamiento a un runner de IA desatendido queda registrado como
+             DISEÑADO pero NO IMPLEMENTADO (requiere IA de pago); hasta que
+             exista, el pipeline opera de facto en P5 para lo que se llamaba
+             "automatico via Codex".
+Hipótesis:   Alinear lo declarado con lo real elimina una incoherencia prohibida
+             (decir/hacer) y evita que los Issues codex-audit sin procesar se
+             confundan con auditorias hechas.
+Razón:       Una incoherencia entre lo que el sistema dice y lo que hace es deuda
+             de gobernanza de la peor clase: invisible hasta que alguien confia
+             en una auditoria que nunca ocurrio. El coste de la automatizacion
+             real (IA de pago) es una decision del PO, no un supuesto silencioso.
+Impacto:     Master §6.3 (tabla, ejecutores, nueva Nota de ejecucion) y §5.5
+             paso 7. Sin cambio de codigo ni de workflows en esta entrada. La
+             implementacion de un runner de IA desatendido, si el PO decide
+             pagarla, sera su propia decision (futura DL).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Commit:      —
+Referencias: §6.3, §5.5, §6.6
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
