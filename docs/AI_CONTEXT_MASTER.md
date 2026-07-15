@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.13 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.14 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -547,6 +547,16 @@ Tag "TruckZone"   — Part de la zona de entrega. TruckManager conecta
 ```
 Los Parts de objetos spawneados llevan Attributes `InstanceId` y `ObjectId`
 (strings) — nunca se identifica un objeto por `.Name` (§2.4).
+
+**Contrato Layout → GameManager (GM-004):**
+```
+Tag "LobbySpawn"  — SpawnLocation del área de lobby, separada de la zona de
+                    ronda. Los jugadores esperan aquí en fase Lobby.
+Tag "RoundSpawn"  — Part marcador dentro del edificio. GameManager
+                    teletransporta a los jugadores aquí en Lobby→Active, y de
+                    vuelta a "LobbySpawn" al reiniciar el ciclo (fase Lobby).
+```
+En modo `"placeholder"` `MapBootstrap` los genera; el mapa real (WLD-001) debe proveerlos. Si faltan, GameManager avisa y no teletransporta (la ronda sigue jugable desde donde estén).
 
 **Arbitración de mapa activo (DL-036):** `GlobalConfig.MAP_MODE` (`"placeholder"` | `"real"`) es la fuente única de qué layout usa el servidor — un solo valor, sin dos flags que puedan contradecirse. El mapa real de Studio vive bajo `Workspace/RealMap`. En modo `"placeholder"`, `MapBootstrap` destruye la copia *runtime* de `Workspace/RealMap` (seguro: el `.rbxlx` guardado no se toca; necesario porque `CollectionService:GetTagged` es agnóstico al parent y parkear no ocultaría los tags) y genera el edificio. En `"real"`, se usa `Workspace/RealMap` tal cual. Sustituye la detección por presencia de `TruckZone` de DL-028 (frágil con el mapa real incompleto).
 
@@ -1767,6 +1777,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.14 | 2026-07-15 | **Flujo de Lobby (GM-004, DL-039).** Área de lobby propia con `SpawnLocation` (`LobbySpawn`), separada de la zona de ronda, generada por MapBootstrap en placeholder. GameManager teletransporta a los jugadores lobby↔edificio en las transiciones de fase (`RoundSpawn` dentro del edificio). Nuevo contrato de tags Layout→GameManager en §4.4. El disparador de ronda (`LOBBY_DURATION` + `MIN_PLAYERS_TO_START`) ya existía (GM-003). El lobby rico (matchmaking) sigue como horizonte (§3.9). Pendiente: verificación en Studio. |
 | 5.13 | 2026-07-15 | **Migración de UI a Fusion (UI-004, DL-042).** `HUDManager` y `SummaryManager` reescritos en Fusion 0.3 declarativo: `Value`s alimentados por un único `subscribe` a ClientStateManager, GUI vía `scope:New`, lista de StoryEvents con `ForValues`, lifecycle con `scope:doCleanup()`. Cero `Instance.new`/mutación manual de labels. INV-001 intacto. §4.14 actualizado (ya no "imperativos"). Pendiente: verificación en Studio. |
 | 5.12 | 2026-07-15 | **Framework de UI: Fusion (§4.14, DL-042).** Decisión del PO — la UI se adopta declarativa-reactiva (`elttob/fusion`): los módulos derivan de `Value`s que reflejan ClientStateManager (§4.10), sin mutar Instances a mano; `UI = f(estado)` mapea 1:1 sobre el estado único del cliente y es AI-óptimo (§5.9). Se prefirió sobre React-lua (peso/ceremonia). Nueva §4.14 fija el contrato. El alta de la dependencia Wally y la migración de HUDManager/SummaryManager son **UI-004** (hoy siguen imperativos — marcado pendiente para no adelantar la realidad). |
 | 5.11 | 2026-07-15 | **Input de interacción del cliente (GAM-010, DL-039).** Nuevo `src/client/InteractionController.lua`: captura el input (`GlobalConfig.INTERACT_KEY`) y dispara `InteractObject:FireServer` — cierra el bug de QA-001 (el servidor escuchaba pero ningún cliente disparaba). No conecta RemoteEvents (INV-001); lee estado de ClientStateManager y localiza objetos por Tag `CarryObject` + Attribute `InstanceId`. Árbol de §4.1 sincronizado con los módulos de cliente reales (InteractionController, HUDManager, SummaryManager). Pendiente: verificación en Studio (QA-001). |

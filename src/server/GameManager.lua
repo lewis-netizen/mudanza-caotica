@@ -122,13 +122,37 @@ local function waitForPlayers(minPlayers: number)
     end
 end
 
+--- Teletransporta a todos los jugadores al marcador con el Tag dado (§4.4,
+--- GM-004): "LobbySpawn" en fase Lobby, "RoundSpawn" al arrancar la ronda. Si
+--- el marcador no existe (p. ej. mapa real sin él), avisa y no mueve a nadie.
+local function teleportAllToTag(tag: string)
+    local CollectionService = game:GetService("CollectionService")
+    local Players = game:GetService("Players")
+    local tagged = CollectionService:GetTagged(tag)
+    if #tagged == 0 then
+        getLog():warn("Sin marcador con Tag %s — no se teletransporta (ver §4.4)", tag)
+        return
+    end
+    local target = (tagged[1] :: any).Position + Vector3.new(0, 3, 0)
+    for _, player in ipairs(Players:GetPlayers()) do
+        local character = player.Character
+        if character then
+            pcall(function()
+                character:PivotTo(CFrame.new(target))
+            end)
+        end
+    end
+end
+
 local function lifecycleLoop()
     local RoundConfig = getRoundConfig()
     local RoundManager = getRoundManager()
 
     while running do
-        -- LOBBY: espera fija + mínimo de jugadores (RoundConfig)
+        -- LOBBY: los jugadores esperan en el área de lobby (GM-004); espera
+        -- fija + mínimo de jugadores (RoundConfig)
         setPhase(phases().LOBBY)
+        teleportAllToTag("LobbySpawn")
         task.wait(RoundConfig.LOBBY_DURATION)
         waitForPlayers(RoundConfig.MIN_PLAYERS_TO_START)
         if not running then
@@ -136,8 +160,10 @@ local function lifecycleLoop()
         end
 
         -- ACTIVE: RoundManager posee la ronda; GameManager solo espera el
-        -- aviso de fin de timer (RoundManager nunca transiciona el estado)
+        -- aviso de fin de timer (RoundManager nunca transiciona el estado).
+        -- Los jugadores entran al edificio (GM-004).
         setPhase(phases().ACTIVE)
+        teleportAllToTag("RoundSpawn")
         applyMatchStarted()
         roundOver = false
         RoundManager.start({

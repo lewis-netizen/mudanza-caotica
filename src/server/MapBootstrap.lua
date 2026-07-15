@@ -181,14 +181,29 @@ local function buildNPCContract(container: any)
     end
 end
 
-local function buildPlayerSpawn(container: any)
+local function buildLobby(container: any)
+    local CollectionService = game:GetService("CollectionService")
+
+    -- Área de lobby: plataforma al sur, separada del edificio (z 0–40) y del
+    -- camión (z -18). Los jugadores esperan aquí durante la fase Lobby (GM-004).
+    makePart({
+        Size = Vector3.new(28, 1, 20),
+        Position = Vector3.new(0, 0.5, -50),
+        Color = Color3.fromRGB(90, 96, 120),
+    }, container)
+
     local spawnLocation = Instance.new("SpawnLocation")
     spawnLocation.Size = Vector3.new(8, 1, 8)
-    spawnLocation.Position = Vector3.new(14, 0.5, -8)
+    spawnLocation.Position = Vector3.new(0, 1.5, -50)
     spawnLocation.Anchored = true
     spawnLocation.Neutral = true
     spawnLocation.Duration = 0
     spawnLocation.Parent = container
+    CollectionService:AddTag(spawnLocation, "LobbySpawn")
+
+    -- Punto de arranque de ronda: dentro del edificio, junto a la puerta sur.
+    -- GameManager teletransporta aquí a los jugadores en Lobby→Active (GM-004).
+    makeMarker(Vector3.new(0, 1, 6), container, "RoundSpawn")
 end
 
 -- ─── API pública ───────────────────────────────────────────────────────────────
@@ -233,7 +248,7 @@ function MapBootstrap.ensure()
     buildDeliveryZone(container)
     buildSpawnMarkers(container)
     buildNPCContract(container)
-    buildPlayerSpawn(container)
+    buildLobby(container)
 
     getLog():info("Mapa placeholder generado (MAP_MODE=real lo desactiva cuando WLD-001 esté listo)")
 end
