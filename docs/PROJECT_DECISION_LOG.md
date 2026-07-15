@@ -1588,4 +1588,84 @@ Commit:      —
 Referencias: §6.3, §5.5, §6.6
 ```
 
+---
+
+### DL-039
+
+```
+ID:          DL-039
+Fecha:       2026-07-15
+Domain:      BOTH
+Tipo:        OBSERVATION
+Estado:      DECISION
+Contexto:    La auditoria del PO (2026-07-15) señalo que la infra, el roadmap y
+             la derivacion de tickets estaban de facto acotados al MVP/slice,
+             aunque los principios (§2, §3.9) son de ciclo de vida. Sintoma: un
+             conjunto de tickets incompleto — faltaban lobby, autoria/versionado
+             de prefabs, input del cliente y config del place, todos
+             habilitadores que un principio implica pero ningun feature nombra.
+Contenido:   Se reencuadra explicitamente: la infraestructura, la arquitectura y
+             la gobernanza apuntan al CICLO DE VIDA COMPLETO; el MVP y el
+             vertical slice son el PRIMER hito, no el horizonte de diseño (§1.3,
+             §5.7). La regla de Completitud (§5.5) se aplica a escala
+             ciclo-de-vida: derivar un hito incluye sus tickets de habilitacion.
+             Se derivan los faltantes: GAM-010, WLD-008, FND-003, FND-004, GM-004.
+Hipótesis:   Fijar el horizonte en el ciclo de vida (no el slice) corrige el
+             sesgo que producia tickets incompletos y evita retrofit — la infra
+             del slice ya se diseña para soportar la evolucion.
+Razón:       "MVP" como horizonte mediocriza el sistema: la infra NO es para una
+             etapa, es para todo el juego. El slice es como se entrega la primera
+             version publica, no el limite de lo que la arquitectura contempla.
+Impacto:     Master §1.3 (alcance de infra), §5.7 (roadmap = primer hito), §6.4
+             (correccion de la nota de sync-tickets). Cinco tickets nuevos de
+             habilitacion en TICKETS.md. Sin cambio de codigo en esta entrada.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      GAM-010, WLD-008, FND-003, FND-004, GM-004
+Commit:      —
+Referencias: §1.3, §5.5, §5.7, §3.9, DL-024, DL-032
+```
+
+---
+
+### DL-040
+
+```
+ID:          DL-040
+Fecha:       2026-07-15
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    §4.1 declara ServerStorage/ObjectPrefabs "fuera de Rojo":
+             PrefabRegistry (DL-031) resuelve ObjectId→prefab desde ahi, pero
+             ningun ticket ni proceso creaba/versionaba esa carpeta. Los prefabs
+             vivian solo en el .rbxlx de Studio — no versionables, no
+             reproducibles desde el repo; el juego corria 100% con placeholders.
+             La auditoria del PO lo marco como hueco de infra.
+Contenido:   Los prefabs de objeto se versionan como un archivo de modelo
+             (assets/ObjectPrefabs.rbxmx) mapeado por Rojo (default.project.json)
+             a ServerStorage/ObjectPrefabs. Deja de estar "fuera de Rojo": el
+             asset es versionable, reproducible con rojo build/serve y auditable
+             por PrefabRegistry.validate() al bootstrap. La autoria de los
+             modelos (WLD-008) y el mapeo/proceso (FND-003) son sus tickets.
+Hipótesis:   Un modelo versionado mapeado por Rojo elimina el estado manual no
+             reproducible sin acoplar el codigo a Studio — mismo principio que
+             MapBootstrap (§5.9): el artefacto AI-optimo es versionable, no un
+             paso manual de Studio.
+Razón:       Un asset "fuera de Rojo" es un punto ciego de versionado: se pierde,
+             diverge entre maquinas y rompe la reproducibilidad que el resto de
+             la infra garantiza. Traerlo a Rojo cierra el hueco de raiz.
+Impacto:     §4.1 (deja de declarar ObjectPrefabs "fuera de Rojo"; nuevo mapeo en
+             default.project.json). Tickets FND-003 (mapeo/versionado) y WLD-008
+             (autoria de modelos). PrefabRegistry no cambia — sigue resolviendo
+             desde ServerStorage/ObjectPrefabs.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P2/P4
+Ticket:      FND-003, WLD-008
+Commit:      —
+Referencias: §4.1, §4.4, §5.9, DL-031
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
