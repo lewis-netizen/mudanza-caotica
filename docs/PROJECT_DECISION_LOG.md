@@ -1713,4 +1713,46 @@ Commit:      —
 Referencias: §5.5, §5.0, §6.4, DL-033, DL-037
 ```
 
+---
+
+### DL-042
+
+```
+ID:          DL-042
+Fecha:       2026-07-15
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    La auditoria del PO (2026-07-15) señalo que el framework de UI nunca
+             se documento ni decidio: UI-001/002/003 se escribieron imperativas
+             (Instance.new + updates manuales + Janitor). Un framework declarativo
+             AI-optimo reescribe esos tickets, asi que la decision los delimita.
+             El PO eligio Fusion.
+Contenido:   Se adopta Fusion (elttob/fusion) como framework de UI. La UI se
+             expresa como funcion del estado: los modulos derivan su arbol de
+             Value/Computed de Fusion que reflejan ClientStateManager (§4.10); un
+             unico subscribe actualiza los Value y Fusion re-renderiza. Nueva
+             §4.14 fija el contrato. La UI no conecta RemoteEvents (INV-001). El
+             alta de la dependencia Wally y la migracion de HUDManager/
+             SummaryManager son UI-004; toda UI nueva nace en Fusion.
+Hipótesis:   UI = f(estado) mapea 1:1 sobre ClientStateManager y elimina el glue
+             imperativo (labels mutados a mano, DL-025). Una IA produce y modifica
+             UI declarativa con menos error — coste-IA menor (§5.9).
+Razón:       El framework de UI estaba sin decidir y sin documentar (hueco de la
+             auditoria). Imperativo es verboso y propenso a error para generar y
+             mantener con IA. Fusion es declarativo, ligero e idiomatico de
+             Roblox; se prefiere sobre React-lua (mas peso/ceremonia) para la
+             escala de §1.2 (4-6 jugadores, HUD simple).
+Impacto:     Master: nueva §4.14 (contrato de UI). wally.toml gana elttob/fusion
+             (en UI-004). Tickets: UI-004 (alta dep + migracion + patron), notas
+             en UI-001/002/003. Sin cambio de codigo en esta entrada —
+             HUDManager/SummaryManager siguen imperativos hasta UI-004.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P2/P4
+Ticket:      UI-004
+Commit:      —
+Referencias: §4.14, §4.10, §5.9, DL-025
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

@@ -725,6 +725,11 @@ Trabajo de Studio (modelado) + export a `.rbxmx`. La resolución la hace PrefabR
 
 ## Dominio: UI
 
+> **Framework: Fusion (DL-042, §4.14).** Toda UI **nueva** se construye con Fusion
+> (declarativo-reactivo): deriva de `Value`s que reflejan ClientStateManager, sin
+> mutar Instances a mano. UI-001 y UI-003 nacieron imperativas y se migran en
+> UI-004. UI-002 (pendiente) se implementa directamente en Fusion.
+
 ### UI-001 — HUD: Timer e indicadores básicos
 
 ```
@@ -793,6 +798,33 @@ Pantalla de resumen al finalizar ronda. Muestra objetos salvados, objetos perdid
 - [ ] La pantalla tiene transición limpia de regreso a Lobby después del tiempo definido
 - [ ] Se limpia completamente antes de la siguiente ronda (Janitor)
 - [ ] No contiene rankings individuales, puntuaciones por jugador ni recompensas de ningún tipo
+
+---
+
+### UI-004 — Adopción de Fusion: dependencia + migración
+
+```
+DL-Ref:      DL-042
+Deriva de:   DL-042 (framework de UI) + §4.14 (contrato de renderizado)
+Domain:      TECH
+Estado:      TODO
+Semana:      2
+Depende de:  UI-001, UI-003
+```
+
+**Descripción**
+Alta de la dependencia `elttob/fusion` en `wally.toml` (`[dependencies]`, realm shared) y `wally install`. Migrar `HUDManager` (UI-001) y `SummaryManager` (UI-003) del estilo imperativo (`Instance.new` + Janitor) a Fusion declarativo, estableciendo el patrón de §4.14: la UI deriva de `Value`s que un único `subscribe` a ClientStateManager actualiza. Fija el patrón de referencia para toda UI futura (UI-002 y sucesoras).
+
+**Criterios de Aceptación**
+- [ ] `elttob/fusion` está en `[dependencies]` de `wally.toml` con versión pineada; `wally install` reproduce `Packages/`
+- [ ] `HUDManager` y `SummaryManager` construyen su árbol con Fusion (`New`/`Children`/`Value`/`Computed`) — sin `Instance.new` manual de labels
+- [ ] Los módulos derivan de `Value`s alimentados por un único `subscribe` a ClientStateManager (§4.10) — sin mutar labels a mano
+- [ ] El lifecycle usa scopes de Fusion; no quedan fugas al salir/entrar de fase (equivalente a `ResetOnSpawn=false`)
+- [ ] Ningún módulo de UI conecta RemoteEvents (INV-001) — sigue leyendo solo de ClientStateManager
+- [ ] StyLua/Selene/Lune-compat verdes; el HUD se comporta igual que antes (timer MM:SS, entregas, visible solo en Active)
+
+**Notas**
+Cierra el hueco de framework de UI sin decidir (DL-042). La suscripción selectiva (DL-025) se preserva: el HUD sigue siendo el único con `timerUpdates=true`.
 
 ---
 
