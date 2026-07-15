@@ -123,19 +123,19 @@ Habilitador de versionado (DL-040, completitud DL-039). WLD-008 llena el `.rbxmx
 DL-Ref:      DL-039
 Deriva de:   §4.1 (infraestructura de repo) + DL-039 (completitud) + Hito §5.7 Semana 1
 Domain:      TECH
-Estado:      TODO
+Estado:      IN_PROGRESS
 Semana:      1
 Depende de:  GM-001
 ```
 
 **Descripción**
-Documentar y versionar (donde sea posible) la configuración del place/juego de Roblox que el slice requiere y que ningún ticket nombraba: RemoteEvents en `default.project.json` (NET-001), Tags de CollectionService, SpawnLocations (lobby y ronda), y settings del place (StreamingEnabled acorde a §4.12, colisiones). Lo reproducible via Rojo/project.json se versiona; lo que solo vive en Studio se documenta en `docs/PROJECT_SETUP.md`.
+Documentar y versionar (donde sea posible) la configuración del place/juego de Roblox que el slice requiere y que ningún ticket nombraba: RemoteEvents en `default.project.json` (NET-001), Tags de CollectionService, SpawnLocations (lobby y ronda), y settings del place (StreamingEnabled acorde a §4.12, colisiones). Lo reproducible via Rojo/project.json se versiona; lo que solo vive en Studio se documenta en `docs/ROBLOX_SETUP.md` (nombre distinto de `.github/PROJECT_SETUP.md`, que es del GitHub Project).
 
 **Criterios de Aceptación**
-- [ ] `default.project.json` refleja el árbol canónico de §4.1 (Remotes, Systems, Shared, Packages, ObjectPrefabs)
-- [ ] Los settings del place no versionables via Rojo están documentados en `docs/PROJECT_SETUP.md`
-- [ ] StreamingEnabled y colisiones fijados acorde al sobre de escala (§4.12)
-- [ ] Un desarrollador nuevo puede levantar el place desde el repo siguiendo PROJECT_SETUP sin adivinar configuración
+- [x] `default.project.json` refleja el árbol canónico de §4.1 (Remotes, Systems, Shared, Packages) — `ServerStorage/ObjectPrefabs` queda a FND-003 (necesita el `.rbxmx`)
+- [x] Los settings del place no versionables via Rojo están documentados en `docs/ROBLOX_SETUP.md`
+- [x] StreamingEnabled fijado acorde al sobre de escala (§4.12); sin CollisionGroups propios en el slice
+- [x] Un desarrollador nuevo puede levantar el place desde el repo siguiendo `docs/ROBLOX_SETUP.md` sin adivinar configuración
 
 **Notas**
 Deriva de la completitud (DL-039): la "correcta configuración de Roblox" era infra implícita sin ticket.
