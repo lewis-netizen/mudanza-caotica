@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.11 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.12 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -818,6 +818,18 @@ La lógica de **decisión** de gameplay que puede ser pura vive en `src/shared/R
 **Invariante — la decisión que puede ser pura, lo es.** Toda lógica de gameplay expresable como función pura de datos (sin I/O ni estado del DataModel) vive en `Rules/` con su `.spec.lua` en `Tests/`. El shell no embebe decisiones de gameplay: delega en el núcleo y solo orquesta efectos. Así la lógica de gameplay se verifica en CI (Lune) sin un runtime de Roblox — hoy 62 specs.
 
 **Nota de trazabilidad (DL-037).** Esta capa entró en el código con el PR #44 etiquetado `class:b`. Fue una **mis-clasificación**: introducir una capa arquitectónica es Clase A (§6.4). DL-037 la formaliza retroactivamente; es el caso que motiva reforzar el enforcement de trazabilidad Clase A (protocolo de versionado).
+
+### 4.14 Renderizado de UI (Fusion, DL-042)
+
+El framework de UI del proyecto es **Fusion** (`elttob/fusion`) — declarativo y reactivo (DL-042). La UI se expresa como función del estado, no como mutación imperativa de Instances.
+
+**Contrato.** Los módulos de UI derivan su árbol de Instances de `Value`s de Fusion que reflejan el estado de `ClientStateManager` (§4.10, fuente única de estado del cliente). Un único `subscribe` a ClientStateManager actualiza esos `Value`s; Fusion re-renderiza solo lo que cambió. El módulo de UI **no** conecta RemoteEvents (INV-001) ni muta labels a mano.
+
+**Lifecycle.** El árbol de UI se gestiona con los *scopes* de Fusion (creación + limpieza declarativas). Janitor sigue siendo válido para recursos no-UI (conexiones, señales — p. ej. `InteractionController`).
+
+**Por qué Fusion (DL-042).** El modelo `UI = f(estado)` mapea 1:1 sobre la arquitectura ya existente (ClientStateManager como estado único) y elimina el glue imperativo que DL-025 (suscripción selectiva) mitigaba a mano. Es AI-óptimo (§5.9): una IA genera y modifica UI declarativa con menos error que `Instance.new` + updates manuales. Es ligero e idiomático de Roblox — se prefirió sobre React-lua (más ceremonia y peso) para la escala de §1.2.
+
+**Estado de migración.** Hoy `HUDManager` (UI-001) y `SummaryManager` (UI-003) son **imperativos** (`Instance.new` + Janitor). El alta de la dependencia Wally y su migración a Fusion son **UI-004** — hasta completarse, esta sección describe el objetivo, no el código actual (los módulos existentes siguen funcionando). Toda UI **nueva** nace en Fusion.
 
 ---
 
@@ -1755,6 +1767,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.12 | 2026-07-15 | **Framework de UI: Fusion (§4.14, DL-042).** Decisión del PO — la UI se adopta declarativa-reactiva (`elttob/fusion`): los módulos derivan de `Value`s que reflejan ClientStateManager (§4.10), sin mutar Instances a mano; `UI = f(estado)` mapea 1:1 sobre el estado único del cliente y es AI-óptimo (§5.9). Se prefirió sobre React-lua (peso/ceremonia). Nueva §4.14 fija el contrato. El alta de la dependencia Wally y la migración de HUDManager/SummaryManager son **UI-004** (hoy siguen imperativos — marcado pendiente para no adelantar la realidad). |
 | 5.11 | 2026-07-15 | **Input de interacción del cliente (GAM-010, DL-039).** Nuevo `src/client/InteractionController.lua`: captura el input (`GlobalConfig.INTERACT_KEY`) y dispara `InteractObject:FireServer` — cierra el bug de QA-001 (el servidor escuchaba pero ningún cliente disparaba). No conecta RemoteEvents (INV-001); lee estado de ClientStateManager y localiza objetos por Tag `CarryObject` + Attribute `InstanceId`. Árbol de §4.1 sincronizado con los módulos de cliente reales (InteractionController, HUDManager, SummaryManager). Pendiente: verificación en Studio (QA-001). |
 | 5.10 | 2026-07-15 | **Protocolo de Versionado + gate de trazabilidad (§5.10, DL-041).** Nueva §5.10 obligatoria: 1 unidad = 1 rama desde `main` = 1 PR (sin apilar); rebase (no merge) antes de integrar, squash, borrar rama; **master↔código en el mismo PR** (un `class:a` referencia su DL y toca `docs/`); nombres de checks estables; el PO sincroniza el ruleset. **Gate de CI `Contract: class:a traceability (DL-041)`** en p2-implementation.yml: falla si un PR `class:a` no referencia un `DL-xxx` o no toca `docs/` — cierra el fallo de #44 (§5.0 actualizado). Requiere que el PO añada el check al ruleset. |
 | 5.9 | 2026-07-15 | **Reencuadre a ciclo de vida + completitud de tickets (auditoría PO, DL-039).** La infra/arquitectura/gobernanza apuntan al **ciclo de vida completo**; el MVP/slice es el **primer hito**, no el horizonte (§1.3, §5.7). La regla de Completitud (§5.5) se aplica a escala ciclo-de-vida — se derivan los habilitadores que faltaban: `GAM-010` (input del cliente, dueño del bug de QA-001), `WLD-008` (autoría de prefabs), `FND-003` (versionado de prefabs via Rojo), `FND-004` (config del place), `GM-004` (flujo de lobby). **Versionado de prefabs (§4.1, DL-040):** `ServerStorage/ObjectPrefabs` deja de estar "fuera de Rojo" — se versiona como `assets/ObjectPrefabs.rbxmx` mapeado por Rojo. **Corrección §6.4:** `TICKETS.md` es autoría de gobernanza; `sync-tickets` solo sincroniza el campo `Estado` (unidireccional Project→TICKETS.md). |
