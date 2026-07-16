@@ -60,7 +60,7 @@ local MAP_MODE: "placeholder" | "real" = "placeholder"
 -- Logger registra flags activos al inicio del servidor.
 
 local FEATURE_FLAGS = {
-    ENABLE_NPC = false, -- NPCManager — desactivado hasta que exista (Semana 3, WLD-004)
+    ENABLE_NPC = true, -- NPCManager patrullando (WLD-004)
     ENABLE_EVENTS = false, -- EventManager — desactivado hasta Semana 3
     ENABLE_SUMMARY_SCREEN = true, -- Summary Screen al finalizar ronda
     DEBUG_OBJECT_STATES = IS_STUDIO, -- Logging verbose de ObjectInstance.State

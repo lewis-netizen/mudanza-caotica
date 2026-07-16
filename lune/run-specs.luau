@@ -43,6 +43,7 @@ local MODULE_MAP = {
     ["CarryRules.spec"] = "src/shared/Rules/CarryRules",
     ["RoundRules.spec"] = "src/shared/Rules/RoundRules",
     ["StatRules.spec"] = "src/shared/Rules/StatRules",
+    ["NPCRules.spec"] = "src/shared/Rules/NPCRules",
 }
 
 -- ─── Utilidades ───────────────────────────────────────────────────────────────
