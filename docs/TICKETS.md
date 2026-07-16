@@ -770,7 +770,7 @@ HUD con timer de ronda en formato `MM:SS` y conteo de objetos entregados. Lee es
 ```
 Deriva de:   §3.7 (feedback: el jugador sabe qué puede interactuar)
 Domain:      TECH
-Estado:      IN_PROGRESS
+Estado:      DONE
 Semana:      2
 Depende de:  UI-001, GAM-002
 ```
@@ -779,12 +779,15 @@ Depende de:  UI-001, GAM-002
 Prompt contextual client-side al acercarse a un objeto interactuable. Distingue visualmente entre objeto `free` y objeto `being_carried`. No genera llamadas al servidor para consultas de estado.
 
 **Criterios de Aceptación**
-- [ ] El prompt aparece cuando el jugador está dentro del rango definido en `src/shared/Config/GlobalConfig.lua`
-- [ ] El prompt desaparece al alejarse o al cambiar el estado del objeto
-- [ ] La representación visual distingue `free` de `being_carried` — o simplemente no aparece para `being_carried`
-- [ ] El sistema corre completamente client-side sin disparar RemoteEvents para consultas
-- [ ] No hay loop costoso de detección — usa distancia calculada eficientemente
-- [ ] Se actualiza correctamente al recibir cambios de estado de ClientStateManager
+- [x] El prompt aparece cuando el jugador está dentro del rango definido en `src/shared/Config/GlobalConfig.lua` (MAX_INTERACT_RANGE, via `InteractionController.getTarget`)
+- [x] El prompt desaparece al alejarse o al cambiar el estado del objeto
+- [x] La representación visual distingue `free` de `being_carried` ("E — Recoger" / "E — Soltar"; los `being_carried` por otros no generan prompt)
+- [x] El sistema corre completamente client-side sin disparar RemoteEvents para consultas
+- [x] No hay loop costoso de detección — poll de 0.15s con `task.wait` (§4.12), distancia al cuadrado
+- [x] Se actualiza correctamente (fase de ClientStateManager; objetivo de InteractionController — targeting definido UNA vez)
+
+**Notas**
+Implementado como `PromptController` (Fusion, §4.14). Runtime verificado (MCP): Recoger→Soltar→oculto. Estado → DONE.
 
 ---
 

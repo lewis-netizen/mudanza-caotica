@@ -17,6 +17,9 @@ local function bootstrap()
     -- RemoteEvents server→cliente; solo FireServer (INV-001).
     require(modules:WaitForChild("InteractionController")).init()
 
+    -- Prompt contextual "E — Recoger/Soltar" (UI-002, Fusion §4.14)
+    require(modules:WaitForChild("PromptController")).init()
+
     local GlobalConfig = require(ReplicatedStorage.Shared.Config.GlobalConfig)
     if GlobalConfig.FEATURE_FLAGS.ENABLE_SUMMARY_SCREEN then
         require(modules:WaitForChild("SummaryManager")).init()
