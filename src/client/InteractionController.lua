@@ -84,10 +84,33 @@ local function nearestFreeInRange(): string?
     return bestId
 end
 
---- Elige el objetivo y dispara InteractObject. Si cargo algo, esa interacción es
+--- Resuelve el objetivo actual de la interacción. Si cargo algo, la acción es
 --- soltar (prioridad 1); si no, recoger el `free` más cercano en rango.
+--- Retorna (instanceId?, "drop"|"pickup"|nil).
+local function resolveTarget(): (string?, string?)
+    local carried = carriedInstanceId()
+    if carried then
+        return carried, "drop"
+    end
+    local nearest = nearestFreeInRange()
+    if nearest then
+        return nearest, "pickup"
+    end
+    return nil, nil
+end
+
+--- Objetivo actual para consumidores de UI (UI-002: el prompt lee esto en su
+--- poll — la lógica de targeting vive AQUÍ, una sola vez). nil antes de init().
+function InteractionController.getTarget(): (string?, string?)
+    if not janitor then
+        return nil, nil
+    end
+    return resolveTarget()
+end
+
+--- Dispara InteractObject para el objetivo actual.
 local function onInteract()
-    local target = carriedInstanceId() or nearestFreeInRange()
+    local target = resolveTarget()
     if not target then
         return
     end
