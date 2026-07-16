@@ -81,7 +81,14 @@ end
 
 --- Escribe el resultado de la migración DENTRO de Profile.Data (misma tabla)
 --- — ProfileStore guarda la referencia original, no una nueva.
+--- GUARDA DE ALIASING: cuando el dato ya está en la versión canónica,
+--- migrate() devuelve la MISMA tabla; limpiar target borraría también source
+--- (self-wipe — el perfil quedaba {} sesión por medio). Si son la misma
+--- referencia no hay nada que escribir.
 local function writeInto(target: any, source: any)
+    if target == source then
+        return
+    end
     for key in pairs(target) do
         target[key] = nil
     end
@@ -89,6 +96,10 @@ local function writeInto(target: any, source: any)
         target[key] = value
     end
 end
+
+-- Expuesto con prefijo _ para el spec (mismo patrón que PrefabRegistry._audit):
+-- la guarda de aliasing es exactamente el bug que los specs de interfaz no veían.
+PlayerDataService._writeInto = writeInto
 
 local function stampJoinDates(data: any)
     local now = os.time()
