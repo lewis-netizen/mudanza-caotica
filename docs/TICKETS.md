@@ -649,14 +649,17 @@ Depende de:  WLD-001, GM-002
 Implementar `src/server/EventManager.lua` con al menos un evento de Entropía Espacial en el pool (ejemplo: bloqueo de pasillo, zona que ralentiza). EventManager selecciona aleatoriamente al inicio de cada ronda y notifica via `EventTriggered`. El evento modifica el entorno físico, no las mecánicas core.
 
 **Criterios de Aceptación**
-- [ ] Al menos 1 evento espacial existe en el pool en `src/shared/Config/Events.lua`
-- [ ] `EventManager.triggerRandom()` selecciona y ejecuta un evento del pool
-- [ ] `EventTriggered` se dispara con el `eventType` correcto
-- [ ] El evento modifica el entorno de forma visible sin tutorial
-- [ ] El evento supera los 5 criterios del Test Oficial de Diseño (§2.2)
-- [ ] El evento no viola la Lista Prohibida (§3.5)
-- [ ] `EventManager.reset()` devuelve el entorno exactamente al estado anterior — sin residuos
-- [ ] Al implementarse, se activa `FEATURE_FLAGS.ENABLE_EVENTS` (hoy `false` hasta que el módulo exista)
+- [x] Al menos 1 evento espacial existe en el pool en `src/shared/Config/Events.lua` (NeighborBlocksCorridor)
+- [x] `EventManager.triggerRandom()` selecciona y ejecuta un evento del pool
+- [x] `EventTriggered` se dispara con el `eventType` correcto (runtime verificado)
+- [x] El evento modifica el entorno de forma visible sin tutorial (el vecino bloquea el chokepoint)
+- [ ] El evento supera los 5 criterios del Test Oficial de Diseño (§2.2) — **validación DESIGN del PO** (Domain BOTH)
+- [x] El evento no viola la Lista Prohibida (§3.5)
+- [x] `EventManager.reset()` devuelve el entorno exactamente al estado anterior (cleanup: PivotTo original + retira `EventParked`)
+- [x] `FEATURE_FLAGS.ENABLE_EVENTS = true` activado
+
+**Notas**
+El evento aparca al vecino via Attribute `EventParked` (coordinación por DataModel — la patrulla de WLD-004 espera). Runtime verificado (MCP): NPC bloqueando el pasillo en `(0,3,21)`, cadena EventTriggered→RoundStarted completa.
 
 ---
 

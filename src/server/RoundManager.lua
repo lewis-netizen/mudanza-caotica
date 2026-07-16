@@ -132,7 +132,12 @@ function RoundManager.start(opts: { onTimeExpired: () -> () })
         getSystems("NPCManager").start()
     end
     if GlobalConfig.FEATURE_FLAGS.ENABLE_EVENTS then
-        getLog():warn("ENABLE_EVENTS activo pero EventManager no existe todavía (WLD-005)")
+        -- Después del NPC (el evento del pasillo lo usa); antes de RoundStarted
+        -- para que el payload lleve el eventType (§4.3, DL-026)
+        activeEventType = getSystems("EventManager").triggerRandom()
+        if activeEventType then
+            RoundManager.recordStoryEvent("RoundEventStarted", { eventType = activeEventType })
+        end
     end
 
     getNetworking().RoundStarted:FireAllClients({
@@ -208,6 +213,9 @@ function RoundManager.reset()
     local resetConfig = require(game:GetService("ReplicatedStorage").Shared.Config.GlobalConfig)
     if resetConfig.FEATURE_FLAGS.ENABLE_NPC then
         getSystems("NPCManager").reset()
+    end
+    if resetConfig.FEATURE_FLAGS.ENABLE_EVENTS then
+        getSystems("EventManager").reset()
     end
     elapsedSeconds = 0
     storyEvents = {}

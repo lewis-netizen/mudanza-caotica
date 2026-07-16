@@ -79,17 +79,26 @@ local Pool = {
             local npcModel = if npcPrimaryPart then npcPrimaryPart.Parent else nil
             local originalCFrame: CFrame? = nil
 
-            if npcModel and corridorZone then
+            if npcModel and npcPrimaryPart and corridorZone then
                 originalCFrame = (npcModel :: Model):GetPivot()
+                -- EventParked: la patrulla de NPCManager espera mientras el
+                -- Attribute esté puesto (coordinación via DataModel — sin
+                -- require entre capas). El cleanup lo retira.
+                npcPrimaryPart:SetAttribute("EventParked", true)
+                local lift = npcPrimaryPart.Size.Y / 2 + 0.5
+                local goal = CFrame.new(corridorZone.Position + Vector3.new(0, lift, 0))
                 local tween = TweenService:Create(
-                    (npcModel :: Model).PrimaryPart,
+                    npcPrimaryPart,
                     TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                    { CFrame = corridorZone.CFrame }
+                    { CFrame = goal }
                 )
                 tween:Play()
             end
 
             return function()
+                if npcPrimaryPart then
+                    npcPrimaryPart:SetAttribute("EventParked", nil)
+                end
                 if npcModel and originalCFrame then
                     (npcModel :: Model):PivotTo(originalCFrame)
                 end
