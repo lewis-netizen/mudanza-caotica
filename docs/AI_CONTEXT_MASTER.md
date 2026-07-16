@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.15 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.16 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -416,6 +416,8 @@ Solo `InteractObject` viaja de cliente a servidor. Su única conexión
 server-side (`OnServerEvent:Connect`) vive en `CarryManager.lua` — ver INV-001.
 `DeliverObject` es disparado por el servidor via `Part.Touched` server-side.
 
+**Contrato de payload (lección QA-001, §6.7).** La columna *Payload* de la tabla es un **contrato exacto que ambos lados cumplen**: el emisor manda esa forma, el receptor la parsea de esa forma. El payload de `InteractObject` es `{ instanceId }` (una tabla), **no** el string suelto — el receptor extrae `payload.instanceId`, y lo hace **defensivo** (tolera forma inesperada sin crashear). El bug #2 de QA-001 fue exactamente esto: `CarryManager` trataba `{ instanceId }` como si fuera el string → nunca recogía. Los specs no lo atrapan (prueban módulos aislados); lo atrapa la verificación de runtime (§6.7).
+
 **Autoridad de estado:** ObjectManager es el único propietario de `ObjectInstance.State`. Ningún otro módulo modifica el estado directamente — todos solicitan el cambio a ObjectManager.
 
 **Regla de RemoteEvents (DL-033):** el CI impone un gate duro (Nivel 1) contra el **cap actual = 7**. El límite existe por una restricción de *runtime* (superficie cliente-servidor: exploit + replicación), no de esfuerzo humano — por eso es un gate, no una guía. El *número* 7 es la heurística: **elevar el cap es una decisión Clase A** que se registra en el Decision Log y actualiza el valor del gate. No hay bypass ad-hoc "con aprobación del PO" — la aprobación ES la decisión que cambia el cap.
@@ -547,6 +549,8 @@ Tag "TruckZone"   — Part de la zona de entrega. TruckManager conecta
 ```
 Los Parts de objetos spawneados llevan Attributes `InstanceId` y `ObjectId`
 (strings) — nunca se identifica un objeto por `.Name` (§2.4).
+
+**Trigger zones son volúmenes (lección QA-001, §6.7).** `TruckZone` es una zona `Touched`, no una calcomanía de suelo: el objeto cargado se sostiene a la **altura del torso** (~3 studs), así que una losa a ras de suelo **nunca lo toca**. La entrega se resuelve por el **personaje** del jugador que entra a la zona (sus pies sí la tocan) → se entrega lo que ese jugador carga (`CarryManager.getCarriedInstanceId`), y solo si está `being_carried`. Fue el bug #3 de QA-001. Regla: una zona `Touched` se detecta por la entidad que la toca de forma fiable, no asumiendo contacto de un objeto sostenido en alto.
 
 **Contrato Layout → GameManager (GM-004):**
 ```
@@ -729,6 +733,8 @@ State = {
     summary: RoundSummary?,
 }
 ```
+
+**Invariante — ownership de estado por evento (lección QA-001, §6.7).** Cada campo de `State` lo posee su **evento de datos**, y **solo** ese evento lo limpia. Un evento de *control* **no** limpia estado de *datos*: el orden de entrega entre RemoteEvents distintos **no está garantizado** por Roblox, así que los `ObjectStateChanged` del spawn pueden llegar *antes* que `RoundStarted`. `objects` se limpia en `RoundEnded` (evento terminal del ciclo del dato), **nunca en RoundStarted**. El bug #1 de QA-001 fue exactamente esto: `RoundStarted` borraba `objects` recién poblado → `InteractionController` no encontraba objetivo → la tecla E no hacía nada.
 
 **Nota sobre Janitor:** este módulo NO usa Janitor (`howmanysmall/janitor`, §4.11). Su patrón de `subscribe(id, listener)` con cleanup por clave es un observer pattern con múltiples suscriptores — forma distinta al problema que Janitor resuelve (un dueño limpiando sus propios recursos). Los módulos de UI que consumen `ClientStateManager` (HUDManager, SummaryManager) sí usan Janitor para gestionar sus propias conexiones internas.
 
@@ -1432,6 +1438,7 @@ mudanza-caotica/
 │   ├── TICKETS.md                    ← Tipo D
 │   ├── SCRATCHPAD.md                 ← Tipo A
 │   ├── ROBLOX_SETUP.md               ← setup del place de Roblox (Tipo C, FND-004)
+│   ├── RUNTIME_VERIFICATION.md        ← smoke test de runtime P6 via MCP (Tipo C, DL-043)
 │   │
 │   ├── prompts/
 │   │   ├── auditors/                 ← Tipo B
@@ -1503,7 +1510,7 @@ Las referencias de sección son al Context Master v5.6.
 | P2/P4 | Implementación (docs o código) | Subagent + revisión humana | Ticket en DECISION | Artefacto implementado | p2-implementation.yml | — |
 | P3 | Auditoría de proyecto | **Issue automático; auditoría manual** (TECH y DESIGN via Claude) — ver nota de ejecución | Lunes 9:00 UTC o solicitud PO | Hallazgos en log | p3-periodic-audit.yml | — |
 | P5 | Contingencia manual | Humano | Pipeline ideal no disponible | Mismo artefacto del pipeline original | — | P1, P2/P4, P3 |
-| P6 | Playtest y observación | Humano | Round completable sin crash + N features MVP (N definido por PO en semana 2) | Entradas en SCRATCHPAD → P1 | — | — |
+| P6 | Verificación de runtime y playtest | **MCP de Studio** (Claude o humano) | Ticket de comportamiento runtime antes de DONE; o hito de integración | Smoke test de runtime pasado + observaciones en SCRATCHPAD → P1 | — | — |
 
 **Ejecutores detallados:**
 
@@ -1531,6 +1538,13 @@ P3 — Auditoría de proyecto
 P5 — Contingencia manual
   Ejecutor único: Humano
   Documentar en Decision Log con nota CONTINGENCY
+
+P6 — Verificación de runtime y playtest
+  Ejecutor: MCP de Studio — Claude conduce y verifica (o humano)
+  PRIMERA etapa del pipeline con automatización de IA REAL: a diferencia
+  del Codex aspiracional (DL-038), el MCP existe y corre. Verifica lo que
+  specs/contratos NO pueden: integración cliente↔servidor, payloads,
+  física/espacio, orden de eventos, bootstrap limpio. Contrato en §6.7.
 ```
 
 **Nota de ejecución — automatización real vs. aspiracional (DL-038).** Ninguna GitHub Action invoca una IA. Los workflows solo **crean Issues y comentarios** (`issues.create`, `createComment`): lo que está automatizado es el *disparo del artefacto*, no su *procesamiento*. "Automático" en este registro se refiere a la creación del Issue, nunca a la ejecución de la auditoría o la construcción. Toda ejecución de IA — intake, construcción, auditoría TECH y DESIGN — es **manual**: un humano dispara Claude en chat. El acoplamiento a un runner de Codex/IA desatendido está **diseñado pero no implementado** (requiere IA de pago); mientras no exista, el pipeline opera de facto en modo P5 (contingencia manual) para todo lo que este registro llamaba "automático via Codex", y los Issues `codex-audit` sin procesar son backlog, no auditorías hechas.
@@ -1747,6 +1761,28 @@ domain:tech | domain:design | domain:both
 class:a | class:b
 ```
 
+### 6.7 Verificación de Runtime (DL-043)
+
+El pipeline verificaba exhaustivamente lo **estático** (specs de núcleos puros, contratos grep/AST, lint, formato) pero **nada** verificaba que el juego *funcionara* en runtime. QA-001 lo expuso: 62 specs y todos los contratos en verde, pero el slice **no era jugable** — tres bugs de integración que ninguna verificación estática atrapa. El MCP de Roblox Studio cierra el hueco: **verificación de runtime accionable** (arrancar Play, conducir input, inspeccionar estado, leer consola), programática, por Claude o por el humano.
+
+**Principio — estático necesario, no suficiente.** Los specs prueban núcleos puros *en aislamiento* (§4.13); no pueden atrapar la *integración*: cableado cliente↔servidor, forma de payloads, física/espacio, orden de eventos, bootstrap. Esos bugs solo se ven **en runtime**.
+
+**Gate de Definition of Done (DL-043).** Un ticket que toca **comportamiento de runtime** — cableado cliente↔servidor, payloads de RemoteEvent, física/colisiones/trigger zones, orden de eventos, o el bootstrap — **no está DONE** hasta que pasa la verificación de runtime (P6). Los specs verdes NO bastan. (El slice #31 se mergeó sin esto → los bugs de QA-001.)
+
+**El smoke test (procedimiento en `docs/RUNTIME_VERIFICATION.md`).**
+1. **Bootstrap limpio:** servidor y cliente arrancan; la consola **sin errores ni stack traces** (más allá de ruido conocido de plataforma).
+2. **Loop core end-to-end:** lobby → arranca ronda → spawn de objetos → recoger (weld, desanclado) → entregar (conteo sube, `DeliverObject`) → fin de ronda → summary.
+3. **Aserciones de estado:** `state.objects` poblado en cliente; objetivo resuelto; objeto entregado destruido y contado.
+
+**Lecciones de QA-001 codificadas como invariantes** (para que no se repitan; si se repiten, están mitigadas):
+- **§4.3 — Contrato de payload de RemoteEvent:** ambos lados usan la forma exacta de §4.3; el receptor **parsea defensivo** (extrae del payload). Cazó el bug #2 (`{instanceId}` tratado como string).
+- **§4.10 — Ownership de estado vs. eventos de control:** el estado de datos lo poseen sus eventos de datos; un evento de control **no** lo limpia (el orden entre RemoteEvents distintos no está garantizado). Cazó el bug #1 (RoundStarted borraba `state.objects`).
+- **§4.4 — Trigger zone = volumen:** una zona `Touched` debe dimensionarse para lo que detecta, o detectar por la entidad que sí la toca. Cazó el bug #3 (objeto cargado a la altura del torso vs. zona a ras de suelo).
+
+**Higiene de sync (lección QA-001).** Antes de verificar, el Studio debe reflejar el repo (rojo conectado y **sincronizado**). Un Studio *stale* produce diagnósticos falsos — en QA-001, un Studio desincronizado hizo reportar "ServerScriptService vacío" cuando no lo estaba, y enmascaró qué código corría.
+
+**Automatización real.** P6-via-MCP es la **primera** etapa del pipeline con automatización de IA que *existe y corre* — a diferencia del runner de Codex aspiracional (DL-038). Claude conduce el MCP directamente.
+
 ---
 
 ## Modo Auditor
@@ -1778,6 +1814,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.16 | 2026-07-16 | **Rediseño del pipeline: Verificación de Runtime (§6.7, DL-043).** QA-001 expuso que 62 specs + todos los contratos en verde no impedían un slice injugable (3 bugs de integración). El MCP de Studio cierra el hueco: nueva **tier de verificación de runtime (P6)** accionable — arrancar Play, conducir input, inspeccionar estado, leer consola (Claude o humano). **Gate de Definition of Done:** tickets de comportamiento runtime no están DONE sin pasar el smoke test. Las 3 lecciones codificadas como invariantes: §4.3 (contrato de payload + parsing defensivo), §4.10 (ownership de estado por evento vs. eventos de control), §4.4 (trigger zones son volúmenes). Nuevo `docs/RUNTIME_VERIFICATION.md`. P6-via-MCP es la primera automatización de IA **real** del pipeline (vs. Codex aspiracional, DL-038). |
 | 5.15 | 2026-07-15 | **Configuración del place (FND-004, DL-039).** Nuevo `docs/ROBLOX_SETUP.md`: cómo levantar el juego desde el repo, qué versiona Rojo vs. qué es solo-Studio, y el contrato de tags de CollectionService (§4.4). `Workspace.StreamingEnabled = false` fijado en `default.project.json` (sobre de escala §4.12). §6.2 lista el nuevo doc. La "correcta configuración de Roblox" era infra implícita sin ticket — cerrada por completitud (DL-039). |
 | 5.14 | 2026-07-15 | **Flujo de Lobby (GM-004, DL-039).** Área de lobby propia con `SpawnLocation` (`LobbySpawn`), separada de la zona de ronda, generada por MapBootstrap en placeholder. GameManager teletransporta a los jugadores lobby↔edificio en las transiciones de fase (`RoundSpawn` dentro del edificio). Nuevo contrato de tags Layout→GameManager en §4.4. El disparador de ronda (`LOBBY_DURATION` + `MIN_PLAYERS_TO_START`) ya existía (GM-003). El lobby rico (matchmaking) sigue como horizonte (§3.9). Pendiente: verificación en Studio. |
 | 5.13 | 2026-07-15 | **Migración de UI a Fusion (UI-004, DL-042).** `HUDManager` y `SummaryManager` reescritos en Fusion 0.3 declarativo: `Value`s alimentados por un único `subscribe` a ClientStateManager, GUI vía `scope:New`, lista de StoryEvents con `ForValues`, lifecycle con `scope:doCleanup()`. Cero `Instance.new`/mutación manual de labels. INV-001 intacto. §4.14 actualizado (ya no "imperativos"). Pendiente: verificación en Studio. |
