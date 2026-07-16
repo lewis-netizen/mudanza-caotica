@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.17 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.18 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -827,7 +827,7 @@ La lógica de **decisión** de gameplay que puede ser pura vive en `src/shared/R
 
 | Módulo (núcleo puro) | Función pura | Shell que lo consume |
 |---|---|---|
-| `CarryRules` | `decideInteraction(facts, states) → "pickup"\|"drop"\|"ignore"`; `carrySpeed(prev, mult)` | `CarryManager` (GAM-003) |
+| `CarryRules` | `decideInteraction(facts, states) → "pickup"\|"drop"\|"ignore"`; `carrySpeed(prev, mult)`; `chooseSupport(candidates, rangeSq) → id?` (GAM-006) | `CarryManager` (GAM-003/006) |
 | `RoundRules` | `buildClientComment(saved, lost) → string` (3 umbrales, §3.5); `countLost(objects, deliveredState)` | `RoundManager` (UI-003) |
 | `StatRules` | `computeStatDeltas(storyEvents) → { [playerId]: PlayerDelta }` | `GameManager` (GAM-004, §2.5) |
 
@@ -1814,6 +1814,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.18 | 2026-07-16 | **Líder/soporte para objetos large (GAM-006) + GAM-005 verificado.** `CarryRules` gana `supportAvailable` en los hechos y `chooseSupport` puro (el otro jugador más cercano en `supportRange`, excluyendo líderes activos); `CarryManager` busca el soporte al pickup y lo replica en `ObjectStateChanged.supportId` (§4.3). Sin soporte, el carry de large no comienza (Dependencia Social §2.1). 70 specs. Runtime (solo): large rechazado sin soporte; GAM-005 verificado (WalkSpeed 16→9.6→16). Path con soporte → QA-002 (2+ jugadores, humano). |
 | 5.17 | 2026-07-16 | **Prefabs versionados y generados en código (FND-003/WLD-008, DL-040).** `assets/ObjectPrefabs.rbxmx` generado por `lune/build-prefabs.luau` (box_small con cinta, sofa_medium con respaldo/brazos/cojines, wardrobe_large con puertas/tiradores) — Models con PrimaryPart-raíz de colisión anclada y detalles decorativos soldados sin colisión (física idéntica al Part suelto que CarryManager muta). Verificación round-trip del contrato §4.4 antes de escribir. Mapeado en `default.project.json` → `ServerStorage/ObjectPrefabs`; ObjectPrefabs deja de estar "fuera de Rojo" (§4.1). Arte final = humano (WLD-008). |
 | 5.16 | 2026-07-16 | **Rediseño del pipeline: Verificación de Runtime (§6.7, DL-043).** QA-001 expuso que 62 specs + todos los contratos en verde no impedían un slice injugable (3 bugs de integración). El MCP de Studio cierra el hueco: nueva **tier de verificación de runtime (P6)** accionable — arrancar Play, conducir input, inspeccionar estado, leer consola (Claude o humano). **Gate de Definition of Done:** tickets de comportamiento runtime no están DONE sin pasar el smoke test. Las 3 lecciones codificadas como invariantes: §4.3 (contrato de payload + parsing defensivo), §4.10 (ownership de estado por evento vs. eventos de control), §4.4 (trigger zones son volúmenes). Nuevo `docs/RUNTIME_VERIFICATION.md`. P6-via-MCP es la primera automatización de IA **real** del pipeline (vs. Codex aspiracional, DL-038). |
 | 5.15 | 2026-07-15 | **Configuración del place (FND-004, DL-039).** Nuevo `docs/ROBLOX_SETUP.md`: cómo levantar el juego desde el repo, qué versiona Rojo vs. qué es solo-Studio, y el contrato de tags de CollectionService (§4.4). `Workspace.StreamingEnabled = false` fijado en `default.project.json` (sobre de escala §4.12). §6.2 lista el nuevo doc. La "correcta configuración de Roblox" era infra implícita sin ticket — cerrada por completitud (DL-039). |

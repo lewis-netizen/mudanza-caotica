@@ -43,11 +43,42 @@ return function(CarryRules)
         it("jugador ya carga otro → ignore", function()
             expect(CarryRules.decideInteraction(facts({ alreadyCarrying = true }), STATES)).to.equal("ignore")
         end)
-        it("objeto large → ignore (GAM-006 pendiente)", function()
-            expect(CarryRules.decideInteraction(facts({ isLarge = true }), STATES)).to.equal("ignore")
+        it("large SIN soporte → ignore (el carry no comienza sin soporte, GAM-006)", function()
+            expect(CarryRules.decideInteraction(facts({ isLarge = true, supportAvailable = false }), STATES)).to.equal(
+                "ignore"
+            )
         end)
         it("delivered → ignore", function()
             expect(CarryRules.decideInteraction(facts({ state = "delivered" }), STATES)).to.equal("ignore")
+        end)
+    end)
+
+    describe("decideInteraction — large con soporte (GAM-006)", function()
+        it("large CON soporte en rango → pickup", function()
+            expect(CarryRules.decideInteraction(facts({ isLarge = true, supportAvailable = true }), STATES)).to.equal(
+                "pickup"
+            )
+        end)
+        it("large con soporte pero fuera de rango del líder → ignore", function()
+            local f = facts({ isLarge = true, supportAvailable = true, inRange = false })
+            expect(CarryRules.decideInteraction(f, STATES)).to.equal("ignore")
+        end)
+    end)
+
+    describe("chooseSupport (GAM-006)", function()
+        it("elige el candidato más cercano dentro de rango", function()
+            local candidates = { { id = 10, distSq = 50 }, { id = 20, distSq = 9 }, { id = 30, distSq = 30 } }
+            expect(CarryRules.chooseSupport(candidates, 64)).to.equal(20)
+        end)
+        it("ninguno en rango → nil", function()
+            local candidates = { { id = 10, distSq = 100 }, { id = 20, distSq = 81 } }
+            expect(CarryRules.chooseSupport(candidates, 64)).to.equal(nil)
+        end)
+        it("sin candidatos → nil", function()
+            expect(CarryRules.chooseSupport({}, 64)).to.equal(nil)
+        end)
+        it("en el borde exacto del rango → cuenta como dentro", function()
+            expect(CarryRules.chooseSupport({ { id = 7, distSq = 64 } }, 64)).to.equal(7)
         end)
     end)
 
