@@ -33,10 +33,18 @@ En Play, `Main.server.lua` arranca `MapBootstrap`, `PrefabRegistry.validate` y
 genera el edificio, el área de lobby y todos los tags de contrato — **no requiere
 ningún paso manual de Studio** para tener una ronda jugable.
 
-Para tipos/autocompletado (opcional):
+**Tipos de paquetes Wally (opcional, autocompletado).** El orden importa — un
+sourcemap viejo no contiene los *link nodes* de paquetes recién instalados:
 ```
-rojo sourcemap default.project.json -o sourcemap.json
+wally install                                          # instala/actualiza Packages
+rojo sourcemap default.project.json -o sourcemap.json  # REGENERAR primero
+wally-package-types --sourcemap sourcemap.json Packages/
+wally-package-types --sourcemap sourcemap.json ServerPackages/
 ```
+Si `wally-package-types` reporta `Linker node ... not found in sourcemap`, el
+sourcemap está desactualizado: reinstala (`wally install`) y **regenera el
+sourcemap** antes de reintentar. (Lección: tras cualquier cambio de dependencias,
+sourcemap → luego types.)
 
 Tests headless (sin Studio):
 ```
