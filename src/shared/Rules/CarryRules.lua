@@ -78,6 +78,36 @@ function CarryRules.chooseSupport(candidates: { { id: number, distSq: number } }
     return bestId
 end
 
+export type SupportFacts = {
+    currentSupportInRange: boolean, -- el soporte actual sigue dentro de supportRange
+    replacementId: number?, -- otro candidato en rango (chooseSupport), si lo hay
+    lostSince: number?, -- timestamp del inicio de la pérdida (nil = con soporte)
+    now: number,
+    timeout: number, -- ObjectDefinition.Properties.supportTimeout
+}
+
+--- Evalúa el soporte de un carry large en un tick del loop (GAM-007).
+--- Retorna (acción, lostSince'):
+---   "keep"     el soporte actual sigue válido            → lostSince' = nil
+---   "reassign" otro jugador en rango toma el relevo      → lostSince' = nil
+---   "grace"    sin soporte, dentro de la tolerancia      → lostSince' arranca/persiste
+---   "drop"     sin soporte por ≥ timeout → el objeto cae
+--- Si el soporte vuelve (keep/reassign) antes del timeout, el carry continúa
+--- sin interrupción — la tolerancia se resetea. Puro.
+function CarryRules.evaluateSupport(facts: SupportFacts): (string, number?)
+    if facts.currentSupportInRange then
+        return "keep", nil
+    end
+    if facts.replacementId ~= nil then
+        return "reassign", nil
+    end
+    local lostSince = facts.lostSince or facts.now
+    if facts.now - lostSince >= facts.timeout then
+        return "drop", lostSince
+    end
+    return "grace", lostSince
+end
+
 --- Velocidad efectiva al cargar: aplica el multiplicador solo si es válido
 --- (número en (0,1)). Devuelve la velocidad previa intacta si no aplica.
 --- El caller decide qué hacer con el resultado (DL-027: nunca pisa con constante).

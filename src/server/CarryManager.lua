@@ -18,6 +18,7 @@ type CarryEntry = {
     weld: any,
     player: any,
     supportId: number?, -- soporte actual si el objeto es large (GAM-006)
+    lostSince: number?, -- inicio de la pérdida de soporte (os.clock), nil = con soporte (GAM-007)
 }
 
 -- ─── Estado interno ────────────────────────────────────────────────────────────
@@ -79,23 +80,8 @@ local function getCharacterParts(player: any): (any?, any?)
     return character:FindFirstChild("HumanoidRootPart"), character:FindFirstChildOfClass("Humanoid")
 end
 
---- Busca el jugador de soporte para un objeto large (GAM-006): el OTRO jugador
---- más cercano dentro de supportRange de la posición del objeto. Los jugadores
---- que ya cargan un objeto como líderes no pueden ser soporte (sus manos están
---- ocupadas — Dependencia Social §2.1). La ELECCIÓN es pura (CarryRules).
-local function findSupportUserId(leader: any, position: any, supportRange: number): number?
-    local Players = game:GetService("Players")
-    local candidates = {}
-    for _, other in ipairs(Players:GetPlayers()) do
-        if other ~= leader and carriersByUserId[other.UserId] == nil then
-            local hrp = getCharacterParts(other)
-            if hrp then
-                local delta = hrp.Position - position
-                table.insert(candidates, { id = other.UserId, distSq = delta:Dot(delta) })
-            end
-        end
-    end
-    return getCarryRules().chooseSupport(candidates, supportRange * supportRange)
+local function getCarrySupport()
+    return require(game:GetService("ServerScriptService").Systems.CarrySupport)
 end
 
 local function restoreWalkSpeed(entry: CarryEntry)
@@ -199,6 +185,36 @@ local function drop(player: any)
     end
 end
 
+-- ─── Contexto para CarrySupport (GAM-006/007) ──────────────────────────────────
+-- La vigilancia del soporte vive en CarrySupport (responsabilidad propia);
+-- los entries siguen siendo propiedad de este módulo (§4.8) — se delegan por
+-- inyección (mismo patrón que RoundManager → CarryManager).
+
+local function buildSupportCtx(): any
+    return {
+        isActive = function()
+            return active
+        end,
+        entries = function()
+            return carriersByUserId
+        end,
+        isBusy = function(userId: number)
+            return carriersByUserId[userId] ~= nil
+        end,
+        getCharacterRoot = function(player: any)
+            local hrp = getCharacterParts(player)
+            return hrp
+        end,
+        applySupport = function(userId: number, entry: any, supportId: number?)
+            entry.supportId = supportId
+            getObjectManager().setState(entry.instanceId, states().BEING_CARRIED, userId, supportId)
+        end,
+        drop = drop,
+        recordStoryEvent = recordStoryEvent,
+        log = getLog(),
+    }
+end
+
 -- ─── Validación de InteractObject (GAM-003) ────────────────────────────────────
 
 local function onInteractObject(player: any, payload: any)
@@ -237,7 +253,7 @@ local function onInteractObject(player: any, payload: any)
     if isLarge and part then
         local supportRange = def.Properties.supportRange
         if type(supportRange) == "number" then
-            supportId = findSupportUserId(player, part.Position, supportRange)
+            supportId = getCarrySupport().findSupportUserId(buildSupportCtx(), player, part.Position, supportRange)
         end
     end
 
@@ -283,6 +299,10 @@ function CarryManager.start(ctx: { recordStoryEvent: (string, any?) -> () })
             end
         end)
     )
+
+    -- Vigilancia de soporte (GAM-007) — CarrySupport corre el loop; la
+    -- cancelación es por el flag `active` via ctx.isActive
+    getCarrySupport().start(buildSupportCtx())
 
     getLog():info("Carry activo — escuchando InteractObject")
 end

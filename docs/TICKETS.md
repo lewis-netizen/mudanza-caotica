@@ -441,7 +441,7 @@ Elección de soporte pura (`CarryRules.chooseSupport`: el otro jugador más cerc
 ```
 Deriva de:   §3.3 (cooperación con consecuencia) + §4.4 (timeout por definición)
 Domain:      TECH
-Estado:      TODO
+Estado:      IN_PROGRESS
 Semana:      2
 Depende de:  GAM-006
 ```
