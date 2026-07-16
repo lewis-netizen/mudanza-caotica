@@ -97,7 +97,7 @@ Ticket de alta retroactiva (auditoría 2026-07-12). Foundational implementado en
 DL-Ref:      DL-040
 Deriva de:   DL-040 (asset dentro de Rojo)
 Domain:      TECH
-Estado:      DONE
+Estado:      TODO
 Semana:      1
 Depende de:  ninguna
 ```
@@ -703,7 +703,7 @@ Ajustar layout, nodos del NPC y pool de eventos basándose en playtests de Seman
 DL-Ref:      DL-040
 Deriva de:   DL-040 (versionado de prefabs) + §4.4 (contrato Arte→PrefabRegistry, DL-031)
 Domain:      TECH
-Estado:      IN_PROGRESS
+Estado:      TODO
 Semana:      2
 Depende de:  GAM-001, FND-003
 ```
