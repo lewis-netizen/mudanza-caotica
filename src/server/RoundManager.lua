@@ -129,7 +129,7 @@ function RoundManager.start(opts: { onTimeExpired: () -> () })
     getSystems("TruckManager").start(ctx)
 
     if GlobalConfig.FEATURE_FLAGS.ENABLE_NPC then
-        getLog():warn("ENABLE_NPC activo pero NPCManager no existe todavía (WLD-004)")
+        getSystems("NPCManager").start()
     end
     if GlobalConfig.FEATURE_FLAGS.ENABLE_EVENTS then
         getLog():warn("ENABLE_EVENTS activo pero EventManager no existe todavía (WLD-005)")
@@ -177,6 +177,10 @@ function RoundManager.stop(): RoundSummary
     -- stop() generan sus StoryEvents y deben entrar al summary.
     getSystems("CarryManager").stop()
     TruckManager.stop()
+    local stopConfig = require(game:GetService("ReplicatedStorage").Shared.Config.GlobalConfig)
+    if stopConfig.FEATURE_FLAGS.ENABLE_NPC then
+        getSystems("NPCManager").stop()
+    end
     roundActive = false
 
     local RoundRules = getRoundRules()
@@ -201,6 +205,10 @@ function RoundManager.reset()
     getSystems("ObjectManager").reset()
     getSystems("CarryManager").reset()
     getSystems("TruckManager").reset()
+    local resetConfig = require(game:GetService("ReplicatedStorage").Shared.Config.GlobalConfig)
+    if resetConfig.FEATURE_FLAGS.ENABLE_NPC then
+        getSystems("NPCManager").reset()
+    end
     elapsedSeconds = 0
     storyEvents = {}
     activeEventType = nil

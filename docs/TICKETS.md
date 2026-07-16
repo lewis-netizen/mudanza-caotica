@@ -612,7 +612,7 @@ Revisar y ajustar el layout para maximizar Compresión Social antes de los playt
 ```
 Deriva de:   §4.4 (NPCManager) + §3.4 (Entropía: NPC vecino)
 Domain:      TECH
-Estado:      TODO
+Estado:      DONE
 Semana:      3
 Depende de:  WLD-002, GM-002
 ```
@@ -621,14 +621,17 @@ Depende de:  WLD-002, GM-002
 Implementar `src/server/NPCManager.lua`. El NPC patrulla los NPCNodes en orden de NodeIndex usando exclusivamente TweenService. El NPC tiene colisión activa con jugadores. Sin PathfindingService en ningún punto del módulo.
 
 **Criterios de Aceptación**
-- [ ] El NPC se mueve entre NPCNodes en orden de `NodeIndex` usando solo TweenService
-- [ ] PathfindingService no se usa en ningún punto del módulo
-- [ ] `NPCManager.start()` inicia el ciclo de patrulla correctamente
-- [ ] `NPCManager.stop()` detiene el movimiento sin errores — incluso si se llama durante un Tween
-- [ ] `NPCManager.reset()` devuelve el NPC a posición inicial limpiamente
-- [ ] El NPC bloquea el paso físicamente (colisión activa con jugadores)
-- [ ] RoundManager es el único punto que llama start/stop/reset sobre NPCManager
-- [ ] Al implementarse, se activa `FEATURE_FLAGS.ENABLE_NPC` (hoy `false` hasta que el módulo exista)
+- [x] El NPC se mueve entre NPCNodes en orden de `NodeIndex` usando solo TweenService
+- [x] PathfindingService no se usa en ningún punto del módulo (contrato CI)
+- [x] `NPCManager.start()` inicia el ciclo de patrulla correctamente
+- [x] `NPCManager.stop()` detiene el movimiento sin errores — incluso si se llama durante un Tween (Cancel en pcall)
+- [x] `NPCManager.reset()` devuelve el NPC a posición inicial limpiamente
+- [x] El NPC bloquea el paso físicamente (colisión activa con jugadores)
+- [x] RoundManager es el único punto que llama start/stop/reset sobre NPCManager
+- [x] `FEATURE_FLAGS.ENABLE_NPC = true` activado
+
+**Notas**
+NPC placeholder construido en código (arte final = humano, como WLD-008). Orden/avance de patrulla puros en `Rules/NPCRules` + specs. Runtime verificado (MCP): patrulla 6 nodos, colisión activa.
 
 ---
 

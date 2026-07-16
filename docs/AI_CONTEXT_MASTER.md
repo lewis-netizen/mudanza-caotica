@@ -1,6 +1,6 @@
-# AI_CONTEXT_MASTER — Mudanza Caótica
+﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.19 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.20 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -353,9 +353,10 @@ src/
 │   │   ├── ObjectState.lua          -- estados de wire: free/being_carried/delivered
 │   │   └── RoundPhase.lua           -- fases globales: Lobby/Active/Summary
 │   ├── Rules/                       -- núcleo funcional: decisión pura, sin efectos (§4.13, DL-037)
-│   │   ├── CarryRules.lua           -- decideInteraction, carrySpeed
+│   │   ├── CarryRules.lua           -- decideInteraction, carrySpeed, chooseSupport, evaluateSupport
 │   │   ├── RoundRules.lua           -- buildClientComment, countLost
-│   │   └── StatRules.lua            -- computeStatDeltas
+│   │   ├── StatRules.lua            -- computeStatDeltas
+│   │   └── NPCRules.lua             -- orderedPatrol, nextStep (WLD-004)
 │   └── Tests/                       -- specs de TestEZ: un [Módulo].spec.lua por
 │                                       cada módulo con núcleo puro testeable en Lune
 │
@@ -832,6 +833,7 @@ La lógica de **decisión** de gameplay que puede ser pura vive en `src/shared/R
 | `CarryRules` | `decideInteraction(facts, states) → "pickup"\|"drop"\|"ignore"`; `carrySpeed(prev, mult)`; `chooseSupport(candidates, rangeSq) → id?` (GAM-006) | `CarryManager` (GAM-003/006) |
 | `RoundRules` | `buildClientComment(saved, lost) → string` (3 umbrales, §3.5); `countLost(objects, deliveredState)` | `RoundManager` (UI-003) |
 | `StatRules` | `computeStatDeltas(storyEvents) → { [playerId]: PlayerDelta }` | `GameManager` (GAM-004, §2.5) |
+| `NPCRules` | `orderedPatrol(nodes) → {keys}`; `nextStep(current, count)` (circular) | `NPCManager` (WLD-004) |
 
 **Invariante — la decisión que puede ser pura, lo es.** Toda lógica de gameplay expresable como función pura de datos (sin I/O ni estado del DataModel) vive en `Rules/` con su `.spec.lua` en `Tests/`. El shell no embebe decisiones de gameplay: delega en el núcleo y solo orquesta efectos. Así la lógica de gameplay se verifica en CI (Lune) sin un runtime de Roblox — hoy 62 specs.
 
@@ -1816,6 +1818,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.20 | 2026-07-16 | **El vecino patrulla (WLD-004).** Nuevo `NPCManager`: NPC placeholder construido en código (raíz-torso de colisión + cabeza soldada, tag `NPCModel`), patrulla los `NPCNode` en orden de `NodeIndex` **solo con TweenService** (duración = distancia/`NPC_SPEED`), colisión activa (bloquea el paso — Entropía §3.4). Orden y avance puros en `Rules/NPCRules` (`orderedPatrol` con descarte de índices inválidos, `nextStep` circular). RoundManager llama start/stop/reset bajo `ENABLE_NPC = true` (activado). 83 specs. Runtime (MCP): patrulla 6 nodos, 14.2 studs en 2.5s, sin errores. |
 | 5.19 | 2026-07-16 | **Caída por pérdida de soporte (GAM-007) + módulo CarrySupport.** `CarryRules.evaluateSupport` puro (keep/reassign/grace/drop con tolerancia `supportTimeout`); si otro jugador entra en rango toma el relevo (reassign, más cooperativo que el soporte fijo del ticket); `SupportLost`/`SupportRestored` como StoryEvents. La vigilancia vive en el nuevo **`CarrySupport`** (loop task.wait 0.25s, §4.12) — extraído de CarryManager (424→355 líneas, backstop DL-033): recibe los entries por inyección, CarryManager sigue siendo su dueño (§4.8). 76 specs. |
 | 5.18 | 2026-07-16 | **Líder/soporte para objetos large (GAM-006) + GAM-005 verificado.** `CarryRules` gana `supportAvailable` en los hechos y `chooseSupport` puro (el otro jugador más cercano en `supportRange`, excluyendo líderes activos); `CarryManager` busca el soporte al pickup y lo replica en `ObjectStateChanged.supportId` (§4.3). Sin soporte, el carry de large no comienza (Dependencia Social §2.1). 70 specs. Runtime (solo): large rechazado sin soporte; GAM-005 verificado (WalkSpeed 16→9.6→16). Path con soporte → QA-002 (2+ jugadores, humano). |
 | 5.17 | 2026-07-16 | **Prefabs versionados y generados en código (FND-003/WLD-008, DL-040).** `assets/ObjectPrefabs.rbxmx` generado por `lune/build-prefabs.luau` (box_small con cinta, sofa_medium con respaldo/brazos/cojines, wardrobe_large con puertas/tiradores) — Models con PrimaryPart-raíz de colisión anclada y detalles decorativos soldados sin colisión (física idéntica al Part suelto que CarryManager muta). Verificación round-trip del contrato §4.4 antes de escribir. Mapeado en `default.project.json` → `ServerStorage/ObjectPrefabs`; ObjectPrefabs deja de estar "fuera de Rojo" (§4.1). Arte final = humano (WLD-008). |
