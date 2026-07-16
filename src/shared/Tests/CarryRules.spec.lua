@@ -93,6 +93,53 @@ return function(CarryRules)
         end)
     end)
 
+    describe("evaluateSupport (GAM-007)", function()
+        local function supportFacts(overrides)
+            local f = {
+                currentSupportInRange = false,
+                replacementId = nil,
+                lostSince = nil,
+                now = 100,
+                timeout = 3,
+            }
+            for k, v in pairs(overrides) do
+                f[k] = v
+            end
+            return f
+        end
+
+        it("soporte actual en rango → keep, tolerancia reseteada", function()
+            local action, lostSince =
+                CarryRules.evaluateSupport(supportFacts({ currentSupportInRange = true, lostSince = 99 }))
+            expect(action).to.equal("keep")
+            expect(lostSince).to.equal(nil)
+        end)
+        it("soporte fuera pero hay reemplazo en rango → reassign", function()
+            local action, lostSince = CarryRules.evaluateSupport(supportFacts({ replacementId = 42 }))
+            expect(action).to.equal("reassign")
+            expect(lostSince).to.equal(nil)
+        end)
+        it("sin soporte por primera vez → grace, arranca la tolerancia", function()
+            local action, lostSince = CarryRules.evaluateSupport(supportFacts({ now = 100 }))
+            expect(action).to.equal("grace")
+            expect(lostSince).to.equal(100)
+        end)
+        it("sin soporte dentro de la tolerancia → grace, lostSince persiste", function()
+            local action, lostSince = CarryRules.evaluateSupport(supportFacts({ lostSince = 98, now = 100 }))
+            expect(action).to.equal("grace")
+            expect(lostSince).to.equal(98)
+        end)
+        it("sin soporte más allá del timeout → drop", function()
+            local action = CarryRules.evaluateSupport(supportFacts({ lostSince = 96, now = 100, timeout = 3 }))
+            expect(action).to.equal("drop")
+        end)
+        it("el soporte vuelve antes del timeout → keep (el carry continúa)", function()
+            local action =
+                CarryRules.evaluateSupport(supportFacts({ currentSupportInRange = true, lostSince = 98, now = 100 }))
+            expect(action).to.equal("keep")
+        end)
+    end)
+
     describe("carrySpeed", function()
         it("aplica multiplicador válido en (0,1)", function()
             expect(CarryRules.carrySpeed(16, 0.5)).to.equal(8)

@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.18 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.19 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -313,6 +313,7 @@ src/
 │   ├── RoundManager.lua
 │   ├── ObjectManager.lua
 │   ├── CarryManager.lua
+│   ├── CarrySupport.lua             (vigilancia de soporte large — GAM-006/007)
 │   ├── TruckManager.lua
 │   ├── PrefabRegistry.lua            (resuelve ObjectId → asset — DL-031)
 │   ├── MapBootstrap.lua              (edificio placeholder — DL-028)
@@ -430,7 +431,8 @@ server-side (`OnServerEvent:Connect`) vive en `CarryManager.lua` — ver INV-001
 | GameManager | Sistema | Punto de entrada del ciclo de vida. Gestiona estados Lobby y Summary. |
 | RoundManager | Sistema | Gestiona la ronda activa. Propietario de RoundState y RoundSummary. |
 | ObjectManager | Sistema | Spawn, estados y tracking de ObjectInstances. No mueve objetos. Delega la resolución ObjectId → asset en PrefabRegistry. |
-| CarryManager | Sistema | Lógica de transporte. Líder ancla objeto; soporte debe mantenerse en rango. |
+| CarryManager | Sistema | Lógica de transporte. Líder ancla objeto; soporte debe mantenerse en rango. Dueño de los carry entries (§4.8). |
+| CarrySupport | Sistema | Vigilancia del contrato de soporte large (GAM-006/007): búsqueda de soporte y loop por tick (task.wait, nunca por frame §4.12). Recibe los entries por inyección de CarryManager — no los posee. |
 | TruckManager | Sistema | Zona de entrega, conteo de objetos salvados, datos para resumen. |
 | PrefabRegistry | Sistema | Única capa que conoce `ServerStorage/ObjectPrefabs`. Resuelve `ObjectId → prefab` (o placeholder si falta). `validate()` audita el contrato al bootstrap (§4.4, DL-031). |
 | NPCManager | Sistema | TweenService sobre nodos predefinidos. Sin PathfindingService. |
@@ -1814,6 +1816,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.19 | 2026-07-16 | **Caída por pérdida de soporte (GAM-007) + módulo CarrySupport.** `CarryRules.evaluateSupport` puro (keep/reassign/grace/drop con tolerancia `supportTimeout`); si otro jugador entra en rango toma el relevo (reassign, más cooperativo que el soporte fijo del ticket); `SupportLost`/`SupportRestored` como StoryEvents. La vigilancia vive en el nuevo **`CarrySupport`** (loop task.wait 0.25s, §4.12) — extraído de CarryManager (424→355 líneas, backstop DL-033): recibe los entries por inyección, CarryManager sigue siendo su dueño (§4.8). 76 specs. |
 | 5.18 | 2026-07-16 | **Líder/soporte para objetos large (GAM-006) + GAM-005 verificado.** `CarryRules` gana `supportAvailable` en los hechos y `chooseSupport` puro (el otro jugador más cercano en `supportRange`, excluyendo líderes activos); `CarryManager` busca el soporte al pickup y lo replica en `ObjectStateChanged.supportId` (§4.3). Sin soporte, el carry de large no comienza (Dependencia Social §2.1). 70 specs. Runtime (solo): large rechazado sin soporte; GAM-005 verificado (WalkSpeed 16→9.6→16). Path con soporte → QA-002 (2+ jugadores, humano). |
 | 5.17 | 2026-07-16 | **Prefabs versionados y generados en código (FND-003/WLD-008, DL-040).** `assets/ObjectPrefabs.rbxmx` generado por `lune/build-prefabs.luau` (box_small con cinta, sofa_medium con respaldo/brazos/cojines, wardrobe_large con puertas/tiradores) — Models con PrimaryPart-raíz de colisión anclada y detalles decorativos soldados sin colisión (física idéntica al Part suelto que CarryManager muta). Verificación round-trip del contrato §4.4 antes de escribir. Mapeado en `default.project.json` → `ServerStorage/ObjectPrefabs`; ObjectPrefabs deja de estar "fuera de Rojo" (§4.1). Arte final = humano (WLD-008). |
 | 5.16 | 2026-07-16 | **Rediseño del pipeline: Verificación de Runtime (§6.7, DL-043).** QA-001 expuso que 62 specs + todos los contratos en verde no impedían un slice injugable (3 bugs de integración). El MCP de Studio cierra el hueco: nueva **tier de verificación de runtime (P6)** accionable — arrancar Play, conducir input, inspeccionar estado, leer consola (Claude o humano). **Gate de Definition of Done:** tickets de comportamiento runtime no están DONE sin pasar el smoke test. Las 3 lecciones codificadas como invariantes: §4.3 (contrato de payload + parsing defensivo), §4.10 (ownership de estado por evento vs. eventos de control), §4.4 (trigger zones son volúmenes). Nuevo `docs/RUNTIME_VERIFICATION.md`. P6-via-MCP es la primera automatización de IA **real** del pipeline (vs. Codex aspiracional, DL-038). |
