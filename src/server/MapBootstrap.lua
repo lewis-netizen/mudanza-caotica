@@ -179,6 +179,10 @@ local function buildNPCContract(container: any)
     for _, xz in ipairs({ { -16, 12 }, { 16, 32 } }) do
         makeMarker(Vector3.new(xz[1], 1, xz[2]), container, "NPCDropZone")
     end
+    -- Zona del chokepoint central (hueco z 18–24): el evento
+    -- NeighborBlocksCorridor la localiza por Attribute EventTag (Config/Events)
+    local corridorZone = makeMarker(Vector3.new(0, 1, 21), container, "NPCDropZone")
+    corridorZone:SetAttribute("EventTag", "NeighborBlocksCorridor")
 end
 
 local function buildLobby(container: any)

@@ -61,7 +61,7 @@ local MAP_MODE: "placeholder" | "real" = "placeholder"
 
 local FEATURE_FLAGS = {
     ENABLE_NPC = true, -- NPCManager patrullando (WLD-004)
-    ENABLE_EVENTS = false, -- EventManager — desactivado hasta Semana 3
+    ENABLE_EVENTS = true, -- EventManager con el pool de Config/Events (WLD-005)
     ENABLE_SUMMARY_SCREEN = true, -- Summary Screen al finalizar ronda
     DEBUG_OBJECT_STATES = IS_STUDIO, -- Logging verbose de ObjectInstance.State
 }

@@ -102,11 +102,20 @@ local function patrolLoop(patrol: { any })
     local step = 1
 
     while active do
-        step = getNPCRules().nextStep(step, #patrol)
-        if step == 0 or not npcModel or not npcModel.PrimaryPart then
+        if not npcModel or not npcModel.PrimaryPart then
             return
         end
         local torso = npcModel.PrimaryPart
+        -- Un evento puede "aparcar" al vecino (EventParked — Config/Events,
+        -- WLD-005): la patrulla espera sin avanzar hasta que el cleanup lo retire
+        if torso:GetAttribute("EventParked") then
+            task.wait(0.5)
+            continue
+        end
+        step = getNPCRules().nextStep(step, #patrol)
+        if step == 0 then
+            return
+        end
         local target = patrol[step]
         local goal = CFrame.new(target.Position + Vector3.new(0, torso.Size.Y / 2 + 0.5, 0))
         local duration = math.max(0.1, (goal.Position - torso.Position).Magnitude / speed)
