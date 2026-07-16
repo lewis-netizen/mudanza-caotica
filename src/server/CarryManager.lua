@@ -180,10 +180,15 @@ end
 
 -- ─── Validación de InteractObject (GAM-003) ────────────────────────────────────
 
-local function onInteractObject(player: any, instanceId: any)
+local function onInteractObject(player: any, payload: any)
     if not active then
         return
     end
+    -- El payload de InteractObject es `{ instanceId }` (§4.3), no el string
+    -- suelto. El CarryManager original (slice #31) lo trataba como string, pero
+    -- nadie lo disparaba (hueco de QA-001) hasta InteractionController (GAM-010),
+    -- que sí sigue el contrato — de ahí el desajuste. Se extrae aquí.
+    local instanceId = if type(payload) == "table" then payload.instanceId else payload
     if type(instanceId) ~= "string" then
         return
     end
@@ -256,6 +261,15 @@ function CarryManager.forceRelease(instanceId: string)
     if userId then
         releaseEntry(userId)
     end
+end
+
+--- InstanceId que el jugador (userId) carga actualmente, o nil. Usado por
+--- TruckManager: el objeto cargado se sostiene a la altura del torso y no toca
+--- una TruckZone a ras de suelo, pero el personaje sí — la entrega se resuelve
+--- por el jugador que entra a la zona, no por el objeto tocándola.
+function CarryManager.getCarriedInstanceId(userId: number): string?
+    local entry = carriersByUserId[userId]
+    return if entry then entry.instanceId else nil
 end
 
 --- Detiene el sistema: desconecta y suelta todos los objetos cargados.
