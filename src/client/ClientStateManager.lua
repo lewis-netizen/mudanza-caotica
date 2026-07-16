@@ -7,7 +7,9 @@
 -- Invariante: el estado es de solo lectura para los consumidores — todo lo que
 --             sale de este módulo (getState, getObject, listeners) es snapshot,
 --             nunca la tabla interna.
--- Invariante: todo el estado se limpia en RoundEnded y RoundStarted
+-- Invariante: state.objects es propiedad de ObjectStateChanged/DeliverObject y
+--             se limpia SOLO en RoundEnded — nunca en RoundStarted (evita una
+--             carrera con los ObjectStateChanged del spawn de la ronda).
 --
 -- Lune-compatible: las dependencias (Networking, Logger) se resuelven en
 -- init(), no en el scope de módulo — sin acceso a `game` al cargar (§4.6).
@@ -155,7 +157,11 @@ local function onRoundStarted(data: { duration: number, eventType: string? })
     state.timeRemaining = data.duration
     state.deliveredCount = 0
     state.activeEventType = data.eventType
-    state.objects = {}
+    -- NO limpiar state.objects aquí: los ObjectStateChanged del spawn de la
+    -- ronda pueden llegar ANTES que RoundStarted (Roblox no garantiza orden
+    -- entre RemoteEvents distintos). Limpiarlos aquí los borraría y el cliente
+    -- quedaría sin objetos → interacción rota. Los objetos son propiedad de
+    -- ObjectStateChanged/DeliverObject; se limpian en RoundEnded (fin de ronda).
     state.summary = nil
     notify()
 end
@@ -164,6 +170,9 @@ local function onRoundEnded(summary: RoundSummary)
     log:info("RoundEnded — saved: %d, lost: %d", summary.SavedObjects, summary.LostObjects)
     state.phase = Phase.SUMMARY
     state.summary = summary
+    -- La ronda terminó: sus objetos ya no existen (ObjectManager.reset los
+    -- destruye server-side). Se limpian aquí, no en RoundStarted (ver onRoundStarted).
+    state.objects = {}
     notify()
 end
 

@@ -75,7 +75,19 @@ local function onZoneTouched(hit: any)
         return
     end
 
+    -- El objeto puede tocar la zona directamente (Model bajo), pero lo habitual
+    -- es que se sostenga a la altura del torso y NO toque una zona a ras de
+    -- suelo — el personaje del jugador sí la toca. En ese caso se entrega lo que
+    -- ese jugador carga (§4.4, GAM-004: solo being_carried se entrega).
     local instanceId = resolveInstanceId(hit)
+    if not instanceId then
+        local Players = game:GetService("Players")
+        local character = if hit then hit:FindFirstAncestorOfClass("Model") else nil
+        local player = if character then Players:GetPlayerFromCharacter(character) else nil
+        if player then
+            instanceId = getCarryManager().getCarriedInstanceId(player.UserId)
+        end
+    end
     if not instanceId then
         return
     end
