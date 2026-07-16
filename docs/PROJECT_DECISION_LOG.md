@@ -1755,4 +1755,56 @@ Commit:      —
 Referencias: §4.14, §4.10, §5.9, DL-025
 ```
 
+---
+
+### DL-043
+
+```
+ID:          DL-043
+Fecha:       2026-07-16
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    QA-001 (playtest del slice) expuso un hueco estructural del
+             pipeline: 62 specs y todos los contratos de CI en verde, pero el
+             slice NO era jugable. Tres bugs de integracion —payload de
+             RemoteEvent mal parseado, carrera de orden entre RemoteEvents, y un
+             objeto cargado que no toca una trigger zone a ras de suelo— que
+             ninguna verificacion estatica atrapa (los specs prueban nucleos
+             puros aislados, §4.13). El slice #31 se habia mergeado sin ningun
+             playtest. Ahora existe el MCP de Roblox Studio: verificacion de
+             runtime accionable.
+Contenido:   Nueva §6.7 Verificacion de Runtime: el pipeline gana una tier de
+             runtime (P6) accionable via el MCP de Studio (arrancar Play,
+             conducir input, inspeccionar estado, leer consola — Claude o
+             humano). Gate de Definition of Done: un ticket que toca
+             comportamiento de runtime (cableado cliente↔servidor, payloads,
+             fisica/trigger zones, orden de eventos, bootstrap) NO esta DONE sin
+             pasar el smoke test. P6 pasa de "Humano" a MCP y es la PRIMERA
+             automatizacion de IA REAL del pipeline (vs. el Codex aspiracional
+             de DL-038). Las tres lecciones se codifican como invariantes: §4.3
+             (contrato de payload + parsing defensivo), §4.10 (ownership de
+             estado por evento — no limpiar datos en eventos de control), §4.4
+             (trigger zones son volumenes). Procedimiento en
+             docs/RUNTIME_VERIFICATION.md.
+Hipótesis:   Una tier de runtime cierra el hueco que dejo pasar los bugs de
+             QA-001; las lecciones como invariantes evitan que se repitan, y si
+             se repiten, el smoke test las caza antes del merge.
+Razón:       La verificacion estatica es necesaria pero no suficiente: no ve la
+             integracion. Sin verificacion de runtime, "todo verde" no significa
+             "funciona" — y el PO paga el costo probando a mano. El MCP lo hace
+             accionable por primera vez.
+Impacto:     Master: nueva §6.7, P6 en §6.3, invariantes en §4.3/§4.10/§4.4,
+             gate de DoD. Nuevo docs/RUNTIME_VERIFICATION.md (procedimiento +
+             smoke test en Luau). Sin cambio de codigo (los bugs se corrigieron
+             en #76). El smoke test corre via MCP, no en CI (CI no conduce
+             Studio).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P6
+Ticket:      —
+Commit:      —
+Referencias: §6.7, §6.3, §4.3, §4.10, §4.4, §4.13, DL-038
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
