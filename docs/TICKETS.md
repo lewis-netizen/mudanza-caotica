@@ -97,7 +97,7 @@ Ticket de alta retroactiva (auditoría 2026-07-12). Foundational implementado en
 DL-Ref:      DL-040
 Deriva de:   DL-040 (asset dentro de Rojo)
 Domain:      TECH
-Estado:      TODO
+Estado:      DONE
 Semana:      1
 Depende de:  ninguna
 ```
@@ -106,14 +106,14 @@ Depende de:  ninguna
 Traer `ServerStorage/ObjectPrefabs` a Rojo. Añadir en `default.project.json` un mapeo de `ServerStorage/ObjectPrefabs` a un archivo de modelo versionado `assets/ObjectPrefabs.rbxmx`. Elimina el estado "fuera de Rojo" (§4.1): los prefabs pasan a ser versionables y reproducibles con `rojo build`/`serve`. Actualizar §4.1 en consecuencia.
 
 **Criterios de Aceptación**
-- [ ] `default.project.json` mapea `ServerStorage/ObjectPrefabs` a `assets/ObjectPrefabs.rbxmx`
-- [ ] `rojo build` incluye ObjectPrefabs en ServerStorage sin pasos manuales de Studio
-- [ ] `assets/ObjectPrefabs.rbxmx` está versionado en el repo (aunque inicie vacío/placeholder hasta WLD-008)
-- [ ] §4.1 deja de declarar ObjectPrefabs "fuera de Rojo"; refleja el mapeo (DL-040)
-- [ ] PrefabRegistry sigue resolviendo desde `ServerStorage/ObjectPrefabs` sin cambios de código
+- [x] `default.project.json` mapea `ServerStorage/ObjectPrefabs` a `assets/ObjectPrefabs.rbxmx`
+- [x] `rojo build` incluye ObjectPrefabs en ServerStorage sin pasos manuales de Studio
+- [x] `assets/ObjectPrefabs.rbxmx` está versionado en el repo — generado por `lune/build-prefabs.luau` con los 3 modelos del catálogo
+- [x] §4.1 deja de declarar ObjectPrefabs "fuera de Rojo"; refleja el mapeo (DL-040)
+- [x] PrefabRegistry sigue resolviendo desde `ServerStorage/ObjectPrefabs` sin cambios de código
 
 **Notas**
-Habilitador de versionado (DL-040, completitud DL-039). WLD-008 llena el `.rbxmx` con modelos reales.
+Habilitador de versionado (DL-040, completitud DL-039). **Superó el plan del ticket** (licencia del PO): en lugar de esperar autoría manual en Studio, los prefabs se generan en código (`lune/build-prefabs.luau`, coste-IA §5.9) con verificación round-trip del contrato §4.4. WLD-008 queda solo para el arte final.
 
 ---
 
@@ -703,7 +703,7 @@ Ajustar layout, nodos del NPC y pool de eventos basándose en playtests de Seman
 DL-Ref:      DL-040
 Deriva de:   DL-040 (versionado de prefabs) + §4.4 (contrato Arte→PrefabRegistry, DL-031)
 Domain:      TECH
-Estado:      TODO
+Estado:      IN_PROGRESS
 Semana:      2
 Depende de:  GAM-001, FND-003
 ```
@@ -712,14 +712,15 @@ Depende de:  GAM-001, FND-003
 Modelar los prefabs de objeto (al menos uno por Size: small/medium/large) como Models con Attribute `ObjectId` (nunca `.Name`, §2.4), ubicados en el archivo de modelo versionado `assets/ObjectPrefabs.rbxmx` (FND-003) que Rojo mapea a `ServerStorage/ObjectPrefabs`. No requiere assets finales de arte, pero reemplaza los placeholders que PrefabRegistry genera hoy.
 
 **Criterios de Aceptación**
-- [ ] Existe al menos un Model por Size con Attribute `ObjectId` que casa con un ObjectDefinition (GAM-001)
-- [ ] Cada Model tiene un `root` BasePart bien definido (`PrefabRegistry.instantiate` retorna root BasePart)
-- [ ] Los prefabs viven en `assets/ObjectPrefabs.rbxmx`, versionado en el repo (FND-003)
-- [ ] `PrefabRegistry.validate()` no reporta faltantes/huérfanos/duplicados para los ObjectIds del slice
-- [ ] Identificación por Attribute `ObjectId`, nunca por `.Name` (§2.4)
+- [x] Existe al menos un Model por Size con Attribute `ObjectId` que casa con un ObjectDefinition (GAM-001)
+- [x] Cada Model tiene un `root` BasePart bien definido (`PrefabRegistry.instantiate` retorna root BasePart)
+- [x] Los prefabs viven en `assets/ObjectPrefabs.rbxmx`, versionado en el repo (FND-003)
+- [x] `PrefabRegistry.validate()` no reporta faltantes/huérfanos/duplicados para los ObjectIds del slice
+- [x] Identificación por Attribute `ObjectId`, nunca por `.Name` (§2.4)
+- [ ] Arte final de calidad (mallas/texturas) — **manos humanas**, ver Notas
 
 **Notas**
-Trabajo de Studio (modelado) + export a `.rbxmx`. La resolución la hace PrefabRegistry (GAM-009); este ticket provee los assets reales que hoy no existen.
+Los modelos **funcionales** (caja con cinta, sofá con respaldo/brazos/cojines, ropero con puertas/tiradores) los genera `lune/build-prefabs.luau` — juego reconocible sin bloquear el slice. El **arte final** (MeshParts, texturas, calidad visual de producto) es trabajo humano de Studio: al hacerlo, exportar y reemplazar `assets/ObjectPrefabs.rbxmx` (o migrar el generador a referenciar mallas).
 
 ---
 

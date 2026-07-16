@@ -20,6 +20,13 @@
       }
     },
 
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "ObjectPrefabs": {
+        "$path": "assets/ObjectPrefabs.rbxmx"
+      }
+    },
+
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
       "Shared": {

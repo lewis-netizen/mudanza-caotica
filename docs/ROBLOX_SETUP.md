@@ -56,16 +56,25 @@ Definido en `default.project.json`:
 | `ReplicatedStorage/Remotes` (7 RemoteEvents) | declarados inline (§4.3) |
 | `StarterPlayer/StarterPlayerScripts` | `src/client` |
 | `StarterGui` | `src/gui` |
+| `ServerStorage/ObjectPrefabs` | `assets/ObjectPrefabs.rbxmx` (generado — ver abajo) |
 | `Workspace.StreamingEnabled = false` | `$properties` (ver §5) |
+
+Los prefabs de objeto se **generan en código** (FND-003/WLD-008, DL-040): tras
+cambiar un modelo en `lune/build-prefabs.luau`, regenerar con
+```
+lune run lune/build-prefabs.luau
+```
+El script valida el contrato Arte→PrefabRegistry (§4.4) por round-trip antes de
+escribir. El `.rbxmx` generado se commitea.
 
 ## 4. Qué NO versiona Rojo (solo Studio — se documenta aquí)
 
 - **Mapa real** (`Workspace/RealMap`): se construye en Studio (WLD-001) y se activa
   con `GlobalConfig.MAP_MODE = "real"` (DL-036). Mientras esté incompleto, se
   desarrolla con `"placeholder"`.
-- **`ServerStorage/ObjectPrefabs`**: hoy fuera de Rojo. **FND-003** (DL-040) lo traerá
-  a Rojo como `assets/ObjectPrefabs.rbxmx`; hasta entonces, `PrefabRegistry` genera
-  placeholders. Los modelos reales son **WLD-008**.
+- ~~`ServerStorage/ObjectPrefabs`~~: **ya versionado via Rojo** (`assets/ObjectPrefabs.rbxmx`,
+  FND-003/DL-040). Los modelos funcionales los genera `lune/build-prefabs.luau`; el
+  **arte final** (mallas/texturas de calidad) sigue siendo trabajo de Studio (WLD-008).
 - **Publicación** (game ID, permisos de acceso, productos): **QA-004**.
 
 ## 5. Settings del place (sobre de escala §4.12)

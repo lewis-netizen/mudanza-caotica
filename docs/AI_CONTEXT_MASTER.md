@@ -1,6 +1,6 @@
 # AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.16 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.17 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -379,7 +379,7 @@ src/
 | ¿Cómo es esa entidad? (datos concretos) | `Definitions/` |
 | ¿Cómo se comporta un sistema? | `Config/` |
 | ¿Quién ejecuta el comportamiento? | `src/server/` |
-| ¿Cuál es el asset real en el servidor? | `ServerStorage/ObjectPrefabs` — resuelto por PrefabRegistry (§4.4, DL-031). Se versiona como `assets/ObjectPrefabs.rbxmx` mapeado por Rojo (DL-040); *hoy fuera de Rojo hasta FND-003* |
+| ¿Cuál es el asset real en el servidor? | `ServerStorage/ObjectPrefabs` — resuelto por PrefabRegistry (§4.4, DL-031). Versionado como `assets/ObjectPrefabs.rbxmx`, mapeado por Rojo y **generado en código** por `lune/build-prefabs.luau` (DL-040, FND-003) |
 
 **Distinción Entities vs Definitions:**
 - `Entities/` contiene los módulos de lógica y los contratos de tipo de cada entidad.
@@ -1814,6 +1814,7 @@ Si no hay problemas: `"Sin problemas detectados. Aprobado."`
 
 | Versión | Fecha | Cambios |
 |---|---|---|
+| 5.17 | 2026-07-16 | **Prefabs versionados y generados en código (FND-003/WLD-008, DL-040).** `assets/ObjectPrefabs.rbxmx` generado por `lune/build-prefabs.luau` (box_small con cinta, sofa_medium con respaldo/brazos/cojines, wardrobe_large con puertas/tiradores) — Models con PrimaryPart-raíz de colisión anclada y detalles decorativos soldados sin colisión (física idéntica al Part suelto que CarryManager muta). Verificación round-trip del contrato §4.4 antes de escribir. Mapeado en `default.project.json` → `ServerStorage/ObjectPrefabs`; ObjectPrefabs deja de estar "fuera de Rojo" (§4.1). Arte final = humano (WLD-008). |
 | 5.16 | 2026-07-16 | **Rediseño del pipeline: Verificación de Runtime (§6.7, DL-043).** QA-001 expuso que 62 specs + todos los contratos en verde no impedían un slice injugable (3 bugs de integración). El MCP de Studio cierra el hueco: nueva **tier de verificación de runtime (P6)** accionable — arrancar Play, conducir input, inspeccionar estado, leer consola (Claude o humano). **Gate de Definition of Done:** tickets de comportamiento runtime no están DONE sin pasar el smoke test. Las 3 lecciones codificadas como invariantes: §4.3 (contrato de payload + parsing defensivo), §4.10 (ownership de estado por evento vs. eventos de control), §4.4 (trigger zones son volúmenes). Nuevo `docs/RUNTIME_VERIFICATION.md`. P6-via-MCP es la primera automatización de IA **real** del pipeline (vs. Codex aspiracional, DL-038). |
 | 5.15 | 2026-07-15 | **Configuración del place (FND-004, DL-039).** Nuevo `docs/ROBLOX_SETUP.md`: cómo levantar el juego desde el repo, qué versiona Rojo vs. qué es solo-Studio, y el contrato de tags de CollectionService (§4.4). `Workspace.StreamingEnabled = false` fijado en `default.project.json` (sobre de escala §4.12). §6.2 lista el nuevo doc. La "correcta configuración de Roblox" era infra implícita sin ticket — cerrada por completitud (DL-039). |
 | 5.14 | 2026-07-15 | **Flujo de Lobby (GM-004, DL-039).** Área de lobby propia con `SpawnLocation` (`LobbySpawn`), separada de la zona de ronda, generada por MapBootstrap en placeholder. GameManager teletransporta a los jugadores lobby↔edificio en las transiciones de fase (`RoundSpawn` dentro del edificio). Nuevo contrato de tags Layout→GameManager en §4.4. El disparador de ronda (`LOBBY_DURATION` + `MIN_PLAYERS_TO_START`) ya existía (GM-003). El lobby rico (matchmaking) sigue como horizonte (§3.9). Pendiente: verificación en Studio. |
