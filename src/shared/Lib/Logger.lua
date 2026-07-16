@@ -69,7 +69,18 @@ local function emit(prefix: string, level: string, levelValue: number, msg: stri
         return
     end
 
-    local formatted = string.format(msg, ...)
+    -- Un log NUNCA debe crashear al llamador. Si el formato es inválido (p. ej.
+    -- `%d` con nil), se degrada a texto plano en vez de propagar el error de
+    -- string.format — un typo de logging no puede tumbar el bootstrap ni una ronda.
+    local ok, formatted = pcall(string.format, msg, ...)
+    if not ok then
+        local args = table.pack(...)
+        local parts = { msg }
+        for i = 1, args.n do
+            parts[i + 1] = tostring(args[i])
+        end
+        formatted = "⚠ log con formato inválido: " .. table.concat(parts, " ")
+    end
     local line = string.format("%s[%s] %s", prefix, level, formatted)
 
     if levelValue >= LEVELS.ERROR then
