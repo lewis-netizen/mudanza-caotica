@@ -392,7 +392,7 @@ Implementar `src/server/TruckManager.lua`. Zona de entrega detectada server-side
 ```
 Deriva de:   §3.3 (fricción de cooperación) + §4.4 (CarryManager) + DL-027 (WalkSpeed)
 Domain:      TECH
-Estado:      TODO
+Estado:      DONE
 Semana:      2
 Depende de:  GAM-003, GAM-001
 ```
@@ -414,7 +414,7 @@ Cargar un objeto medium reduce el `WalkSpeed` del jugador según `ObjectDefiniti
 ```
 Deriva de:   Principio §2.1 (Dependencia Social — cooperación forzada) + §3.3
 Domain:      TECH
-Estado:      TODO
+Estado:      IN_PROGRESS
 Semana:      2
 Depende de:  GAM-003, GAM-001
 ```
@@ -423,12 +423,16 @@ Depende de:  GAM-003, GAM-001
 Un objeto large requiere un jugador líder (inicia el carry) y al menos un jugador soporte en rango. El carry no comienza sin soporte. `ObjectStateChanged` incluye `leaderId` y `supportId`. Sin sincronización física entre clientes, sin Heartbeat.
 
 **Criterios de Aceptación**
-- [ ] Solo el jugador que inicia la interacción puede ser líder
-- [ ] El carry no comienza si no hay soporte dentro de `ObjectDefinition.Properties.supportRange`
-- [ ] `ObjectStateChanged` incluye `leaderId` y `supportId` correctamente
-- [ ] El objeto se ancla al líder server-side — sin sincronización física entre clientes
-- [ ] El sistema no usa Heartbeat para movimiento del objeto
-- [ ] Sustituye el rechazo temporal de large de GAM-003 (el slice rechaza pickup de large con log hasta este ticket)
+- [x] Solo el jugador que inicia la interacción puede ser líder
+- [x] El carry no comienza si no hay soporte dentro de `ObjectDefinition.Properties.supportRange`
+- [x] `ObjectStateChanged` incluye `leaderId` y `supportId` correctamente
+- [x] El objeto se ancla al líder server-side — sin sincronización física entre clientes
+- [x] El sistema no usa Heartbeat para movimiento del objeto
+- [x] Sustituye el rechazo temporal de large de GAM-003 (el slice rechaza pickup de large con log hasta este ticket)
+- [ ] Verificado con 2+ jugadores reales (QA-002 — **manos humanas**; en solo-player solo se puede verificar el rechazo sin soporte)
+
+**Notas**
+Elección de soporte pura (`CarryRules.chooseSupport`: el otro jugador más cercano en `supportRange`, excluyendo a quienes ya cargan como líderes). Runtime verificado en solo (MCP): large rechazado sin soporte. El path CON soporte requiere 2 clientes → QA-002.
 
 ---
 

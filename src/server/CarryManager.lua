@@ -17,6 +17,7 @@ type CarryEntry = {
     previousWalkSpeed: number,
     weld: any,
     player: any,
+    supportId: number?, -- soporte actual si el objeto es large (GAM-006)
 }
 
 -- ─── Estado interno ────────────────────────────────────────────────────────────
@@ -78,6 +79,25 @@ local function getCharacterParts(player: any): (any?, any?)
     return character:FindFirstChild("HumanoidRootPart"), character:FindFirstChildOfClass("Humanoid")
 end
 
+--- Busca el jugador de soporte para un objeto large (GAM-006): el OTRO jugador
+--- más cercano dentro de supportRange de la posición del objeto. Los jugadores
+--- que ya cargan un objeto como líderes no pueden ser soporte (sus manos están
+--- ocupadas — Dependencia Social §2.1). La ELECCIÓN es pura (CarryRules).
+local function findSupportUserId(leader: any, position: any, supportRange: number): number?
+    local Players = game:GetService("Players")
+    local candidates = {}
+    for _, other in ipairs(Players:GetPlayers()) do
+        if other ~= leader and carriersByUserId[other.UserId] == nil then
+            local hrp = getCharacterParts(other)
+            if hrp then
+                local delta = hrp.Position - position
+                table.insert(candidates, { id = other.UserId, distSq = delta:Dot(delta) })
+            end
+        end
+    end
+    return getCarryRules().chooseSupport(candidates, supportRange * supportRange)
+end
+
 local function restoreWalkSpeed(entry: CarryEntry)
     local _, humanoid = getCharacterParts(entry.player)
     if not humanoid then
@@ -111,7 +131,7 @@ end
 
 -- ─── Pickup / Drop ─────────────────────────────────────────────────────────────
 
-local function pickup(player: any, instanceId: string)
+local function pickup(player: any, instanceId: string, supportId: number?)
     local ObjectManager = getObjectManager()
     local part = ObjectManager.getObjectPart(instanceId)
     local hrp, humanoid = getCharacterParts(player)
@@ -123,8 +143,8 @@ local function pickup(player: any, instanceId: string)
     local Catalog = require(game:GetService("ReplicatedStorage").Shared.Definitions.Objects)
     local def = if obj then Catalog.get(obj.ObjectId) else nil
 
-    -- El rechazo de large (GAM-006 pendiente) ya lo decidió CarryRules antes de
-    -- llegar aquí — pickup solo se llama con una decisión "pickup" válida.
+    -- La validación (incluido el soporte de large, GAM-006) ya la decidió
+    -- CarryRules — pickup solo se llama con una decisión "pickup" válida.
 
     -- Posicionar frente al jugador y soldar — autoridad física del servidor (§4.2)
     part.Anchored = false
@@ -148,10 +168,11 @@ local function pickup(player: any, instanceId: string)
         previousWalkSpeed = previousWalkSpeed,
         weld = weld,
         player = player,
+        supportId = supportId,
     }
     userIdByInstance[instanceId] = player.UserId
 
-    ObjectManager.setState(instanceId, states().BEING_CARRIED, player.UserId, nil)
+    ObjectManager.setState(instanceId, states().BEING_CARRIED, player.UserId, supportId)
     if recordStoryEvent then
         recordStoryEvent("CarryStarted", { instanceId = instanceId, playerId = player.UserId })
     end
@@ -209,11 +230,23 @@ local function onInteractObject(player: any, payload: any)
         inRange = (part.Position - hrp.Position).Magnitude <= maxRange
     end
 
+    -- large: buscar soporte ANTES de decidir — el carry no comienza sin él
+    -- (GAM-006). supportId viaja en ObjectStateChanged (§4.3).
+    local isLarge = def ~= nil and def.Size == "large"
+    local supportId: number? = nil
+    if isLarge and part then
+        local supportRange = def.Properties.supportRange
+        if type(supportRange) == "number" then
+            supportId = findSupportUserId(player, part.Position, supportRange)
+        end
+    end
+
     local decision = getCarryRules().decideInteraction({
         exists = obj ~= nil,
         state = if obj then obj.State else "",
         leaderId = if obj then obj.LeaderId else nil,
-        isLarge = def ~= nil and def.Size == "large",
+        isLarge = isLarge,
+        supportAvailable = supportId ~= nil,
         alreadyCarrying = carriersByUserId[player.UserId] ~= nil,
         inRange = inRange,
         playerId = player.UserId,
@@ -222,7 +255,7 @@ local function onInteractObject(player: any, payload: any)
     if decision == "drop" then
         drop(player)
     elseif decision == "pickup" then
-        pickup(player, instanceId)
+        pickup(player, instanceId, supportId)
     end
 end
 

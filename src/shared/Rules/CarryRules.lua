@@ -14,6 +14,7 @@ export type InteractionFacts = {
     state: string, -- ObjectState del objeto (free/being_carried/delivered)
     leaderId: number?, -- líder actual si being_carried
     isLarge: boolean, -- def.Size == "large"
+    supportAvailable: boolean?, -- large: hay otro jugador en supportRange (GAM-006)
     alreadyCarrying: boolean, -- el jugador ya carga otro objeto
     inRange: boolean, -- dentro de MAX_INTERACT_RANGE
     playerId: number, -- UserId del jugador que interactúa
@@ -23,11 +24,13 @@ export type InteractionFacts = {
 export type Decision = "pickup" | "drop" | "ignore"
 
 --- Decide qué hacer ante un InteractObject, dado el estado del mundo.
---- Regla (GAM-003, §4.2): validación server-side de tipo/existencia/rango/estado.
+--- Regla (GAM-003/GAM-006, §4.2): validación server-side de tipo/existencia/
+--- rango/estado.
 --- - objeto being_carried por este jugador (líder) → drop
 --- - objeto being_carried por otro → ignore (solo el líder suelta)
 --- - objeto free, en rango, jugador libre, no large → pickup
---- - large → ignore (líder/soporte es GAM-006, Semana 2)
+--- - large: además requiere soporte disponible (otro jugador en supportRange,
+---   Dependencia Social §2.1) — sin soporte → ignore
 --- - cualquier otro caso → ignore
 function CarryRules.decideInteraction(
     facts: InteractionFacts,
@@ -48,12 +51,31 @@ function CarryRules.decideInteraction(
         return "ignore"
     end
 
-    -- free: requiere rango, jugador libre, y que no sea large (GAM-006 pendiente)
-    if facts.alreadyCarrying or not facts.inRange or facts.isLarge then
+    if facts.alreadyCarrying or not facts.inRange then
+        return "ignore"
+    end
+
+    -- large: el carry no comienza sin soporte (GAM-006)
+    if facts.isLarge and not facts.supportAvailable then
         return "ignore"
     end
 
     return "pickup"
+end
+
+--- Elige el jugador de soporte: el candidato más cercano dentro de rango.
+--- `candidates` = { { id, distSq } } (otros jugadores, nunca el líder).
+--- Retorna su id, o nil si ninguno está en rango. Puro (GAM-006/GAM-007).
+function CarryRules.chooseSupport(candidates: { { id: number, distSq: number } }, rangeSq: number): number?
+    local bestId: number? = nil
+    local bestSq = rangeSq
+    for _, candidate in ipairs(candidates) do
+        if candidate.distSq <= bestSq then
+            bestSq = candidate.distSq
+            bestId = candidate.id
+        end
+    end
+    return bestId
 end
 
 --- Velocidad efectiva al cargar: aplica el multiplicador solo si es válido
