@@ -1943,4 +1943,49 @@ Commit:      —
 Referencias: §3.1, §3.3, §2.1, §2.6, DL-027, DL-044, DL-045
 ```
 
+---
+
+### DL-047
+
+```
+ID:          DL-047
+Fecha:       2026-07-17
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    §3.3 (DL-046) determina la cooperación por acoplamiento intrínseco
+             (eficiencia = f(pooling), sin gate ni drop), pero §4 seguía con los
+             contratos de carry del diseño viejo (soporte-como-gate, drop al
+             perder soporte, penalización individual carrySpeed(mult)). Antes de
+             tocar §4 se re-derivó el CONJUNTO de sistemas desde el §3 nuevo — no
+             se parchó un sistema asumiendo que sobrevive.
+Contenido:   Derivación del conjunto: ningún sistema nuevo (la contención del
+             espacio es layout+física, no un sistema servidor); el schema
+             ObjectInstance (§2.3, LeaderId+SupportId) sobrevive para demanda ≤ 2
+             — SupportId=nil = "solo, pobre", con soporte = "normal" (cambia
+             semántica, no forma); los sistemas de carry sobreviven con CONTRATOS
+             nuevos. §4.4 gana el Contrato de carry cooperativo; §4.13 reemplaza
+             carrySpeed(prev, mult) por carryEfficiency(demand, carriers) → factor
+             (eficiencia por pooling). El límite modular CarrySupport-separado-vs-
+             fundido lo determina el backstop de tamaño (DL-033) al implementar.
+             Parámetro libre aislado (playtest): boost de un 2º cargador en objetos
+             de demanda 1 (pooling en medium).
+Hipótesis:   Modelar eficiencia = f(cargadores) hace la cooperación intrínseca
+             (C3) y elimina la fricción jugador↔sistema, conservando la
+             dependencia en objetos de demanda > 1.
+Razón:       CONTINGENCY P5 — autoridad directa del PO; re-derivar §4 (conjunto,
+             no parche) desde §3.3 antes de reestructurar tickets.
+Impacto:     §4.4, §4.13 actualizadas. Header v5.26. §2.3 sin cambio (verificado).
+             Ripple (siguiente ola, tras el gate): reestructurar tickets
+             GAM-005/006/007 desde este §4; luego reconciliar código (CarryRules
+             carrySpeed→carryEfficiency; CarrySupport gate/drop → vigilancia de
+             eficiencia; GameplayConfig).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      GAM-005, GAM-006, GAM-007
+Commit:      —
+Referencias: §4.4, §4.13, §2.3, §3.3, DL-027, DL-033, DL-046
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
