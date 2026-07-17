@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.25 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.26 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -503,6 +503,8 @@ server-side (`OnServerEvent:Connect`) vive en `CarryManager.lua` — ver INV-001
 | PlayerDataService | Persistencia | Wrapper delgado sobre ProfileStore (externo). Aplica MigrationService al cargar y expone el schema canónico de PlayerData. |
 | ClientStateManager | Cliente | Única fuente de estado del juego en el cliente. Conecta todos los RemoteEvents. Los módulos de UI leen de él. |
 
+**Contrato de carry cooperativo (§3.3, DL-047).** La eficiencia de transporte es **función del pooling**, no un penalizador individual: `CarryRules.carryEfficiency(demand, carriers) → factor` sube con los cargadores hasta la `demand` del objeto. Un large (demand 2) se mueve **pobre con el líder solo** y **normal con soporte** — el líder **siempre puede iniciar** (resistencia intrínseca, no una regla que bloquee, C3). Un objeto de demanda 1 va normal con un cargador — **sin penalización de velocidad**. Perder soporte **degrada** la eficiencia, no obliga a soltar. El conjunto de sistemas (ObjectManager, CarryManager, CarrySupport, CarryRules) y el schema `ObjectInstance` (§2.3, demanda ≤ 2) **sobreviven** — cambia su semántica, no su forma. *Parámetro libre (playtest):* si un segundo cargador sobre un objeto de demanda 1 añade eficiencia extra (pooling en medium).
+
 **API — ObjectManager:**
 ```lua
 ObjectManager.initialize()
@@ -891,7 +893,7 @@ La lógica de **decisión** de gameplay que puede ser pura vive en `src/shared/R
 
 | Módulo (núcleo puro) | Función pura | Shell que lo consume |
 |---|---|---|
-| `CarryRules` | `decideInteraction(facts, states) → "pickup"\|"drop"\|"ignore"`; `carrySpeed(prev, mult)`; `chooseSupport(candidates, rangeSq) → id?` (GAM-006) | `CarryManager` (GAM-003/006) |
+| `CarryRules` | `decideInteraction(facts, states) → "pickup"\|"drop"\|"ignore"` (un large es *pickup* por el líder aun sin soporte — §3.3); `carryEfficiency(demand, carriers) → factor` (eficiencia por pooling — reemplaza el `carrySpeed(prev, mult)` individual); `carrySpeed(prev, factor)` aplica el factor; `chooseSupport(candidates, rangeSq) → id?` | `CarryManager` (GAM-003/006) |
 | `RoundRules` | `buildClientComment(saved, lost) → string` (3 umbrales, §3.5); `countLost(objects, deliveredState)` | `RoundManager` (UI-003) |
 | `StatRules` | `computeStatDeltas(storyEvents) → { [playerId]: PlayerDelta }` | `GameManager` (GAM-004, §2.5) |
 | `NPCRules` | `orderedPatrol(nodes) → {keys}`; `nextStep(current, count)` (circular) | `NPCManager` (WLD-004) |
