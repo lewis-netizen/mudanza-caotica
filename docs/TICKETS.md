@@ -392,7 +392,7 @@ Implementar `src/server/TruckManager.lua`. Zona de entrega detectada server-side
 ```
 Deriva de:   §3.3 (fricción de cooperación) + §4.4 (CarryManager) + DL-027 (WalkSpeed)
 Domain:      TECH
-Estado:      DONE
+Estado:      TODO
 Semana:      2
 Depende de:  GAM-003, GAM-001
 ```
@@ -414,7 +414,7 @@ Cargar un objeto medium reduce el `WalkSpeed` del jugador según `ObjectDefiniti
 ```
 Deriva de:   Principio §2.1 (Dependencia Social — cooperación forzada) + §3.3
 Domain:      TECH
-Estado:      IN_PROGRESS
+Estado:      TODO
 Semana:      2
 Depende de:  GAM-003, GAM-001
 ```
@@ -441,7 +441,7 @@ Elección de soporte pura (`CarryRules.chooseSupport`: el otro jugador más cerc
 ```
 Deriva de:   §3.3 (cooperación con consecuencia) + §4.4 (timeout por definición)
 Domain:      TECH
-Estado:      IN_PROGRESS
+Estado:      TODO
 Semana:      2
 Depende de:  GAM-006
 ```
@@ -612,7 +612,7 @@ Revisar y ajustar el layout para maximizar Compresión Social antes de los playt
 ```
 Deriva de:   §4.4 (NPCManager) + §3.4 (Entropía: NPC vecino)
 Domain:      TECH
-Estado:      DONE
+Estado:      TODO
 Semana:      3
 Depende de:  WLD-002, GM-002
 ```
@@ -770,7 +770,7 @@ HUD con timer de ronda en formato `MM:SS` y conteo de objetos entregados. Lee es
 ```
 Deriva de:   §3.7 (feedback: el jugador sabe qué puede interactuar)
 Domain:      TECH
-Estado:      DONE
+Estado:      IN_PROGRESS
 Semana:      2
 Depende de:  UI-001, GAM-002
 ```
