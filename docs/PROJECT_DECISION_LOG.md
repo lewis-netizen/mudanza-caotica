@@ -1853,4 +1853,49 @@ Commit:      —
 Referencias: §2.1, §2.2, §3.7, DL-024, DL-039
 ```
 
+---
+
+### DL-045
+
+```
+ID:          DL-045
+Fecha:       2026-07-17
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    La sesión que re-estratificó §2.1 (DL-044) también forjó una
+             metodología de modelado —altitud/carrier-vs-esencia, primacía
+             derivada, determinismo del modelado, y un enforcement de
+             derivaciones auto-certificantes— que vivía solo en notas de
+             sesión. El PO pidió documentarla en el framework, y observó que
+             pedirle "auditar el nivel" o "validar el gate" delega
+             verificación de modelado que es competencia del agente, no rol
+             del PO.
+Contenido:   Nueva §2.6 Disciplina de Modelado en Fundamentos Transversales:
+             altitud (axioma→corolario→instanciación→feel; representar en la
+             relación carrier-agnóstica, no en la entidad); primacía derivada
+             (matriz principio×entidad, no heredar encuadre); determinismo
+             (duda de diseño = deuda de modelado, no se delega); roles (el PO
+             ratifica axiomas / decide parámetros libres / da forma al método;
+             no verifica corrección de modelado); y el enforcement de
+             derivaciones auto-certificantes vía un gate de 5 chequeos.
+             Criterio de validez: cumplir objetiva y efectivamente el
+             enforcement.
+Hipótesis:   Documentar la disciplina como fundamento transversal la hace
+             auditable y aplicable por todos los agentes y dominios, y saca al
+             PO del rol de detector de errores de modelado.
+Razón:       CONTINGENCY P5 — autoridad directa del PO sobre la constitución
+             (2026-07-17) + directriz de documentar los metamodelos en el
+             framework.
+Impacto:     §2.6 nueva. Header a v5.24. Pendiente de propagación: los _BASE
+             de agentes y los AUDITOR_* deben referenciar §2.6. Refina el rol
+             de auditoría del PO respecto a DL-044.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Commit:      —
+Referencias: §2.1, §2.6, §5.0, DL-044
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

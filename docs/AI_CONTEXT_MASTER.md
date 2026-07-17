@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.23 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.24 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -192,6 +192,28 @@ PlayerData = {
 ```
 
 **Regla de dominios reservados:** Los dominios `Identity`, `Creation` y cualquier dominio marcado como reservado no pueden utilizarse hasta que exista una especificación oficial aprobada por el Product Owner.
+
+### 2.6 Disciplina de Modelado
+
+Cómo se deriva el diseño desde los Principios Congelados (§2.1). Es transversal — la usan todos los dominios y agentes — y su incumplimiento es un **error de modelado**, auditable como cualquier contrato.
+
+**Altitud.** Toda afirmación pertenece a un nivel: **axioma** (§2.1 Nivel 0) → **corolario** (se deduce) → **instanciación** (diseño concreto) → **feel/implementación** (parámetros). Un principio se representa en su **relación carrier-agnóstica**, nunca nombrando una entidad que lo transporta. Confundir el *carrier* (una entidad, un tamaño, un mapa) con lo *portado* (la relación) es error de nivel.
+
+**Primacía derivada.** Antes de asignar el rol de una entidad, derivar —matriz principio × entidad— cuál la satisface *mejor*. No heredar el encuadre (del chat, de un ticket, de una versión previa).
+
+**Determinismo.** Un modelado correcto es determinista: su conclusión se sigue de los axiomas y no depende del juicio del PO. Toda "duda de diseño" residual es **deuda de modelado** — se cierra derivando, no se delega.
+
+**Roles.** El PO ratifica axiomas, decide parámetros libres genuinos, aporta hechos e intención de dominio, y da forma al método. El PO **no** adjudica conclusiones determinadas ni verifica la corrección del modelado — eso es competencia del agente que modela.
+
+**Enforcement — derivaciones auto-certificantes.** Toda salida de modelado carga su cadena de entailment de modo que su corrección sea manifiesta por construcción. Antes de presentar un paso, el agente corre el gate:
+
+1. **Procedencia** — ¿cada premisa deriva de un axioma, o se heredó?
+2. **Nivel** — ¿relación carrier-agnóstica, o colapsada en entidad/instancia/feel?
+3. **Entailment** — ¿se muestra que cada paso se sigue de axioma + pasos previos?
+4. **Determinación** — ¿determinado (se presenta) o parámetro libre (se aísla)?
+5. **Cierre** — ¿queda duda residual? Es deuda: se cierra.
+
+**Criterio de validez:** el modelado es válido si cumple, objetiva y efectivamente, este enforcement.
 
 ---
 
