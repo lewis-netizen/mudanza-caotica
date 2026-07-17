@@ -1807,4 +1807,50 @@ Commit:      —
 Referencias: §6.7, §6.3, §4.3, §4.10, §4.4, §4.13, DL-038
 ```
 
+---
+
+### DL-044
+
+```
+ID:          DL-044
+Fecha:       2026-07-17
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Un stress-test conceptual (sesión 2026-07-17) destiló el
+             núcleo de diseño a 4 axiomas irreducibles y detectó que §2.1
+             mezclaba altitudes: axiomas, corolarios deducibles, composites
+             (axioma + elección de diseño) y principios de método/
+             arquitectura convivían en una lista plana. Dos Principios
+             Congelados —"Objetivo Estable" y "Dependencia Social"—
+             resultaron ser composites, no rango axioma.
+Contenido:   §2.1 se re-estratifica por altitud en tres niveles SIN eliminar
+             ni renombrar ningún principio existente (preserva el grafo de
+             referencias de TICKETS/prompts/auditores). Nivel 0 Axiomas:
+             Interacción Humana como Contenido (C1a) + tres nuevos —
+             Interdependencia como Valor (C1b), Ambigüedad Interpretable
+             (C2'), Restricción Intrínseca (C3). Nivel 1 Corolarios de
+             diseño, con derivación explícita y marca de composite. Nivel 2
+             Método y arquitectura. La "legibilidad" que carga Objetivo
+             Estable se anota como derivable (no requiere 5º axioma).
+Hipótesis:   Estratificar por altitud hace auditable la diferencia entre un
+             conflicto con un axioma (irreducible) y uno con una elección de
+             diseño (revisable), sin debilitar la obligatoriedad de ningún
+             principio.
+Razón:       CONTINGENCY P5 — el PO otorgó control y autoridad directa sobre
+             la constitución en sesión (2026-07-17) para re-estratificar §2.1
+             antes de formalizar el núcleo destilado.
+Impacto:     §2.1 reescrita (estructura, sin pérdida de contenido). Header a
+             v5.23. Pendiente de propagación (paso siguiente): §2.2 Test
+             Oficial, señales de rechazo de SCRATCHPAD_INTAKE, checklist de
+             AUDITOR_DESIGN y el vocabulario "Deriva de Principio §2.1" en
+             TICKETS. Nota: SCRATCHPAD_INTAKE.md aún cita "v5.7" (stale).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Commit:      —
+Referencias: §2.1, §2.2, §3.7, DL-024, DL-039
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
