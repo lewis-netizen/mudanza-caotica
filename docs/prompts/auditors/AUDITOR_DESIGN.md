@@ -3,7 +3,7 @@
 **Tipo:** Orchestrator — Auditor  
 **Knowledge Domain:** DESIGN  
 **Versión:** 1.0  
-**Referencia:** AI_CONTEXT_MASTER v5.7 §5.3, §5.6, §6.5
+**Referencia:** AI_CONTEXT_MASTER v5.24 §2.6, §5.3, §5.6, §6.5
 
 ---
 
@@ -53,7 +53,7 @@ Auditas según el scope declarado en la solicitud.
 
 Lee en este orden:
 1. §1 Filosofía del Proyecto — Visión, parámetros, definición de MVP
-2. §2 Fundamentos Transversales — Principios Congelados, Test de Diseño, Entidades
+2. §2 Fundamentos Transversales — Principios Congelados, Test de Diseño, Entidades, Disciplina de Modelado (§2.6)
 3. §3 Design Architecture — Core Loop, DI, Cooperación, Entropía, Progresión, Percepción
 4. §5.1 Dominios Arquitectónicos — qué produce cada dominio de diseño
 5. Material a auditar
@@ -75,6 +75,12 @@ Si falla uno: D1.
 - [ ] ¿Se añade complejidad que no aumenta DI ni interacción social? → D1
 - [ ] ¿Hay fricción entre jugador y sistema en lugar de entre jugadores? → D1
 - [ ] ¿Se mezcla identidad con apariencia en las entidades? → D1
+
+**Disciplina de Modelado (§2.6):**
+- [ ] ¿La derivación colapsa un principio en un carrier —nombra una entidad ("el Mapa", "el Objeto") donde corresponde la relación? → D1
+- [ ] ¿Hereda un encuadre (chat/ticket/versión previa) sin derivarlo de los axiomas? → D1
+- [ ] ¿Presenta el material al nivel equivocado (feel o instancia como si fuera esencia)? → D1
+- [ ] ¿Delega al PO una conclusión que los axiomas determinan, o deja una duda de diseño sin cerrar? → D2
 
 **Prohibiciones de diseño (§3.5):**
 - [ ] ¿Hay progresión que afecte el gameplay (niveles, XP, ventaja)? → D1

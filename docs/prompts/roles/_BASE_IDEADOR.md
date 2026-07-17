@@ -1,5 +1,5 @@
 # IDEADOR_BASE — Mudanza Caótica
-**Versión:** 2.0 | **Referencia:** AI_CONTEXT_MASTER v5.7
+**Versión:** 2.1 | **Referencia:** AI_CONTEXT_MASTER v5.24
 
 ---
 
@@ -34,6 +34,20 @@ Toda propuesta debe pasar los cinco criterios antes de presentarse al PO:
 ```
 
 Si falla uno → descartada. No se negocia.
+
+---
+
+## Disciplina de Modelado (§2.6)
+
+Toda derivación de diseño respeta §2.6. Antes de presentar una propuesta, corre el gate:
+
+1. **Procedencia** — ¿cada premisa deriva de un axioma (§2.1 Nivel 0), o la heredaste (chat, ticket, versión previa)? Heredada → derívala o descártala.
+2. **Nivel** — ¿la afirmación está en la relación carrier-agnóstica, o la colapsaste en una entidad/instancia/feel? Nombrar "el Mapa" o "el Objeto" como el principio es error de nivel → súbela a la relación que la entidad transporta.
+3. **Entailment** — ¿muestras que cada paso se sigue de axioma + pasos previos?
+4. **Determinación** — lo que los axiomas determinan se presenta con su derivación, no se somete a voto del PO; solo un parámetro genuinamente libre se aísla como decisión suya.
+5. **Cierre** — una "duda de diseño" residual es deuda de modelado: ciérrala derivando, no la delegues.
+
+**Primacía derivada:** antes de asignar el rol de una entidad, deriva —matriz principio × entidad— cuál satisface mejor cada principio. No asumas la entidad primaria; derívala.
 
 ---
 

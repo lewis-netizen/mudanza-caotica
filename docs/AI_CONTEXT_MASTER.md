@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.22 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.24 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -37,24 +37,49 @@ Este MVP es shippable. No es una validación de gameplay — es la base del prod
 
 ### 2.1 Principios Congelados
 
-Estos principios no se debaten. Toda idea que contradiga cualquiera de ellos es rechazada sin excepción.
+Estos principios no se debaten. Toda idea que contradiga cualquiera de ellos —sea del nivel que sea— es rechazada sin excepción.
 
-| Principio | Definición |
+Se organizan por **altitud**. Un nivel superior **genera o restringe** a los inferiores: el orden es de dependencia lógica, no estético. La altitud no cambia la obligatoriedad — cambia la **naturaleza del conflicto** al auditar: chocar con un **axioma** (Nivel 0) es irreducible; chocar con una **elección de diseño** marcada ⚠ es, en principio, revisable por el PO sin tocar el núcleo.
+
+#### Nivel 0 — Axiomas (núcleo irreducible)
+
+Los cuatro principios de los que todo lo demás se deduce. Destilados y verificados por stress-test conceptual (DL-044): independientes por pares, primitivos, irreducibles entre sí.
+
+| Axioma | Definición |
 |---|---|
-| Dependencia Social | Las tareas importantes deben beneficiarse significativamente de la cooperación. |
-| Entropía Social | Cada partida produce situaciones distintas sin modificar el objetivo principal. |
-| Objetivo Estable | Los jugadores siempre saben qué hacer. El objetivo nunca cambia. |
-| Contexto Variable | Las condiciones cambian. El objetivo no. |
-| Simplicidad Mecánica | La profundidad surge de sistemas simples interactuando. |
-| Presión Situacional | El reto surge del contexto, no de aprender nuevas mecánicas. |
-| Interacción Humana como Contenido | Los jugadores son el contenido principal del juego. |
-| Complejidad Justificada | Toda complejidad debe aumentar la interacción social o las situaciones emergentes. |
-| Fricción Social | La mejor fricción ocurre entre jugadores, no entre jugador y sistema. |
-| Compresión Social | El espacio debe aumentar la frecuencia con la que los jugadores interfieren entre sí. |
-| Entidades Estables | Diseñar alrededor de entidades (Player, Object, Map, Content), no alrededor de nombres, archivos o features concretas. |
-| Expresión sobre Ventaja | La monetización futura debe derivar de expresión personal y creación, no de ventaja competitiva. |
-| Jugadores como Fuente de Contenido | El valor a largo plazo proviene de convertir a los jugadores en contenido para otros jugadores, mediante interacción o creación. |
-| Modelo de Tres Niveles | Toda decisión arquitectónica pertenece a uno de tres niveles: Entidades (qué existe), Sistemas (qué hace cosas), Persistencia (qué sobrevive entre sesiones). |
+| **Interacción Humana como Contenido** (C1a) | Los jugadores son el contenido principal del juego; los sistemas existen solo para provocar su interacción. |
+| **Interdependencia como Valor** (C1b) | El valor reside en la interdependencia entre jugadores, no en su mera coexistencia. Es **locativo** (dice dónde vive el valor, no que la interdependencia se maximice — su magnitud la gobiernan C3 y el juego en solitario como línea base) y **neutral de valencia** (no distingue cooperación de competencia; la valencia cooperativa de Mudanza es una elección de diseño, no parte del axioma). |
+| **Ambigüedad Interpretable** (C2′) | La decisión compartida vive entre lo determinado (donde no hay decisión) y lo aleatorio (donde no hay criterio). |
+| **Restricción Intrínseca** (C3) | Una restricción intrínseca a la naturaleza de la entidad se vive como oportunidad; impuesta por una regla externa, como cerradura. |
+
+#### Nivel 1 — Corolarios de diseño
+
+Se deducen de los axiomas; frozen porque su fundamento lo es. ⚠ marca un **composite**: un axioma combinado con una elección de diseño revisable por el PO.
+
+| Principio | Definición | Deriva de |
+|---|---|---|
+| Fricción Social | La mejor fricción ocurre entre jugadores, no entre jugador y sistema. | C1a + C1b (operador de dirección de la tensión) |
+| Dependencia Social ⚠ | Las tareas importantes deben beneficiarse significativamente de la cooperación. | C1b + elección de valencia cooperativa (objetivo compartido) |
+| Entropía Social | Cada partida produce situaciones distintas sin modificar el objetivo principal. | C2′ + Contexto Variable |
+| Contexto Variable ⚠ | Las condiciones cambian. El objetivo no. | C2′ + elección: el ancla interpretable es el objetivo |
+| Objetivo Estable ⚠ | Los jugadores siempre saben qué hacer. El objetivo nunca cambia. | C2′ + elección (ancla = objetivo); ver Nota de legibilidad |
+| Presión Situacional | El reto surge del contexto, no de aprender nuevas mecánicas. | C2′ + Simplicidad Mecánica |
+| Complejidad Justificada | Toda complejidad debe aumentar la interacción social o las situaciones emergentes. | C1a (gate de complejidad) |
+| Expresión sobre Ventaja | La monetización futura debe derivar de expresión personal y creación, no de ventaja competitiva. | C1a (teorema anti-poder: la ventaja rutea el resultado por el sistema) |
+| Jugadores como Fuente de Contenido | El valor a largo plazo proviene de convertir a los jugadores en contenido para otros jugadores, mediante interacción o creación. | C1a (extensión a largo plazo → entidad Content) |
+
+**Nota de legibilidad.** "Objetivo Estable" carga además "los jugadores siempre saben qué hacer". No requiere un 5º axioma: la legibilidad del *objetivo* se deduce de fijar el objetivo (elección) + Simplicidad Mecánica, y la legibilidad del *estado* es la interpretabilidad de C2′ elaborada como contrato de UX en §3.7. Se anota para confirmación del PO, no como gap sin resolver.
+
+#### Nivel 2 — Método y arquitectura
+
+Otro eje: no describen la experiencia del jugador sino **cómo se construye y se estructura el sistema**. Frozen, pero no se deducen de los axiomas de experiencia.
+
+| Principio | Definición | Eje |
+|---|---|---|
+| Simplicidad Mecánica | La profundidad surge de sistemas simples interactuando. | Método |
+| Compresión Social | El espacio debe aumentar la frecuencia con la que los jugadores interfieren entre sí. | Método (táctica espacial al servicio de C1b) |
+| Entidades Estables | Diseñar alrededor de entidades (Player, Object, Map, Content), no alrededor de nombres, archivos o features concretas. | Arquitectura |
+| Modelo de Tres Niveles | Toda decisión arquitectónica pertenece a uno de tres niveles: Entidades (qué existe), Sistemas (qué hace cosas), Persistencia (qué sobrevive entre sesiones). | Arquitectura |
 
 ### 2.2 Test Oficial de Diseño
 
@@ -167,6 +192,28 @@ PlayerData = {
 ```
 
 **Regla de dominios reservados:** Los dominios `Identity`, `Creation` y cualquier dominio marcado como reservado no pueden utilizarse hasta que exista una especificación oficial aprobada por el Product Owner.
+
+### 2.6 Disciplina de Modelado
+
+Cómo se deriva el diseño desde los Principios Congelados (§2.1). Es transversal — la usan todos los dominios y agentes — y su incumplimiento es un **error de modelado**, auditable como cualquier contrato.
+
+**Altitud.** Toda afirmación pertenece a un nivel: **axioma** (§2.1 Nivel 0) → **corolario** (se deduce) → **instanciación** (diseño concreto) → **feel/implementación** (parámetros). Un principio se representa en su **relación carrier-agnóstica**, nunca nombrando una entidad que lo transporta. Confundir el *carrier* (una entidad, un tamaño, un mapa) con lo *portado* (la relación) es error de nivel.
+
+**Primacía derivada.** Antes de asignar el rol de una entidad, derivar —matriz principio × entidad— cuál la satisface *mejor*. No heredar el encuadre (del chat, de un ticket, de una versión previa).
+
+**Determinismo.** Un modelado correcto es determinista: su conclusión se sigue de los axiomas y no depende del juicio del PO. Toda "duda de diseño" residual es **deuda de modelado** — se cierra derivando, no se delega.
+
+**Roles.** El PO ratifica axiomas, decide parámetros libres genuinos, aporta hechos e intención de dominio, y da forma al método. El PO **no** adjudica conclusiones determinadas ni verifica la corrección del modelado — eso es competencia del agente que modela.
+
+**Enforcement — derivaciones auto-certificantes.** Toda salida de modelado carga su cadena de entailment de modo que su corrección sea manifiesta por construcción. Antes de presentar un paso, el agente corre el gate:
+
+1. **Procedencia** — ¿cada premisa deriva de un axioma, o se heredó?
+2. **Nivel** — ¿relación carrier-agnóstica, o colapsada en entidad/instancia/feel?
+3. **Entailment** — ¿se muestra que cada paso se sigue de axioma + pasos previos?
+4. **Determinación** — ¿determinado (se presenta) o parámetro libre (se aísla)?
+5. **Cierre** — ¿queda duda residual? Es deuda: se cierra.
+
+**Criterio de validez:** el modelado es válido si cumple, objetiva y efectivamente, este enforcement.
 
 ---
 
