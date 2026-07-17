@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.24 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.25 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -241,6 +241,8 @@ Summary Screen muestra lo que ocurrió
 Nueva ronda
 ```
 
+**Esencia (derivada de §2.1).** El reto no vive en el transporte sino en la **coordinación decisional bajo escasez**: tiempo y espacio finitos vuelven "sacar objetos" una decisión compartida de qué salvar, con quién y por qué ruta. El mecanismo por el que el entorno genera esa cooperación se deriva en §3.3.
+
 ### 3.2 Densidad de Interacción (DI)
 
 **Pregunta:** ¿Cada cuánto tiempo ocurre algo que provoque comunicación, coordinación, improvisación o reacción entre jugadores?
@@ -251,9 +253,20 @@ Esta métrica es el criterio de avance entre semanas del Roadmap. No se avanza h
 
 ### 3.3 Dependencia Social y Cooperación
 
-Las tareas importantes deben beneficiarse significativamente de la cooperación. El diseño prioriza situaciones donde ayudarse mutuamente produce resultados mejores que actuar solo.
+La cooperación no es una feature: es lo que se genera cuando el **entorno acopla los resultados de los jugadores** (C1b — el valor reside en la interdependencia). Un acoplamiento cuenta cuando es **intrínseco** (C3): emana de la naturaleza de un elemento compartido, no de una regla externa.
 
-Los objetos grandes (large) son el mecanismo principal de cooperación forzada: requieren un líder que ancla el objeto y un soporte que debe mantenerse en rango. Esto no es opcional — es estructural.
+Dos carriers generan el acoplamiento, con valencias distintas:
+
+- **Espacio — contención (acoplamiento negativo):** finito y compartido; los cuerpos rivalizan por el mismo lugar. Es **pervasivo** — ocurre en cada movimiento (Compresión Social). Es la fricción de fondo que fuerza coordinar rutas y turnos.
+- **Objeto — pooling (acoplamiento positivo):** un objeto cuya demanda excede la capacidad de un individuo obliga a combinar esfuerzo. Es **puntuado** — solo al enganchar ese objeto. El objeto además porta la apuesta (el objetivo es salvar objetos).
+
+El **objetivo colectivo** (§1.2) fija la valencia cooperativa: como el resultado es de equipo, todo acoplamiento suma en vez de competir.
+
+**Cooperación intrínseca, no impuesta (C3, C4).** La cooperación obligatoria es legítima *solo si es intrínseca*. Un objeto grande requiere dos porque su naturaleza lo exige — no porque una regla bloquee la interacción. Representación correcta: el líder **puede** engancharlo y moverlo con dificultad; el soporte lo vuelve normal. Representación prohibida: una regla que **impide iniciar** el carry sin soporte — se siente cerradura, no oportunidad.
+
+**La escasez vuelve la cooperación una decisión (C2′).** Tiempo y manos finitos ⇒ no se puede salvar todo ⇒ el equipo prioriza qué salvar y con quién. La coordinación es **decisional**: no basta ejecutar en sincronía, hay que decidir juntos bajo escasez.
+
+Las magnitudes —cuánto se mueve un large en solitario, cuánta eficiencia añade un segundo cargador en un medium, cuánta compresión impone el layout— son **parámetros libres de playtest**, no se fijan aquí.
 
 ### 3.4 Entropía Social
 

@@ -1898,4 +1898,49 @@ Commit:      —
 Referencias: §2.1, §2.6, §5.0, DL-044
 ```
 
+---
+
+### DL-046
+
+```
+ID:          DL-046
+Fecha:       2026-07-17
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Con los axiomas en §2.1 (DL-044) y la disciplina de modelado en
+             §2.6 (DL-045), el Core Loop derivado en sesión —esencia +
+             perfiles de acoplamiento por carrier— vivía en la conversación,
+             no en §3. Además §3.3 enmarcaba la cooperación como "forzada /
+             no opcional", lenguaje de imposición que C3/C4 corrigen.
+Contenido:   §3.1 gana una nota de Esencia (el reto es coordinación decisional
+             bajo escasez, no transporte). §3.3 re-derivada desde los axiomas:
+             la cooperación se genera por acoplamiento intrínseco del entorno
+             (C1b); dos carriers con valencias distintas — espacio=contención
+             (negativo, pervasivo, Compresión Social), objeto=pooling
+             (positivo, puntuado, + porta la apuesta); el objetivo colectivo
+             (§1.2) fija la valencia cooperativa; la cooperación obligatoria es
+             legítima solo si es intrínseca (C3/C4) — representación correcta =
+             resistencia física, prohibida = regla que impide iniciar el carry;
+             la escasez vuelve la cooperación una decisión (C2′). Las magnitudes
+             quedan como parámetros libres de playtest.
+Hipótesis:   Anclar §3 en el modelo de acoplamiento hace la cooperación
+             derivable y auditable con el gate §2.6, y elimina el marco de
+             "imposición" que producía cerraduras.
+Razón:       CONTINGENCY P5 — autoridad directa del PO sobre la constitución
+             para formalizar el Core Loop derivado antes de reconciliar
+             implementación.
+Impacto:     §3.1 y §3.3 reescritas. Header v5.25. Ripple de implementación
+             (Ola 4, post-gate): GAM-005 (penalización de velocidad en medium
+             = fricción jugador↔sistema) y GAM-006 (AC "el carry no comienza
+             sin soporte" = representación impuesta) quedan en tensión con §3.3
+             re-derivada — reconciliar al abrir la implementación.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      GAM-005, GAM-006
+Commit:      —
+Referencias: §3.1, §3.3, §2.1, §2.6, DL-027, DL-044, DL-045
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
