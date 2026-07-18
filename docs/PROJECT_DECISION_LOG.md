@@ -43,6 +43,9 @@ Costo:       C1 | C2 | C3 | C4 — vacío hasta DECISION
 Pipeline:    P1 | P2/P4 | P3 | P5 | P6 — vacío hasta DECISION
 Ticket:      [DOMINIO]-[número] — vacío hasta que exista
 Commit:      [hash] — vacío hasta que exista
+Modifica:    [§N.N del master que esta entrada CAMBIA — arista DL→§ del grafo
+             de derivación (DL-049); vacío si no modifica el master. Distinto
+             de Referencias: referenciar no es modificar.]
 Referencias: [§N.N del Context Master, otros DL-, T-]
 ```
 
@@ -1850,7 +1853,8 @@ Costo:       C3
 Pipeline:    P5
 Ticket:      —
 Commit:      —
-Referencias: §2.1, §2.2, §3.7, DL-024, DL-039
+Modifica:    §2.1
+Referencias: §2.2, §3.7, DL-024, DL-039
 ```
 
 ---
@@ -1895,7 +1899,8 @@ Costo:       C3
 Pipeline:    P5
 Ticket:      —
 Commit:      —
-Referencias: §2.1, §2.6, §5.0, DL-044
+Modifica:    §2.6
+Referencias: §2.1, §5.0, DL-044
 ```
 
 ---
@@ -1940,7 +1945,8 @@ Costo:       C3
 Pipeline:    P5
 Ticket:      GAM-005, GAM-006
 Commit:      —
-Referencias: §3.1, §3.3, §2.1, §2.6, DL-027, DL-044, DL-045
+Modifica:    §3.1, §3.3
+Referencias: §2.1, §2.6, DL-027, DL-044, DL-045
 ```
 
 ---
@@ -1985,7 +1991,8 @@ Costo:       C3
 Pipeline:    P5
 Ticket:      GAM-005, GAM-006, GAM-007
 Commit:      —
-Referencias: §4.4, §4.13, §2.3, §3.3, DL-027, DL-033, DL-046
+Modifica:    §4.4, §4.13
+Referencias: §2.3, §3.3, DL-027, DL-033, DL-046
 ```
 
 ---
@@ -2036,7 +2043,59 @@ Costo:       C3
 Pipeline:    P5
 Ticket:      —
 Commit:      —
-Referencias: §5.0, §5.4, §2.6, DL-012, DL-041
+Modifica:    §5.0
+Referencias: §5.4, §2.6, DL-012, DL-041
+```
+
+---
+
+### DL-049
+
+```
+ID:          DL-049
+Fecha:       2026-07-18
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El validador (DL-048) cubría integridad + frescura pero no
+             COBERTURA: un DL podía modificar §3/§4 sin declarar ningún
+             ticket ni derivación — la "tajada silenciosa" quedaba invisible.
+             Además la arista DL→§ (modificar ≠ referenciar) estaba
+             sub-especificada dentro de Referencias. Investigación de sistemas
+             formales (B/Event-B, TLA+, Z, VDM, Alloy, SysML+OCL) para
+             completar el validador hacia holístico, por dirección del PO.
+Contenido:   (1) Campo `Modifica:` en el schema del DL — la arista DL→§ como
+             relación de primera clase (backfill DL-044..048; Referencias
+             queda solo para referenciar). (2) Regla `uncovered`: DL que
+             modifica §3/§4 sin declarar Ticket: y sin derivadores = violación
+             (concepto B-Method: todo refinamiento genera obligaciones; un
+             cambio de diseño sin obligaciones declaradas es sospechoso).
+             (3) `dangling` extendido a modifies. (4) Roadmap del validador
+             completo derivado de §2.6 e informado por la investigación:
+             F4.5 `Difiere:` (diferimiento reificado, autorizado y ACOTADO por
+             hito — convierte la deuda de liveness estilo TLA+ en check
+             decidible; reemplaza baseline.txt) + prompt-freshness (prompts
+             como nodos; caza refs stale tipo "v5.7"); F5 aristas tipadas
+             (estereotipos SysML deriveReqt/satisfy/verify/refine) + altitud
+             como tipo (Z schemas); F6 código como nodos + gluing invariants
+             §3↔§4 (Event-B); F7 marcas de determinación.
+Hipótesis:   Cobertura + frescura + integridad cierran el fragmento relacional
+             SAFETY del validador; el diferimiento acotado (F4.5) añade la
+             dimensión temporal sin salir de lo decidible.
+Razón:       CONTINGENCY P5 — dirección del PO: "nuestra mayor inversión ahora
+             es este validador; hay que completarlo", incluyendo meta-relaciones.
+Impacto:     Schema del log gana Modifica: (obligatorio cuando la entrada
+             cambia el master). derivation.dl + check.luau extendidos. El PO
+             configuró el check como required (ruleset main-protection) — el
+             validador es gate duro del pipeline. Meta-relaciones: reificadas
+             parcialmente (affects/modifies/baseline); su forma completa llega
+             con Difiere: y prompt-nodes (F4.5).
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    —
+Referencias: §5.0, §5.4, §2.6, DL-048
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

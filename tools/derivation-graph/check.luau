@@ -26,6 +26,7 @@ end
 local nodes = {}
 local derives = {}
 local affects = {}
+local modifies = {}
 
 local function eachRef(text, fn)
 	for num in text:gmatch("§([%d%.]+)") do
@@ -71,6 +72,12 @@ do
 				eachTicketId(tks, function(t)
 					table.insert(affects, { cur, t })
 				end)
+			end
+			local mods = line:match("^Modifica:%s*(.+)")
+			if mods then
+				for num in mods:gmatch("§([%d%.]+)") do
+					table.insert(modifies, { cur, norm(num) })
+				end
 			end
 		end
 	end
@@ -147,6 +154,30 @@ for _, a in ipairs(affects) do
 	end
 end
 
+-- uncovered: DL que modifica §3/§4 sin declarar Ticket: y sin que nada derive de él
+local coveredSet = {}
+for _, e in ipairs(derives) do
+	coveredSet[e[2]] = true
+end
+for _, a in ipairs(affects) do
+	coveredSet[a[1]] = true
+end
+local uncovered, uncoveredSeen = {}, {}
+for _, m in ipairs(modifies) do
+	local isImpl = m[2]:match("^§3") ~= nil or m[2]:match("^§4") ~= nil
+	if isImpl and not coveredSet[m[1]] and not uncoveredSeen[m[1]] then
+		uncoveredSeen[m[1]] = true
+		table.insert(uncovered, m[1])
+	end
+end
+
+-- dangling también para modifies (sección inexistente)
+for _, m in ipairs(modifies) do
+	if not nodes[m[2]] then
+		table.insert(dangling, { m[1], m[2] })
+	end
+end
+
 -- ── reporte ─────────────────────────────────────────────────────────────────
 local nodeCount = 0
 for _ in pairs(nodes) do
@@ -154,10 +185,11 @@ for _ in pairs(nodes) do
 end
 print(
 	string.format(
-		"Grafo: %d nodos, %d aristas 'derives', %d aristas 'affects'\n",
+		"Grafo: %d nodos, %d 'derives', %d 'affects', %d 'modifies'\n",
 		nodeCount,
 		#derives,
-		#affects
+		#affects,
+		#modifies
 	)
 )
 
@@ -181,12 +213,15 @@ end)
 reportViolations("stale NUEVO (regresión)", newStale, function(r)
 	return r[1] .. " no referencia " .. r[2]
 end)
+reportViolations("uncovered (DL modifica §3/§4 sin derivación declarada)", uncovered, function(r)
+	return r
+end)
 
 if #knownStale > 0 then
 	print(string.format("\n  · deuda conocida (baseline): %d — backlog de trazabilidad, no bloquea", #knownStale))
 end
 
-local violations = #dangling + #orphan + #newStale
+local violations = #dangling + #orphan + #newStale + #uncovered
 if violations > 0 then
 	print(string.format("\n%d violación(es) NUEVA(s) — el grafo de derivación regresó.", violations))
 	process.exit(1)
