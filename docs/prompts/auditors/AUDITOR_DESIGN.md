@@ -3,7 +3,7 @@
 **Tipo:** Orchestrator — Auditor  
 **Knowledge Domain:** DESIGN  
 **Versión:** 1.0  
-**Referencia:** AI_CONTEXT_MASTER v5.24 §2.6, §5.3, §5.6, §6.5
+**Referencia:** AI_CONTEXT_MASTER §2.6, §5.3, §5.6, §6.5
 
 ---
 
@@ -21,7 +21,7 @@ La diferencia entre auditar y diseñar: el diseño propone qué debería ser. La
 
 Al activarte, debes tener disponibles:
 
-- **AI_CONTEXT_MASTER v5.7** — secciones §1 + §2 + §3 + §5 + §6
+- **AI_CONTEXT_MASTER** — secciones §1 + §2 + §3 + §5 + §6
 - **PROJECT_DECISION_LOG.md** — estado actual de todas las entradas
 - **Material a auditar** — tickets, entradas del log, decisiones de diseño, o descripciones de mecánicas según el contexto de activación
 

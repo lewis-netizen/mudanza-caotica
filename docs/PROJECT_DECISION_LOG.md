@@ -1,7 +1,7 @@
 # PROJECT_DECISION_LOG — Mudanza Caótica
 
 **Versión:** 1.0
-**Referencia:** AI_CONTEXT_MASTER v5.7 §5.4  
+**Referencia:** AI_CONTEXT_MASTER §5.4  
 **Última actualización:** 2026-07-11
 
 ---
@@ -2096,6 +2096,60 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    —
 Referencias: §5.0, §5.4, §2.6, DL-048
+```
+
+---
+
+### DL-050
+
+```
+ID:          DL-050
+Fecha:       2026-07-18
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    F4.5 del validador: tres meta-relaciones vivían fuera del sistema
+             formal. (a) El diferimiento — baseline.txt difería deuda sin
+             autorización ni plazo. (b) Los version-pins — artefactos
+             referenciando "AI_CONTEXT_MASTER vN.N" que rotan en cada bump:
+             se hallaron 9 pins fósiles en 6 archivos, incluidos dos "v5.24"
+             de una corrección de esta misma sesión ya vencidos contra v5.26 —
+             prueba de que el pin rota más rápido de lo que se vigila. (c) El
+             drift de §5.0 — DL-048/049 declararon su capa de verificación sin
+             actualizar la tabla de contratos del master.
+Contenido:   (1) deferrals.txt reemplaza baseline.txt: cada diferimiento es
+             (ticket, dl, autorizado-por, hasta-fecha) — reificado, con
+             procedencia y ACOTADO. Diferimiento vencido = violación que
+             bloquea: la obligación de liveness ("eventualmente reconciliado",
+             TLA+) se vuelve decidible. Las 17 deudas: 12 autorizadas por
+             DL-048 (descubiertas), 5 por DL-046/047 (declaradas); bound
+             inicial 2026-08-11 (deadline del slice) — ajustable por el PO.
+             (2) Ban de version-pins: ningún artefacto contiene
+             "AI_CONTEXT_MASTER vN.N" — el master se lee siempre vigente
+             (única fuente de verdad, §header). Los 9 pins limpiados; el log
+             histórico exento (solo se escanea su header). Se disuelve la
+             meta-relación frágil en vez de vigilarla. (3) §5.0 Nivel 1 gana
+             las filas del grafo de derivación y del ban — cierra el drift.
+             (4) contract-derivation-graph entra a pre-commit (lefthook),
+             cumpliendo la doble ejecución de Nivel 1 (DL-023). El nombre del
+             required check NO cambia (regla de nombres §5.0/DL-033).
+Hipótesis:   Con diferimiento acotado y pins disueltos, toda deuda relacional
+             del grafo tiene dueño, autorización y vencimiento — la máquina
+             reclama la reconciliación sin depender de memoria humana.
+Razón:       CONTINGENCY P5 — dirección del PO: completar el validador hacia
+             holístico, meta-relaciones incluidas.
+Impacto:     tools/derivation-graph/: deferrals.txt (nuevo), baseline.txt
+             (eliminado), check.luau y derivation.dl extendidos. Master §5.0 +
+             header v5.27. lefthook.yml gana contract-derivation-graph. 6
+             archivos de docs/ limpiados de pins. Al vencer 2026-08-11 sin
+             reconciliar, el check bloquea TODO PR — el vencimiento es el
+             mecanismo, no un accidente.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Referencias: §5.4, §2.6, DL-023, DL-024, DL-033, DL-048, DL-049
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

@@ -56,15 +56,26 @@ covered(D) :- affects(D, _).
 .decl uncovered(dl:Node)
 uncovered(D) :- modifies(D, S), impl_section(S), !covered(D).
 
+// (5) DIFERIMIENTO ACOTADO (F4.5, DL-050) — un stale solo se difiere mediante
+//     una fila autorizada en deferrals.txt: (ticket, dl, autorizado_por, hasta).
+//     Reifica la meta-relación de diferimiento CON procedencia y CON plazo:
+//       deferred(T,D)  :- stale(T,D), deferral(T,D,_,U), today <= U.   // no bloquea
+//       expired(T,D,U) :- stale(T,D), deferral(T,D,_,U), today > U.    // VIOLACIÓN
+//     Convierte la obligación de liveness ("eventualmente reconciliado", TLA+)
+//     en check decidible: la deuda tiene dueño y vencimiento. Reemplaza el
+//     baseline.txt plano (que difería sin autorización ni plazo).
+.decl deferral(ticket:Node, dl:Node, auth:Node, until:symbol)
+.input deferral
+
+// (6) VERSION-PIN BAN (F4.5, DL-050) — ningún artefacto fuera del master
+//     contiene "AI_CONTEXT_MASTER vN.N". El master se lee siempre vigente
+//     (única fuente de verdad): un pin es estado duplicado que rota en cada
+//     bump (observado: refs "v5.7" fósiles, y los "v5.24" de una corrección
+//     previa rotaron en la misma sesión). Se DISUELVE la meta-relación frágil
+//     en lugar de vigilarla. Entradas históricas del log exentas (solo header).
+//     Implementación: escaneo de docs/ en check.luau (lint de texto, no EDB).
+
 .output dangling
 .output orphan
 .output stale
 .output uncovered
-
-// ── Pendiente (F4.5+) ───────────────────────────────────────────────────────
-// `Difiere:` — reificación autorizada y ACOTADA del diferimiento (reemplaza
-//   baseline.txt): quién lo autorizó (DL) y hasta cuándo (hito). Convierte la
-//   deuda de liveness ("eventualmente reconciliado", TLA+) en check decidible
-//   ("diferido más allá de su hito = violación").
-// prompt-freshness — los prompts (docs/prompts/*) como nodos: referencia a una
-//   versión del master ≠ actual = stale (caso real: refs "v5.7" observadas).
