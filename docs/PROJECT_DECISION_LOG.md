@@ -2152,4 +2152,54 @@ Modifica:    §5.0
 Referencias: §5.4, §2.6, DL-023, DL-024, DL-033, DL-048, DL-049
 ```
 
+---
+
+### DL-051
+
+```
+ID:          DL-051
+Fecha:       2026-07-18
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    F5 del validador: la meta-propiedad de NIVEL ("¿se está
+             abstrayendo en el nivel correcto?") era la única clase de error
+             que seguía dependiendo del juicio del PO — el fragmento
+             relacional (F1–F4.5) caza aristas rotas pero no saltos de
+             altitud. El PO condicionó retomar el diseño a cerrar esto.
+Contenido:   La altitud como tipo, INFERIDA de la estructura existente (cero
+             anotación nueva): nivel(§1/§2)=fundamento, nivel(§3)=diseño,
+             nivel(§4)=técnica, nivel(ticket)=implementación; aristas tipadas
+             por destino (taxonomía SysML: ticket→§4 «satisfy», ticket→§3
+             «refine», ticket→§2 «motivate», ticket→DL «trace», DL→§
+             «modify»). Tres reglas nuevas: level_skip (ticket cuyas fuentes
+             son SOLO fundamento/hito — implementación no deriva directo de
+             axiomas sin contrato §3/§4/DL en medio; QA-xxx exento por ser
+             hitos transversales), domain_mismatch (DL que Modifica §3 debe
+             ser DESIGN|BOTH, §4 debe ser TECH|BOTH), impl_leak (nombres de
+             módulos de src/ en §1–§3 del master = implementación filtrada al
+             piso de diseño; "Main" exento). Además: el extractor gana la
+             arista DL-Ref (declarada por los tickets e ignorada hasta ahora —
+             fidelidad del EDB, +11 aristas).
+Hipótesis:   Con la altitud tipada, el error de nivel deja de necesitar el
+             insight del PO: un salto de capa es una fila de salida, no una
+             observación. El residuo genuinamente semántico (prosa de §3 con
+             sabor de implementación más allá de nombres de módulos) queda en
+             el checklist §2.6 del AUDITOR_DESIGN — más chico y más claro.
+Razón:       CONTINGENCY P5 — condición del PO: F5 antes de retomar la
+             abstracción, porque F5 es lo que evita que la validación de nivel
+             caiga sobre él.
+Impacto:     Primer run cazó un true positive: WLD-000 declaraba derivar solo
+             de Principio+Hito cuando sus fuentes reales (DL-028, DL-036,
+             §4.4) estaban en su propio cuerpo — corregido su Deriva de, y la
+             fila muerta (WLD-000, DL-036) eliminada de deferrals.txt (17→16).
+             §5.0 actualizada con las reglas de altitud. Header v5.28.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Referencias: §5.4, §2.6, DL-032, DL-048, DL-049, DL-050
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

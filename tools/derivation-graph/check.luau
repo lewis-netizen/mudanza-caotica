@@ -28,6 +28,7 @@ local nodes = {}
 local derives = {}
 local affects = {}
 local modifies = {}
+local dlDomain = {}
 
 local function eachRef(text, fn)
 	for num in text:gmatch("§([%d%.]+)") do
@@ -80,6 +81,10 @@ do
 					table.insert(modifies, { cur, norm(num) })
 				end
 			end
+			local dom = line:match("^Domain:%s*(%S+)")
+			if dom then
+				dlDomain[cur] = dom
+			end
 		end
 	end
 end
@@ -95,6 +100,13 @@ do
 			local dv = line:match("^Deriva de:%s*(.+)")
 			if dv then
 				eachRef(dv, function(p)
+					table.insert(derives, { cur, p })
+				end)
+			end
+			-- DL-Ref también es una arista de derivación declarada por el artefacto
+			local dlref = line:match("^DL%-Ref:%s*(.+)")
+			if dlref then
+				eachRef(dlref, function(p)
 					table.insert(derives, { cur, p })
 				end)
 			end
@@ -182,6 +194,95 @@ for _, m in ipairs(modifies) do
 	end
 end
 
+-- ── F5: altitud como tipo (DL-051) ──────────────────────────────────────────
+
+-- level_skip: ticket cuyas fuentes son SOLO fundamento (§1/§2) o hito (§5+) —
+-- la implementación exige ≥1 fuente de diseño (§3), técnica (§4) o DL.
+-- QA-xxx exento: hitos transversales (TICKETS.md — "QA no es un dominio").
+local ticketHasDT = {}
+for _, e in ipairs(derives) do
+	if nodes[e[1]] == "ticket" then
+		local pk = nodes[e[2]]
+		if pk == "dl" then
+			ticketHasDT[e[1]] = true
+		elseif pk == "section" then
+			local m = tonumber(e[2]:match("^§(%d+)") or "")
+			if m == 3 or m == 4 then
+				ticketHasDT[e[1]] = true
+			end
+		end
+	end
+end
+local levelSkip = {}
+for id, kind in pairs(nodes) do
+	if kind == "ticket" and hasSource[id] and not ticketHasDT[id] and not id:match("^QA%-") then
+		table.insert(levelSkip, id)
+	end
+end
+table.sort(levelSkip)
+
+-- domain_mismatch: Domain del DL incoherente con el nivel de lo que Modifica.
+local domainMismatch, dmSeen = {}, {}
+for _, m in ipairs(modifies) do
+	local major = tonumber(m[2]:match("^§(%d+)") or "")
+	local d = dlDomain[m[1]] or "?"
+	local bad = (major == 3 and d ~= "DESIGN" and d ~= "BOTH")
+		or (major == 4 and d ~= "TECH" and d ~= "BOTH")
+	local key = m[1] .. "\0" .. tostring(major)
+	if bad and not dmSeen[key] then
+		dmSeen[key] = true
+		table.insert(domainMismatch, { m[1], m[2], d })
+	end
+end
+table.sort(domainMismatch, function(a, b)
+	return a[1] < b[1]
+end)
+
+-- impl_leak: nombres de módulos de src/ en §1–§3 del master (implementación
+-- filtrada al piso de diseño). "Main" exento (entry point, palabra común).
+local moduleNames = {}
+local function collectModules(dir)
+	local ok, entries = pcall(fs.readDir, dir)
+	if not ok then
+		return
+	end
+	for _, name in ipairs(entries) do
+		local p = dir .. "/" .. name
+		if fs.isDir(p) then
+			collectModules(p)
+		else
+			local base = name:match("^(.+)%.luau?$")
+			if base then
+				base = base:gsub("%.server$", ""):gsub("%.client$", ""):gsub("%.spec$", "")
+				moduleNames[base] = true
+			end
+		end
+	end
+end
+collectModules("src")
+moduleNames["Main"] = nil
+local implLeak = {}
+do
+	local inRange = false
+	local i = 0
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		i += 1
+		if line:match("^## 1%.") then
+			inRange = true
+		elseif line:match("^## 4%.") then
+			inRange = false
+		end
+		if inRange then
+			for name in pairs(moduleNames) do
+				if line:match("%f[%w]" .. name .. "%f[%W]") then
+					table.insert(implLeak, "AI_CONTEXT_MASTER.md:" .. i .. " → " .. name)
+				end
+			end
+		end
+	end
+end
+table.sort(implLeak)
+
 -- version-pins: ningún artefacto referencia "AI_CONTEXT_MASTER vN.N" (DL-050).
 -- El master se lee siempre vigente. Entradas históricas del log exentas
 -- (solo se escanea su header). El master mismo está exento.
@@ -257,15 +358,31 @@ end)
 reportViolations("uncovered (DL modifica §3/§4 sin derivación declarada)", uncovered, function(r)
 	return r
 end)
+reportViolations("level_skip (implementación sin fuente §3/§4/DL)", levelSkip, function(r)
+	return r
+end)
+reportViolations("domain_mismatch (Domain del DL vs nivel que Modifica)", domainMismatch, function(r)
+	return r[1] .. " (Domain " .. r[3] .. ") modifica " .. r[2]
+end)
+reportViolations("impl_leak (módulo de src/ nombrado en §1–§3)", implLeak, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
 
 if #deferred > 0 then
 	print(string.format("\n  · deuda diferida vigente: %d — autorizada y acotada en deferrals.txt", #deferred))
+	table.sort(deferred, function(a, b)
+		return a[1] .. a[2] < b[1] .. b[2]
+	end)
+	for _, d in ipairs(deferred) do
+		print("      " .. d[1] .. " ↛ " .. d[2])
+	end
 end
 
 local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
+	+ #levelSkip + #domainMismatch + #implLeak
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)
