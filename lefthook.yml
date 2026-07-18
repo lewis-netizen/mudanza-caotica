@@ -105,7 +105,7 @@ pre-commit:
     # Corre sobre el working tree completo (el grafo es global, no por archivo).
 
     - name: contract-derivation-graph
-      glob: "{docs/**/*.md,tools/derivation-graph/*}"
+      glob: "{docs/**/*.md,tools/derivation-graph/*,src/**/*.lua}"
       run: lune run tools/derivation-graph/check.luau
 
 commit-msg:

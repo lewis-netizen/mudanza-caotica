@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.30 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.31 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -916,6 +916,31 @@ El framework de UI del proyecto es **Fusion** (`elttob/fusion`) — declarativo 
 
 ---
 
+### 4.15 Gluing §3↔§4 y Registro de Módulos (DL-054)
+
+El **gluing** (Event-B) hace explícita la correspondencia entre el diseño (§3) y su realización técnica (§4): toda sección §3.N declara aquí **cómo se realiza** — con mecanismos de sistema, o con un marcador legítimo (`empírico → playtest` para lo que se mide, `normativo` para lo que restringe). El validador exige totalidad (`unglued_section`) y existencia de lo nombrado (`glue_dangling`): un concepto de diseño sin realización declarada es una **obligación pendiente**, no una omisión silenciosa. Los nombres en backticks son claims de módulo verificados contra el registro y `src/`.
+
+| §3.N | Concepto | Realización |
+|---|---|---|
+| §3.1 | Ciclo de ronda (core loop) | `GameManager` (estados Lobby/Summary) + `RoundManager` (ronda activa) — §4.4 |
+| §3.2 | Densidad de Interacción | — empírico → playtest (métrica de avance, §3.2) |
+| §3.3 | Contención (espacio — acoplamiento negativo, pervasivo) | layout + física del engine: `MapBootstrap` (placeholder, DL-036) / layout real (WLD-003, Compresión Social) |
+| §3.3 | Pooling (objeto — acoplamiento positivo, puntuado) | `CarryRules` carryEfficiency (§4.13, DL-047) + `CarryManager` / `CarrySupport` |
+| §3.3 | Escasez (tiempo → decisión, C2′) | timer de `RoundManager` (1 tick/s, §4.12) |
+| §3.3 | Apuesta (el objeto porta el objetivo) | `ObjectManager` (estados) + `TruckManager` (entrega y conteo) |
+| §3.4 | Entropía Social | `EventManager` (evento por ronda) + `NPCManager` (vecino) + spawn aleatorio de `ObjectManager` |
+| §3.5 | Prohibiciones de progresión | — normativo → Test de Diseño (§2.2) + auditoría DESIGN (D1) |
+| §3.6 | Monetización ética | — normativo (futuro, entidad Content) |
+| §3.7 | Percepción y feedback | `ClientStateManager` (§4.10) + contratos UX (§3.7) + `HUDManager` / `SummaryManager` / `PromptController` |
+| §3.8 | Criterios de éxito del MVP | — empírico → playtest (QA-001, P6 §6.7) |
+| §3.9 | Visión a largo plazo | — normativo (roadmap §5.7, dominios Identidad/Creación) |
+
+**Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`. (⚠ `ProfileStoreConfig` existe en `src/server/Persistence/` pero §4.7 declara solo PlayerDataService y MigrationService como módulos propios — prosa desactualizada; armonizar en la re-derivación holística de §4.)
+
+**Exenciones del registro:** `src/shared/Tests/` (specs — verifican, no son sistemas), `src/shared/Definitions/` (contenido de entidades — §2.4 prohíbe que el master se acople a nombres concretos de objetos), `Main.*` e `init` (infraestructura de arranque).
+
+---
+
 ## 5. Governance
 
 ### 5.0 Principio de Separación CI/IA
@@ -961,7 +986,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Formato de código uniforme | StyLua |
 | — | Convención de commits | commitlint (Lefthook commit-msg) |
 | §5.10 | PR `class:a` referencia un `DL-xxx` y toca `docs/` (trazabilidad, DL-041) | github-script en CI (labels + cuerpo/commits + archivos del PR) — solo CI, requiere contexto de PR |
-| §5.4/§5.5 | Grafo de derivación: integridad (`dangling`), procedencia (`orphan`, DL-032), frescura (`stale` — con diferimientos autorizados y acotados por fecha en `deferrals.txt`; vencido = violación), cobertura (`uncovered`: DL que modifica §3/§4 sin declarar derivación) altitud (`level_skip`: implementación sin fuente §3/§4/DL; `domain_mismatch`: Domain del DL incoherente con lo que Modifica; `impl_leak`: módulos de `src/` nombrados en §1–§3) y determinación (`undeclared_free`: DL que modifica el master sin declarar `Libre:` — el juicio determinado-vs-libre es un acto explícito) — DL-048/049/050/051/053 | `lune run tools/derivation-graph/check.luau` (modelo: `tools/derivation-graph/derivation.dl`) |
+| §5.4/§5.5 | Grafo de derivación: integridad (`dangling`), procedencia (`orphan`, DL-032), frescura (`stale` — con diferimientos autorizados y acotados por fecha en `deferrals.txt`; vencido = violación), cobertura (`uncovered`: DL que modifica §3/§4 sin declarar derivación) altitud (`level_skip`: implementación sin fuente §3/§4/DL; `domain_mismatch`: Domain del DL incoherente con lo que Modifica; `impl_leak`: módulos de `src/` nombrados en §1–§3) determinación (`undeclared_free`: DL que modifica el master sin declarar `Libre:` — el juicio determinado-vs-libre es un acto explícito), código (`module_undeclared`: módulo en `src/` no declarado en §4) y gluing §3↔§4 (`unglued_section`: sección §3 sin realización en §4.15; `glue_dangling`: claim de módulo inexistente) — DL-048/049/050/051/053/054 | `lune run tools/derivation-graph/check.luau` (modelo: `tools/derivation-graph/derivation.dl`) |
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 

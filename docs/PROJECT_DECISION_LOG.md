@@ -2327,4 +2327,59 @@ Libre:       —
 Referencias: §5.4, §5.0, §2.6, DL-049, DL-052
 ```
 
+---
+
+### DL-054
+
+```
+ID:          DL-054
+Fecha:       2026-07-18
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    F6 — último fragmento del validador, construido ANTES del
+             trabajo holístico que gobierna (principio DL-053): el grafo no
+             alcanzaba el código (src/) ni existía correspondencia explícita
+             diseño→realización. Al construir el registro emergió drift real:
+             ProfileStoreConfig existe en src/server/Persistence/ pero §4.7
+             declara "únicos módulos propios: PlayerDataService y
+             MigrationService" — prosa desactualizada.
+Contenido:   (1) Código como nodos: registro de módulos declarados (tabla
+             §4.4 + tabla §4.13 + registro adicional en §4.15) contra src/
+             real — regla module_undeclared ("implementado sin diseñar").
+             Exenciones: Tests/ (verifican), Definitions/ (contenido — §2.4
+             prohíbe acoplar el master a nombres de objetos), Main/init.
+             (2) Nueva §4.15: tabla de GLUING §3↔§4 (Event-B) — toda sección
+             §3.N declara su realización (mecanismos con claims de módulo en
+             backticks, o marcador legítimo: empírico→playtest / normativo);
+             filas finas por concepto para §3.3 (contención, pooling,
+             escasez, apuesta). Reglas unglued_section (totalidad) y
+             glue_dangling (existencia). Construido antes del holístico, el
+             gluing GENERA obligaciones: re-derivar §3/§4 sin re-pegar
+             dispara las reglas. (3) uncovered refinado: §4.15 exento (es
+             registro, gobernado por sus propias reglas). (4) lefthook glob
+             gana src/. La meta-2 (código del validador mismo) queda
+             gobernada por el tripwire DL-052, no por el grafo.
+Hipótesis:   Con código y gluing en el grafo, "diseñado sin implementar",
+             "implementado sin diseñar" y "concepto sin realización" son
+             filas de salida — el holístico §4 trabaja descargando
+             obligaciones visibles, no confiando en memoria.
+Razón:       CONTINGENCY P5 — arranque de F6 ordenado por el PO bajo el
+             principio validador-antes-del-trabajo (DL-053).
+Impacto:     §4.15 nueva; §5.0 actualizada; header v5.31. 13 reglas activas.
+             Drift ProfileStoreConfig↔§4.7 anotado ⚠ en §4.15 — obligación
+             del holístico. Validador COMPLETO respecto a su roadmap
+             (F1–F7): el programa de diseño queda desbloqueado con
+             precondiciones en pie.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §4.15, §5.0
+Libre:       Granularidad del gluing por debajo de sección (claims tipados
+             por afirmación individual de §3) → se decide al verla operar en
+             el holístico (PO)
+Referencias: §4.4, §4.13, §4.7, §2.4, §2.6, §5.0, DL-047, DL-052, DL-053
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

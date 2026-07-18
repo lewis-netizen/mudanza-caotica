@@ -126,6 +126,38 @@ domain_mismatch(D, S, X) :- modifies(D, S), section_major(S, 4), dl_domain(D, X)
 .decl undeclared_free(dl:Node)
 undeclared_free(D) :- modifies(D, _), !declares_free(D).
 
+// (11) CÓDIGO COMO NODOS (F6, DL-054) — el grafo alcanza src/: todo módulo
+//      real debe estar declarado en §4 (tablas §4.4/§4.13 o registro §4.15).
+//      Caza "implementado sin diseñar". Exenciones: Tests/ (verifican),
+//      Definitions/ (contenido — §2.4 prohíbe acoplar el master a nombres
+//      de objetos), Main/init (arranque). La meta-2 (código del validador)
+//      queda gobernada por el tripwire DL-052, no por el grafo.
+.decl src_module(m:symbol)
+.decl declared_module(m:symbol)
+.input src_module
+.input declared_module
+
+.decl module_undeclared(m:symbol)
+module_undeclared(M) :- src_module(M), !declared_module(M).
+
+// (12–13) GLUING §3↔§4 (F6, Event-B) — §4.15 reifica la correspondencia
+//      diseño→realización. Totalidad: toda sección §3.N tiene ≥1 fila
+//      (mecanismo, o marcador legítimo: empírico→playtest / normativo).
+//      Existencia: todo claim de módulo (backticks CamelCase) resuelve.
+//      Construido ANTES del holístico (DL-053): una sección re-derivada
+//      sin re-glue dispara unglued/dangling — el gluing GENERA obligaciones.
+.decl glue(sec:Node, target:symbol)
+.input glue
+
+.decl glued(sec:Node)
+glued(S) :- glue(S, _).
+
+.decl unglued_section(sec:Node)
+unglued_section(S) :- node(S, "section"), section_major(S, 3), !glued(S).
+
+.decl glue_dangling(sec:Node, target:symbol)
+glue_dangling(S, T) :- glue(S, T), !declared_module(T), !src_module(T).
+
 .output dangling
 .output orphan
 .output stale
@@ -133,3 +165,6 @@ undeclared_free(D) :- modifies(D, _), !declares_free(D).
 .output level_skip
 .output domain_mismatch
 .output undeclared_free
+.output module_undeclared
+.output unglued_section
+.output glue_dangling

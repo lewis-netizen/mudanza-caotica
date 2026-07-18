@@ -191,7 +191,9 @@ for _, a in ipairs(affects) do
 end
 local uncovered, uncoveredSeen = {}, {}
 for _, m in ipairs(modifies) do
-	local isImpl = m[2]:match("^§3") ~= nil or m[2]:match("^§4") ~= nil
+	-- §4.15 exento: es el registro de gluing (gobernado por unglued/dangling,
+	-- no por obligación de tickets — DL-054)
+	local isImpl = (m[2]:match("^§3") ~= nil or m[2]:match("^§4") ~= nil) and m[2] ~= "§4.15"
 	if isImpl and not coveredSet[m[1]] and not uncoveredSeen[m[1]] then
 		uncoveredSeen[m[1]] = true
 		table.insert(uncovered, m[1])
@@ -333,6 +335,97 @@ local function walkDocs(dir)
 end
 walkDocs("docs")
 
+-- ── F6: código como nodos + gluing §3↔§4 (DL-054) ───────────────────────────
+-- Registro declarado (tabla §4.4, tabla §4.13, registro adicional §4.15)
+-- contra src/ real, y tabla de gluing §4.15: totalidad + existencia.
+local declaredModules = {}
+local glueSecs = {} -- filas de gluing: secciones §3.N con ≥1 realización
+local glueTargets = {} -- claims de módulo en filas de gluing
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "4.4" then
+			local name = line:match("^| (%u%w+) |")
+			if name and name ~= "Módulo" then
+				declaredModules[name] = true
+			end
+		elseif region == "4.13" then
+			local name = line:match("^| `(%u%w+)`")
+			if name then
+				declaredModules[name] = true
+			end
+		elseif region == "4.15" then
+			if line:match("^%*%*Registro adicional") then
+				for name in line:gmatch("`(%u%w+)`") do
+					declaredModules[name] = true
+				end
+			else
+				local sec = line:match("^| (§3%.%d+) |")
+				if sec then
+					glueSecs[sec] = true
+					for name in line:gmatch("`(%u%w+)`") do
+						table.insert(glueTargets, { sec, name })
+					end
+				end
+			end
+		end
+	end
+end
+
+-- módulos reales de src/ (exenciones: Tests, Definitions, Main, init — §4.15)
+local srcModules = {}
+local function collectSrc(dir)
+	local ok, entries = pcall(fs.readDir, dir)
+	if not ok then
+		return
+	end
+	for _, name in ipairs(entries) do
+		local p = dir .. "/" .. name
+		if fs.isDir(p) then
+			if name ~= "Tests" and name ~= "Definitions" then
+				collectSrc(p)
+			end
+		else
+			local base = name:match("^(.+)%.luau?$")
+			if base and not base:match("%.spec$") then
+				base = base:gsub("%.server$", ""):gsub("%.client$", "")
+				if base ~= "Main" and base ~= "init" then
+					srcModules[base] = true
+				end
+			end
+		end
+	end
+end
+collectSrc("src")
+
+local moduleUndeclared = {}
+for name in pairs(srcModules) do
+	if not declaredModules[name] then
+		table.insert(moduleUndeclared, name)
+	end
+end
+table.sort(moduleUndeclared)
+
+local ungluedSection = {}
+for id, kind in pairs(nodes) do
+	if kind == "section" and id:match("^§3%.%d+$") and not glueSecs[id] then
+		table.insert(ungluedSection, id)
+	end
+end
+table.sort(ungluedSection)
+
+local glueDangling = {}
+for _, t in ipairs(glueTargets) do
+	if not declaredModules[t[2]] and not srcModules[t[2]] then
+		table.insert(glueDangling, t[1] .. " → " .. t[2])
+	end
+end
+table.sort(glueDangling)
+
 -- ── reporte ─────────────────────────────────────────────────────────────────
 local nodeCount = 0
 for _ in pairs(nodes) do
@@ -386,6 +479,15 @@ end)
 reportViolations("undeclared_free (DL modifica el master sin declarar Libre:)", undeclaredFree, function(r)
 	return r
 end)
+reportViolations("module_undeclared (módulo en src/ no declarado en §4)", moduleUndeclared, function(r)
+	return r
+end)
+reportViolations("unglued_section (sección §3 sin realización en §4.15)", ungluedSection, function(r)
+	return r
+end)
+reportViolations("glue_dangling (claim de módulo inexistente en §4.15)", glueDangling, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
@@ -402,6 +504,7 @@ end
 
 local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
 	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
+	+ #moduleUndeclared + #ungluedSection + #glueDangling
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)
