@@ -100,6 +100,14 @@ pre-commit:
       glob: "src/{shared,server}/**/*.lua"
       run: bash .github/scripts/contract-lune-compatibility.sh {staged_files}
 
+    # ── Nivel 1: Grafo de derivación (DL-048/049/050) ────────────────────────
+    # Integridad + frescura + cobertura del grafo docs/ y ban de version-pins.
+    # Corre sobre el working tree completo (el grafo es global, no por archivo).
+
+    - name: contract-derivation-graph
+      glob: "{docs/**/*.md,tools/derivation-graph/*}"
+      run: lune run tools/derivation-graph/check.luau
+
 commit-msg:
   jobs:
     # ── Convención de commits ────────────────────────────────────────────────

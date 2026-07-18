@@ -1,5 +1,5 @@
 # TICKETS — Mudanza Caótica
-**Referencia:** AI_CONTEXT_MASTER v5.7 §5.5
+**Referencia:** AI_CONTEXT_MASTER §5.5
 
 Los tickets están organizados por Dominio Arquitectónico (§5.1), no por responsable.
 Un ticket pertenece a un dominio. Una persona puede cubrir múltiples dominios.
