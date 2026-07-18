@@ -382,6 +382,48 @@ jobs:
       - name: Verify derivation graph integrity + freshness
         run: lune run tools/derivation-graph/check.luau
 
+  # ── Meta-frontera: cambios al enforcement son explícitos (DL-052) ────────────
+  # Evolucionar el sistema formal (validador, deferrals, workflows, hooks) es
+  # una decisión META — el sistema no puede validar sus propias reglas, pero SÍ
+  # puede exigir que cambiarlas sea un acto visible: la etiqueta
+  # `enforcement-change`. El debilitamiento no se vuelve imposible (límite
+  # operativo de una sola cuenta); se vuelve deliberado y auditable en el PR.
+  contract-enforcement-change:
+    name: "Contract: enforcement-change acknowledged (DL-052)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+            const guarded = files.filter(f =>
+              f.filename.startsWith('tools/derivation-graph/') ||
+              f.filename.startsWith('.github/workflows/') ||
+              f.filename === 'lefthook.yml'
+            );
+            if (guarded.length === 0) {
+              core.info('No toca rutas de enforcement.');
+              return;
+            }
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            if (!labels.includes('enforcement-change')) {
+              core.setFailed(
+                'El PR modifica el enforcement (' +
+                guarded.map(f => f.filename).join(', ') +
+                ') sin la etiqueta `enforcement-change`. Evolucionar el sistema ' +
+                'formal es una decisión meta — debe ser explícita, nunca ' +
+                'silenciosa (DL-052).'
+              );
+            }
+
   validate-commit-convention:
     name: "Convention: commitlint"
     runs-on: ubuntu-latest
