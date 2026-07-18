@@ -515,7 +515,7 @@ Dueño del bug de QA-001. Deriva de la completitud (DL-039): el camino input→i
 
 ```
 DL-Ref:      DL-028
-Deriva de:   Principio §2.1 (Entidades Estables) + Hito §5.7 Semana 1
+Deriva de:   DL-028 + DL-036 + §4.4 (contrato de tags Layout→Gameplay) + Principio §2.1 (Entidades Estables) + Hito §5.7 Semana 1
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1

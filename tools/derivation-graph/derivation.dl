@@ -75,7 +75,46 @@ uncovered(D) :- modifies(D, S), impl_section(S), !covered(D).
 //     en lugar de vigilarla. Entradas históricas del log exentas (solo header).
 //     Implementación: escaneo de docs/ en check.luau (lint de texto, no EDB).
 
+// (7) NIVEL / ALTITUD (F5, DL-051) — la altitud como tipo, inferida de la
+//     estructura existente (cero anotación): nivel(§1/§2)=fundamento,
+//     nivel(§3)=diseño, nivel(§4)=técnica, nivel(ticket)=implementación.
+//     Tipo de arista inferido por destino (taxonomía SysML):
+//       ticket→§4 = «satisfy» · ticket→§3 = «refine» · ticket→§2 = «motivate»
+//       ticket→DL = «trace» · DL→§ = «modify»
+//     level_skip: la implementación no puede derivar SOLO de axiomas/hitos —
+//     exige ≥1 fuente §3/§4/DL (el salto de nivel, binarizado).
+//     QA-xxx exento: son hitos transversales, su fuente ES el hito (TICKETS.md).
+.decl section_major(sec:Node, m:number)
+.input section_major
+
+.decl has_design_or_tech_source(t:Node)
+has_design_or_tech_source(T) :- derives(T, P), node(P, "dl").
+has_design_or_tech_source(T) :- derives(T, P), section_major(P, 3).
+has_design_or_tech_source(T) :- derives(T, P), section_major(P, 4).
+
+.decl level_skip(t:Node)
+level_skip(T) :- node(T, "ticket"), derives(T, _), !has_design_or_tech_source(T).
+
+// (8) COHERENCIA DE DOMINIO (F5) — el Domain del DL debe ser coherente con
+//     el nivel de lo que Modifica: §3 ⇒ DESIGN|BOTH; §4 ⇒ TECH|BOTH.
+//     Caza decisiones mal clasificadas (afectan qué auditor las revisa).
+.decl dl_domain(dl:Node, d:symbol)
+.input dl_domain
+
+.decl domain_mismatch(dl:Node, sec:Node, d:symbol)
+domain_mismatch(D, S, X) :- modifies(D, S), section_major(S, 3), dl_domain(D, X),
+                            X != "DESIGN", X != "BOTH".
+domain_mismatch(D, S, X) :- modifies(D, S), section_major(S, 4), dl_domain(D, X),
+                            X != "TECH", X != "BOTH".
+
+// (9) IMPL-LEAK (F5) — nombres de módulos de src/ apareciendo en §1–§3 del
+//     master: implementación filtrada al piso de diseño (el colapso de nivel
+//     textual más común). Implementación: escaneo léxico en check.luau
+//     (léxico, no EDB). "Main" exento (entry point, palabra común).
+
 .output dangling
 .output orphan
 .output stale
 .output uncovered
+.output level_skip
+.output domain_mismatch
