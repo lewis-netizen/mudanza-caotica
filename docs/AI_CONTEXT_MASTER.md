@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.31 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.32 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1019,6 +1019,26 @@ Cuando el Auditor TECH detecta un patrón en Nivel 3, propone convertirlo a Nive
 ```
 
 No es auditoría. Es arquitectura. El PO decide en cada entrada Clase A.
+
+**Superficie exacta del PO (DL-055).** Con el grafo de derivación completo (Nivel 1), la **forma** de toda derivación es mecánica. Lo que el PO evalúa **ya no es la coherencia**:
+
+*Ya no es suyo* — integridad referencial, procedencia, frescura, cobertura, altitud/nivel, declaración de determinación, linkage de código y totalidad del gluing. Trece reglas, deterministas, en pre-commit y CI. Un error de esa clase es una fila de salida, no un hallazgo humano.
+
+*Sí es suyo:*
+
+**A · Sobre el sistema — irreducible.** Un sistema formal no valida sus propios axiomas (Gödel/Tarski); este límite es *sobre* el sistema, no dentro.
+- Los **axiomas** (§2.1 Nivel 0): ¿C1a/C1b/C2′/C3 son el suelo correcto?
+- **Adecuación del modelo**: ¿este sistema formal modela *Mudanza Caótica* — el problema real? ¿Las entidades (§2.3) son las correctas?
+- **Evolución del sistema**: cambiar las reglas del enforcement — visible por el tripwire (DL-052), decidido por el PO.
+
+**B · Dentro del sistema, aún no formalizado — deuda, no límite permanente.**
+- **Solidez del entailment**: ¿la conclusión *se sigue* de los axiomas? El grafo verifica que la arista existe y respeta niveles, no que la inferencia sea válida. Subsume dos casos: si un `Libre:` es genuinamente libre (lo que los axiomas determinan no lo es) y si una fila de §4.15 realmente *realiza* su concepto. Formalizable en principio (asistentes de prueba); su costo hoy es desproporcionado. Nota: formalizarlo movería la verificación a la máquina, pero la *adecuación de esa formalización* subiría a (A) — (B) se encoge, no se vacía.
+
+**C · Elecciones, no auditoría.**
+- **Parámetros libres de intención** (`Libre:` → PO): se deciden.
+- **Parámetros empíricos** (`Libre:` → playtest): se miden.
+
+**Concentración del riesgo.** El validador no redujo la responsabilidad del PO — la **concentró**. Una derivación impecablemente coherente desde un axioma equivocado pasa las trece reglas en verde: el sistema propaga el error con consistencia perfecta y sin señal. Menos superficie que evaluar, más consecuencia por juicio. El modo de fallo peligroso ya no es la incoherencia — es lo **correcto en forma y errado en fundamento**.
 
 ### 5.1 Dominios Arquitectónicos
 

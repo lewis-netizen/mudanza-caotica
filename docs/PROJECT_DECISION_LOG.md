@@ -2382,4 +2382,62 @@ Libre:       Granularidad del gluing por debajo de sección (claims tipados
 Referencias: §4.4, §4.13, §4.7, §2.4, §2.6, §5.0, DL-047, DL-052, DL-053
 ```
 
+---
+
+### DL-055
+
+```
+ID:          DL-055
+Fecha:       2026-07-18
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Completado el validador (F1–F7, 13 reglas), el PO planteó la
+             pregunta que lo cierra: si la coherencia ya es mecánica, ¿qué
+             audita él? §5.0 Nivel 4 declaraba el nivel del PO pero no su
+             superficie exacta — quedaba implícito y por tanto disputable,
+             justo la clase de ambigüedad que este sistema elimina.
+Contenido:   §5.0 Nivel 4 gana la especificación de la superficie del PO,
+             derivada por sustracción de lo que el Nivel 1 mecaniza. Ya no
+             es suyo: integridad, procedencia, frescura, cobertura, altitud,
+             declaración de determinación, linkage de código, totalidad del
+             gluing. Sí es suyo, en tres categorías: (A) SOBRE el sistema —
+             irreducible por Gödel/Tarski: los axiomas §2.1 Nivel 0, la
+             adecuación del modelo al problema real, y la evolución del
+             enforcement; (B) DENTRO del sistema pero no formalizado aún —
+             solidez del entailment (¿la conclusión se sigue?), que subsume
+             si un `Libre:` es genuinamente libre y si una fila de §4.15
+             realmente realiza su concepto: deuda, no límite permanente
+             (formalizable con asistentes de prueba, costo hoy
+             desproporcionado; formalizarlo encogería B empujando su residuo
+             a A, no lo vaciaría); (C) elecciones, no auditoría — parámetros
+             libres de intención (PO) y empíricos (playtest). Se registra la
+             CONCENTRACIÓN DEL RIESGO: el validador no redujo la
+             responsabilidad del PO, la concentró — una derivación coherente
+             desde un axioma equivocado pasa las 13 reglas en verde; el modo
+             de fallo peligroso pasa de "incoherente" a "correcto en forma,
+             errado en fundamento".
+Hipótesis:   Especificar la superficie por sustracción evita los dos fallos
+             simétricos: que el PO siga auditando lo ya mecanizado
+             (desperdicio, y la dependencia que el sistema eliminó), o que
+             delegue en el verde de CI lo que ninguna forma puede cargar
+             (falsa confianza).
+Razón:       CONTINGENCY P5 — pregunta directa del PO tras aterrizar F6:
+             "especifica qué audito, porque no será la coherencia".
+Impacto:     §5.0 Nivel 4 especificado; header v5.32. Consecuencia operativa
+             inmediata: al presentar el holístico §3/§4 para evaluación, lo
+             que se somete al PO es (A) adecuación y (B) entailment — no
+             trazabilidad ni nivel, que llegan ya en verde. La cadena de
+             entailment se presenta mostrada (§2.6, auto-certificación): el
+             PO verifica una cadena exhibida, no reconstruye la derivación.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Libre:       Si (B) se formaliza con un asistente de pruebas y cuándo — hoy
+             registrado como deuda de costo desproporcionado → PO
+Referencias: §5.0, §2.1, §2.3, §2.6, §4.15, DL-052, DL-053, DL-054
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
