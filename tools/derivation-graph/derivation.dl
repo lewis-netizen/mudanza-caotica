@@ -4,6 +4,12 @@
 // Fragmento RELACIONAL del enforcement (§2.6) — decidible → CI.
 // CONTRATO: toda relación de SALIDA debe quedar VACÍA. Una fila = una violación.
 // Sintaxis Soufflé. La evaluación de referencia vive en check.luau (Lune).
+//
+// Nota de meta-relaciones: Datalog es de primer orden — no cuantifica sobre
+// relaciones. Las meta-relaciones se REIFICAN como hechos: `affects` es la
+// obligación de derivación declarada por un DL; `stale` se define sobre la
+// ausencia de otra relación; el baseline (deuda diferida) es un juicio sobre
+// instancias de stale, y su forma autorizada será la arista `Difiere:` (F4.5).
 // ═══════════════════════════════════════════════════════════════════════════
 
 .type Node <: symbol            // "§3.3", "DL-046", "GAM-005"
@@ -12,16 +18,21 @@
 .decl node(n:Node, kind:symbol)          // "section" | "dl" | "ticket"
 .decl derives(child:Node, parent:Node)   // "Deriva de:" (ticket) / "Referencias:" (DL)
 .decl affects(dl:Node, ticket:Node)       // campo "Ticket:" del DL: a qué tickets dice afectar
+.decl modifies(dl:Node, sec:Node)         // campo "Modifica:" del DL: qué secciones cambia
+.decl impl_section(sec:Node)              // §3.* / §4.* — capas que se implementan en tickets
 
 .input node
 .input derives
 .input affects
+.input modifies
+.input impl_section
 
 // ── Reglas (IDB) ────────────────────────────────────────────────────────────
 
 // (1) INTEGRIDAD REFERENCIAL — toda arista apunta a un nodo declarado.
 .decl dangling(src:Node, ref:Node)
 dangling(S, R) :- derives(S, R), !node(R, _).
+dangling(D, S) :- modifies(D, S), !node(S, _).
 
 // (2) HUÉRFANOS — un ticket sin ninguna fuente (regla §5.5 / DL-032).
 .decl orphan(t:Node)
@@ -33,11 +44,27 @@ orphan(T) :- node(T, "ticket"), !derives(T, _).
 .decl stale(ticket:Node, dl:Node)
 stale(T, D) :- affects(D, T), !derives(T, D).
 
+// (4) COBERTURA — un DL modificó una sección de implementación (§3/§4) pero
+//     no declaró NINGÚN ticket ni nada deriva de él: la tajada silenciosa.
+//     La reconciliación fina de lo declarado la exige (3); esta regla caza
+//     lo NO declarado. B-Method: cada refinamiento genera obligaciones —
+//     un cambio de diseño sin obligaciones declaradas es sospechoso per se.
+.decl covered(dl:Node)
+covered(D) :- derives(_, D).
+covered(D) :- affects(D, _).
+
+.decl uncovered(dl:Node)
+uncovered(D) :- modifies(D, S), impl_section(S), !covered(D).
+
 .output dangling
 .output orphan
 .output stale
+.output uncovered
 
-// (4) COBERTURA — PENDIENTE: requiere la arista modifies(DL, §) explícita
-//     (campo `Modifica:` en el schema del DL, hoy sub-especificado en
-//     `Referencias`). Caza "cambié impl §3/§4 y no declaré NINGÚN ticket".
-//     Se activa cuando exista esa arista tipada.
+// ── Pendiente (F4.5+) ───────────────────────────────────────────────────────
+// `Difiere:` — reificación autorizada y ACOTADA del diferimiento (reemplaza
+//   baseline.txt): quién lo autorizó (DL) y hasta cuándo (hito). Convierte la
+//   deuda de liveness ("eventualmente reconciliado", TLA+) en check decidible
+//   ("diferido más allá de su hito = violación").
+// prompt-freshness — los prompts (docs/prompts/*) como nodos: referencia a una
+//   versión del master ≠ actual = stale (caso real: refs "v5.7" observadas).
