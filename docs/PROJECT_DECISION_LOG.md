@@ -46,6 +46,11 @@ Commit:      [hash] — vacío hasta que exista
 Modifica:    [§N.N del master que esta entrada CAMBIA — arista DL→§ del grafo
              de derivación (DL-049); vacío si no modifica el master. Distinto
              de Referencias: referenciar no es modificar.]
+Libre:       [parámetros que esta decisión NO determina y quedan por resolver,
+             con su resolutor (playtest | PO). "—" es respuesta legítima y
+             significa "nada queda libre". OBLIGATORIO si Modifica no está
+             vacío (DL-053, chequeo 4 de §2.6): el juicio determinado-vs-libre
+             debe ser un acto explícito, no una omisión.]
 Referencias: [§N.N del Context Master, otros DL-, T-]
 ```
 
@@ -1854,6 +1859,8 @@ Pipeline:    P5
 Ticket:      —
 Commit:      —
 Modifica:    §2.1
+Libre:       Si la legibilidad ("los jugadores siempre saben qué hacer") es
+             derivable o merece rango de 5º axioma → PO (anotado en §2.1)
 Referencias: §2.2, §3.7, DL-024, DL-039
 ```
 
@@ -1900,6 +1907,7 @@ Pipeline:    P5
 Ticket:      —
 Commit:      —
 Modifica:    §2.6
+Libre:       —
 Referencias: §2.1, §5.0, DL-044
 ```
 
@@ -1946,6 +1954,9 @@ Pipeline:    P5
 Ticket:      GAM-005, GAM-006
 Commit:      —
 Modifica:    §3.1, §3.3
+Libre:       Magnitudes de §3.3 — cuánto se mueve un large en solitario,
+             cuánta eficiencia añade un segundo cargador, cuánta compresión
+             impone el layout → playtest
 Referencias: §2.1, §2.6, DL-027, DL-044, DL-045
 ```
 
@@ -1992,6 +2003,8 @@ Pipeline:    P5
 Ticket:      GAM-005, GAM-006, GAM-007
 Commit:      —
 Modifica:    §4.4, §4.13
+Libre:       Si un segundo cargador sobre un objeto de demanda 1 añade
+             eficiencia extra (pooling en medium) → playtest
 Referencias: §2.3, §3.3, DL-027, DL-033, DL-046
 ```
 
@@ -2044,6 +2057,7 @@ Pipeline:    P5
 Ticket:      —
 Commit:      —
 Modifica:    §5.0
+Libre:       —
 Referencias: §5.4, §2.6, DL-012, DL-041
 ```
 
@@ -2149,6 +2163,8 @@ Costo:       C2
 Pipeline:    P5
 Ticket:      —
 Modifica:    §5.0
+Libre:       Fechas de los diferimientos en deferrals.txt (apretar/extender
+             cada bound) → PO
 Referencias: §5.4, §2.6, DL-023, DL-024, DL-033, DL-048, DL-049
 ```
 
@@ -2199,6 +2215,7 @@ Costo:       C2
 Pipeline:    P5
 Ticket:      —
 Modifica:    §5.0
+Libre:       —
 Referencias: §5.4, §2.6, DL-032, DL-048, DL-049, DL-050
 ```
 
@@ -2251,7 +2268,63 @@ Costo:       C2
 Pipeline:    P5
 Ticket:      —
 Modifica:    §5.0
+Libre:       Guard duro de la meta-frontera (CODEOWNERS + segunda cuenta
+             aprobadora, vs. el tripwire actual) → PO
 Referencias: §5.0, §2.6, DL-048, DL-050, DL-051
+```
+
+---
+
+### DL-053
+
+```
+ID:          DL-053
+Fecha:       2026-07-18
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO detectó que F7 estaba posicionado como paso FINAL del
+             programa de diseño ("no huele bien") — tres errores: (a) la
+             clase de error de F7 (confundir determinado con libre) ocurre en
+             CADA paso del trabajo, dejarlo al final deja los pasos previos
+             sin esa validación y la carga cae sobre el PO; (b) independencia:
+             un fragmento escrito DESPUÉS del trabajo que juzga puede ser
+             moldeado para bendecirlo; (c) al reclasificar F7 de opcional a
+             obligatorio se heredó su POSICIÓN de cuando era opcional — se
+             cambió el atributo sin re-derivar el orden.
+Contenido:   F7 — determinación como acto explícito. Campo `Libre:` en el
+             schema del DL: qué parámetros la decisión NO determina y quién
+             los resuelve (playtest | PO); "—" es respuesta legítima;
+             OBLIGATORIO si Modifica no está vacío. Regla `undeclared_free`:
+             DL que modifica el master sin declarar Libre: = violación. No
+             valida la corrección del juicio (semántico) sino que el juicio
+             se haya HECHO y quede auditable — mismo patrón que DL-052: lo
+             indecidible es el contenido, lo decidible es la declaración del
+             acto. Backfill en DL-044..052. Principio nuevo de método: un
+             fragmento del validador debe existir ANTES del trabajo cuya
+             clase de error gobierna — el validador nunca es un paso del
+             programa que valida, es su PRECONDICIÓN. Orden corregido: F7 ✓,
+             luego F6 (que construido antes no califica el §4 holístico a
+             posteriori — GENERA sus obligaciones, modelo B/Event-B), recién
+             entonces el trabajo de diseño.
+Hipótesis:   Forzar el juicio determinado-vs-libre como declaración auditable
+             en cada decisión elimina la clase "parámetro colado sin decisión"
+             en el momento en que ocurre, no al final del proceso.
+Razón:       CONTINGENCY P5 — corrección de orden del PO (2026-07-18): el
+             validador se completa antes del proceso, no al final.
+Impacto:     Schema del log gana Libre: (obligatorio con Modifica). Regla
+             undeclared_free en derivation.dl + check.luau. Backfill 8 DLs
+             (los Libre: retroactivos registran parámetros ya conocidos:
+             legibilidad→PO, magnitudes §3.3→playtest, pooling medium→
+             playtest, bounds de deferrals→PO, guard duro→PO). §5.0
+             actualizada; header v5.30. Restante del validador: solo F6.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Libre:       —
+Referencias: §5.4, §5.0, §2.6, DL-049, DL-052
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

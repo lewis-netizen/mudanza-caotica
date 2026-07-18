@@ -29,6 +29,7 @@ local derives = {}
 local affects = {}
 local modifies = {}
 local dlDomain = {}
+local declaresFree = {}
 
 local function eachRef(text, fn)
 	for num in text:gmatch("§([%d%.]+)") do
@@ -84,6 +85,9 @@ do
 			local dom = line:match("^Domain:%s*(%S+)")
 			if dom then
 				dlDomain[cur] = dom
+			end
+			if line:match("^Libre:%s*%S") then
+				declaresFree[cur] = true
 			end
 		end
 	end
@@ -238,6 +242,18 @@ table.sort(domainMismatch, function(a, b)
 	return a[1] < b[1]
 end)
 
+-- undeclared_free (F7): un DL que modifica el master sin declarar `Libre:`.
+-- Fuerza el juicio de determinación como acto explícito ("—" es respuesta
+-- legítima); no valida su corrección — valida que se haya hecho.
+local undeclaredFree, ufSeen = {}, {}
+for _, m in ipairs(modifies) do
+	if not declaresFree[m[1]] and not ufSeen[m[1]] then
+		ufSeen[m[1]] = true
+		table.insert(undeclaredFree, m[1])
+	end
+end
+table.sort(undeclaredFree)
+
 -- impl_leak: nombres de módulos de src/ en §1–§3 del master (implementación
 -- filtrada al piso de diseño). "Main" exento (entry point, palabra común).
 local moduleNames = {}
@@ -367,6 +383,9 @@ end)
 reportViolations("impl_leak (módulo de src/ nombrado en §1–§3)", implLeak, function(r)
 	return r
 end)
+reportViolations("undeclared_free (DL modifica el master sin declarar Libre:)", undeclaredFree, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
@@ -382,7 +401,7 @@ if #deferred > 0 then
 end
 
 local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
-	+ #levelSkip + #domainMismatch + #implLeak
+	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)

@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.29 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.30 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -961,7 +961,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Formato de código uniforme | StyLua |
 | — | Convención de commits | commitlint (Lefthook commit-msg) |
 | §5.10 | PR `class:a` referencia un `DL-xxx` y toca `docs/` (trazabilidad, DL-041) | github-script en CI (labels + cuerpo/commits + archivos del PR) — solo CI, requiere contexto de PR |
-| §5.4/§5.5 | Grafo de derivación: integridad (`dangling`), procedencia (`orphan`, DL-032), frescura (`stale` — con diferimientos autorizados y acotados por fecha en `deferrals.txt`; vencido = violación), cobertura (`uncovered`: DL que modifica §3/§4 sin declarar derivación) y altitud (`level_skip`: implementación sin fuente §3/§4/DL; `domain_mismatch`: Domain del DL incoherente con lo que Modifica; `impl_leak`: módulos de `src/` nombrados en §1–§3) — DL-048/049/050/051 | `lune run tools/derivation-graph/check.luau` (modelo: `tools/derivation-graph/derivation.dl`) |
+| §5.4/§5.5 | Grafo de derivación: integridad (`dangling`), procedencia (`orphan`, DL-032), frescura (`stale` — con diferimientos autorizados y acotados por fecha en `deferrals.txt`; vencido = violación), cobertura (`uncovered`: DL que modifica §3/§4 sin declarar derivación) altitud (`level_skip`: implementación sin fuente §3/§4/DL; `domain_mismatch`: Domain del DL incoherente con lo que Modifica; `impl_leak`: módulos de `src/` nombrados en §1–§3) y determinación (`undeclared_free`: DL que modifica el master sin declarar `Libre:` — el juicio determinado-vs-libre es un acto explícito) — DL-048/049/050/051/053 | `lune run tools/derivation-graph/check.luau` (modelo: `tools/derivation-graph/derivation.dl`) |
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 
