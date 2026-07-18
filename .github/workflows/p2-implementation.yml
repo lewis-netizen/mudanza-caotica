@@ -366,6 +366,22 @@ jobs:
       - name: Run TestEZ specs
         run: lune run lune/run-specs.luau
 
+  # ── Grafo de derivación: integridad + frescura (DL-048) ──────────────────────
+  # Fragmento relacional del enforcement (§2.6) formalizado como Datalog.
+  # Falla solo en regresiones (stale fuera de baseline) — respeta la altitud.
+  contract-derivation-graph:
+    name: "Contract: Derivation graph freshness (DL-048)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: CompeyDev/setup-rokit@v0.2.1
+        with:
+          token: ${{ github.token }}
+          cache: "true"
+      - name: Verify derivation graph integrity + freshness
+        run: lune run tools/derivation-graph/check.luau
+
   validate-commit-convention:
     name: "Convention: commitlint"
     runs-on: ubuntu-latest
