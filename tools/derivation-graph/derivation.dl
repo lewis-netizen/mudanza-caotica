@@ -112,9 +112,24 @@ domain_mismatch(D, S, X) :- modifies(D, S), section_major(S, 4), dl_domain(D, X)
 //     textual más común). Implementación: escaneo léxico en check.luau
 //     (léxico, no EDB). "Main" exento (entry point, palabra común).
 
+// (10) DETERMINACIÓN (F7, DL-053) — chequeo 4 del gate §2.6: toda decisión
+//      que cambia el master debe declarar EXPLÍCITAMENTE qué queda como
+//      parámetro libre (campo `Libre:`, con "—" como respuesta legítima).
+//      No valida que la determinación sea correcta (semántico) sino que el
+//      juicio se haya HECHO y quede auditable — mismo patrón que DL-052:
+//      lo indecidible es el contenido, lo decidible es la declaración del acto.
+//      Sin esto, un parámetro libre se cuela como determinado (o al revés) sin
+//      que nada lo note excepto el PO — la dependencia que el sistema elimina.
+.decl declares_free(dl:Node)
+.input declares_free
+
+.decl undeclared_free(dl:Node)
+undeclared_free(D) :- modifies(D, _), !declares_free(D).
+
 .output dangling
 .output orphan
 .output stale
 .output uncovered
 .output level_skip
 .output domain_mismatch
+.output undeclared_free
