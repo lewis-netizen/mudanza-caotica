@@ -1,0 +1,21 @@
+# baseline.txt — deuda de trazabilidad conocida/diferida (grandfathered).
+# Formato: <ticket> <dl>  — un stale aceptado como diferido, no bloqueante.
+# Reconciliar (el ticket referencia el DL en su "Deriva de") saca la fila de aquí.
+# Añadir una fila = declarar explícitamente un diferimiento intencional.
+UI-001 DL-025
+GAM-002 DL-026
+WLD-001 DL-028
+GAM-002 DL-028
+GAM-004 DL-028
+GAM-003 DL-029
+WLD-000 DL-032
+GAM-009 DL-032
+WLD-000 DL-036
+WLD-001 DL-036
+WLD-008 DL-039
+FND-003 DL-039
+GAM-005 DL-046
+GAM-006 DL-046
+GAM-005 DL-047
+GAM-006 DL-047
+GAM-007 DL-047

@@ -1,0 +1,43 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// derivation.dl — Modelo Datalog del grafo de derivación de Mudanza Caótica
+// ───────────────────────────────────────────────────────────────────────────
+// Fragmento RELACIONAL del enforcement (§2.6) — decidible → CI.
+// CONTRATO: toda relación de SALIDA debe quedar VACÍA. Una fila = una violación.
+// Sintaxis Soufflé. La evaluación de referencia vive en check.luau (Lune).
+// ═══════════════════════════════════════════════════════════════════════════
+
+.type Node <: symbol            // "§3.3", "DL-046", "GAM-005"
+
+// ── Hechos (EDB) — extraídos de docs/ ──────────────────────────────────────
+.decl node(n:Node, kind:symbol)          // "section" | "dl" | "ticket"
+.decl derives(child:Node, parent:Node)   // "Deriva de:" (ticket) / "Referencias:" (DL)
+.decl affects(dl:Node, ticket:Node)       // campo "Ticket:" del DL: a qué tickets dice afectar
+
+.input node
+.input derives
+.input affects
+
+// ── Reglas (IDB) ────────────────────────────────────────────────────────────
+
+// (1) INTEGRIDAD REFERENCIAL — toda arista apunta a un nodo declarado.
+.decl dangling(src:Node, ref:Node)
+dangling(S, R) :- derives(S, R), !node(R, _).
+
+// (2) HUÉRFANOS — un ticket sin ninguna fuente (regla §5.5 / DL-032).
+.decl orphan(t:Node)
+orphan(T) :- node(T, "ticket"), !derives(T, _).
+
+// (3) FRESCURA — un DL declara que afecta a T (campo Ticket:), pero T no lo
+//     referencia. Preciso: usa la declaración del propio DL, cero falsos
+//     positivos. Caza "cambié el diseño, declaré los tickets, no los re-derivé".
+.decl stale(ticket:Node, dl:Node)
+stale(T, D) :- affects(D, T), !derives(T, D).
+
+.output dangling
+.output orphan
+.output stale
+
+// (4) COBERTURA — PENDIENTE: requiere la arista modifies(DL, §) explícita
+//     (campo `Modifica:` en el schema del DL, hoy sub-especificado en
+//     `Referencias`). Caza "cambié impl §3/§4 y no declaré NINGÚN ticket".
+//     Se activa cuando exista esa arista tipada.

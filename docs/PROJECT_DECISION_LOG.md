@@ -1988,4 +1988,55 @@ Commit:      —
 Referencias: §4.4, §4.13, §2.3, §3.3, DL-027, DL-033, DL-046
 ```
 
+---
+
+### DL-048
+
+```
+ID:          DL-048
+Fecha:       2026-07-17
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El enforcement de modelado (§2.6) dependía del juicio del PO para
+             cazar errores relacionales (tickets stale, derivación en tajada) —
+             una deuda que no se pagaba. El PO propuso formalizar la parte
+             relacional como un sistema de lógica (Datalog): el grafo de
+             derivación es un DAG cuyas propiedades se binarizan → CI. Al
+             correrlo, destapó 12 deudas de trazabilidad preexistentes
+             invisibles a la revisión humana.
+Contenido:   Nueva capa de verificación §5.0 Nivel 1: el grafo de derivación.
+             Modelo Datalog en tools/derivation-graph/derivation.dl (nodos =
+             §/DL/ticket; aristas = Deriva de / Referencias / Ticket). Runner en
+             Lune (tools/derivation-graph/check.luau) extrae el grafo de docs/ y
+             evalúa: dangling (integridad referencial), orphan (ticket sin fuente
+             §5.5/DL-032), stale (un DL declara afectar a T pero T no lo
+             referencia). Baseline (tools/derivation-graph/baseline.txt)
+             grandfatherea la deuda conocida/diferida — el check falla solo en
+             REGRESIONES (stale nuevo, fuera del baseline), respetando el nivel
+             de abstracción del trabajo actual. Job CI contract-derivation-graph.
+             Es el fragmento RELACIONAL de un enforcement mayor formalizado como
+             lógica (el resto — altitud/tipos, refinamiento — es trabajo futuro).
+Hipótesis:   Un check determinista sobre el grafo mueve la detección de errores
+             relacionales del juicio del PO (y de mi diligencia) a la máquina —
+             self-test binario al final de cada interacción de estos niveles. El
+             baseline evita que la introducción bloquee por deuda preexistente y
+             hace explícito cada diferimiento.
+Razón:       CONTINGENCY P5 — dirección directa del PO; formaliza §2.6 como
+             lógica relacional decidible (mismo principio §5.0/DL-012).
+Impacto:     tools/derivation-graph/ (modelo + runner + baseline). Job CI nuevo.
+             Hallazgos: (a) 17 stale en baseline (12 preexistentes + 5 de
+             DL-046/047, diferidos) = backlog de trazabilidad a reconciliar;
+             (b) la formalización expone dos relaciones sub-especificadas →
+             campos explícitos futuros: `Modifica:` (DL→§, activa la regla
+             `uncovered`) y `Difiere:` (diferimiento declarado). Hacer el check
+             required necesita configurar branch protection (acción del PO).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Commit:      —
+Referencias: §5.0, §5.4, §2.6, DL-012, DL-041
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
