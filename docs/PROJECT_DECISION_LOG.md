@@ -2202,4 +2202,56 @@ Modifica:    §5.0
 Referencias: §5.4, §2.6, DL-032, DL-048, DL-049, DL-050
 ```
 
+---
+
+### DL-052
+
+```
+ID:          DL-052
+Fecha:       2026-07-18
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO estableció el principio de exhaustividad intra-sistema: el
+             límite del validador es SOBRE el sistema (definirlo/evolucionarlo
+             — asiento del PO), no DENTRO de él. Dos consecuencias: (a) el
+             "residuo semántico → auditor" no es estado estable sino deuda de
+             formalización (F6/F7 pasan de opcionales a obligatorios); (b) la
+             postura "el guardián del debilitamiento de reglas es el PO" era
+             incorrecta — la frontera meta no se puede DECIDIR mecánicamente,
+             pero sí VIGILAR mecánicamente.
+Contenido:   Tripwire de meta-frontera: el job contract-enforcement-change
+             falla si un PR toca rutas de enforcement (tools/derivation-graph/,
+             .github/workflows/, lefthook.yml) sin la etiqueta
+             enforcement-change. Evolucionar el sistema formal deja de poder
+             ser un cambio silencioso: es un acto etiquetado, visible y
+             auditable en el PR. Límite operativo honesto: con una sola cuenta
+             GitHub el debilitamiento no se vuelve imposible (quien etiqueta es
+             la misma cuenta) — se vuelve deliberado y trazable. Un guard duro
+             requeriría segunda cuenta aprobadora (CODEOWNERS + required
+             review): decisión del PO si la quiere. §5.0 gana la fila
+             correspondiente.
+Hipótesis:   Hacer explícita la evolución del sistema formal elimina la clase
+             "regla debilitada sin que nadie lo note" — el análogo meta del
+             version-pin: no se vigila el contenido del cambio (indecidible),
+             se exige la declaración del acto (decidible).
+Razón:       CONTINGENCY P5 — principio de exhaustividad intra-sistema del PO
+             (2026-07-18): todo lo mecanizable dentro del sistema se mecaniza;
+             la frontera meta se vigila aunque no se decida.
+Impacto:     p2-implementation.yml gana contract-enforcement-change. Etiqueta
+             enforcement-change creada. §5.0 actualizada; header v5.29. Para
+             que bloquee: el PO añade el check al ruleset main-protection
+             (mismo procedimiento que DL-048). Re-clasificación de roadmap:
+             F6 (código como nodos + gluing §3↔§4) y F7 (marcas de
+             determinación) son obligatorios — completitud del sistema, no
+             opcionales. Este propio PR toca workflows → lleva la etiqueta:
+             el tripwire nace aplicándose a sí mismo.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Referencias: §5.0, §2.6, DL-048, DL-050, DL-051
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
