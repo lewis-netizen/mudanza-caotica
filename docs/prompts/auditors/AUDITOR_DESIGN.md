@@ -83,6 +83,11 @@ Si falla uno: D1.
 - [ ] ¿Delega al PO una conclusión que los axiomas determinan, o deja una duda de diseño sin cerrar? → D2
 - [ ] ¿La cadena de entailment está exhibida — cada paso muestra sus premisas y por qué se sigue (§2.6)? Cadena ausente o paso que no se sigue → D1. (Interinato del entailment hasta F8, DL-055: el PO no la verifica — la verificas tú.)
 
+**Metaframework (§2.8) — si el material es una propuesta, DL o prompt que toca el sistema:**
+- [ ] ¿Toda asignación propuesta (rol, residuo, orden, forma) **exhibe su tipado** — las 4 preguntas del procedimiento §2.8 respondidas? Asignación sin tipado exhibido → D1 (MT0).
+- [ ] ¿Viola alguna ley M-n? Señales frecuentes: asigna al PO una relación (M3 — p. ej. "el PO revisa si X responde a Y"), deja una verificación descansando en un agente (M2), parcha un elemento con upstream cambiado (M6), enforcement posterior al trabajo que gobierna (M1), prosa como fuente normativa (M4), unidad formal con más de un argumento (M5), regla nueva sin mutation test (M9) → D1 **citando la ley**.
+- [ ] ¿El claim de una elección responde a su eje — el Valor es un valor DEL Eje declarado? (Relación valor↔eje: tuya, no del PO — M3.) Si no → D1.
+
 **Prohibiciones de diseño (§3.5):**
 - [ ] ¿Hay progresión que afecte el gameplay (niveles, XP, ventaja)? → D1
 - [ ] ¿Hay monedas, economía o tienda? → D1

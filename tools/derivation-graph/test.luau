@@ -210,6 +210,80 @@ local cases = {
 			replaceOnce(MASTER, "| R-ELEC · C2′ + E2 |", "| R-COMP · C2′ + [Entropía Social] |")
 		end,
 	},
+	{
+		name = "elección sin axioma portador (solo E-n)",
+		expect = "✗ rule_arity",
+		apply = function()
+			-- Garantía estructural (DL-058): ninguna conclusión deriva SOLO de
+			-- elecciones — toda derivación exige un axioma/claim portador.
+			replaceOnce(MASTER, "R-ELEC · C1b + E1", "R-ELEC · E1 + E2")
+		end,
+	},
+	{
+		name = "election_malformed",
+		expect = "✗ election_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| E2 | Ancla interpretable |", "| E2 | |")
+		end,
+	},
+	{
+		name = "election_axis_dup",
+		expect = "✗ election_axis_dup",
+		apply = function()
+			replaceOnce(MASTER, "| E3 | Tratamiento de la derrota |", "| E3 | Ancla interpretable |")
+		end,
+	},
+	{
+		name = "election_compound (el defecto histórico de E1)",
+		expect = "✗ election_compound",
+		apply = function()
+			-- Reconstruye exactamente la doble argumentación que el PO cazó a
+			-- mano en E1 — ahora la caza la máquina.
+			replaceOnce(
+				MASTER,
+				"| Cooperativa: el resultado es de equipo (§1.2) |",
+				"| Cooperativa: el resultado es de equipo (§1.2) — sin condición de derrota |"
+			)
+		end,
+	},
+	{
+		name = "meta_law_malformed",
+		expect = "✗ meta_law_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| DL-050 |", "| DL-999 |")
+		end,
+	},
+	{
+		name = "meta-ley con premisa inexistente (claims F8 cubren §2.8)",
+		expect = "✗ unknown_premise",
+		apply = function()
+			-- Prueba que las derivaciones de §2.8 pasan por las reglas F8
+			-- (no parsing vacuo): M3 citando una premisa que no existe.
+			replaceOnce(
+				MASTER,
+				"R-ESP · [MT0] — restricción del titular PO al caso 1",
+				"R-ESP · [MT9] — restricción del titular PO al caso 1"
+			)
+		end,
+	},
+	{
+		name = "zone_malformed",
+		expect = "✗ zone_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| Ejes como tipos con dominio de valores enumerado |", "| |")
+		end,
+	},
+	{
+		name = "zone_expired",
+		expect = "✗ zone_expired",
+		apply = function()
+			replaceOnce(
+				MASTER,
+				"no entre prosa y módulos | 2026-08-11 |",
+				"no entre prosa y módulos | 2026-01-01 |"
+			)
+		end,
+	},
 }
 
 -- ── runner ──────────────────────────────────────────────────────────────────
@@ -240,6 +314,35 @@ for _, case in ipairs(cases) do
 		print("  ✗ " .. case.name .. " — NO DETECTADO (exit=" .. tostring(code) .. ")")
 		print("      " .. (out:gsub("\n", "\n      ")))
 	end
+end
+-- M9 mecanizada (DL-060): AUTO-COBERTURA — toda regla que el validador
+-- reporta debe tener un caso de mutación en esta suite. Verificado por
+-- máquina, no por disciplina: añadir una regla sin mutación falla aquí.
+freshSandbox()
+local _, pristineOut = runCheck()
+local uncovered = {}
+for ruleName in pristineOut:gmatch("\n  ✓ ([^\n:]+):") do
+	local key = ruleName:match("^([%w_%-]+)")
+	if key then
+		local covered = false
+		for _, case in ipairs(cases) do
+			if case.expect and case.expect:find(key, 1, true) then
+				covered = true
+				break
+			end
+		end
+		if not covered then
+			table.insert(uncovered, ruleName)
+		end
+	end
+end
+if #uncovered > 0 then
+	failures += #uncovered
+	for _, r in ipairs(uncovered) do
+		print("  ✗ regla sin mutation test (M9): " .. r)
+	end
+else
+	print("  ✓ auto-cobertura M9: toda regla del validador tiene su mutación")
 end
 rmrf(SANDBOX)
 

@@ -434,6 +434,9 @@ local f8Axioms = {}
 local f8Claims = {} -- nombre → { raw }
 local f8Rules = {}
 local f8Elections = {}
+local f8ElectionRows = {} -- E-n → { eje, abierto, valor, estado }
+local metaLaws = {} -- M-n → { ley, fuente }
+local zones = {} -- Z-n → { zona, camino, vence } (registro de zonas no verificadas)
 do
 	local region, nivel = nil, nil
 	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
@@ -477,6 +480,36 @@ do
 			local e = line:match("^| (E%d+) |")
 			if e then
 				f8Elections[e] = true
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				-- | ID | Eje | Abierto por | Valor elegido | Estado |
+				f8ElectionRows[e] = { eje = cells[2] or "", abierto = cells[3] or "", valor = cells[4] or "", estado = cells[5] or "" }
+			end
+		elseif region == "2.8" then
+			local m = line:match("^| (MT?%d+) |")
+			if m then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				-- | ID | Ley | Revelada por | Derivación |
+				metaLaws[m] = { ley = cells[2] or "", fuente = cells[3] or "" }
+				-- las meta-leyes son claims: sus derivaciones pasan por las
+				-- reglas F8 (MT0 = R-POST; M-n = R-ESP · [MT0])
+				if cells[4] and cells[4] ~= "" then
+					f8Claims[m] = { raw = cells[4] }
+				end
+			end
+			local z = line:match("^| (Z%d+) |")
+			if z then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				-- | ID | Zona | Camino de cierre | Vence |
+				zones[z] = { zona = cells[2] or "", camino = cells[3] or "", vence = cells[4] or "" }
 			end
 		end
 	end
@@ -582,6 +615,85 @@ do
 end
 table.sort(f8Cycle)
 
+-- elecciones como VALENCIAS (DL-058): un eje atómico + un valor, sin duplicados.
+-- La conjunción (" — ", " + ", " y " en Eje) es la firma textual del defecto
+-- histórico de E1 (dos argumentos en una elección) — lint de señal, no de
+-- completitud: la atomicidad plena la fuerza la forma + la pasada del AUDITOR.
+-- (M3, DL-059: la relación valor↔eje NO se somete al PO — él solo elige el valor.)
+local electionMalformed, electionAxisDup, electionCompound = {}, {}, {}
+do
+	local axisSeen = {}
+	local ids = {}
+	for id in pairs(f8ElectionRows) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local row = f8ElectionRows[id]
+		if row.eje == "" or row.abierto == "" or row.valor == "" or row.estado == "" then
+			table.insert(electionMalformed, id)
+		end
+		if row.eje ~= "" then
+			local norm2 = row.eje:lower()
+			if axisSeen[norm2] then
+				table.insert(electionAxisDup, id .. " duplica eje de " .. axisSeen[norm2])
+			else
+				axisSeen[norm2] = id
+			end
+		end
+		if row.eje:find(" — ", 1, true) or row.eje:find(" + ", 1, true) or row.eje:find(" y ", 1, true) then
+			table.insert(electionCompound, id .. " (eje compuesto)")
+		elseif row.valor:find(" — ", 1, true) or row.valor:find(" + ", 1, true) then
+			table.insert(electionCompound, id .. " (valor con conjunción)")
+		end
+	end
+end
+
+-- metaframework (DL-059): la forma de las leyes M-n es verificada — su
+-- contenido es constitución (ratifica el PO; las leyes son contenido, M3).
+local metaLawMalformed = {}
+do
+	local ids = {}
+	for id in pairs(metaLaws) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local row = metaLaws[id]
+		local hasDl = false
+		for dl in row.fuente:gmatch("DL%-(%d+)") do
+			if nodes["DL-" .. dl] then
+				hasDl = true
+			else
+				table.insert(metaLawMalformed, id .. " → fuente DL-" .. dl .. " inexistente")
+			end
+		end
+		if row.ley == "" or not hasDl then
+			table.insert(metaLawMalformed, id .. (row.ley == "" and " → ley vacía" or " → sin fuente DL"))
+		end
+	end
+end
+
+-- zonas no verificadas (DL-060): dependencias sin garantía — explícitas y
+-- ACOTADAS. Zona vencida = violación: el vencimiento fuerza la decisión
+-- (formalizar, disolver o re-acotar — re-acotar es del PO).
+local zoneMalformed, zoneExpired = {}, {}
+do
+	local ids = {}
+	for id in pairs(zones) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local z = zones[id]
+		if z.zona == "" or z.camino == "" or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
+			table.insert(zoneMalformed, id)
+		elseif today > z.vence then
+			table.insert(zoneExpired, id .. " (venció " .. z.vence .. ")")
+		end
+	end
+end
+
 -- ── reporte ─────────────────────────────────────────────────────────────────
 local nodeCount = 0
 for _ in pairs(nodes) do
@@ -659,6 +771,24 @@ end)
 reportViolations("claim_cycle (ciclo en premisas de claims)", f8Cycle, function(r)
 	return r
 end)
+reportViolations("election_malformed (elección sin eje/abierto-por/valor/estado)", electionMalformed, function(r)
+	return r
+end)
+reportViolations("election_axis_dup (dos elecciones sobre el mismo eje)", electionAxisDup, function(r)
+	return r
+end)
+reportViolations("election_compound (eje no atómico o valor con conjunción)", electionCompound, function(r)
+	return r
+end)
+reportViolations("meta_law_malformed (ley M-n vacía o fuente sin DL existente)", metaLawMalformed, function(r)
+	return r
+end)
+reportViolations("zone_malformed (zona sin descripción/camino/fecha válida)", zoneMalformed, function(r)
+	return r
+end)
+reportViolations("zone_expired (zona no verificada VENCIDA)", zoneExpired, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
@@ -677,6 +807,8 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
 	+ #moduleUndeclared + #ungluedSection + #glueDangling
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
+	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
+	+ #zoneMalformed + #zoneExpired
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)

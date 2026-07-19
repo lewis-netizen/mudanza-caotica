@@ -2559,4 +2559,198 @@ Libre:       —
 Referencias: §2.6, §5.0, §1.2, DL-044, DL-053, DL-055, DL-056
 ```
 
+---
+
+### DL-058
+
+```
+ID:          DL-058
+Fecha:       2026-07-19
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Al ratificar F8, el PO detectó que E1 mezclaba dos argumentos
+             distintos en una sola elección: la valencia cooperativa y la
+             ausencia de condición de derrota — independientes (existen
+             juegos cooperativos CON derrota declarable, y juegos sin
+             derrota con valencia competitiva). Además precisó el alcance de
+             "sin condición de derrota": NO significa que el jugador no
+             experimente fracaso, sino que el juego no lo declara ni lo
+             castiga ("Perdiste"). Y pidió validar con el propio validador
+             que ese malentendido no tenga espacio.
+Contenido:   (1) E1 se divide: E1 = valencia cooperativa (resultado de
+             equipo, §1.2); E3 nueva = el juego no declara ni castiga la
+             derrota (no existe estado «Perdiste», §1.2) — texto mínimo
+             deliberado: la distinción declarada-vs-experimentada NO se
+             especifica porque SE DERIVA (C2′ exige resultados abiertos bajo
+             escasez → el fracaso parcial es posible y se experimenta; C1a
+             lo vuelve contenido — las historias de §3.8). (2) PRUEBA REAL
+             ejecutada con el validador: el malentendido ("el jugador nunca
+             experimenta derrota") autorado en 5 formulaciones sobre copia
+             del corpus — 4 bloqueadas por rule_arity, revelando la
+             GARANTÍA ESTRUCTURAL del catálogo: ninguna conclusión deriva
+             SOLO de elecciones; toda derivación exige un axioma portador, y
+             ningún axioma ratificado porta "no hay fracaso" (C2′ exige lo
+             contrario). La 5ª formulación (R-ELEC · C2′ + E3) pasa sintaxis
+             = residuo de contenido: claim VISIBLE cuya premisa citada no
+             sostiene semánticamente la conclusión — hoy lo caza el AUDITOR
+             (checklist entailment §2.6); se cierra más cuando §3 se autore
+             en claims (la claim derivada "el fracaso parcial existe y es
+             contenido" queda como contradicción visible). (3) Mutation test
+             permanente nuevo: elección-sin-axioma-portador → rule_arity.
+             (4) FORMALIZACIÓN "las elecciones son valencias" (3ª observación
+             del PO: identificar la doble argumentación no debía ser su
+             trabajo): una elección = un EJE que los axiomas dejan abierto +
+             el VALOR elegido — una de las valencias válidas del eje. Tabla
+             §2.7 re-estructurada: | ID | Eje | Abierto por | Valor | Estado |
+             (E1←C1b neutral de valencia; E2←C2′ exige ancla; E3←silencio
+             axiomático, C3 informa). Tres reglas nuevas: election_malformed
+             (celda vacía), election_axis_dup (dos elecciones en un eje),
+             election_compound (eje no atómico o valor con conjunción — la
+             firma textual del defecto de E1; lint de señal, no completitud).
+             Sweep del conjunto ejecutado via la forma: tres ejes atómicos y
+             distintos, cada uno con apertura trazable — sin otra mezcla.
+             Mutación permanente que RECONSTRUYE el defecto histórico de E1
+             → election_compound lo caza (23 casos). 21 reglas activas.
+Hipótesis:   Con E1/E3 separadas y la garantía estructural testeada, el
+             malentendido no puede volverse normativo por vía sintáctica; su
+             única vía (axioma citado que no sostiene) es visible y auditable.
+Razón:       CONTINGENCY P5 — corrección y prueba ordenadas por el PO al
+             ratificar F8 (2026-07-19).
+Impacto:     §2.7 elecciones re-estructurada como tabla de valencias (E1
+             escindida, E3 nueva, ejes con apertura trazable); header v5.35.
+             check.luau 21 reglas; test.luau 23 casos. Dependencia Social
+             sigue citando R-ELEC · C1b + E1 (valencia — correcto tras el
+             split). E3 queda citable para las claims de §3/§3.5
+             (prohibición de castigo). La clase de defecto que el PO cazó a
+             mano en E1 queda mecanizada — no vuelve a su superficie.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7
+Libre:       —
+Referencias: §2.7, §1.2, §2.1, §3.8, DL-055, DL-057
+```
+
+---
+
+### DL-059
+
+```
+ID:          DL-059
+Fecha:       2026-07-19
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO detectó que tras construir el validador los errores del
+             agente persistían — pero migrados de capa: F7 mal posicionado,
+             roles mal asignados (entailment al PO, relación valor↔eje al
+             PO), dependencia de agente disfrazada, E1 compuesta. Ninguno es
+             error DE artefacto (el validador los cubre); todos son errores
+             en el DISEÑO DEL SISTEMA mismo — la única capa sin ley
+             explícita: sus principios existían como precedentes dispersos
+             en prosa de DLs y memoria del agente. Sin ley explícita no hay
+             violación citable — solo el catch del PO. Es el problema
+             original un nivel arriba; el PO ordenó identificarlo
+             holísticamente y resolverlo con un metaframework explícito.
+Contenido:   Nueva §2.8 — Metaframework: Leyes de Evolución del Sistema.
+             Diez leyes M1–M10 que gobiernan asignación de roles, orden de
+             construcción y forma de las estructuras, cada una citando el
+             catch (DL) que la reveló — el metaframework SE DERIVA de la
+             historia de fallos. M10 es el motor: todo catch de meta-nivel
+             se convierte en el mismo ciclo en ley explícita + regla del
+             validador si su clase es formalizable (catch→ley→regla).
+             Violación de una M-n en propuesta/DL/prompt = D1 citando la ley
+             (AUDITOR gana el meta-checklist). La FORMA de la tabla es
+             verificada (meta_law_malformed: ley vacía o fuente sin DL
+             existente + mutación — 24 casos); su CONTENIDO es constitución
+             (el PO ratifica leyes — contenido, no relación: M3 aplicada a
+             sí misma). Corrección de la instancia disparadora: la relación
+             valor↔eje de las elecciones se reasigna del PO al AUDITOR (M3).
+Hipótesis:   Con la capa meta bajo ley explícita, los errores de diseño del
+             sistema se vuelven citables y auditables en vez de depender del
+             insight del PO; M10 garantiza que la tabla crece con cada catch
+             en vez de agotarse en la instancia.
+Razón:       CONTINGENCY P5 — identificación holística ordenada por el PO
+             (2026-07-19): "es un metaproblema; debe resolverse creando un
+             metaframework, haciéndolo explícito".
+Impacto:     §2.8 nueva; §5.0 fila meta_law_malformed; header v5.36.
+             AUDITOR_DESIGN gana meta-checklist M1–M10 y la relación
+             valor↔eje. check.luau 22 reglas; test.luau 24 casos. La clase
+             entera "error de diseño del sistema" deja de caer en la
+             superficie del PO: su parte formal es máquina, su parte
+             semántica es citable y del AUDITOR.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §5.0
+Libre:       —
+Referencias: §2.6, §2.7, §5.0, DL-053, DL-055, DL-057, DL-058
+```
+
+---
+
+### DL-060
+
+```
+ID:          DL-060
+Fecha:       2026-07-19
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Dos precisiones del PO sobre el metaframework recién creado:
+             (a) un sistema de leyes con fallback en el PO no es determinista
+             — M10 como "motor catch→ley→regla" decía que el problema se
+             mitigó, no se resolvió; y una tabla enumerada desde los fallos
+             históricos del agente no es una abstracción sino un
+             comportamiento específico — no cubre lo que aún no ocurrió.
+             (b) un sistema que depende del AGENTE para "ser determinista"
+             tampoco lo es — ningún fallback no binario, incluido el propio
+             agente y el AUDITOR.
+Contenido:   §2.8 re-derivada top-down: (1) MT0 — Ley de Asignación Total
+             (R-POST): todo elemento tiene exactamente un titular
+             determinado por su naturaleza; nada queda asignado
+             implícitamente. (2) Procedimiento de tipado TOTAL (4 casos
+             exhaustivos: contenido de intención→PO; relación expresable→
+             máquina; formalizable pendiente→transitorio declarado;
+             ninguna→empírico o disolver) + descomposición (M5) para lo que
+             se resista — totalidad por construcción: cualquier meta-error
+             futuro es una violación tipificable de MT0, no una ley nueva.
+             (3) M1–M9 re-derivadas como TEOREMAS (R-ESP · [MT0]),
+             verificadas por las reglas F8 — la tabla deja de ser lista.
+             (4) M10 invertida: de motor a FALSACIÓN — un catch del PO
+             refuta el framework (elemento mal tipado = bug); la métrica es
+             que no se dispare fuera de zonas. (5) PERÍMETRO BINARIO: la
+             garantía emana solo de máquina (reglas con mutación) y
+             contenido ratificado (PO); agentes advisory — jamás titulares
+             de garantía; prosa sin autoridad. (6) REGISTRO DE ZONAS NO
+             VERIFICADAS (Z1 contenido semántico de claims; Z2 valor↔eje;
+             Z3 realización del gluing) — las fugas conocidas no se asignan
+             a nadie: se registran con camino y VENCIMIENTO; zona vencida =
+             violación (la diferencia entre fallback implícito que carga
+             peso y frontera explícita que expira). (7) M9 MECANIZADA:
+             auto-cobertura — toda regla del validador debe tener su caso de
+             mutación, verificado por test.luau contra el reporte real, no
+             por disciplina.
+Hipótesis:   Con garantía solo de máquina∪contenido, zonas explícitas
+             acotadas y auto-cobertura, el sistema no contiene ningún
+             fallback no binario: lo no garantizado es enumerable, visible y
+             expira — nada descansa en el juicio de agente alguno.
+Razón:       CONTINGENCY P5 — precisiones del PO (2026-07-19): "no debe
+             tener ningún fallback no binario".
+Impacto:     §2.8 reescrita (MT0 + procedimiento + teoremas + perímetro +
+             zonas); header v5.37. check.luau 24 reglas (zone_malformed,
+             zone_expired); test.luau 27 mutaciones + auto-cobertura M9.
+             Los vencimientos de Z1–Z3 (2026-08-11) son parámetro del PO.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §5.0
+Libre:       Vencimientos de las zonas Z1–Z3 (re-acotar cada frontera) → PO
+Referencias: §2.8, §2.6, §5.0, DL-050, DL-056, DL-059
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
