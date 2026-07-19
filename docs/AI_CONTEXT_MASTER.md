@@ -228,13 +228,13 @@ La capa normativa del diseño se **autora directamente en forma** (DL-055): cada
 | R-COMP | composición | ≥ 2 premisas (axiomas o claims), sin elecciones. |
 | R-ELEC | composición con elección | ≥ 2 premisas: ≥ 1 axioma/claim y ≥ 1 elección (E-n). La conclusión se marca ⚠ composite. |
 
-**Elecciones constitucionales** — parámetros de intención decididos por el PO, citables como premisas:
+**Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *una* de las valencias válidas que el eje admite; elegir otra es revisión de la elección (⚠), no del núcleo. Forma obligatoria: **un eje por elección, atómico** (sin conjunciones), un valor por eje, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_compound`).
 
-| ID | Elección | Estado |
-|---|---|---|
-| E1 | Valencia cooperativa: el resultado es de equipo (§1.2) | decidida |
-| E2 | El ancla interpretable (C2′) es el objetivo — no el espacio, las reglas ni las entidades | decidida |
-| E3 | El juego no declara ni castiga la derrota: no existe estado «Perdiste» (§1.2) | decidida |
+| ID | Eje | Abierto por | Valor elegido | Estado |
+|---|---|---|---|---|
+| E1 | Valencia del resultado | C1b (neutral de valencia: el axioma no la fija) | Cooperativa: el resultado es de equipo (§1.2) | decidida |
+| E2 | Ancla interpretable | C2′ (exige un ancla, no dice cuál) | El objetivo | decidida |
+| E3 | Tratamiento de la derrota | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | No se declara ni se castiga: no existe estado «Perdiste» (§1.2) | decidida |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
@@ -1013,7 +1013,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
-| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057 | mismo runner (`check.luau`) |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058 | mismo runner (`check.luau`) |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
 

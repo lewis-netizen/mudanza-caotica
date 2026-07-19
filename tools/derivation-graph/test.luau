@@ -219,6 +219,33 @@ local cases = {
 			replaceOnce(MASTER, "R-ELEC · C1b + E1", "R-ELEC · E1 + E2")
 		end,
 	},
+	{
+		name = "election_malformed",
+		expect = "✗ election_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| E2 | Ancla interpretable |", "| E2 | |")
+		end,
+	},
+	{
+		name = "election_axis_dup",
+		expect = "✗ election_axis_dup",
+		apply = function()
+			replaceOnce(MASTER, "| E3 | Tratamiento de la derrota |", "| E3 | Ancla interpretable |")
+		end,
+	},
+	{
+		name = "election_compound (el defecto histórico de E1)",
+		expect = "✗ election_compound",
+		apply = function()
+			-- Reconstruye exactamente la doble argumentación que el PO cazó a
+			-- mano en E1 — ahora la caza la máquina.
+			replaceOnce(
+				MASTER,
+				"| Cooperativa: el resultado es de equipo (§1.2) |",
+				"| Cooperativa: el resultado es de equipo (§1.2) — sin condición de derrota |"
+			)
+		end,
+	},
 }
 
 -- ── runner ──────────────────────────────────────────────────────────────────

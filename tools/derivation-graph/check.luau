@@ -434,6 +434,7 @@ local f8Axioms = {}
 local f8Claims = {} -- nombre → { raw }
 local f8Rules = {}
 local f8Elections = {}
+local f8ElectionRows = {} -- E-n → { eje, abierto, valor, estado }
 do
 	local region, nivel = nil, nil
 	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
@@ -477,6 +478,12 @@ do
 			local e = line:match("^| (E%d+) |")
 			if e then
 				f8Elections[e] = true
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				-- | ID | Eje | Abierto por | Valor elegido | Estado |
+				f8ElectionRows[e] = { eje = cells[2] or "", abierto = cells[3] or "", valor = cells[4] or "", estado = cells[5] or "" }
 			end
 		end
 	end
@@ -582,6 +589,39 @@ do
 end
 table.sort(f8Cycle)
 
+-- elecciones como VALENCIAS (DL-058): un eje atómico + un valor, sin duplicados.
+-- La conjunción (" — ", " + ", " y " en Eje) es la firma textual del defecto
+-- histórico de E1 (dos argumentos en una elección) — lint de señal, no de
+-- completitud: la atomicidad plena la fuerza la forma + ratificación por fila.
+local electionMalformed, electionAxisDup, electionCompound = {}, {}, {}
+do
+	local axisSeen = {}
+	local ids = {}
+	for id in pairs(f8ElectionRows) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local row = f8ElectionRows[id]
+		if row.eje == "" or row.abierto == "" or row.valor == "" or row.estado == "" then
+			table.insert(electionMalformed, id)
+		end
+		if row.eje ~= "" then
+			local norm2 = row.eje:lower()
+			if axisSeen[norm2] then
+				table.insert(electionAxisDup, id .. " duplica eje de " .. axisSeen[norm2])
+			else
+				axisSeen[norm2] = id
+			end
+		end
+		if row.eje:find(" — ", 1, true) or row.eje:find(" + ", 1, true) or row.eje:find(" y ", 1, true) then
+			table.insert(electionCompound, id .. " (eje compuesto)")
+		elseif row.valor:find(" — ", 1, true) or row.valor:find(" + ", 1, true) then
+			table.insert(electionCompound, id .. " (valor con conjunción)")
+		end
+	end
+end
+
 -- ── reporte ─────────────────────────────────────────────────────────────────
 local nodeCount = 0
 for _ in pairs(nodes) do
@@ -659,6 +699,15 @@ end)
 reportViolations("claim_cycle (ciclo en premisas de claims)", f8Cycle, function(r)
 	return r
 end)
+reportViolations("election_malformed (elección sin eje/abierto-por/valor/estado)", electionMalformed, function(r)
+	return r
+end)
+reportViolations("election_axis_dup (dos elecciones sobre el mismo eje)", electionAxisDup, function(r)
+	return r
+end)
+reportViolations("election_compound (eje no atómico o valor con conjunción)", electionCompound, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
@@ -677,6 +726,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
 	+ #moduleUndeclared + #ungluedSection + #glueDangling
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
+	+ #electionMalformed + #electionAxisDup + #electionCompound
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)

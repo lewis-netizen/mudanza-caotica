@@ -2597,17 +2597,33 @@ Contenido:   (1) E1 se divide: E1 = valencia cooperativa (resultado de
              (checklist entailment §2.6); se cierra más cuando §3 se autore
              en claims (la claim derivada "el fracaso parcial existe y es
              contenido" queda como contradicción visible). (3) Mutation test
-             permanente nuevo: elección-sin-axioma-portador → rule_arity
-             (20 casos).
+             permanente nuevo: elección-sin-axioma-portador → rule_arity.
+             (4) FORMALIZACIÓN "las elecciones son valencias" (3ª observación
+             del PO: identificar la doble argumentación no debía ser su
+             trabajo): una elección = un EJE que los axiomas dejan abierto +
+             el VALOR elegido — una de las valencias válidas del eje. Tabla
+             §2.7 re-estructurada: | ID | Eje | Abierto por | Valor | Estado |
+             (E1←C1b neutral de valencia; E2←C2′ exige ancla; E3←silencio
+             axiomático, C3 informa). Tres reglas nuevas: election_malformed
+             (celda vacía), election_axis_dup (dos elecciones en un eje),
+             election_compound (eje no atómico o valor con conjunción — la
+             firma textual del defecto de E1; lint de señal, no completitud).
+             Sweep del conjunto ejecutado via la forma: tres ejes atómicos y
+             distintos, cada uno con apertura trazable — sin otra mezcla.
+             Mutación permanente que RECONSTRUYE el defecto histórico de E1
+             → election_compound lo caza (23 casos). 21 reglas activas.
 Hipótesis:   Con E1/E3 separadas y la garantía estructural testeada, el
              malentendido no puede volverse normativo por vía sintáctica; su
              única vía (axioma citado que no sostiene) es visible y auditable.
 Razón:       CONTINGENCY P5 — corrección y prueba ordenadas por el PO al
              ratificar F8 (2026-07-19).
-Impacto:     §2.7 elecciones actualizada (E1 escindida, E3 nueva); header
-             v5.35. test.luau 20 casos. Dependencia Social sigue citando
-             R-ELEC · C1b + E1 (valencia — correcto tras el split). E3 queda
-             citable para las claims de §3/§3.5 (prohibición de castigo).
+Impacto:     §2.7 elecciones re-estructurada como tabla de valencias (E1
+             escindida, E3 nueva, ejes con apertura trazable); header v5.35.
+             check.luau 21 reglas; test.luau 23 casos. Dependencia Social
+             sigue citando R-ELEC · C1b + E1 (valencia — correcto tras el
+             split). E3 queda citable para las claims de §3/§3.5
+             (prohibición de castigo). La clase de defecto que el PO cazó a
+             mano en E1 queda mecanizada — no vuelve a su superficie.
 Ejecución:   CONFIRM
 Costo:       C2
 Pipeline:    P5
