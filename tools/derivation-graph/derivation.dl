@@ -158,6 +158,30 @@ unglued_section(S) :- node(S, "section"), section_major(S, 3), !glued(S).
 .decl glue_dangling(sec:Node, target:symbol)
 glue_dangling(S, T) :- glue(S, T), !declared_module(T), !src_module(T).
 
+// (14–18) CLAIMS TIPADOS (F8, DL-057) — la capa normativa se AUTORA en forma
+//      (DL-055: la conversión semántica se elimina, no se asigna). Toda
+//      entrada de §2.1 porta `Derivación: R-XXX · P1 + P2` citando el
+//      catálogo sintáctico §2.7 (R-POST 0 premisas; R-ESP exactamente 1 sin
+//      elección; R-COMP ≥2 sin elección; R-ELEC ≥2 con ≥1 elección E-n y ≥1
+//      axioma/claim). Premisas: axioma (C1a..), elección (E-n) o [Claim].
+//      Nada deriva de prosa; el comentario tras "—" no se procesa.
+.decl claim(name:symbol, rule:symbol)
+.decl claim_premise(name:symbol, prem:symbol)
+.decl rule_registered(r:symbol)
+.decl election(e:symbol)
+.input claim
+.input claim_premise
+.input rule_registered
+.input election
+
+.decl claim_bad_derivation(name:symbol)   // sin forma R-XXX parseable
+.decl unknown_rule(name:symbol, r:symbol)
+unknown_rule(N, R) :- claim(N, R), !rule_registered(R).
+.decl unknown_premise(name:symbol, p:symbol)
+// p no resuelve a axioma, elección ni claim (evaluado en check.luau)
+.decl rule_arity(name:symbol)             // condición sintáctica de la regla
+.decl claim_cycle(name:symbol)            // ciclo en la relación premisa
+
 .output dangling
 .output orphan
 .output stale
@@ -168,3 +192,8 @@ glue_dangling(S, T) :- glue(S, T), !declared_module(T), !src_module(T).
 .output module_undeclared
 .output unglued_section
 .output glue_dangling
+.output claim_bad_derivation
+.output unknown_rule
+.output unknown_premise
+.output rule_arity
+.output claim_cycle

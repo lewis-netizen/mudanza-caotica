@@ -169,6 +169,47 @@ local cases = {
 			append("docs/SCRATCHPAD.md", "\nRef de prueba: AI_CONTEXT_MASTER v9.9\n")
 		end,
 	},
+	{
+		name = "claim_bad_derivation",
+		expect = "✗ claim_bad_derivation",
+		apply = function()
+			replaceOnce(
+				MASTER,
+				"R-COMP · C1a + C1b — operador de dirección de la tensión",
+				"C1a + C1b — operador de dirección de la tensión"
+			)
+		end,
+	},
+	{
+		name = "unknown_rule",
+		expect = "✗ unknown_rule",
+		apply = function()
+			replaceOnce(MASTER, "R-ELEC · C1b + E1", "R-FANTASMA · C1b + E1")
+		end,
+	},
+	{
+		name = "unknown_premise",
+		expect = "✗ unknown_premise",
+		apply = function()
+			replaceOnce(MASTER, "R-COMP · C2′ + [Simplicidad Mecánica]", "R-COMP · C2′ + [Claim Inexistente]")
+		end,
+	},
+	{
+		name = "rule_arity",
+		expect = "✗ rule_arity",
+		apply = function()
+			replaceOnce(MASTER, "R-ESP · C1a — gate de complejidad", "R-ESP · C1a + C1b — gate de complejidad")
+		end,
+	},
+	{
+		name = "claim_cycle",
+		expect = "✗ claim_cycle",
+		apply = function()
+			-- Entropía Social ← [Contexto Variable]; se muta Contexto Variable
+			-- para que derive de [Entropía Social] → ciclo.
+			replaceOnce(MASTER, "| R-ELEC · C2′ + E2 |", "| R-COMP · C2′ + [Entropía Social] |")
+		end,
+	},
 }
 
 -- ── runner ──────────────────────────────────────────────────────────────────
@@ -179,7 +220,7 @@ local function runCheck()
 	return r.code, (r.stdout or "") .. (r.stderr or "")
 end
 
-print("Mutation tests del validador — corpus real + 13 violaciones inyectadas\n")
+print(string.format("Mutation tests del validador — corpus real + %d violaciones inyectadas\n", #cases - 1))
 
 local failures = 0
 for _, case in ipairs(cases) do
@@ -206,5 +247,11 @@ if failures > 0 then
 	print(string.format("\n%d regla(s) NO encendieron ante su violación — validador NO confiable.", failures))
 	process.exit(1)
 else
-	print("\n14/14 — todas las reglas encienden ante su clase de violación. Validador verificado contra el corpus real.")
+	print(
+		string.format(
+			"\n%d/%d — todas las reglas encienden ante su clase de violación. Validador verificado contra el corpus real.",
+			#cases,
+			#cases
+		)
+	)
 end

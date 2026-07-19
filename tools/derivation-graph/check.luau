@@ -426,6 +426,162 @@ for _, t in ipairs(glueTargets) do
 end
 table.sort(glueDangling)
 
+-- ── F8: claims tipados — derivación formal en §2.1 (DL-057) ─────────────────
+-- La columna Derivación es NORMATIVA: `R-XXX · P1 + P2 [— comentario]`.
+-- Premisas: ID de axioma (C1a...), elección (E1...) o claim [Nombre].
+-- Nada deriva de prosa; el comentario tras "—" no se procesa.
+local f8Axioms = {}
+local f8Claims = {} -- nombre → { raw }
+local f8Rules = {}
+local f8Elections = {}
+do
+	local region, nivel = nil, nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+			nivel = nil
+		end
+		local nv = line:match("^#### Nivel (%d)")
+		if nv then
+			nivel = tonumber(nv)
+		end
+		if region == "2.1" and nivel == 0 then
+			local id = line:match("^| %*%*.-%*%* %((.-)%)")
+			if id then
+				f8Axioms[id] = true
+			end
+		elseif region == "2.1" and (nivel == 1 or nivel == 2) then
+			if line:match("^|") and not line:match("^|%-") and not line:match("^| Principio") then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local name = (cells[1] or ""):gsub("%s*⚠%s*$", "")
+				local deriv = nil
+				for i = #cells, 1, -1 do
+					if cells[i] ~= "" then
+						deriv = cells[i]
+						break
+					end
+				end
+				if name ~= "" and deriv then
+					f8Claims[name] = { raw = deriv }
+				end
+			end
+		elseif region == "2.7" then
+			local r = line:match("^| (R%-%u+) |")
+			if r then
+				f8Rules[r] = true
+			end
+			local e = line:match("^| (E%d+) |")
+			if e then
+				f8Elections[e] = true
+			end
+		end
+	end
+end
+
+local f8BadDeriv, f8UnknownRule, f8UnknownPremise, f8Arity = {}, {}, {}, {}
+local f8Edges = {} -- nombre → { claims premisa } para detección de ciclos
+for name, c in pairs(f8Claims) do
+	local formal = c.raw
+	local dash = formal:find(" — ", 1, true)
+	if dash then
+		formal = formal:sub(1, dash - 1)
+	end
+	formal = formal:gsub("%s+$", "")
+	local rule, premStr = formal:match("^(R%-%u+)%s*·%s*(.+)$")
+	if not rule then
+		rule = formal:match("^(R%-%u+)$")
+	end
+	if not rule then
+		table.insert(f8BadDeriv, name .. " → \"" .. c.raw .. "\"")
+	else
+		if not f8Rules[rule] then
+			table.insert(f8UnknownRule, name .. " → " .. rule)
+		end
+		local prems = {}
+		if premStr then
+			for tok in premStr:gmatch("[^+]+") do
+				tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+				if tok ~= "" then
+					table.insert(prems, tok)
+				end
+			end
+		end
+		f8Edges[name] = {}
+		local elecN, otherN = 0, 0
+		for _, tok in ipairs(prems) do
+			local claimRef = tok:match("^%[(.+)%]$")
+			if claimRef then
+				if f8Claims[claimRef] then
+					otherN += 1
+					table.insert(f8Edges[name], claimRef)
+				else
+					table.insert(f8UnknownPremise, name .. " → [" .. claimRef .. "]")
+				end
+			elseif f8Elections[tok] then
+				elecN += 1
+			elseif f8Axioms[tok] then
+				otherN += 1
+			else
+				table.insert(f8UnknownPremise, name .. " → " .. tok)
+			end
+		end
+		local n = #prems
+		local bad = false
+		if rule == "R-POST" then
+			bad = n ~= 0
+		elseif rule == "R-ESP" then
+			bad = n ~= 1 or elecN ~= 0
+		elseif rule == "R-COMP" then
+			bad = n < 2 or elecN ~= 0
+		elseif rule == "R-ELEC" then
+			bad = n < 2 or elecN < 1 or otherN < 1
+		end
+		if bad and f8Rules[rule] then
+			table.insert(f8Arity, name .. " → " .. rule .. " con " .. n .. " premisa(s), " .. elecN .. " elección(es)")
+		end
+	end
+end
+table.sort(f8BadDeriv)
+table.sort(f8UnknownRule)
+table.sort(f8UnknownPremise)
+table.sort(f8Arity)
+
+local f8Cycle = {}
+do
+	local done = {}
+	for start in pairs(f8Claims) do
+		if not done[start] then
+			local visiting = {}
+			local found = false
+			local function dfs(n)
+				if found or done[n] then
+					return
+				end
+				if visiting[n] then
+					found = true
+					return
+				end
+				visiting[n] = true
+				for _, m in ipairs(f8Edges[n] or {}) do
+					dfs(m)
+				end
+				visiting[n] = nil
+				done[n] = true
+			end
+			dfs(start)
+			if found then
+				table.insert(f8Cycle, start)
+				done[start] = true
+			end
+		end
+	end
+end
+table.sort(f8Cycle)
+
 -- ── reporte ─────────────────────────────────────────────────────────────────
 local nodeCount = 0
 for _ in pairs(nodes) do
@@ -488,6 +644,21 @@ end)
 reportViolations("glue_dangling (claim de módulo inexistente en §4.15)", glueDangling, function(r)
 	return r
 end)
+reportViolations("claim_bad_derivation (§2.1 sin derivación formal R-XXX)", f8BadDeriv, function(r)
+	return r
+end)
+reportViolations("unknown_rule (regla no registrada en §2.7)", f8UnknownRule, function(r)
+	return r
+end)
+reportViolations("unknown_premise (premisa no resuelve a axioma/elección/claim)", f8UnknownPremise, function(r)
+	return r
+end)
+reportViolations("rule_arity (condición sintáctica de la regla violada)", f8Arity, function(r)
+	return r
+end)
+reportViolations("claim_cycle (ciclo en premisas de claims)", f8Cycle, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
@@ -505,6 +676,7 @@ end
 local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
 	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
 	+ #moduleUndeclared + #ungluedSection + #glueDangling
+	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)
