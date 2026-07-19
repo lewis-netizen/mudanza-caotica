@@ -424,6 +424,24 @@ jobs:
               );
             }
 
+  # ── Validador auto-testeado: mutation tests (DL-056) ─────────────────────────
+  # Cada regla del grafo de derivación debe ENCENDER ante una violación mínima
+  # de su clase inyectada sobre copia del corpus real (+ control en verde).
+  # Complementa el tripwire DL-052: debilitar una regla rompe su mutation test —
+  # el debilitamiento silencioso muere por conducta, no solo por declaración.
+  contract-validator-mutations:
+    name: "Contract: validator mutation tests (DL-056)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: CompeyDev/setup-rokit@v0.2.1
+        with:
+          token: ${{ github.token }}
+          cache: "true"
+      - name: Run validator mutation tests
+        run: lune run tools/derivation-graph/test.luau
+
   validate-commit-convention:
     name: "Convention: commitlint"
     runs-on: ubuntu-latest

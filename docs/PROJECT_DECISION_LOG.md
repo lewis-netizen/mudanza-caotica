@@ -2448,4 +2448,50 @@ Libre:       —
 Referencias: §5.0, §2.1, §2.3, §2.6, §4.15, DL-052, DL-053, DL-054
 ```
 
+---
+
+### DL-056
+
+```
+ID:          DL-056
+Fecha:       2026-07-19
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Movimiento prudencial ordenado por el PO antes de apoyar el
+             programa holístico en el validador: testearlo contra el propio
+             proyecto. 13 luces en verde no distinguen un validador correcto
+             de uno roto — varias reglas nacieron en verde y nunca habían
+             encendido. Contexto de fondo: el PO ratificó los axiomas como
+             único input humano afirmado (DL-055) — todo lo demás debe
+             probarse por el sistema, incluido el validador mismo.
+Contenido:   Mutation tests del validador (test.luau): por cada una de las
+             13 reglas se inyecta una violación mínima de su clase sobre una
+             COPIA del corpus real (docs/ + src/ + deferrals) y se exige que
+             la regla encienda (exit≠0 + fila de su clase); más un control
+             (el corpus sin mutar pasa). 14 casos, sandbox efímero
+             (.dgtest-sandbox/, gitignored), anclas literales que fallan si
+             el corpus cambia y la mutación deja de probar. Job CI
+             contract-validator-mutations. Con esto el validador queda
+             gobernado por CONDUCTA (tests) además de por DECLARACIÓN
+             (tripwire DL-052): debilitar una regla rompe su mutation test.
+Hipótesis:   Un validador cuyas reglas demostraron encender ante su clase de
+             violación es precondición confiable del programa; uno que solo
+             ha pasado en verde, no.
+Razón:       CONTINGENCY P5 — "el siguiente movimiento prudencial es testear
+             el validador contra el mismo proyecto" (PO, 2026-07-19).
+Impacto:     tools/derivation-graph/test.luau nuevo. p2-implementation.yml
+             gana contract-validator-mutations (para que bloquee: añadirlo
+             al ruleset — acción del PO). §5.0 actualizada; header v5.33.
+             .gitignore gana el sandbox. Resultado inaugural: 14/14 — todas
+             las reglas encienden.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Libre:       —
+Referencias: §5.0, §2.6, DL-048, DL-052, DL-055
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
