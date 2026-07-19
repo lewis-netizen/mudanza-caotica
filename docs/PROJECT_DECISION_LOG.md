@@ -2504,4 +2504,59 @@ Libre:       —
 Referencias: §5.0, §2.6, DL-048, DL-052, DL-055
 ```
 
+---
+
+### DL-057
+
+```
+ID:          DL-057
+Fecha:       2026-07-19
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    F8 bajo la arquitectura fijada por las correcciones del PO en
+             DL-055: la conversión semántica prosa→forma SE ELIMINA — la
+             capa normativa se autora directamente en forma, el determinismo
+             no cae en agentes. Además el merge de #110 no incluyó el último
+             commit de DL-055 (verificado: main sin la corrección); se
+             re-aplica aquí como primer commit.
+Contenido:   (1) §2.7 nueva — Catálogo de Reglas de Inferencia: R-POST
+             (postulado, 0 premisas), R-ESP (especialización, exactamente 1,
+             sin elecciones), R-COMP (composición, ≥2, sin elecciones),
+             R-ELEC (composición con elección, ≥2 con ≥1 E-n → marca ⚠).
+             Condiciones SINTÁCTICAS: aplicabilidad decidible de la
+             estructura; el paso no-sintáctico se descompone. Tabla de
+             Elecciones constitucionales citables: E1 (valencia cooperativa,
+             §1.2), E2 (el ancla interpretable es el objetivo). (2) §2.1 en
+             forma normativa: N0 gana estado formal (axiomas = R-POST,
+             ratificados por el PO 2026-07-19); N1 reemplaza "Deriva de"
+             (prosa) por "Derivación" formal (R-XXX · premisas — comentario);
+             N2 gana columna Derivación (R-POST). Nada deriva de prosa.
+             (3) Cinco reglas nuevas del validador: claim_bad_derivation
+             (totalidad — toda entrada §2.1 porta forma), unknown_rule,
+             unknown_premise, rule_arity, claim_cycle (DFS sobre premisas).
+             18 reglas activas. (4) Cinco mutation tests nuevos — 19 casos,
+             todos encienden. El entailment de §2.1 queda verificado por
+             máquina: el interinato (agente+auditor) se retira para la capa
+             constitucional.
+Hipótesis:   Con §2.1 en claims verificados, "verificar §3" del programa
+             holístico es autorar §3 en esta misma forma — el entailment de
+             diseño deja de depender de agentes capa por capa, empezando por
+             la constitución.
+Razón:       CONTINGENCY P5 — "procede F8" (PO, 2026-07-19), bajo sus tres
+             correcciones de DL-055.
+Impacto:     §2.1 (forma normativa), §2.7 (nueva), §5.0 (fila F8); header
+             v5.34. El catálogo y las elecciones E1/E2 son constitución:
+             este PR se somete a validación del PO (sin auto-merge). Las
+             reglas §2.7 requieren soporte en validador para evolucionar
+             (tripwire DL-052 + mutation DL-056).
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.1, §2.7, §5.0
+Libre:       —
+Referencias: §2.6, §5.0, §1.2, DL-044, DL-053, DL-055, DL-056
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.33 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.34 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -52,21 +52,23 @@ Los cuatro principios de los que todo lo demás se deduce. Destilados y verifica
 | **Ambigüedad Interpretable** (C2′) | La decisión compartida vive entre lo determinado (donde no hay decisión) y lo aleatorio (donde no hay criterio). |
 | **Restricción Intrínseca** (C3) | Una restricción intrínseca a la naturaleza de la entidad se vive como oportunidad; impuesta por una regla externa, como cerradura. |
 
+**Estado formal (F8, DL-057):** los cuatro axiomas son claims `R-POST` (§2.7) — **ratificados por el PO (2026-07-19, DL-055)**: único input humano afirmado del sistema.
+
 #### Nivel 1 — Corolarios de diseño
 
-Se deducen de los axiomas; frozen porque su fundamento lo es. ⚠ marca un **composite**: un axioma combinado con una elección de diseño revisable por el PO.
+Se deducen de los axiomas; frozen porque su fundamento lo es. ⚠ marca un **composite**: un axioma combinado con una elección de diseño revisable por el PO. La columna **Derivación** es normativa (F8, §2.7): regla citada del catálogo + premisas; lo que sigue a `—` es comentario no normativo.
 
-| Principio | Definición | Deriva de |
+| Principio | Definición | Derivación |
 |---|---|---|
-| Fricción Social | La mejor fricción ocurre entre jugadores, no entre jugador y sistema. | C1a + C1b (operador de dirección de la tensión) |
-| Dependencia Social ⚠ | Las tareas importantes deben beneficiarse significativamente de la cooperación. | C1b + elección de valencia cooperativa (objetivo compartido) |
-| Entropía Social | Cada partida produce situaciones distintas sin modificar el objetivo principal. | C2′ + Contexto Variable |
-| Contexto Variable ⚠ | Las condiciones cambian. El objetivo no. | C2′ + elección: el ancla interpretable es el objetivo |
-| Objetivo Estable ⚠ | Los jugadores siempre saben qué hacer. El objetivo nunca cambia. | C2′ + elección (ancla = objetivo); ver Nota de legibilidad |
-| Presión Situacional | El reto surge del contexto, no de aprender nuevas mecánicas. | C2′ + Simplicidad Mecánica |
-| Complejidad Justificada | Toda complejidad debe aumentar la interacción social o las situaciones emergentes. | C1a (gate de complejidad) |
-| Expresión sobre Ventaja | La monetización futura debe derivar de expresión personal y creación, no de ventaja competitiva. | C1a (teorema anti-poder: la ventaja rutea el resultado por el sistema) |
-| Jugadores como Fuente de Contenido | El valor a largo plazo proviene de convertir a los jugadores en contenido para otros jugadores, mediante interacción o creación. | C1a (extensión a largo plazo → entidad Content) |
+| Fricción Social | La mejor fricción ocurre entre jugadores, no entre jugador y sistema. | R-COMP · C1a + C1b — operador de dirección de la tensión |
+| Dependencia Social ⚠ | Las tareas importantes deben beneficiarse significativamente de la cooperación. | R-ELEC · C1b + E1 |
+| Entropía Social | Cada partida produce situaciones distintas sin modificar el objetivo principal. | R-COMP · C2′ + [Contexto Variable] |
+| Contexto Variable ⚠ | Las condiciones cambian. El objetivo no. | R-ELEC · C2′ + E2 |
+| Objetivo Estable ⚠ | Los jugadores siempre saben qué hacer. El objetivo nunca cambia. | R-ELEC · C2′ + E2 — ver Nota de legibilidad |
+| Presión Situacional | El reto surge del contexto, no de aprender nuevas mecánicas. | R-COMP · C2′ + [Simplicidad Mecánica] |
+| Complejidad Justificada | Toda complejidad debe aumentar la interacción social o las situaciones emergentes. | R-ESP · C1a — gate de complejidad |
+| Expresión sobre Ventaja | La monetización futura debe derivar de expresión personal y creación, no de ventaja competitiva. | R-ESP · C1a — teorema anti-poder: la ventaja rutea el resultado por el sistema |
+| Jugadores como Fuente de Contenido | El valor a largo plazo proviene de convertir a los jugadores en contenido para otros jugadores, mediante interacción o creación. | R-ESP · C1a — extensión a largo plazo (entidad Content) |
 
 **Nota de legibilidad.** "Objetivo Estable" carga además "los jugadores siempre saben qué hacer". No requiere un 5º axioma: la legibilidad del *objetivo* se deduce de fijar el objetivo (elección) + Simplicidad Mecánica, y la legibilidad del *estado* es la interpretabilidad de C2′ elaborada como contrato de UX en §3.7. Se anota para confirmación del PO, no como gap sin resolver.
 
@@ -74,12 +76,12 @@ Se deducen de los axiomas; frozen porque su fundamento lo es. ⚠ marca un **com
 
 Otro eje: no describen la experiencia del jugador sino **cómo se construye y se estructura el sistema**. Frozen, pero no se deducen de los axiomas de experiencia.
 
-| Principio | Definición | Eje |
-|---|---|---|
-| Simplicidad Mecánica | La profundidad surge de sistemas simples interactuando. | Método |
-| Compresión Social | El espacio debe aumentar la frecuencia con la que los jugadores interfieren entre sí. | Método (táctica espacial al servicio de C1b) |
-| Entidades Estables | Diseñar alrededor de entidades (Player, Object, Map, Content), no alrededor de nombres, archivos o features concretas. | Arquitectura |
-| Modelo de Tres Niveles | Toda decisión arquitectónica pertenece a uno de tres niveles: Entidades (qué existe), Sistemas (qué hace cosas), Persistencia (qué sobrevive entre sesiones). | Arquitectura |
+| Principio | Definición | Eje | Derivación |
+|---|---|---|---|
+| Simplicidad Mecánica | La profundidad surge de sistemas simples interactuando. | Método | R-POST |
+| Compresión Social | El espacio debe aumentar la frecuencia con la que los jugadores interfieren entre sí. | Método (táctica espacial al servicio de C1b) | R-POST |
+| Entidades Estables | Diseñar alrededor de entidades (Player, Object, Map, Content), no alrededor de nombres, archivos o features concretas. | Arquitectura | R-POST |
+| Modelo de Tres Niveles | Toda decisión arquitectónica pertenece a uno de tres niveles: Entidades (qué existe), Sistemas (qué hace cosas), Persistencia (qué sobrevive entre sesiones). | Arquitectura | R-POST |
 
 ### 2.2 Test Oficial de Diseño
 
@@ -214,6 +216,26 @@ Cómo se deriva el diseño desde los Principios Congelados (§2.1). Es transvers
 5. **Cierre** — ¿queda duda residual? Es deuda: se cierra.
 
 **Criterio de validez:** el modelado es válido si cumple, objetiva y efectivamente, este enforcement.
+
+### 2.7 Catálogo de Reglas de Inferencia (F8, DL-057)
+
+La capa normativa del diseño se **autora directamente en forma** (DL-055): cada claim derivado cita una regla de este catálogo. Las reglas son **sintácticas** — su aplicabilidad se decide desde la estructura del claim (aridad y clase de las premisas), no por juicio. Un paso que no pueda expresarse con una regla del catálogo **se descompone hasta que pueda**. Añadir o cambiar una regla es un acto constitucional (validación del PO) y exige soporte en el validador (tripwire DL-052 + mutation test DL-056).
+
+| Regla | Forma | Condición sintáctica |
+|---|---|---|
+| R-POST | postulado | 0 premisas. Se ratifica, no se deriva (axiomas N0; método/arquitectura N2). |
+| R-ESP | especialización | exactamente 1 premisa (axioma o claim), sin elecciones; restringe su alcance. |
+| R-COMP | composición | ≥ 2 premisas (axiomas o claims), sin elecciones. |
+| R-ELEC | composición con elección | ≥ 2 premisas: ≥ 1 axioma/claim y ≥ 1 elección (E-n). La conclusión se marca ⚠ composite. |
+
+**Elecciones constitucionales** — parámetros de intención decididos por el PO, citables como premisas:
+
+| ID | Elección | Estado |
+|---|---|---|
+| E1 | Valencia cooperativa: el resultado es de equipo — sin condición de derrota (§1.2) | decidida |
+| E2 | El ancla interpretable (C2′) es el objetivo — no el espacio, las reglas ni las entidades | decidida |
+
+**Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
 ---
 
@@ -989,7 +1011,8 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | §5.4/§5.5 | Grafo de derivación: integridad (`dangling`), procedencia (`orphan`, DL-032), frescura (`stale` — con diferimientos autorizados y acotados por fecha en `deferrals.txt`; vencido = violación), cobertura (`uncovered`: DL que modifica §3/§4 sin declarar derivación) altitud (`level_skip`: implementación sin fuente §3/§4/DL; `domain_mismatch`: Domain del DL incoherente con lo que Modifica; `impl_leak`: módulos de `src/` nombrados en §1–§3) determinación (`undeclared_free`: DL que modifica el master sin declarar `Libre:` — el juicio determinado-vs-libre es un acto explícito), código (`module_undeclared`: módulo en `src/` no declarado en §4) y gluing §3↔§4 (`unglued_section`: sección §3 sin realización en §4.15; `glue_dangling`: claim de módulo inexistente) — DL-048/049/050/051/053/054 | `lune run tools/derivation-graph/check.luau` (modelo: `tools/derivation-graph/derivation.dl`) |
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
-| — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde — 14 casos (DL-056) | `lune run tools/derivation-graph/test.luau` |
+| — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057 | mismo runner (`check.luau`) |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
 
