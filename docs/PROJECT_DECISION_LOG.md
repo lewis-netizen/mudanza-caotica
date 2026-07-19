@@ -2633,4 +2633,61 @@ Libre:       —
 Referencias: §2.7, §1.2, §2.1, §3.8, DL-055, DL-057
 ```
 
+---
+
+### DL-059
+
+```
+ID:          DL-059
+Fecha:       2026-07-19
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO detectó que tras construir el validador los errores del
+             agente persistían — pero migrados de capa: F7 mal posicionado,
+             roles mal asignados (entailment al PO, relación valor↔eje al
+             PO), dependencia de agente disfrazada, E1 compuesta. Ninguno es
+             error DE artefacto (el validador los cubre); todos son errores
+             en el DISEÑO DEL SISTEMA mismo — la única capa sin ley
+             explícita: sus principios existían como precedentes dispersos
+             en prosa de DLs y memoria del agente. Sin ley explícita no hay
+             violación citable — solo el catch del PO. Es el problema
+             original un nivel arriba; el PO ordenó identificarlo
+             holísticamente y resolverlo con un metaframework explícito.
+Contenido:   Nueva §2.8 — Metaframework: Leyes de Evolución del Sistema.
+             Diez leyes M1–M10 que gobiernan asignación de roles, orden de
+             construcción y forma de las estructuras, cada una citando el
+             catch (DL) que la reveló — el metaframework SE DERIVA de la
+             historia de fallos. M10 es el motor: todo catch de meta-nivel
+             se convierte en el mismo ciclo en ley explícita + regla del
+             validador si su clase es formalizable (catch→ley→regla).
+             Violación de una M-n en propuesta/DL/prompt = D1 citando la ley
+             (AUDITOR gana el meta-checklist). La FORMA de la tabla es
+             verificada (meta_law_malformed: ley vacía o fuente sin DL
+             existente + mutación — 24 casos); su CONTENIDO es constitución
+             (el PO ratifica leyes — contenido, no relación: M3 aplicada a
+             sí misma). Corrección de la instancia disparadora: la relación
+             valor↔eje de las elecciones se reasigna del PO al AUDITOR (M3).
+Hipótesis:   Con la capa meta bajo ley explícita, los errores de diseño del
+             sistema se vuelven citables y auditables en vez de depender del
+             insight del PO; M10 garantiza que la tabla crece con cada catch
+             en vez de agotarse en la instancia.
+Razón:       CONTINGENCY P5 — identificación holística ordenada por el PO
+             (2026-07-19): "es un metaproblema; debe resolverse creando un
+             metaframework, haciéndolo explícito".
+Impacto:     §2.8 nueva; §5.0 fila meta_law_malformed; header v5.36.
+             AUDITOR_DESIGN gana meta-checklist M1–M10 y la relación
+             valor↔eje. check.luau 22 reglas; test.luau 24 casos. La clase
+             entera "error de diseño del sistema" deja de caer en la
+             superficie del PO: su parte formal es máquina, su parte
+             semántica es citable y del AUDITOR.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §5.0
+Libre:       —
+Referencias: §2.6, §2.7, §5.0, DL-053, DL-055, DL-057, DL-058
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

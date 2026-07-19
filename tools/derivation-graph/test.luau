@@ -246,6 +246,13 @@ local cases = {
 			)
 		end,
 	},
+	{
+		name = "meta_law_malformed",
+		expect = "✗ meta_law_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| DL-050 |", "| DL-999 |")
+		end,
+	},
 }
 
 -- ── runner ──────────────────────────────────────────────────────────────────

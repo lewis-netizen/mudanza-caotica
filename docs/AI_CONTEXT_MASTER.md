@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.35 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.36 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -237,6 +237,25 @@ La capa normativa del diseño se **autora directamente en forma** (DL-055): cada
 | E3 | Tratamiento de la derrota | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | No se declara ni se castiga: no existe estado «Perdiste» (§1.2) | decidida |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
+
+### 2.8 Metaframework — Leyes de Evolución del Sistema (DL-059)
+
+El validador gobierna los artefactos; estas leyes gobiernan **el diseño del sistema mismo** — asignación de roles, orden de construcción, forma de las estructuras. Existían como precedentes dispersos; sin ley explícita no hay violación citable, y los errores de esta capa caían sobre el PO. Cada ley cita el catch que la reveló: **el metaframework se deriva de la historia de fallos.** Violarlas en una propuesta, DL o prompt es hallazgo D1 (AUDITOR, citando la ley).
+
+| ID | Ley | Revelada por |
+|---|---|---|
+| M1 | **El validador precede al trabajo**: un fragmento de enforcement existe antes del trabajo cuya clase de error gobierna; el validador nunca es un paso del programa que valida. | DL-053 |
+| M2 | **El determinismo vive fuera de los agentes**: ninguna verificación descansa en agente alguno; toda dependencia residual se declara con dueño y frontera, nunca queda implícita. | DL-055 |
+| M3 | **La superficie del PO es contenido, nunca relación**: al PO solo se le someten axiomas ("¿es este el suelo?") y elecciones ("¿es este el valor que elijo?"). Toda tarea expresable como relación entre elementos del sistema está mal asignada si se le propone. | DL-055, DL-059 |
+| M4 | **Lo normativo se autora en forma**: nada deriva de prosa; la única dirección es forma→prosa. | DL-055, DL-057 |
+| M5 | **Atomicidad**: cada unidad formal porta exactamente un argumento — una elección = un eje, un claim = una conclusión, un DL = una decisión (§5.4). | DL-058 |
+| M6 | **Conjunto sobre elemento**: un cambio upstream re-deriva el conjunto derivado completo; parchar un elemento es la tajada silenciosa. | DL-047, DL-049 |
+| M7 | **Disolver sobre vigilar**: una relación frágil se elimina como clase antes que policiarse como instancias. | DL-050 |
+| M8 | **Exhaustividad declarada**: todo lo formalizable se formaliza; el residuo restante se declara con dueño explícito — un residuo sin dueño es una asignación implícita al PO. | DL-055 |
+| M9 | **Evolución conductual**: cambiar el sistema es acto etiquetado (tripwire) y toda regla nueva demuestra detectar (mutation) antes de confiarse. | DL-052, DL-056 |
+| M10 | **El ciclo catch→ley→regla**: todo error de meta-nivel cazado por el PO se convierte, en el mismo ciclo, en (a) ley explícita de esta tabla y (b) regla del validador si su clase es formalizable. El catch nunca se agota en corregir la instancia. | DL-059 |
+
+La forma de esta tabla está verificada (`meta_law_malformed`: ley vacía o fuente que no resuelve a un DL existente). Su **contenido** es constitución: lo ratifica el PO — las leyes son contenido ("¿son estas mis leyes?"), no relación (M3 se aplica a sí misma).
 
 ---
 
@@ -1014,6 +1033,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
 | §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058 | mismo runner (`check.luau`) |
+| §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`: ley vacía o fuente sin DL existente) — DL-059 | mismo runner (`check.luau`) |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
 
