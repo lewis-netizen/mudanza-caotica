@@ -253,6 +253,37 @@ local cases = {
 			replaceOnce(MASTER, "| DL-050 |", "| DL-999 |")
 		end,
 	},
+	{
+		name = "meta-ley con premisa inexistente (claims F8 cubren §2.8)",
+		expect = "✗ unknown_premise",
+		apply = function()
+			-- Prueba que las derivaciones de §2.8 pasan por las reglas F8
+			-- (no parsing vacuo): M3 citando una premisa que no existe.
+			replaceOnce(
+				MASTER,
+				"R-ESP · [MT0] — restricción del titular PO al caso 1",
+				"R-ESP · [MT9] — restricción del titular PO al caso 1"
+			)
+		end,
+	},
+	{
+		name = "zone_malformed",
+		expect = "✗ zone_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| Ejes como tipos con dominio de valores enumerado |", "| |")
+		end,
+	},
+	{
+		name = "zone_expired",
+		expect = "✗ zone_expired",
+		apply = function()
+			replaceOnce(
+				MASTER,
+				"no entre prosa y módulos | 2026-08-11 |",
+				"no entre prosa y módulos | 2026-01-01 |"
+			)
+		end,
+	},
 }
 
 -- ── runner ──────────────────────────────────────────────────────────────────
@@ -283,6 +314,35 @@ for _, case in ipairs(cases) do
 		print("  ✗ " .. case.name .. " — NO DETECTADO (exit=" .. tostring(code) .. ")")
 		print("      " .. (out:gsub("\n", "\n      ")))
 	end
+end
+-- M9 mecanizada (DL-060): AUTO-COBERTURA — toda regla que el validador
+-- reporta debe tener un caso de mutación en esta suite. Verificado por
+-- máquina, no por disciplina: añadir una regla sin mutación falla aquí.
+freshSandbox()
+local _, pristineOut = runCheck()
+local uncovered = {}
+for ruleName in pristineOut:gmatch("\n  ✓ ([^\n:]+):") do
+	local key = ruleName:match("^([%w_%-]+)")
+	if key then
+		local covered = false
+		for _, case in ipairs(cases) do
+			if case.expect and case.expect:find(key, 1, true) then
+				covered = true
+				break
+			end
+		end
+		if not covered then
+			table.insert(uncovered, ruleName)
+		end
+	end
+end
+if #uncovered > 0 then
+	failures += #uncovered
+	for _, r in ipairs(uncovered) do
+		print("  ✗ regla sin mutation test (M9): " .. r)
+	end
+else
+	print("  ✓ auto-cobertura M9: toda regla del validador tiene su mutación")
 end
 rmrf(SANDBOX)
 

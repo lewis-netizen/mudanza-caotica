@@ -436,6 +436,7 @@ local f8Rules = {}
 local f8Elections = {}
 local f8ElectionRows = {} -- E-n → { eje, abierto, valor, estado }
 local metaLaws = {} -- M-n → { ley, fuente }
+local zones = {} -- Z-n → { zona, camino, vence } (registro de zonas no verificadas)
 do
 	local region, nivel = nil, nil
 	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
@@ -487,14 +488,28 @@ do
 				f8ElectionRows[e] = { eje = cells[2] or "", abierto = cells[3] or "", valor = cells[4] or "", estado = cells[5] or "" }
 			end
 		elseif region == "2.8" then
-			local m = line:match("^| (M%d+) |")
+			local m = line:match("^| (MT?%d+) |")
 			if m then
 				local cells = {}
 				for cell in line:gmatch("|([^|]*)") do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
-				-- | ID | Ley | Revelada por |
+				-- | ID | Ley | Revelada por | Derivación |
 				metaLaws[m] = { ley = cells[2] or "", fuente = cells[3] or "" }
+				-- las meta-leyes son claims: sus derivaciones pasan por las
+				-- reglas F8 (MT0 = R-POST; M-n = R-ESP · [MT0])
+				if cells[4] and cells[4] ~= "" then
+					f8Claims[m] = { raw = cells[4] }
+				end
+			end
+			local z = line:match("^| (Z%d+) |")
+			if z then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				-- | ID | Zona | Camino de cierre | Vence |
+				zones[z] = { zona = cells[2] or "", camino = cells[3] or "", vence = cells[4] or "" }
 			end
 		end
 	end
@@ -659,6 +674,26 @@ do
 	end
 end
 
+-- zonas no verificadas (DL-060): dependencias sin garantía — explícitas y
+-- ACOTADAS. Zona vencida = violación: el vencimiento fuerza la decisión
+-- (formalizar, disolver o re-acotar — re-acotar es del PO).
+local zoneMalformed, zoneExpired = {}, {}
+do
+	local ids = {}
+	for id in pairs(zones) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local z = zones[id]
+		if z.zona == "" or z.camino == "" or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
+			table.insert(zoneMalformed, id)
+		elseif today > z.vence then
+			table.insert(zoneExpired, id .. " (venció " .. z.vence .. ")")
+		end
+	end
+end
+
 -- ── reporte ─────────────────────────────────────────────────────────────────
 local nodeCount = 0
 for _ in pairs(nodes) do
@@ -748,6 +783,12 @@ end)
 reportViolations("meta_law_malformed (ley M-n vacía o fuente sin DL existente)", metaLawMalformed, function(r)
 	return r
 end)
+reportViolations("zone_malformed (zona sin descripción/camino/fecha válida)", zoneMalformed, function(r)
+	return r
+end)
+reportViolations("zone_expired (zona no verificada VENCIDA)", zoneExpired, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
@@ -767,6 +808,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #moduleUndeclared + #ungluedSection + #glueDangling
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
+	+ #zoneMalformed + #zoneExpired
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)

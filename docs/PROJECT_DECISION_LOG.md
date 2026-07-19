@@ -2690,4 +2690,67 @@ Libre:       —
 Referencias: §2.6, §2.7, §5.0, DL-053, DL-055, DL-057, DL-058
 ```
 
+---
+
+### DL-060
+
+```
+ID:          DL-060
+Fecha:       2026-07-19
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Dos precisiones del PO sobre el metaframework recién creado:
+             (a) un sistema de leyes con fallback en el PO no es determinista
+             — M10 como "motor catch→ley→regla" decía que el problema se
+             mitigó, no se resolvió; y una tabla enumerada desde los fallos
+             históricos del agente no es una abstracción sino un
+             comportamiento específico — no cubre lo que aún no ocurrió.
+             (b) un sistema que depende del AGENTE para "ser determinista"
+             tampoco lo es — ningún fallback no binario, incluido el propio
+             agente y el AUDITOR.
+Contenido:   §2.8 re-derivada top-down: (1) MT0 — Ley de Asignación Total
+             (R-POST): todo elemento tiene exactamente un titular
+             determinado por su naturaleza; nada queda asignado
+             implícitamente. (2) Procedimiento de tipado TOTAL (4 casos
+             exhaustivos: contenido de intención→PO; relación expresable→
+             máquina; formalizable pendiente→transitorio declarado;
+             ninguna→empírico o disolver) + descomposición (M5) para lo que
+             se resista — totalidad por construcción: cualquier meta-error
+             futuro es una violación tipificable de MT0, no una ley nueva.
+             (3) M1–M9 re-derivadas como TEOREMAS (R-ESP · [MT0]),
+             verificadas por las reglas F8 — la tabla deja de ser lista.
+             (4) M10 invertida: de motor a FALSACIÓN — un catch del PO
+             refuta el framework (elemento mal tipado = bug); la métrica es
+             que no se dispare fuera de zonas. (5) PERÍMETRO BINARIO: la
+             garantía emana solo de máquina (reglas con mutación) y
+             contenido ratificado (PO); agentes advisory — jamás titulares
+             de garantía; prosa sin autoridad. (6) REGISTRO DE ZONAS NO
+             VERIFICADAS (Z1 contenido semántico de claims; Z2 valor↔eje;
+             Z3 realización del gluing) — las fugas conocidas no se asignan
+             a nadie: se registran con camino y VENCIMIENTO; zona vencida =
+             violación (la diferencia entre fallback implícito que carga
+             peso y frontera explícita que expira). (7) M9 MECANIZADA:
+             auto-cobertura — toda regla del validador debe tener su caso de
+             mutación, verificado por test.luau contra el reporte real, no
+             por disciplina.
+Hipótesis:   Con garantía solo de máquina∪contenido, zonas explícitas
+             acotadas y auto-cobertura, el sistema no contiene ningún
+             fallback no binario: lo no garantizado es enumerable, visible y
+             expira — nada descansa en el juicio de agente alguno.
+Razón:       CONTINGENCY P5 — precisiones del PO (2026-07-19): "no debe
+             tener ningún fallback no binario".
+Impacto:     §2.8 reescrita (MT0 + procedimiento + teoremas + perímetro +
+             zonas); header v5.37. check.luau 24 reglas (zone_malformed,
+             zone_expired); test.luau 27 mutaciones + auto-cobertura M9.
+             Los vencimientos de Z1–Z3 (2026-08-11) son parámetro del PO.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §5.0
+Libre:       Vencimientos de las zonas Z1–Z3 (re-acotar cada frontera) → PO
+Referencias: §2.8, §2.6, §5.0, DL-050, DL-056, DL-059
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

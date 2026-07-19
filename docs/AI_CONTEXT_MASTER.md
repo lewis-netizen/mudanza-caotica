@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.36 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.37 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -238,24 +238,46 @@ La capa normativa del diseño se **autora directamente en forma** (DL-055): cada
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
-### 2.8 Metaframework — Leyes de Evolución del Sistema (DL-059)
+### 2.8 Metaframework — Asignación Total (DL-059, DL-060)
 
-El validador gobierna los artefactos; estas leyes gobiernan **el diseño del sistema mismo** — asignación de roles, orden de construcción, forma de las estructuras. Existían como precedentes dispersos; sin ley explícita no hay violación citable, y los errores de esta capa caían sobre el PO. Cada ley cita el catch que la reveló: **el metaframework se deriva de la historia de fallos.** Violarlas en una propuesta, DL o prompt es hallazgo D1 (AUDITOR, citando la ley).
+El validador gobierna los artefactos; esta sección gobierna **el diseño del sistema mismo** — asignación de roles, orden de construcción, forma de las estructuras. No es una lista de lecciones: es **una ley con su procedimiento**, de la que las demás se derivan (verificadas por las reglas F8 como cualquier claim). Un metaframework enumerado desde fallos históricos cubriría solo lo ya ocurrido; derivado desde una ley, cubre el espacio por construcción.
 
-| ID | Ley | Revelada por |
-|---|---|---|
-| M1 | **El validador precede al trabajo**: un fragmento de enforcement existe antes del trabajo cuya clase de error gobierna; el validador nunca es un paso del programa que valida. | DL-053 |
-| M2 | **El determinismo vive fuera de los agentes**: ninguna verificación descansa en agente alguno; toda dependencia residual se declara con dueño y frontera, nunca queda implícita. | DL-055 |
-| M3 | **La superficie del PO es contenido, nunca relación**: al PO solo se le someten axiomas ("¿es este el suelo?") y elecciones ("¿es este el valor que elijo?"). Toda tarea expresable como relación entre elementos del sistema está mal asignada si se le propone. | DL-055, DL-059 |
-| M4 | **Lo normativo se autora en forma**: nada deriva de prosa; la única dirección es forma→prosa. | DL-055, DL-057 |
-| M5 | **Atomicidad**: cada unidad formal porta exactamente un argumento — una elección = un eje, un claim = una conclusión, un DL = una decisión (§5.4). | DL-058 |
-| M6 | **Conjunto sobre elemento**: un cambio upstream re-deriva el conjunto derivado completo; parchar un elemento es la tajada silenciosa. | DL-047, DL-049 |
-| M7 | **Disolver sobre vigilar**: una relación frágil se elimina como clase antes que policiarse como instancias. | DL-050 |
-| M8 | **Exhaustividad declarada**: todo lo formalizable se formaliza; el residuo restante se declara con dueño explícito — un residuo sin dueño es una asignación implícita al PO. | DL-055 |
-| M9 | **Evolución conductual**: cambiar el sistema es acto etiquetado (tripwire) y toda regla nueva demuestra detectar (mutation) antes de confiarse. | DL-052, DL-056 |
-| M10 | **El ciclo catch→ley→regla**: todo error de meta-nivel cazado por el PO se convierte, en el mismo ciclo, en (a) ley explícita de esta tabla y (b) regla del validador si su clase es formalizable. El catch nunca se agota en corregir la instancia. | DL-059 |
+**El procedimiento de tipado (total).** Para todo elemento X del sistema:
 
-La forma de esta tabla está verificada (`meta_law_malformed`: ley vacía o fuente que no resuelve a un DL existente). Su **contenido** es constitución: lo ratifica el PO — las leyes son contenido ("¿son estas mis leyes?"), no relación (M3 se aplica a sí misma).
+1. ¿X es **contenido de intención** — un postulado sin premisas, o la valencia de un eje abierto? → **PO**.
+2. ¿X es **expresable como relación** dentro del sistema definido? → **máquina** (y M1 fija el cuándo: antes del trabajo que gobierna).
+3. ¿X es **formalizable pero aún no formalizado**? → **transitorio declarado**: dueño + frontera/plazo, nunca implícito.
+4. ¿Ninguna de las anteriores? → X es **empírico** (se mide: playtest) o su clase **se disuelve** (M7).
+
+Si X se resiste a tipar, X no es atómico: **se descompone (M5) y se tipa por partes.** La exhaustividad del case-split más la descomposición a átomos garantizan totalidad: *no existe elemento sin titular*. El fallback humano no es parte del procedimiento — es su **falsación** (M10).
+
+| ID | Ley | Revelada por | Derivación |
+|---|---|---|---|
+| MT0 | **Ley de Asignación Total**: todo elemento del sistema (contenido, relación, residuo, cambio) tiene exactamente un titular determinado por su naturaleza; nada queda asignado implícitamente. | DL-060 | R-POST |
+| M1 | **El validador precede al trabajo**: el enforcement de una clase de error existe antes del trabajo que la produce; el validador nunca es un paso del programa que valida. | DL-053 | R-ESP · [MT0] — forma temporal: una clase sin enforcement está sin titular durante el gap |
+| M2 | **El determinismo vive fuera de los agentes**: ninguna verificación descansa en agente alguno — incluidos el que modela y el AUDITOR: sus pasadas son advisory, nunca titulares de garantía. | DL-055, DL-060 | R-ESP · [MT0] — los agentes no son titulares válidos de verificación |
+| M3 | **La superficie del PO es contenido, nunca relación**: solo se le someten axiomas ("¿es este el suelo?") y elecciones ("¿es este el valor que elijo?"). | DL-055, DL-059 | R-ESP · [MT0] — restricción del titular PO al caso 1 |
+| M4 | **Lo normativo se autora en forma**: nada deriva de prosa; la única dirección es forma→prosa. | DL-055, DL-057 | R-ESP · [MT0] — la forma es precondición de asignabilidad a máquina |
+| M5 | **Atomicidad**: cada unidad formal porta exactamente un argumento — una elección = un eje, un claim = una conclusión, un DL = una decisión (§5.4). | DL-058 | R-ESP · [MT0] — sin atomicidad el tipado no es unívoco |
+| M6 | **Conjunto sobre elemento**: un cambio upstream re-deriva el conjunto derivado completo. | DL-047, DL-049 | R-ESP · [MT0] — propagación: lo no re-derivado queda sin titular |
+| M7 | **Disolver sobre vigilar**: una relación frágil se elimina como clase antes que policiarse como instancias. | DL-050 | R-ESP · [MT0] — caso 4 del procedimiento |
+| M8 | **Exhaustividad declarada**: todo lo formalizable se formaliza; el residuo restante lleva dueño explícito. | DL-055 | R-ESP · [MT0] — caso 3: residuo sin dueño = asignación implícita, prohibida |
+| M9 | **Evolución conductual**: cambiar el sistema es acto etiquetado (tripwire) y toda regla nueva demuestra detectar (mutation). | DL-052, DL-056 | R-ESP · [MT0] — los cambios del sistema son elementos y tipan |
+| M10 | **Falsación**: un catch del PO no es motor del sistema — es un **defecto del framework**: un elemento mal tipado o el procedimiento mal aplicado. Se trata como bug (¿cuál de las 4 preguntas se respondió mal?), se corrige el tipado y, si la clase es formalizable, baja a regla. Un catch sobre una zona registrada no es falsación — ahí el sistema no garantizaba. **La métrica del metaframework es que esta ley no se dispare fuera de zonas.** | DL-059, DL-060 | R-ESP · [MT0] — el catch revela una violación de asignación, no una ley nueva |
+
+Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_*`); su forma por `meta_law_malformed`.
+
+**Perímetro binario de garantía (DL-060).** El sistema garantiza únicamente lo que emana de dos fuentes: **máquina** (reglas con mutación demostrada — auto-cobertura verificada: toda regla del validador tiene su caso de mutación, chequeado por `test.luau`, no por disciplina) y **contenido ratificado** (axiomas, elecciones, leyes — el PO). Los agentes no son titulares de garantía alguna: sus pasadas son advisory (hallazgos D-n como insumo, jamás como muro). La prosa no tiene autoridad (M4): un elemento normativo solo existe dentro de un slot de forma (claim, elección, regla+mutación, zona) y cada slot está verificado — mal-tipar un elemento lo hace fallar su slot o lo deja fuera del perímetro, sin autoridad. La única fuga posible es contenido que **cabe en la forma sin sostenerse semánticamente**; esas fugas no se asignan a nadie: se **registran** como zonas con camino y vencimiento — zona vencida = violación (`zone_expired`); el vencimiento fuerza la decisión (formalizar, disolver o re-acotar — re-acotar es del PO).
+
+**Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas:
+
+| ID | Zona — sin garantía del sistema | Camino de cierre | Vence |
+|---|---|---|---|
+| Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 |
+| Z2 | Relación valor↔eje en elecciones: que el Valor sea un valor del Eje declarado | Ejes como tipos con dominio de valores enumerado | 2026-08-11 |
+| Z3 | Realización del gluing: que la fila de §4.15 realmente realice su concepto de §3 | Autorar §3 en claims → gluing entre claims y módulos, no entre prosa y módulos | 2026-08-11 |
+
+El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento y las zonas ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma).
 
 ---
 
@@ -1033,7 +1055,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
 | §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058 | mismo runner (`check.luau`) |
-| §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`: ley vacía o fuente sin DL existente) — DL-059 | mismo runner (`check.luau`) |
+| §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas y acotadas (`zone_malformed`, `zone_expired`: zona vencida = violación). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
 
