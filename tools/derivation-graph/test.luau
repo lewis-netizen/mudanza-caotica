@@ -210,6 +210,15 @@ local cases = {
 			replaceOnce(MASTER, "| R-ELEC · C2′ + E2 |", "| R-COMP · C2′ + [Entropía Social] |")
 		end,
 	},
+	{
+		name = "elección sin axioma portador (solo E-n)",
+		expect = "✗ rule_arity",
+		apply = function()
+			-- Garantía estructural (DL-058): ninguna conclusión deriva SOLO de
+			-- elecciones — toda derivación exige un axioma/claim portador.
+			replaceOnce(MASTER, "R-ELEC · C1b + E1", "R-ELEC · E1 + E2")
+		end,
+	},
 }
 
 -- ── runner ──────────────────────────────────────────────────────────────────

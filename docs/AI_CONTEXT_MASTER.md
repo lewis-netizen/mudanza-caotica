@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.34 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.35 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -232,8 +232,9 @@ La capa normativa del diseño se **autora directamente en forma** (DL-055): cada
 
 | ID | Elección | Estado |
 |---|---|---|
-| E1 | Valencia cooperativa: el resultado es de equipo — sin condición de derrota (§1.2) | decidida |
+| E1 | Valencia cooperativa: el resultado es de equipo (§1.2) | decidida |
 | E2 | El ancla interpretable (C2′) es el objetivo — no el espacio, las reglas ni las entidades | decidida |
+| E3 | El juego no declara ni castiga la derrota: no existe estado «Perdiste» (§1.2) | decidida |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 

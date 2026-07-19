@@ -2559,4 +2559,62 @@ Libre:       —
 Referencias: §2.6, §5.0, §1.2, DL-044, DL-053, DL-055, DL-056
 ```
 
+---
+
+### DL-058
+
+```
+ID:          DL-058
+Fecha:       2026-07-19
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Al ratificar F8, el PO detectó que E1 mezclaba dos argumentos
+             distintos en una sola elección: la valencia cooperativa y la
+             ausencia de condición de derrota — independientes (existen
+             juegos cooperativos CON derrota declarable, y juegos sin
+             derrota con valencia competitiva). Además precisó el alcance de
+             "sin condición de derrota": NO significa que el jugador no
+             experimente fracaso, sino que el juego no lo declara ni lo
+             castiga ("Perdiste"). Y pidió validar con el propio validador
+             que ese malentendido no tenga espacio.
+Contenido:   (1) E1 se divide: E1 = valencia cooperativa (resultado de
+             equipo, §1.2); E3 nueva = el juego no declara ni castiga la
+             derrota (no existe estado «Perdiste», §1.2) — texto mínimo
+             deliberado: la distinción declarada-vs-experimentada NO se
+             especifica porque SE DERIVA (C2′ exige resultados abiertos bajo
+             escasez → el fracaso parcial es posible y se experimenta; C1a
+             lo vuelve contenido — las historias de §3.8). (2) PRUEBA REAL
+             ejecutada con el validador: el malentendido ("el jugador nunca
+             experimenta derrota") autorado en 5 formulaciones sobre copia
+             del corpus — 4 bloqueadas por rule_arity, revelando la
+             GARANTÍA ESTRUCTURAL del catálogo: ninguna conclusión deriva
+             SOLO de elecciones; toda derivación exige un axioma portador, y
+             ningún axioma ratificado porta "no hay fracaso" (C2′ exige lo
+             contrario). La 5ª formulación (R-ELEC · C2′ + E3) pasa sintaxis
+             = residuo de contenido: claim VISIBLE cuya premisa citada no
+             sostiene semánticamente la conclusión — hoy lo caza el AUDITOR
+             (checklist entailment §2.6); se cierra más cuando §3 se autore
+             en claims (la claim derivada "el fracaso parcial existe y es
+             contenido" queda como contradicción visible). (3) Mutation test
+             permanente nuevo: elección-sin-axioma-portador → rule_arity
+             (20 casos).
+Hipótesis:   Con E1/E3 separadas y la garantía estructural testeada, el
+             malentendido no puede volverse normativo por vía sintáctica; su
+             única vía (axioma citado que no sostiene) es visible y auditable.
+Razón:       CONTINGENCY P5 — corrección y prueba ordenadas por el PO al
+             ratificar F8 (2026-07-19).
+Impacto:     §2.7 elecciones actualizada (E1 escindida, E3 nueva); header
+             v5.35. test.luau 20 casos. Dependencia Social sigue citando
+             R-ELEC · C1b + E1 (valencia — correcto tras el split). E3 queda
+             citable para las claims de §3/§3.5 (prohibición de castigo).
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7
+Libre:       —
+Referencias: §2.7, §1.2, §2.1, §3.8, DL-055, DL-057
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
