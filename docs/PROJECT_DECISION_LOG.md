@@ -2382,4 +2382,116 @@ Libre:       Granularidad del gluing por debajo de sección (claims tipados
 Referencias: §4.4, §4.13, §4.7, §2.4, §2.6, §5.0, DL-047, DL-052, DL-053
 ```
 
+---
+
+### DL-055
+
+```
+ID:          DL-055
+Fecha:       2026-07-18
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Completado el validador (F1–F7, 13 reglas), el PO planteó la
+             pregunta que lo cierra: si la coherencia ya es mecánica, ¿qué
+             audita él? §5.0 Nivel 4 declaraba el nivel del PO pero no su
+             superficie exacta — quedaba implícito y por tanto disputable,
+             justo la clase de ambigüedad que este sistema elimina.
+Contenido:   §5.0 Nivel 4 gana la especificación de la superficie del PO —
+             exactamente DOS actos, tras dos correcciones del propio PO a la
+             propuesta inicial (que le asignaba además el entailment como
+             interinato): (1) VALIDAR LOS AXIOMAS — la constitución: §2.1
+             Nivel 0, entidades §2.3 y el catálogo de reglas de inferencia
+             (F8); validar la fundación ES validar la adecuación, no hay
+             acto separado. (2) ELEGIR — parámetros de intención (Libre→PO)
+             y meta-elecciones sobre el sistema (evolución del enforcement,
+             tripwire DL-052); los empíricos (Libre→playtest) se miden, no
+             se eligen. NO es del PO: la coherencia (13 reglas) NI el
+             entailment — su terreno son relaciones dentro del sistema
+             definido: binariza. La barrera nunca fue el chequeo (decidible)
+             sino la CONVERSIÓN SEMÁNTICA prosa→forma; por determinación del
+             PO ("decisión objetiva" — se deduce de la exhaustividad
+             intra-sistema + DL-053 fija el cuándo) esa conversión la realiza
+             EL SISTEMA en autoría: F8 = claims tipados (id, nivel, premisas,
+             regla citada) + catálogo de reglas de inferencia
+             (constitucional → validación del PO). Dejar la conversión sin
+             hacer sería una ineficiencia que es en sí una vulnerabilidad.
+             Interinato mientras F8 se construye: agente que modela
+             (auto-certificación §2.6) + AUDITOR_DESIGN (pasada adversarial)
+             — nunca el PO. Se registra la CONCENTRACIÓN DEL RIESGO: una
+             derivación impecable desde un axioma errado (o un catálogo mal
+             ratificado) pasa todo en verde — el modo de fallo peligroso es
+             lo correcto en forma y errado en fundamento.
+Hipótesis:   Con la superficie reducida a fundación + elecciones, el PO deja
+             de ser load-bearing en cualquier verificación; los dos fallos
+             simétricos (auditar lo mecanizado / confiar al verde lo que la
+             forma no carga) quedan estructuralmente cerrados.
+Razón:       CONTINGENCY P5 — pregunta directa del PO tras aterrizar F6
+             ("especifica qué audito, porque no será la coherencia") + sus
+             dos correcciones (entailment no es suyo; la conversión
+             semántica la hace el sistema).
+Impacto:     §5.0 Nivel 4 especificado; header v5.32. AUDITOR_DESIGN gana el
+             checklist de entailment (interinato hasta F8). RATIFICACIÓN
+             REGISTRADA (2026-07-19): el PO afirmó "los axiomas definidos
+             son correctos — lo único" → acto 1 de su superficie ejecutado;
+             único input humano afirmado del sistema; todo lo demás debe
+             probarse por el sistema. Resuelve además el Libre de DL-054
+             (granularidad del gluing → claims tipados por afirmación, F8).
+             Consecuencia operativa: verificar §3 ≡ convertir §3 a claims —
+             el primer paso del programa holístico ES F8 operando.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Libre:       —
+Referencias: §5.0, §2.1, §2.3, §2.6, §4.15, DL-052, DL-053, DL-054
+```
+
+---
+
+### DL-056
+
+```
+ID:          DL-056
+Fecha:       2026-07-19
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Movimiento prudencial ordenado por el PO antes de apoyar el
+             programa holístico en el validador: testearlo contra el propio
+             proyecto. 13 luces en verde no distinguen un validador correcto
+             de uno roto — varias reglas nacieron en verde y nunca habían
+             encendido. Contexto de fondo: el PO ratificó los axiomas como
+             único input humano afirmado (DL-055) — todo lo demás debe
+             probarse por el sistema, incluido el validador mismo.
+Contenido:   Mutation tests del validador (test.luau): por cada una de las
+             13 reglas se inyecta una violación mínima de su clase sobre una
+             COPIA del corpus real (docs/ + src/ + deferrals) y se exige que
+             la regla encienda (exit≠0 + fila de su clase); más un control
+             (el corpus sin mutar pasa). 14 casos, sandbox efímero
+             (.dgtest-sandbox/, gitignored), anclas literales que fallan si
+             el corpus cambia y la mutación deja de probar. Job CI
+             contract-validator-mutations. Con esto el validador queda
+             gobernado por CONDUCTA (tests) además de por DECLARACIÓN
+             (tripwire DL-052): debilitar una regla rompe su mutation test.
+Hipótesis:   Un validador cuyas reglas demostraron encender ante su clase de
+             violación es precondición confiable del programa; uno que solo
+             ha pasado en verde, no.
+Razón:       CONTINGENCY P5 — "el siguiente movimiento prudencial es testear
+             el validador contra el mismo proyecto" (PO, 2026-07-19).
+Impacto:     tools/derivation-graph/test.luau nuevo. p2-implementation.yml
+             gana contract-validator-mutations (para que bloquee: añadirlo
+             al ruleset — acción del PO). §5.0 actualizada; header v5.33.
+             .gitignore gana el sandbox. Resultado inaugural: 14/14 — todas
+             las reglas encienden.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.0
+Libre:       —
+Referencias: §5.0, §2.6, DL-048, DL-052, DL-055
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
