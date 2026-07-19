@@ -81,6 +81,7 @@ Si falla uno: D1.
 - [ ] ¿Hereda un encuadre (chat/ticket/versión previa) sin derivarlo de los axiomas? → D1
 - [ ] ¿Presenta el material al nivel equivocado (feel o instancia como si fuera esencia)? → D1
 - [ ] ¿Delega al PO una conclusión que los axiomas determinan, o deja una duda de diseño sin cerrar? → D2
+- [ ] ¿La cadena de entailment está exhibida — cada paso muestra sus premisas y por qué se sigue (§2.6)? Cadena ausente o paso que no se sigue → D1. (Interinato del entailment hasta F8, DL-055: el PO no la verifica — la verificas tú.)
 
 **Prohibiciones de diseño (§3.5):**
 - [ ] ¿Hay progresión que afecte el gameplay (niveles, XP, ventaja)? → D1

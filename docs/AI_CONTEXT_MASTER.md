@@ -1020,25 +1020,16 @@ Cuando el Auditor TECH detecta un patrón en Nivel 3, propone convertirlo a Nive
 
 No es auditoría. Es arquitectura. El PO decide en cada entrada Clase A.
 
-**Superficie exacta del PO (DL-055).** Con el grafo de derivación completo (Nivel 1), la **forma** de toda derivación es mecánica. Lo que el PO evalúa **ya no es la coherencia**:
+**Superficie exacta del PO (DL-055).** Con el grafo de derivación completo (Nivel 1), la **forma** de toda derivación es mecánica. La superficie del PO son exactamente **dos actos**:
 
-*Ya no es suyo* — integridad referencial, procedencia, frescura, cobertura, altitud/nivel, declaración de determinación, linkage de código y totalidad del gluing. Trece reglas, deterministas, en pre-commit y CI. Un error de esa clase es una fila de salida, no un hallazgo humano.
+1. **Validar los axiomas** — la constitución del sistema: §2.1 Nivel 0, las entidades (§2.3) y el catálogo de reglas de inferencia (F8). Validar la fundación **es** validar la adecuación — no existe un acto separado de "¿modela bien el problema?": la fundación es el modelo.
+2. **Elegir** — los parámetros de intención (`Libre:` → PO) y las meta-elecciones sobre el sistema (evolucionar el enforcement — visible por el tripwire DL-052, decidido por el PO). Los parámetros empíricos (`Libre:` → playtest) no se eligen ni se auditan: se miden.
 
-*Sí es suyo:*
+*Lo que NO es del PO:*
+- **La coherencia** — trece reglas deterministas (Nivel 1). Un error de esa clase es una fila de salida, no un hallazgo humano.
+- **El entailment** (¿la conclusión *se sigue*?) — su terreno son relaciones dentro del sistema definido: **binariza**. La barrera nunca fue el chequeo (decidible) sino la **conversión semántica** prosa→forma; esa conversión la realiza el sistema en autoría (F8): toda afirmación derivacional se expresa como **claim tipado** — id, nivel, premisas, regla de inferencia citada del catálogo — y el validador la procesa. Dejar la conversión sin hacer sería una ineficiencia que es, en sí, una vulnerabilidad del proyecto. No es una elección: se deduce de la exhaustividad intra-sistema (lo formalizable se formaliza) y DL-053 fija el cuándo (antes del trabajo que gobierna). Mientras F8 se construye, el interinato es del agente que modela (auto-certificación §2.6, cadena exhibida) + la pasada adversarial del AUDITOR — **nunca del PO**; su catch es red de seguridad voluntaria, no mecanismo.
 
-**A · Sobre el sistema — irreducible.** Un sistema formal no valida sus propios axiomas (Gödel/Tarski); este límite es *sobre* el sistema, no dentro.
-- Los **axiomas** (§2.1 Nivel 0): ¿C1a/C1b/C2′/C3 son el suelo correcto?
-- **Adecuación del modelo**: ¿este sistema formal modela *Mudanza Caótica* — el problema real? ¿Las entidades (§2.3) son las correctas?
-- **Evolución del sistema**: cambiar las reglas del enforcement — visible por el tripwire (DL-052), decidido por el PO.
-
-**B · Dentro del sistema, aún no formalizado — deuda, no límite permanente.**
-- **Solidez del entailment**: ¿la conclusión *se sigue* de los axiomas? El grafo verifica que la arista existe y respeta niveles, no que la inferencia sea válida. Subsume dos casos: si un `Libre:` es genuinamente libre (lo que los axiomas determinan no lo es) y si una fila de §4.15 realmente *realiza* su concepto. Formalizable en principio (asistentes de prueba); su costo hoy es desproporcionado. Nota: formalizarlo movería la verificación a la máquina, pero la *adecuación de esa formalización* subiría a (A) — (B) se encoge, no se vacía.
-
-**C · Elecciones, no auditoría.**
-- **Parámetros libres de intención** (`Libre:` → PO): se deciden.
-- **Parámetros empíricos** (`Libre:` → playtest): se miden.
-
-**Concentración del riesgo.** El validador no redujo la responsabilidad del PO — la **concentró**. Una derivación impecablemente coherente desde un axioma equivocado pasa las trece reglas en verde: el sistema propaga el error con consistencia perfecta y sin señal. Menos superficie que evaluar, más consecuencia por juicio. El modo de fallo peligroso ya no es la incoherencia — es lo **correcto en forma y errado en fundamento**.
+**Concentración del riesgo.** El validador no redujo la responsabilidad del PO — la **concentró en la fundación**. Una derivación impecable desde un axioma equivocado — o un catálogo de inferencia mal ratificado — pasa todas las reglas en verde: el sistema propaga el error con consistencia perfecta y sin señal. El modo de fallo peligroso no es la incoherencia — es lo **correcto en forma y errado en fundamento**.
 
 ### 5.1 Dominios Arquitectónicos
 

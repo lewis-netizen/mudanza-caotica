@@ -2397,46 +2397,54 @@ Contexto:    Completado el validador (F1–F7, 13 reglas), el PO planteó la
              audita él? §5.0 Nivel 4 declaraba el nivel del PO pero no su
              superficie exacta — quedaba implícito y por tanto disputable,
              justo la clase de ambigüedad que este sistema elimina.
-Contenido:   §5.0 Nivel 4 gana la especificación de la superficie del PO,
-             derivada por sustracción de lo que el Nivel 1 mecaniza. Ya no
-             es suyo: integridad, procedencia, frescura, cobertura, altitud,
-             declaración de determinación, linkage de código, totalidad del
-             gluing. Sí es suyo, en tres categorías: (A) SOBRE el sistema —
-             irreducible por Gödel/Tarski: los axiomas §2.1 Nivel 0, la
-             adecuación del modelo al problema real, y la evolución del
-             enforcement; (B) DENTRO del sistema pero no formalizado aún —
-             solidez del entailment (¿la conclusión se sigue?), que subsume
-             si un `Libre:` es genuinamente libre y si una fila de §4.15
-             realmente realiza su concepto: deuda, no límite permanente
-             (formalizable con asistentes de prueba, costo hoy
-             desproporcionado; formalizarlo encogería B empujando su residuo
-             a A, no lo vaciaría); (C) elecciones, no auditoría — parámetros
-             libres de intención (PO) y empíricos (playtest). Se registra la
-             CONCENTRACIÓN DEL RIESGO: el validador no redujo la
-             responsabilidad del PO, la concentró — una derivación coherente
-             desde un axioma equivocado pasa las 13 reglas en verde; el modo
-             de fallo peligroso pasa de "incoherente" a "correcto en forma,
-             errado en fundamento".
-Hipótesis:   Especificar la superficie por sustracción evita los dos fallos
-             simétricos: que el PO siga auditando lo ya mecanizado
-             (desperdicio, y la dependencia que el sistema eliminó), o que
-             delegue en el verde de CI lo que ninguna forma puede cargar
-             (falsa confianza).
-Razón:       CONTINGENCY P5 — pregunta directa del PO tras aterrizar F6:
-             "especifica qué audito, porque no será la coherencia".
-Impacto:     §5.0 Nivel 4 especificado; header v5.32. Consecuencia operativa
-             inmediata: al presentar el holístico §3/§4 para evaluación, lo
-             que se somete al PO es (A) adecuación y (B) entailment — no
-             trazabilidad ni nivel, que llegan ya en verde. La cadena de
-             entailment se presenta mostrada (§2.6, auto-certificación): el
-             PO verifica una cadena exhibida, no reconstruye la derivación.
+Contenido:   §5.0 Nivel 4 gana la especificación de la superficie del PO —
+             exactamente DOS actos, tras dos correcciones del propio PO a la
+             propuesta inicial (que le asignaba además el entailment como
+             interinato): (1) VALIDAR LOS AXIOMAS — la constitución: §2.1
+             Nivel 0, entidades §2.3 y el catálogo de reglas de inferencia
+             (F8); validar la fundación ES validar la adecuación, no hay
+             acto separado. (2) ELEGIR — parámetros de intención (Libre→PO)
+             y meta-elecciones sobre el sistema (evolución del enforcement,
+             tripwire DL-052); los empíricos (Libre→playtest) se miden, no
+             se eligen. NO es del PO: la coherencia (13 reglas) NI el
+             entailment — su terreno son relaciones dentro del sistema
+             definido: binariza. La barrera nunca fue el chequeo (decidible)
+             sino la CONVERSIÓN SEMÁNTICA prosa→forma; por determinación del
+             PO ("decisión objetiva" — se deduce de la exhaustividad
+             intra-sistema + DL-053 fija el cuándo) esa conversión la realiza
+             EL SISTEMA en autoría: F8 = claims tipados (id, nivel, premisas,
+             regla citada) + catálogo de reglas de inferencia
+             (constitucional → validación del PO). Dejar la conversión sin
+             hacer sería una ineficiencia que es en sí una vulnerabilidad.
+             Interinato mientras F8 se construye: agente que modela
+             (auto-certificación §2.6) + AUDITOR_DESIGN (pasada adversarial)
+             — nunca el PO. Se registra la CONCENTRACIÓN DEL RIESGO: una
+             derivación impecable desde un axioma errado (o un catálogo mal
+             ratificado) pasa todo en verde — el modo de fallo peligroso es
+             lo correcto en forma y errado en fundamento.
+Hipótesis:   Con la superficie reducida a fundación + elecciones, el PO deja
+             de ser load-bearing en cualquier verificación; los dos fallos
+             simétricos (auditar lo mecanizado / confiar al verde lo que la
+             forma no carga) quedan estructuralmente cerrados.
+Razón:       CONTINGENCY P5 — pregunta directa del PO tras aterrizar F6
+             ("especifica qué audito, porque no será la coherencia") + sus
+             dos correcciones (entailment no es suyo; la conversión
+             semántica la hace el sistema).
+Impacto:     §5.0 Nivel 4 especificado; header v5.32. AUDITOR_DESIGN gana el
+             checklist de entailment (interinato hasta F8). RATIFICACIÓN
+             REGISTRADA (2026-07-19): el PO afirmó "los axiomas definidos
+             son correctos — lo único" → acto 1 de su superficie ejecutado;
+             único input humano afirmado del sistema; todo lo demás debe
+             probarse por el sistema. Resuelve además el Libre de DL-054
+             (granularidad del gluing → claims tipados por afirmación, F8).
+             Consecuencia operativa: verificar §3 ≡ convertir §3 a claims —
+             el primer paso del programa holístico ES F8 operando.
 Ejecución:   CONFIRM
 Costo:       C2
 Pipeline:    P5
 Ticket:      —
 Modifica:    §5.0
-Libre:       Si (B) se formaliza con un asistente de pruebas y cuándo — hoy
-             registrado como deuda de costo desproporcionado → PO
+Libre:       —
 Referencias: §5.0, §2.1, §2.3, §2.6, §4.15, DL-052, DL-053, DL-054
 ```
 
