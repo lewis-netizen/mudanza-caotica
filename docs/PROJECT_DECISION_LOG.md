@@ -2398,7 +2398,7 @@ Contexto:    Completado el validador (F1–F7, 13 reglas), el PO planteó la
              superficie exacta — quedaba implícito y por tanto disputable,
              justo la clase de ambigüedad que este sistema elimina.
 Contenido:   §5.0 Nivel 4 gana la especificación de la superficie del PO —
-             exactamente DOS actos, tras dos correcciones del propio PO a la
+             exactamente DOS actos, tras tres correcciones del propio PO a la
              propuesta inicial (que le asignaba además el entailment como
              interinato): (1) VALIDAR LOS AXIOMAS — la constitución: §2.1
              Nivel 0, entidades §2.3 y el catálogo de reglas de inferencia
@@ -2411,11 +2411,20 @@ Contenido:   §5.0 Nivel 4 gana la especificación de la superficie del PO —
              definido: binariza. La barrera nunca fue el chequeo (decidible)
              sino la CONVERSIÓN SEMÁNTICA prosa→forma; por determinación del
              PO ("decisión objetiva" — se deduce de la exhaustividad
-             intra-sistema + DL-053 fija el cuándo) esa conversión la realiza
-             EL SISTEMA en autoría: F8 = claims tipados (id, nivel, premisas,
-             regla citada) + catálogo de reglas de inferencia
-             (constitucional → validación del PO). Dejar la conversión sin
-             hacer sería una ineficiencia que es en sí una vulnerabilidad.
+             intra-sistema + DL-053 fija el cuándo) esa conversión SE
+             ELIMINA, no se asigna (3ª corrección: el determinismo no cae en
+             agentes — un ápice de dependencia lo daña; y una f(x)
+             determinista prosa→forma no existe: pretenderla sería
+             dependencia de agente disfrazada). F8 = la capa normativa se
+             AUTORA directamente en forma: claims tipados (id, nivel,
+             premisas, regla citada) + catálogo de reglas de inferencia
+             SINTÁCTICAS (aplicabilidad decidible de la estructura;
+             constitucional → validación del PO; el paso no-sintáctico se
+             descompone hasta serlo). La prosa es comentario NO normativo —
+             nada deriva de prosa; única dirección permitida: forma→prosa.
+             Los axiomas se siembran como claims: la ratificación del PO
+             recae sobre la forma. Dejar la forma sin adoptar sería una
+             ineficiencia que es en sí una vulnerabilidad.
              Interinato mientras F8 se construye: agente que modela
              (auto-certificación §2.6) + AUDITOR_DESIGN (pasada adversarial)
              — nunca el PO. Se registra la CONCENTRACIÓN DEL RIESGO: una
@@ -2428,8 +2437,9 @@ Hipótesis:   Con la superficie reducida a fundación + elecciones, el PO deja
              forma no carga) quedan estructuralmente cerrados.
 Razón:       CONTINGENCY P5 — pregunta directa del PO tras aterrizar F6
              ("especifica qué audito, porque no será la coherencia") + sus
-             dos correcciones (entailment no es suyo; la conversión
-             semántica la hace el sistema).
+             tres correcciones (entailment no es suyo; la conversión
+             semántica no queda en prosa; el determinismo no cae en agentes
+             — la conversión se elimina por autoría directa en forma).
 Impacto:     §5.0 Nivel 4 especificado; header v5.32. AUDITOR_DESIGN gana el
              checklist de entailment (interinato hasta F8). RATIFICACIÓN
              REGISTRADA (2026-07-19): el PO afirmó "los axiomas definidos
