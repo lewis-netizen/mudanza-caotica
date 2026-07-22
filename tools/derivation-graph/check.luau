@@ -191,9 +191,16 @@ for _, a in ipairs(affects) do
 end
 local uncovered, uncoveredSeen = {}, {}
 for _, m in ipairs(modifies) do
-	-- §4.15 exento: es el registro de gluing (gobernado por unglued/dangling,
-	-- no por obligación de tickets — DL-054)
-	local isImpl = (m[2]:match("^§3") ~= nil or m[2]:match("^§4") ~= nil) and m[2] ~= "§4.15"
+	-- Exenciones de obligación de ticket (DL-062):
+	--  · §4.15 — registro de gluing, gobernado por unglued_claim/glue_dangling.
+	--  · §3.1–§3.9 — comentario NO NORMATIVO desde DL-061: prosa que no obliga
+	--    no puede generar obligación de implementación (exención DERIVADA).
+	--  · §3.0 — normativa, pero el grafo no distingue reubicar normatividad de
+	--    cambiar el compromiso: los enunciados no están versionados. Exención
+	--    ACOTADA por la zona Z4 (§2.8), con vencimiento — no es un fallback.
+	local sec = m[2]
+	local exempt = sec == "§4.15" or sec:match("^§3") ~= nil
+	local isImpl = (sec:match("^§3") ~= nil or sec:match("^§4") ~= nil) and not exempt
 	if isImpl and not coveredSet[m[1]] and not uncoveredSeen[m[1]] then
 		uncoveredSeen[m[1]] = true
 		table.insert(uncovered, m[1])
@@ -339,7 +346,7 @@ walkDocs("docs")
 -- Registro declarado (tabla §4.4, tabla §4.13, registro adicional §4.15)
 -- contra src/ real, y tabla de gluing §4.15: totalidad + existencia.
 local declaredModules = {}
-local glueSecs = {} -- filas de gluing: secciones §3.N con ≥1 realización
+local gluedClaims = {} -- filas de gluing: claims D-n con ≥1 realización (DL-062)
 local glueTargets = {} -- claims de módulo en filas de gluing
 do
 	local region = nil
@@ -364,11 +371,11 @@ do
 					declaredModules[name] = true
 				end
 			else
-				local sec = line:match("^| (§3%.%d+) |")
-				if sec then
-					glueSecs[sec] = true
+				local did = line:match("^| (D%d+) |")
+				if did then
+					gluedClaims[did] = true
 					for name in line:gmatch("`(%u%w+)`") do
-						table.insert(glueTargets, { sec, name })
+						table.insert(glueTargets, { did, name })
 					end
 				end
 			end
@@ -410,14 +417,6 @@ for name in pairs(srcModules) do
 end
 table.sort(moduleUndeclared)
 
-local ungluedSection = {}
-for id, kind in pairs(nodes) do
-	if kind == "section" and id:match("^§3%.%d+$") and not glueSecs[id] then
-		table.insert(ungluedSection, id)
-	end
-end
-table.sort(ungluedSection)
-
 local glueDangling = {}
 for _, t in ipairs(glueTargets) do
 	if not declaredModules[t[2]] and not srcModules[t[2]] then
@@ -437,6 +436,8 @@ local f8Elections = {}
 local f8ElectionRows = {} -- E-n → { eje, abierto, valor, estado }
 local metaLaws = {} -- M-n → { ley, fuente }
 local zones = {} -- Z-n → { zona, camino, vence } (registro de zonas no verificadas)
+local designClaims = {} -- D-n → { sec, deriv } (capa normativa de §3, DL-061)
+local claimedSections = {} -- §3.N con ≥1 claim o marcador
 do
 	local region, nivel = nil, nil
 	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
@@ -470,6 +471,25 @@ do
 				end
 				if name ~= "" and deriv then
 					f8Claims[name] = { raw = deriv }
+				end
+			end
+		elseif region == "3.0" then
+			-- claims de diseño: | ID | Sección | Claim | Derivación |
+			local did = line:match("^| (D%d+) |")
+			if did then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local sec, deriv = cells[2] or "", cells[4] or ""
+				designClaims[did] = { sec = sec, deriv = deriv }
+				if sec ~= "" then
+					claimedSections[sec] = true
+				end
+				-- marcador legítimo ("— empírico → playtest"): cuenta para
+				-- totalidad pero no es claim derivado (no pasa por F8).
+				if deriv ~= "" and not deriv:match("^—") then
+					f8Claims[did] = { raw = deriv }
 				end
 			end
 		elseif region == "2.7" then
@@ -509,7 +529,13 @@ do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
 				-- | ID | Zona | Camino de cierre | Vence |
-				zones[z] = { zona = cells[2] or "", camino = cells[3] or "", vence = cells[4] or "" }
+				-- | ID | Zona | Camino de cierre | Vence | Ratificada |
+				zones[z] = {
+					zona = cells[2] or "",
+					camino = cells[3] or "",
+					vence = cells[4] or "",
+					ratif = cells[5] or "",
+				}
 			end
 		end
 	end
@@ -674,6 +700,30 @@ do
 	end
 end
 
+-- totalidad de la capa normativa de §3 (DL-061): toda subsección tiene ≥1
+-- claim derivado o marcador legítimo. Sin esto, una sección podría fundar
+-- normativamente desde prosa — violación de M4 invisible.
+local unclaimedSection = {}
+for id, kind in pairs(nodes) do
+	if kind == "section" and id:match("^§3%.%d+$") and id ~= "§3.0" and not claimedSections[id] then
+		table.insert(unclaimedSection, id)
+	end
+end
+table.sort(unclaimedSection)
+
+-- totalidad del gluing (DL-062): todo claim normativo de §3.0 declara CÓMO se
+-- realiza. El ancla es el claim, no la prosa (cierre de Z3): un claim sin
+-- realización es obligación pendiente, no omisión silenciosa.
+local ungluedClaim = {}
+for id in pairs(designClaims) do
+	if not gluedClaims[id] then
+		table.insert(ungluedClaim, id)
+	end
+end
+table.sort(ungluedClaim, function(a, b)
+	return tonumber(a:sub(2)) < tonumber(b:sub(2))
+end)
+
 -- zonas no verificadas (DL-060): dependencias sin garantía — explícitas y
 -- ACOTADAS. Zona vencida = violación: el vencimiento fuerza la decisión
 -- (formalizar, disolver o re-acotar — re-acotar es del PO).
@@ -686,7 +736,11 @@ do
 	table.sort(ids)
 	for _, id in ipairs(ids) do
 		local z = zones[id]
-		if z.zona == "" or z.camino == "" or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
+		-- La ratificación del PO es fuente de garantía (perímetro binario,
+		-- DL-060): una zona SIN ratificar es una frontera que yo me concedí.
+		-- Por eso está en la forma, no en la prosa de un DL.
+		local ratified = z.ratif:match("^PO %d%d%d%d%-%d%d%-%d%d$") ~= nil
+		if z.zona == "" or z.camino == "" or not ratified or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
 			table.insert(zoneMalformed, id)
 		elseif today > z.vence then
 			table.insert(zoneExpired, id .. " (venció " .. z.vence .. ")")
@@ -750,7 +804,10 @@ end)
 reportViolations("module_undeclared (módulo en src/ no declarado en §4)", moduleUndeclared, function(r)
 	return r
 end)
-reportViolations("unglued_section (sección §3 sin realización en §4.15)", ungluedSection, function(r)
+reportViolations("unglued_claim (claim de §3.0 sin realización en §4.15)", ungluedClaim, function(r)
+	return r
+end)
+reportViolations("unclaimed_section (sección §3 sin claim normativo en §3.0)", unclaimedSection, function(r)
 	return r
 end)
 reportViolations("glue_dangling (claim de módulo inexistente en §4.15)", glueDangling, function(r)
@@ -783,7 +840,7 @@ end)
 reportViolations("meta_law_malformed (ley M-n vacía o fuente sin DL existente)", metaLawMalformed, function(r)
 	return r
 end)
-reportViolations("zone_malformed (zona sin descripción/camino/fecha válida)", zoneMalformed, function(r)
+reportViolations("zone_malformed (zona sin descripción/camino/fecha/ratificación)", zoneMalformed, function(r)
 	return r
 end)
 reportViolations("zone_expired (zona no verificada VENCIDA)", zoneExpired, function(r)
@@ -805,7 +862,7 @@ end
 
 local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
 	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
-	+ #moduleUndeclared + #ungluedSection + #glueDangling
+	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #zoneMalformed + #zoneExpired

@@ -141,14 +141,12 @@ local cases = {
 		end,
 	},
 	{
-		name = "unglued_section",
-		expect = "✗ unglued_section",
+		name = "unglued_claim",
+		expect = "✗ unglued_claim",
 		apply = function()
-			replaceOnce(
-				MASTER,
-				"| §3.2 | Densidad de Interacción | — empírico → playtest (métrica de avance, §3.2) |",
-				""
-			)
+			-- claim normativo sin realización declarada: obligación pendiente
+			-- que quedaría invisible si el gluing no exigiera totalidad.
+			replaceOnce(MASTER, "\n| D2 | Densidad de interacción | — empírico → playtest (métrica de avance, §3.2) |", "")
 		end,
 	},
 	{
@@ -157,8 +155,8 @@ local cases = {
 		apply = function()
 			replaceOnce(
 				MASTER,
-				"| §3.1 | Ciclo de ronda (core loop) | `GameManager` (estados Lobby/Summary)",
-				"| §3.1 | Ciclo de ronda (core loop) | `ModuloFantasma` (estados Lobby/Summary)"
+				"| D1 | Coordinación decisional bajo escasez | `GameManager`",
+				"| D1 | Coordinación decisional bajo escasez | `ModuloFantasma`"
 			)
 		end,
 	},
@@ -274,14 +272,36 @@ local cases = {
 		end,
 	},
 	{
+		name = "zona sin ratificar (frontera auto-concedida)",
+		expect = "✗ zone_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| 2026-08-11 | PO 2026-07-22 |", "| 2026-08-11 | |")
+		end,
+	},
+	{
 		name = "zone_expired",
 		expect = "✗ zone_expired",
 		apply = function()
 			replaceOnce(
 				MASTER,
-				"no entre prosa y módulos | 2026-08-11 |",
-				"no entre prosa y módulos | 2026-01-01 |"
+				"no su posición— cambia | 2026-08-11 |",
+				"no su posición— cambia | 2026-01-01 |"
 			)
+		end,
+	},
+	{
+		name = "unclaimed_section",
+		expect = "✗ unclaimed_section",
+		apply = function()
+			-- Sección de diseño que funda desde prosa, sin claim normativo.
+			replaceOnce(MASTER, "| D10 | §3.4 |", "| D10 | §3.99 |")
+		end,
+	},
+	{
+		name = "claim de diseño con premisa inexistente",
+		expect = "✗ unknown_premise",
+		apply = function()
+			replaceOnce(MASTER, "R-COMP · [D3] + [D4]", "R-COMP · [D3] + [D99]")
 		end,
 	},
 }
