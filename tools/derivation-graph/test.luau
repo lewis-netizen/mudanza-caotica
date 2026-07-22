@@ -272,6 +272,13 @@ local cases = {
 		end,
 	},
 	{
+		name = "zona sin ratificar (frontera auto-concedida)",
+		expect = "✗ zone_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| 2026-08-11 | PO 2026-07-22 |", "| 2026-08-11 | |")
+		end,
+	},
+	{
 		name = "zone_expired",
 		expect = "✗ zone_expired",
 		apply = function()

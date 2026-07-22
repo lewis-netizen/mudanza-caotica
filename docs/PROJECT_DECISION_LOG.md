@@ -2836,6 +2836,13 @@ Contenido:   §4.15 re-anclada — la columna izquierda es el CLAIM D-n, no la
              (3) El propio validador rechazó cerrar Z3 marcando la fila
                  como "cerrada" (zone_malformed): el registro es de zonas
                  NO verificadas, no un cementerio.
+             AÑADIDO tras ratificación del PO (2026-07-22): la tabla de
+             zonas gana columna Ratificada y zone_malformed la exige como
+             `PO <fecha>`. Razón: la ratificación es fuente de garantía
+             (perímetro binario, DL-060), luego debe vivir en la FORMA, no
+             en la prosa de un DL — una frontera que el sistema se concede
+             a sí mismo no es una frontera. Z1/Z2 ratificadas 2026-07-19
+             (junto con el metaframework), Z4 el 2026-07-22.
 Hipótesis:   Con el gluing anclado en claims, toda la cadena axioma →
              claim → realización → módulo es verificable sin leer prosa.
              La prosa queda estrictamente como comentario: puede borrarse

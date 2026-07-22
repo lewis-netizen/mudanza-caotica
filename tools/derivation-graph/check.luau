@@ -529,7 +529,13 @@ do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
 				-- | ID | Zona | Camino de cierre | Vence |
-				zones[z] = { zona = cells[2] or "", camino = cells[3] or "", vence = cells[4] or "" }
+				-- | ID | Zona | Camino de cierre | Vence | Ratificada |
+				zones[z] = {
+					zona = cells[2] or "",
+					camino = cells[3] or "",
+					vence = cells[4] or "",
+					ratif = cells[5] or "",
+				}
 			end
 		end
 	end
@@ -730,7 +736,11 @@ do
 	table.sort(ids)
 	for _, id in ipairs(ids) do
 		local z = zones[id]
-		if z.zona == "" or z.camino == "" or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
+		-- La ratificación del PO es fuente de garantía (perímetro binario,
+		-- DL-060): una zona SIN ratificar es una frontera que yo me concedí.
+		-- Por eso está en la forma, no en la prosa de un DL.
+		local ratified = z.ratif:match("^PO %d%d%d%d%-%d%d%-%d%d$") ~= nil
+		if z.zona == "" or z.camino == "" or not ratified or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
 			table.insert(zoneMalformed, id)
 		elseif today > z.vence then
 			table.insert(zoneExpired, id .. " (venció " .. z.vence .. ")")
@@ -830,7 +840,7 @@ end)
 reportViolations("meta_law_malformed (ley M-n vacía o fuente sin DL existente)", metaLawMalformed, function(r)
 	return r
 end)
-reportViolations("zone_malformed (zona sin descripción/camino/fecha válida)", zoneMalformed, function(r)
+reportViolations("zone_malformed (zona sin descripción/camino/fecha/ratificación)", zoneMalformed, function(r)
 	return r
 end)
 reportViolations("zone_expired (zona no verificada VENCIDA)", zoneExpired, function(r)
