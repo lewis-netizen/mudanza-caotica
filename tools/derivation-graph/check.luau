@@ -23,6 +23,28 @@ local function norm(sec)
 	return "§" .. (sec:gsub("%.$", ""))
 end
 
+-- Sello del enunciado (Z4, DL-063). FNV-1a de 32 bits sobre el texto
+-- normalizado; 6 hex. Lo que sella es el ENUNCIADO, no la fila: mover un
+-- claim no altera su sello, reescribirlo sí. Así el grafo distingue
+-- REUBICAR normatividad de CAMBIAR el compromiso — sin esa distinción, una
+-- remodelación de diseño es indistinguible de un refactor cosmético.
+-- La multiplicación va partida en dos mitades: 32 bits × 16777619 desborda
+-- la precisión exacta de un double antes del módulo.
+local function mul32(a, b)
+	local hi = math.floor(a / 65536)
+	local lo = a % 65536
+	return ((hi * b % 65536) * 65536 + lo * b) % 4294967296
+end
+
+local function sealOf(text)
+	local s = text:gsub("%s+", " "):gsub("^ ", ""):gsub(" $", "")
+	local h = 2166136261
+	for i = 1, #s do
+		h = mul32(bit32.bxor(h, string.byte(s, i)), 16777619)
+	end
+	return string.format("%08x", h):sub(1, 6)
+end
+
 -- ── relaciones (EDB) ────────────────────────────────────────────────────────
 local nodes = {}
 local derives = {}
@@ -195,9 +217,10 @@ for _, m in ipairs(modifies) do
 	--  · §4.15 — registro de gluing, gobernado por unglued_claim/glue_dangling.
 	--  · §3.1–§3.9 — comentario NO NORMATIVO desde DL-061: prosa que no obliga
 	--    no puede generar obligación de implementación (exención DERIVADA).
-	--  · §3.0 — normativa, pero el grafo no distingue reubicar normatividad de
-	--    cambiar el compromiso: los enunciados no están versionados. Exención
-	--    ACOTADA por la zona Z4 (§2.8), con vencimiento — no es un fallback.
+	--  · §3.0 — normativa. Desde DL-063 el sello hace VISIBLE que un claim
+	--    cambió, pero el grafo no guarda historia: no sabe qué sello había
+	--    antes, luego no puede derivar obligación del cambio. Exención
+	--    ACOTADA por la zona Z4 re-acotada (§2.8) — no es un fallback.
 	local sec = m[2]
 	local exempt = sec == "§4.15" or sec:match("^§3") ~= nil
 	local isImpl = (sec:match("^§3") ~= nil or sec:match("^§4") ~= nil) and not exempt
@@ -433,7 +456,8 @@ local f8Axioms = {}
 local f8Claims = {} -- nombre → { raw }
 local f8Rules = {}
 local f8Elections = {}
-local f8ElectionRows = {} -- E-n → { eje, abierto, valor, estado }
+local f8ElectionRows = {} -- E-n → { eje (A-n), valor, abierto, estado }
+local axes = {} -- A-n → { nombre, dominio = {valores}, cierre } (Z2, DL-064)
 local metaLaws = {} -- M-n → { ley, fuente }
 local zones = {} -- Z-n → { zona, camino, vence } (registro de zonas no verificadas)
 local designClaims = {} -- D-n → { sec, deriv } (capa normativa de §3, DL-061)
@@ -482,7 +506,12 @@ do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
 				local sec, deriv = cells[2] or "", cells[4] or ""
-				designClaims[did] = { sec = sec, deriv = deriv }
+				designClaims[did] = {
+					sec = sec,
+					deriv = deriv,
+					enunciado = cells[3] or "",
+					sello = cells[5] or "",
+				}
 				if sec ~= "" then
 					claimedSections[sec] = true
 				end
@@ -504,8 +533,26 @@ do
 				for cell in line:gmatch("|([^|]*)") do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
-				-- | ID | Eje | Abierto por | Valor elegido | Estado |
-				f8ElectionRows[e] = { eje = cells[2] or "", abierto = cells[3] or "", valor = cells[4] or "", estado = cells[5] or "" }
+				-- | ID | Eje (A-n) | Valor | Abierto por | Estado |
+				f8ElectionRows[e] = {
+					eje = cells[2] or "",
+					valor = cells[3] or "",
+					abierto = cells[4] or "",
+					estado = cells[5] or "",
+				}
+			end
+			-- registro de ejes (Z2): | ID | Eje | Dominio | Cierre |
+			local a = line:match("^| (A%d+) |")
+			if a then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local dominio = {}
+				for v in (cells[3] or ""):gmatch("`([^`]+)`") do
+					table.insert(dominio, v)
+				end
+				axes[a] = { nombre = cells[2] or "", dominio = dominio, cierre = cells[4] or "" }
 			end
 		elseif region == "2.8" then
 			local m = line:match("^| (MT?%d+) |")
@@ -667,10 +714,60 @@ do
 				axisSeen[norm2] = id
 			end
 		end
-		if row.eje:find(" — ", 1, true) or row.eje:find(" + ", 1, true) or row.eje:find(" y ", 1, true) then
-			table.insert(electionCompound, id .. " (eje compuesto)")
-		elseif row.valor:find(" — ", 1, true) or row.valor:find(" + ", 1, true) then
+		-- la atomicidad del eje vive ahora en el registro (un A-n es atómico
+		-- por construcción); aquí solo queda el valor sin conjunciones.
+		if row.valor:find(" — ", 1, true) or row.valor:find(" + ", 1, true) then
 			table.insert(electionCompound, id .. " (valor con conjunción)")
+		end
+	end
+end
+
+-- ── Z2 (DL-064): el eje es un TIPO con dominio enumerado ────────────────────
+-- Sin dominio, "el valor pertenece a su eje" no es comprobable y "¿es el
+-- mejor valor?" no es respondible. Estas reglas son la precondición del
+-- juicio de optimalidad, no un chequeo de forma más.
+local axisMalformed, axisDomainThin = {}, {}
+local electionAxisUnregistered, electionValueOffAxis = {}, {}
+do
+	local ids = {}
+	for id in pairs(axes) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local ax = axes[id]
+		if ax.nombre == "" or (ax.cierre ~= "cerrado" and ax.cierre ~= "abierto") then
+			table.insert(axisMalformed, id .. " → sin nombre o Cierre distinto de cerrado|abierto")
+		end
+		-- un eje con un solo valor no es una elección: es una consecuencia
+		-- disfrazada. El dominio mínimo de un eje real es 2.
+		if #ax.dominio < 2 then
+			table.insert(axisDomainThin, id .. " → dominio de " .. #ax.dominio .. " valor(es)")
+		end
+	end
+
+	local eids = {}
+	for id in pairs(f8ElectionRows) do
+		table.insert(eids, id)
+	end
+	table.sort(eids)
+	for _, id in ipairs(eids) do
+		local row = f8ElectionRows[id]
+		local ejeId = row.eje:match("^A%d+$")
+		if not ejeId or not axes[ejeId] then
+			table.insert(electionAxisUnregistered, id .. " → eje \"" .. row.eje .. "\" no está en el registro")
+		else
+			local valor = row.valor:match("^`(.+)`$") or row.valor
+			local pertenece = false
+			for _, v in ipairs(axes[ejeId].dominio) do
+				if v == valor then
+					pertenece = true
+					break
+				end
+			end
+			if not pertenece then
+				table.insert(electionValueOffAxis, id .. " → \"" .. valor .. "\" no está en el dominio de " .. ejeId)
+			end
 		end
 	end
 end
@@ -710,6 +807,38 @@ for id, kind in pairs(nodes) do
 	end
 end
 table.sort(unclaimedSection)
+
+-- sello del enunciado (Z4, DL-063): el claim declara el hash de su propio
+-- enunciado. Reescribirlo sin re-sellar = violación; moverlo no toca nada.
+-- Re-sellar es el ACTO que hace visible una remodelación: no valida que el
+-- contenido nuevo sea correcto (eso es Z1), valida que el cambio se declaró.
+local claimSealMismatch = {}
+for id, c in pairs(designClaims) do
+	local esperado = sealOf(c.enunciado)
+	if c.sello == "" then
+		table.insert(claimSealMismatch, id .. " → sin sello (esperado " .. esperado .. ")")
+	elseif c.sello ~= esperado then
+		table.insert(claimSealMismatch, id .. " → sello " .. c.sello .. ", enunciado sella " .. esperado)
+	end
+end
+table.sort(claimSealMismatch)
+
+-- `--seals`: recalcula e imprime los sellos. Se corre al remodelar un claim,
+-- para obtener el sello nuevo que hay que escribir en la tabla.
+if table.find(process.args, "--seals") then
+	local ids = {}
+	for id in pairs(designClaims) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	print("Sellos de §3.0 (enunciado normalizado → FNV-1a/6):\n")
+	for _, id in ipairs(ids) do
+		print(string.format("  %-4s %s", id, sealOf(designClaims[id].enunciado)))
+	end
+	process.exit(0)
+end
 
 -- totalidad del gluing (DL-062): todo claim normativo de §3.0 declara CÓMO se
 -- realiza. El ancla es el claim, no la prosa (cierre de Z3): un claim sin
@@ -810,6 +939,9 @@ end)
 reportViolations("unclaimed_section (sección §3 sin claim normativo en §3.0)", unclaimedSection, function(r)
 	return r
 end)
+reportViolations("claim_seal_mismatch (enunciado reescrito sin re-sellar)", claimSealMismatch, function(r)
+	return r
+end)
 reportViolations("glue_dangling (claim de módulo inexistente en §4.15)", glueDangling, function(r)
 	return r
 end)
@@ -834,7 +966,19 @@ end)
 reportViolations("election_axis_dup (dos elecciones sobre el mismo eje)", electionAxisDup, function(r)
 	return r
 end)
-reportViolations("election_compound (eje no atómico o valor con conjunción)", electionCompound, function(r)
+reportViolations("axis_malformed (eje sin nombre o sin Cierre cerrado|abierto)", axisMalformed, function(r)
+	return r
+end)
+reportViolations("axis_domain_thin (eje con dominio < 2 valores: no es una elección)", axisDomainThin, function(r)
+	return r
+end)
+reportViolations("election_axis_unregistered (elección sobre eje no registrado)", electionAxisUnregistered, function(r)
+	return r
+end)
+reportViolations("election_value_off_axis (valor fuera del dominio de su eje)", electionValueOffAxis, function(r)
+	return r
+end)
+reportViolations("election_compound (valor con conjunción)", electionCompound, function(r)
 	return r
 end)
 reportViolations("meta_law_malformed (ley M-n vacía o fuente sin DL existente)", metaLawMalformed, function(r)
@@ -865,7 +1009,8 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
-	+ #zoneMalformed + #zoneExpired
+	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
+	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)

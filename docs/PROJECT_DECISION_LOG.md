@@ -2864,4 +2864,257 @@ Libre:       —
 Referencias: §4.15, §3.0, §2.8, DL-054, DL-060, DL-061
 ```
 
+### DL-063
+
+```
+ID:          DL-063
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Z4: el grafo no distinguía REUBICAR normatividad de CAMBIAR el
+             compromiso. Consecuencia práctica detectada por el PO: el
+             programa de trabajo se re-priorizaba en cada turno sin que
+             nada chillara, porque una remodelación era indistinguible de
+             un refactor cosmético. Prioridad ordenada por el PO: el
+             aparato antes que la implementación, por motivo objetivo —
+             implementar contra un modelo no verificado produce trabajo
+             que habrá que rehacer.
+Contenido:   Sello del enunciado. Cada claim de §3.0 porta el hash FNV-1a
+             (6 hex) de su propio enunciado normalizado. Regla
+             claim_seal_mismatch: enunciado reescrito sin re-sellar =
+             violación. Lo sellado es el ENUNCIADO, no la fila: mover un
+             claim no altera su sello, reescribirlo sí. Modo `--seals`
+             recalcula los sellos al remodelar legítimamente. Re-sellar es
+             el ACTO que declara una remodelación; no valida que el
+             contenido nuevo sea correcto (eso es Z1), valida que el cambio
+             se hizo visible.
+             Segundo caso de mutación NUEVO en clase: `reject` — la regla
+             NO debe encender. El control de Z4 mueve un claim de sección y
+             exige que el sello siga válido. Sin él, un sello sobre la fila
+             entera pasaría los tests igual y Z4 quedaría cerrada en falso;
+             una regla que enciende de más bloquea trabajo legítimo y
+             entrena a ignorarla.
+             HALLAZGO (causa raíz del shift de prioridades): DL-044 declaró
+             en su campo Impacto: "pendiente de propagación (paso
+             siguiente): §2.2, SCRATCHPAD_INTAKE, AUDITOR_DESIGN,
+             vocabulario en TICKETS". Nunca se ejecutó — §2.2 no ha sido
+             modificada por ningún DL desde 2026-07-17. Impacto: es PROSA:
+             un paso siguiente declarado ahí no es obligación que el grafo
+             persiga. `uncovered` exige ticket o derivadores, nada exige
+             que una propagación declarada se descargue. Por eso el orden
+             se pudo abandonar sin señal. Se corrige en el paso siguiente
+             (campo `Propaga:`), NO aquí: un PR, un cambio.
+Hipótesis:   Con el enunciado sellado, remodelar deja de ser silencioso: el
+             diff muestra el sello cambiando y el acto queda declarado.
+Razón:       CONTINGENCY P5 — "arranca por Z4" (PO, 2026-07-22), bajo su
+             corrección de que el aparato precede a la implementación.
+Impacto:     §3.0 gana columna Sello (21 claims sellados); §5.0 fila.
+             check.luau 26 reglas + modo --seals; test.luau 32 casos
+             (soporte `reject` nuevo). Header v5.40.
+             Z4 NO se cierra: el sello descarga su mitad de DETECCIÓN, no
+             la de OBLIGACIÓN — el grafo no guarda historia, luego no sabe
+             que un sello cambió respecto a ayer, y §3.0 sigue exenta de
+             obligación de ticket. Re-acotar la zona es del PO (§2.8); la
+             fila queda intacta hasta que se ratifique su nuevo alcance.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §5.0
+Libre:       Alcance re-acotado de Z4 tras el sello (mitad de obligación) →
+             PO. Idem el registro de las zonas propuestas Z5/Z6 → PO.
+Referencias: §3.0, §2.8, §5.0, DL-044, DL-056, DL-060, DL-061, DL-062
+```
+
+### DL-064
+
+```
+ID:          DL-064
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Z2. El PO exigió que las valencias no solo sean válidas sino
+             LAS MEJORES. Derivar el criterio de optimalidad (esta sesión)
+             mostró que "no existe otro valor que domine a este" es
+             indecidible sin el dominio del eje enumerado: la optimalidad
+             es estrictamente posterior a Z2. Z2 dejó de ser una zona
+             menor y pasó a ser precondición.
+Contenido:   Registro de Ejes en §2.7. Un eje es un TIPO: nombre + dominio
+             de valores + Cierre. A1 valencia del resultado (cerrado), A2
+             ancla interpretable (abierto), A3 tratamiento de la derrota
+             (cerrado). Las elecciones citan un eje por ID y su valor debe
+             pertenecer al dominio. Cuatro reglas: axis_malformed,
+             axis_domain_thin (dominio < 2 = no es elección sino
+             consecuencia disfrazada), election_axis_unregistered,
+             election_value_off_axis (el defecto que Z2 nombraba, antes
+             indetectable porque el eje era texto libre).
+             La columna Cierre es la parte honesta: `cerrado` = el dominio
+             agota el eje; `abierto` = son los valores CONSIDERADOS. Decide
+             qué puede afirmarse después: en dominio cerrado "no dominado"
+             significa óptimo; en abierto, óptimo entre lo considerado.
+             CRITERIO DE OPTIMALIDAD derivado (registrado aquí, aplicado
+             después): el maximando sale de los axiomas, única fuente
+             ratificada junto a las elecciones — medir una elección contra
+             otra sería circular. Los cuatro axiomas NO juegan el mismo
+             papel: C1a es el único enunciado en forma de "qué es la cosa",
+             luego el único maximando; C1b y C2′ son GENERADORES (C1b es
+             locativo: dice dónde reside el valor, no qué perseguir); C3 es
+             FILTRO, no dimensión de mérito — una interdependencia lograda
+             por regla impuesta no puntúa peor, está prohibida (D8 ya lo
+             dice así). Criterio: V es óptimo si (1) admisible bajo C3 y
+             los claims vigentes, (2) no dominado — no existe W admisible
+             en el dominio con ≥ interacción-como-contenido por ambas vías
+             (C1b y C2′) y > por al menos una, (3) si sobrevive más de un
+             valor el eje tiene FRONTERA y la elección es del PO: "la
+             mejor" deja de tener respuesta. Pareto y no suma ponderada
+             porque los pesos serían otra elección injustificable desde los
+             axiomas.
+Hipótesis:   Con los ejes tipados, la pregunta "¿es el mejor valor?" pasa
+             de retórica a decidible, y la frontera separa lo determinado
+             (valores dominados: se cambian) de lo genuinamente electivo.
+Razón:       CONTINGENCY P5 — "deriva el criterio de optimalidad primero,
+             luego arranca Z2" (PO, 2026-07-22).
+Impacto:     §2.7 gana Registro de Ejes; tabla de elecciones re-esquematizada
+             (E1→A1, E2→A2, E3→A3) sin cambio de contenido ratificado.
+             §2.8: Z2 CERRADA y retirada del registro. §5.0 fila. Header
+             v5.41. check.luau 30 reglas; test.luau 36/36.
+             RESIDUO no cubierto: que un dominio marcado `cerrado`
+             realmente agote su eje es una afirmación semántica que nadie
+             verifica. Se somete a ratificación junto con Z5/Z6; no se
+             registra unilateralmente (§2.8: una frontera que el sistema se
+             concede no es frontera).
+             DEUDA que el criterio arrastra: se apoya en D2 (la DI mide la
+             calidad del loop), que está entre los 19 claims formalizados
+             pero NO re-derivados (Z1). El criterio es provisional ahí. Y
+             la DI mide frecuencia, no profundidad: proxy imperfecto de
+             C1a.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7, §2.8, §5.0
+Libre:       Dominios de A1/A3 marcados `cerrado` (¿agotan el eje?) → PO.
+             Registro de Z5/Z6 y del residuo de cierre → PO.
+Referencias: §2.7, §2.8, §3.2, §5.0, DL-058, DL-060, DL-061, DL-063
+```
+
+### DL-065
+
+```
+ID:          DL-065
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    DL-064 dejó el criterio de optimalidad apoyado en D2 ("la
+             calidad del loop se mide por la DI") y declaró la DI como
+             proxy imperfecto de C1a: mide frecuencia, no profundidad. El
+             PO confirmó el diagnóstico. Al mirarlo, el defecto estaba un
+             nivel más abajo: §3.2 define la DI como "un momento
+             SIGNIFICATIVO cada 10–15 segundos" y "significativo" NUNCA se
+             definió. La DI no era un proxy vago — era un contador bien
+             definido sobre un predicado indefinido. Toda la profundidad
+             entraba ahí sin declararse.
+Contenido:   D2 re-derivado: de medida a PREDICADO. "Un momento cuenta como
+             contenido cuando acopla los resultados de dos o más jugadores
+             y exige decidir bajo ambigüedad; la sincronía sin decisión no
+             cuenta." R-COMP · C1b + C2′ — el predicado no se inventa: sale
+             de los dos generadores, y D9 ya lo enunciaba para la escasez
+             ("no basta ejecutar en sincronía"). El criterio de calificación
+             ya estaba derivado en el corpus y §3.2 no lo usaba.
+             D22 nuevo: "La calidad del loop es la frecuencia de momentos
+             que cuentan como contenido; el umbral concreto es empírico."
+             R-COMP · C1a + [D2]. Separa medida de predicado — estaban
+             fundidos en el D2 viejo.
+             Con el predicado explícito, la frecuencia vuelve a ser
+             suficiente: la profundidad se absorbe en si el momento
+             califica. El proxy deja de ser imperfecto por indefinición.
+             §3.2 (comentario) reescrita para no contradecir, con el límite
+             conocido declarado: si en playtest aparecen momentos que
+             califican pero difieren mucho en peso, el predicado es
+             demasiado grueso y se REFINA — no se compensa moviendo el
+             umbral.
+Hipótesis:   Un criterio de optimalidad calibrado sobre un predicado
+             definido produce veredictos auditables; sobre uno indefinido
+             habría producido trece veredictos con la indefinición dentro.
+Razón:       CONTINGENCY P5 — "DI es proxy imperfecto, el aparato sigue
+             incompleto, haz lo que recomiendes" (PO, 2026-07-22). Aplica
+             M1 al propio criterio: el instrumento precede a la medición.
+Impacto:     §3.0: D2 re-sellado (801e43 → 05adac) — PRIMER uso real del
+             sello de DL-063: la remodelación quedó declarada en el diff,
+             que es exactamente para lo que se construyó. D22 nuevo
+             (8c9248). §4.15: fila de D2 re-anclada (de empírico a
+             normativo: define el criterio de conteo), fila de D22 nueva.
+             §3.2 reescrita. Header v5.42. test.luau 36/36.
+             El validador cazó a D22 al nacer (unglued_claim): claim nuevo
+             sin realización declarada.
+             DEUDA QUE ESTO NO CIERRA: los 18 claims restantes del conjunto
+             formalizado-pero-no-re-derivado siguen sin verificar (Z1). Se
+             re-derivó SOLO el claim del que cuelga el instrumento.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §3.2, §4.15
+Libre:       Umbral de la banda (10–15 s) → playtest. Granularidad del
+             predicado de D2 si el playtest muestra momentos de peso muy
+             desigual → playtest.
+Referencias: §3.0, §3.2, §4.15, §2.7, DL-061, DL-063, DL-064
+```
+
+### DL-066
+
+```
+ID:          DL-066
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO ratificó cuatro fronteras pendientes: Z4 re-acotada, Z5
+             (claim↔código), Z6 (sello sin obligación) y el residuo de
+             `cerrado` (DL-064). Ninguna podía registrarse antes: la regla
+             de DL-062 exige celda `PO <fecha>`, y una frontera que el
+             sistema se concede a sí mismo no es frontera.
+Contenido:   HALLAZGO al registrar: dos de las cuatro eran la MISMA zona.
+             Z6 se propuso ("cambiar un sello no genera obligación") cuando
+             los sellos aún no existían; construidos en DL-063, el residuo
+             de Z4 ES esa zona. Registrar ambas habría duplicado un hueco
+             en el registro de huecos. Fusión: Z4 absorbe lo propuesto como
+             Z6 — decisión de relación, no de contenido — y el residuo de
+             `cerrado` ocupa el hueco Z6. No queda ID huérfano.
+             Registro resultante:
+             Z1 (contenido semántico de claims — 18 pendientes tras DL-065)
+             Z4 re-acotada: el sello hace VISIBLE el cambio pero no genera
+                deber de implementación; el grafo no guarda historia.
+                Cierre: procedencia del sello (qué DL cambió cada uno).
+             Z5: el gluing verifica que el claim NOMBRE un módulo existente,
+                no que el módulo HAGA lo que dice. Cierre: contratos de
+                función de §4.13 contra las firmas reales de src/.
+             Z6: exhaustividad de dominio — un eje `cerrado` de más
+                convierte "no dominado" en "óptimo" sin derecho. Cierre:
+                dominio derivado como partición demostrada.
+             HALLAZGO 2: `impl_leak` cazó el registro al escribirlo — la
+             evidencia de Z5 nombraba un módulo de src/ dentro del piso de
+             diseño. Reformulada sin el nombre del módulo (la firma de
+             función basta como evidencia); la regla NO se debilitó ni se
+             eximió §2.8.
+Hipótesis:   Con las cuatro fronteras registradas y ratificadas, el
+             perímetro binario vuelve a ser total: todo lo no garantizado
+             está nombrado, acotado y con camino de cierre.
+Razón:       CONTINGENCY P5 — ratificación del PO (2026-07-22).
+Impacto:     §2.8: Z4 re-escrita, Z5 y Z6 nuevas, las tres con `PO
+             2026-07-22`. check.luau: comentario de la exención de §3.0
+             re-anclado a la Z4 re-acotada. test.luau 36/36 (ancla de
+             zone_expired re-anclada). Header v5.43.
+Ejecución:   CONFIRM
+Costo:       C1
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, §2.7, §4.13, DL-060, DL-062, DL-063, DL-064
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

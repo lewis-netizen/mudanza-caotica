@@ -146,7 +146,7 @@ local cases = {
 		apply = function()
 			-- claim normativo sin realización declarada: obligación pendiente
 			-- que quedaría invisible si el gluing no exigiera totalidad.
-			replaceOnce(MASTER, "\n| D2 | Densidad de interacción | — empírico → playtest (métrica de avance, §3.2) |", "")
+			replaceOnce(MASTER, "\n| D22 | Calidad del loop = frecuencia | — empírico → playtest (métrica de avance, §3.2; medida con el criterio de D2) |", "")
 		end,
 	},
 	{
@@ -221,14 +221,14 @@ local cases = {
 		name = "election_malformed",
 		expect = "✗ election_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| E2 | Ancla interpretable |", "| E2 | |")
+			replaceOnce(MASTER, "| E2 | A2 | `el objetivo` |", "| E2 | A2 | |")
 		end,
 	},
 	{
 		name = "election_axis_dup",
 		expect = "✗ election_axis_dup",
 		apply = function()
-			replaceOnce(MASTER, "| E3 | Tratamiento de la derrota |", "| E3 | Ancla interpretable |")
+			replaceOnce(MASTER, "| E3 | A3 |", "| E3 | A2 |")
 		end,
 	},
 	{
@@ -237,11 +237,40 @@ local cases = {
 		apply = function()
 			-- Reconstruye exactamente la doble argumentación que el PO cazó a
 			-- mano en E1 — ahora la caza la máquina.
-			replaceOnce(
-				MASTER,
-				"| Cooperativa: el resultado es de equipo (§1.2) |",
-				"| Cooperativa: el resultado es de equipo (§1.2) — sin condición de derrota |"
-			)
+			replaceOnce(MASTER, "| E1 | A1 | `cooperativa` |", "| E1 | A1 | `cooperativa` — sin condición de derrota |")
+		end,
+	},
+	{
+		name = "axis_malformed",
+		expect = "✗ axis_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| cerrado |\n| A2 |", "| quizás |\n| A2 |")
+		end,
+	},
+	{
+		-- Un eje con un solo valor no es una elección: es una consecuencia
+		-- disfrazada de elección. Sin esta regla, "elegí X" pasaría aunque X
+		-- fuera lo único posible — y el registro mentiría sobre qué es libre.
+		name = "axis_domain_thin (eje de un solo valor)",
+		expect = "✗ axis_domain_thin",
+		apply = function()
+			replaceOnce(MASTER, "`ausente` · `declarada sin castigo` · `castigada`", "`ausente`")
+		end,
+	},
+	{
+		name = "election_axis_unregistered",
+		expect = "✗ election_axis_unregistered",
+		apply = function()
+			replaceOnce(MASTER, "| E1 | A1 |", "| E1 | A9 |")
+		end,
+	},
+	{
+		-- El defecto que Z2 nombraba: un valor que no pertenece a su eje.
+		-- Antes era indetectable porque el eje era texto libre.
+		name = "election_value_off_axis (el defecto que Z2 describía)",
+		expect = "✗ election_value_off_axis",
+		apply = function()
+			replaceOnce(MASTER, "| E1 | A1 | `cooperativa` |", "| E1 | A1 | `el objetivo` |")
 		end,
 	},
 	{
@@ -268,7 +297,7 @@ local cases = {
 		name = "zone_malformed",
 		expect = "✗ zone_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| Ejes como tipos con dominio de valores enumerado |", "| |")
+			replaceOnce(MASTER, "| Descomposición (M5) + catálogo más fino; contradicciones como relación explícita |", "| |")
 		end,
 	},
 	{
@@ -284,9 +313,32 @@ local cases = {
 		apply = function()
 			replaceOnce(
 				MASTER,
-				"no su posición— cambia | 2026-08-11 |",
-				"no su posición— cambia | 2026-01-01 |"
+				"derivar la obligación del cambio | 2026-08-11 |",
+				"derivar la obligación del cambio | 2026-01-01 |"
 			)
+		end,
+	},
+	{
+		name = "claim_seal_mismatch (remodelar sin declarar)",
+		expect = "✗ claim_seal_mismatch",
+		apply = function()
+			-- invierte el compromiso de D14 dejando el sello viejo: es la
+			-- remodelación silenciosa que Z4 existe para hacer visible.
+			replaceOnce(MASTER, "| D14 | §3.5 | El juego no castiga el fallo. |", "| D14 | §3.5 | El juego castiga el fallo. |")
+		end,
+	},
+	{
+		-- CONTROL de Z4: reubicar NO es remodelar. Cambiar la sección de un
+		-- claim no toca su enunciado, luego el sello sigue válido y el corpus
+		-- pasa limpio. Si esto encendiera claim_seal_mismatch, el sello
+		-- estaría sellando la FILA en vez del COMPROMISO — el defecto que Z4
+		-- describe, invertido. Sin este caso, un sello sobre la fila entera
+		-- pasaría los tests igual y Z4 quedaría cerrada en falso.
+		name = "control Z4 — reubicar un claim NO enciende el sello",
+		expect = nil,
+		reject = "✗ claim_seal_mismatch",
+		apply = function()
+			replaceOnce(MASTER, "| D19 | §3.7 |", "| D19 | §3.2 |")
 		end,
 	},
 	{
@@ -326,6 +378,12 @@ for _, case in ipairs(cases) do
 		ok = (code == 0)
 	else
 		ok = (code ~= 0) and out:find(case.expect, 1, true) ~= nil
+	end
+	-- `reject`: la regla NO debe encender. Una regla que enciende de más es
+	-- tan inútil como una que no enciende — bloquea trabajo legítimo y
+	-- entrena a ignorarla.
+	if ok and case.reject then
+		ok = out:find(case.reject, 1, true) == nil
 	end
 	if ok then
 		print("  ✓ " .. case.name)
