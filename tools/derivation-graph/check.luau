@@ -465,6 +465,7 @@ local designClaims = {} -- D-n → { sec, deriv } (capa normativa de §3, DL-061
 local claimedSections = {} -- §3.N con ≥1 claim o marcador
 do
 	local region, nivel = nil, nil
+	local inZoneHistory = false
 	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
 		local h = line:match("^#+%s+(%d[%d%.]*)")
 		if h then
@@ -570,7 +571,16 @@ do
 					f8Claims[m] = { raw = cells[4] }
 				end
 			end
-			local z = line:match("^| (Z%d+) |")
+			-- §2.8 tiene DOS tablas de zonas: el registro VIGENTE y el
+			-- historial de cerradas. Ambas empiezan por | Z-n |, así que se
+			-- distinguen por cabecera — contar celdas enmascararía filas
+			-- realmente malformadas, que es lo que zone_malformed debe ver.
+			if line:match("^| ID | Zona | Abierta por | Cerrada por |") then
+				inZoneHistory = true
+			elseif line:match("^| ID | Zona — sin garantía") then
+				inZoneHistory = false
+			end
+			local z = not inZoneHistory and line:match("^| (Z%d+) |") or nil
 			if z then
 				local cells = {}
 				for cell in line:gmatch("|([^|]*)") do

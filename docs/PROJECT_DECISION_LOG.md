@@ -3503,4 +3503,67 @@ Libre:       —
 Referencias: §2.8, §3.0, §5.0, DL-060, DL-063, DL-068, DL-069, DL-070
 ```
 
+### DL-072
+
+```
+ID:          DL-072
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Se computó la SERIE de la variante sobre el historial de git,
+             contando las tres estructuras de deuda en cada estado del
+             master (sin correr las reglas actuales sobre corpus viejos,
+             que estaría confundido).
+             RESULTADO: v5.2 → v5.34 la variante vale CERO durante 32
+             versiones y semanas de trabajo. No porque no hubiera deuda
+             —era toda la que se lleva encontrando— sino porque NO EXISTÍA
+             EL INSTRUMENTO: el registro de zonas nace en DL-060. Desde
+             ahí: 3 → 3 → 4 → 4 → 12. Solo SUBE; nunca baja neto.
+Contenido:   HALLAZGO QUE INVALIDA PARTE DE DL-071: la variante se presentó
+             como si su descenso fuera a señalar convergencia. No puede.
+             No mide deuda: mide la RESOLUCIÓN DE LOS INSTRUMENTOS. Y por
+             eso es trivialmente falseable — borrar el registro de zonas la
+             lleva a 0 y simularía convergencia. Un cero de 32 versiones no
+             dice "sano", dice "ciego". Es el defecto del registro de
+             escapes un nivel más arriba: un número que mejora encogiendo
+             el artefacto que lo produce.
+             CORRECCIÓN: la variante es DESCRIPCIÓN DE ESTADO. La
+             convergencia exige EVENTOS —cuánto se descubrió y cuánto se
+             cerró, por separado— y hoy eran indistinguibles porque una
+             zona cerrada SALE del registro (DL-062) y su cierre vivía solo
+             en prosa.
+             (1) Columna `Abierta por` en el registro de zonas.
+             (2) Historial de zonas cerradas (Z2, Z3) con apertura y
+             cierre. Como el registro de escapes: MEMORIA, no gobierna
+             nada.
+             Con ambos, descubrimiento y cierre son eventos distinguibles.
+             HALLAZGO al construirlo: las filas del historial matchean el
+             mismo patrón `| Z-n |` que el registro vigente, y el parser
+             las tragó como zonas abiertas — la variante saltó a 14 y
+             zone_malformed encendió con 2. El validador cazó el error en
+             el acto. Se distinguen por CABECERA y no por número de celdas:
+             contar celdas enmascararía filas realmente malformadas, que es
+             lo que zone_malformed debe ver.
+             TERCERA VEZ que un hilo independiente termina pidiendo Z4
+             (procedencia): el sello, la liveness y ahora la serie.
+Hipótesis:   Separando descubrimiento de cierre, la pregunta "¿converge?"
+             deja de confundirse con "¿cuánto vemos?".
+Razón:       CONTINGENCY P5 — "continuemos" (PO, 2026-07-22).
+Impacto:     §2.8: zonas con `Abierta por`; historial de cerradas. Parser
+             de zonas distingue ambas tablas. Header v5.49. check 32
+             reglas, test 39/39. Variante: 12 (sin cambio real; el 14
+             transitorio era el bug).
+             NO CIERRA: la serie sigue calculándose a mano contra git. Y el
+             historial de cerradas es memoria mantenida por un agente —
+             misma naturaleza y misma deuda que el registro de escapes.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, DL-060, DL-062, DL-070, DL-071
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
