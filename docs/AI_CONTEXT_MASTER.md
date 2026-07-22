@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.43 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.44 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -237,14 +237,30 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | A1 | Valencia del resultado | `cooperativa` · `competitiva` · `mixta` · `individual` | cerrado |
 | A2 | Ancla interpretable | `el objetivo` · `las reglas` · `el rol` · `el espacio` | abierto |
 | A3 | Tratamiento de la derrota | `ausente` · `declarada sin castigo` · `castigada` | cerrado |
+| A4 | Situación ficcional | `mudanza` · `evacuación de incendio` · `naufragio` · `atraco` · `rescate` | abierto |
+| A5 | Forma del objetivo | `maximización acumulativa` · `umbral fijo` · `lista específica` · `supervivencia` | abierto |
+| A6 | Escala del grupo | `individual` · `pareja` · `grupo pequeño` · `grupo grande` | abierto |
+| A7 | Naturaleza del primer release | `prototipo de validación` · `early access` · `producto shippable` | abierto |
+| A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado |
+| A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado |
+| A10 | Granularidad de la demanda | `binaria` · `graduada` | cerrado |
 
 **Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *uno* de los valores del dominio de ese eje; elegir otro es revisión de la elección (⚠), no del núcleo. Forma obligatoria: un eje registrado por elección, un valor perteneciente a su dominio, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_axis_unregistered`, `election_value_off_axis`).
+
+**Registrar ≠ ratificar (DL-067).** Registrar el valor vigente de un eje es **describirlo**: deja constancia de que ahí hubo una elección, aunque nadie la haya examinado. Citarlo como premisa es **apoyarse** en él. Solo una elección con `Estado: decidida` — ratificada por el PO — es contenido garantizado y puede fundar un claim; una `sin ratificar` que aparezca como premisa es violación (`election_unratified_cited`). Sin esa separación, registrar una elección la volvería fundante de facto, y el barrido del corpus habría convertido trece hallazgos en trece axiomas de contrabando.
 
 | ID | Eje | Valor elegido | Abierto por | Estado |
 |---|---|---|---|---|
 | E1 | A1 | `cooperativa` | C1b (neutral de valencia: el axioma no la fija) | decidida |
 | E2 | A2 | `el objetivo` | C2′ (exige un ancla, no dice cuál) | decidida |
 | E3 | A3 | `ausente` | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | decidida |
+| E4 | A4 | `mudanza` | Ningún axioma fija la ficción; debe admitir espacio compartido finito, objetos de demanda variable y escasez temporal | sin ratificar |
+| E5 | A5 | `maximización acumulativa` | Ningún axioma fija la forma del objetivo; E2 exige que el objetivo sea el ancla, no dice cuál | sin ratificar |
+| E6 | A6 | `grupo pequeño` | C1a exige varios humanos, no dice cuántos (el rango concreto 4–6 es empírico) | sin ratificar |
+| E7 | A7 | `producto shippable` | Ningún axioma lo fija; postura de proyecto (DL-024) | sin ratificar |
+| E8 | A8 | `el ciclo de vida completo` | Ningún axioma lo fija; postura de arquitectura (DL-039) | sin ratificar |
+| E9 | A9 | `ambos` | C2′ exige variación interpretable, no dice de dónde procede | sin ratificar |
+| E10 | A10 | `binaria` | C1b admite cualquier granularidad; DL-047 acota la demanda a ≤ 2 | sin ratificar |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
@@ -1110,7 +1126,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
-| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado: eje bien formado con Cierre cerrado|abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado (A1–A10): eje bien formado con Cierre cerrado|abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Registrar ≠ ratificar: una elección `sin ratificar` no puede fundar un claim (`election_unratified_cited`) — DL-067. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
 | §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas, acotadas y **ratificadas** (`zone_malformed` exige descripción, camino, vencimiento y celda `PO <fecha>` — DL-062; `zone_expired`: zona vencida = violación). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
