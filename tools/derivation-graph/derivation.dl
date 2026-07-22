@@ -140,23 +140,26 @@ undeclared_free(D) :- modifies(D, _), !declares_free(D).
 .decl module_undeclared(m:symbol)
 module_undeclared(M) :- src_module(M), !declared_module(M).
 
-// (12–13) GLUING §3↔§4 (F6, Event-B) — §4.15 reifica la correspondencia
-//      diseño→realización. Totalidad: toda sección §3.N tiene ≥1 fila
-//      (mecanismo, o marcador legítimo: empírico→playtest / normativo).
+// (12–13) GLUING claim→§4 (F6, Event-B; re-anclado DL-062) — §4.15 reifica la
+//      correspondencia diseño→realización. Desde DL-062 el ancla izquierda es
+//      el CLAIM D-n de §3.0, no la sección: la prosa no es normativa, luego no
+//      puede ser el dominio del gluing (cierre de la zona Z3).
+//      Totalidad: todo claim de §3.0 tiene ≥1 fila (mecanismo, o marcador
+//      legítimo: empírico→playtest / normativo).
 //      Existencia: todo claim de módulo (backticks CamelCase) resuelve.
-//      Construido ANTES del holístico (DL-053): una sección re-derivada
-//      sin re-glue dispara unglued/dangling — el gluing GENERA obligaciones.
-.decl glue(sec:Node, target:symbol)
+//      Construido ANTES del holístico (DL-053): un claim re-derivado sin
+//      re-glue dispara unglued/dangling — el gluing GENERA obligaciones.
+.decl glue(claim:symbol, target:symbol)
 .input glue
 
-.decl glued(sec:Node)
-glued(S) :- glue(S, _).
+.decl glued(claim:symbol)
+glued(D) :- glue(D, _).
 
-.decl unglued_section(sec:Node)
-unglued_section(S) :- node(S, "section"), section_major(S, 3), !glued(S).
+.decl unglued_claim(claim:symbol)
+unglued_claim(D) :- design_claim(D, _, _), !glued(D).
 
-.decl glue_dangling(sec:Node, target:symbol)
-glue_dangling(S, T) :- glue(S, T), !declared_module(T), !src_module(T).
+.decl glue_dangling(claim:symbol, target:symbol)
+glue_dangling(D, T) :- glue(D, T), !declared_module(T), !src_module(T).
 
 // (14–18) CLAIMS TIPADOS (F8, DL-057) — la capa normativa se AUTORA en forma
 //      (DL-055: la conversión semántica se elimina, no se asigna). Toda
@@ -182,6 +185,20 @@ unknown_rule(N, R) :- claim(N, R), !rule_registered(R).
 .decl rule_arity(name:symbol)             // condición sintáctica de la regla
 .decl claim_cycle(name:symbol)            // ciclo en la relación premisa
 
+// (19) CLAIMS DE DISEÑO (DL-061) — §3.0 es la capa normativa de §3; §3.1–§3.9
+//      quedan como comentario no normativo. Cada claim D-n cita su sección de
+//      origen y deriva por el mismo catálogo §2.7 (design_claim alimenta claim).
+//      Totalidad inversa: toda subsección §3.N tiene ≥1 claim o marcador — sin
+//      esto una sección podría fundar normativamente desde prosa (viola M4).
+.decl design_claim(d:symbol, sec:Node, deriv:symbol)
+.input design_claim
+
+.decl claimed_section(sec:Node)
+claimed_section(S) :- design_claim(_, S, _).
+
+.decl unclaimed_section(sec:Node)
+unclaimed_section(S) :- node(S, "section"), section_major(S, 3), !claimed_section(S).
+
 .output dangling
 .output orphan
 .output stale
@@ -190,7 +207,8 @@ unknown_rule(N, R) :- claim(N, R), !rule_registered(R).
 .output domain_mismatch
 .output undeclared_free
 .output module_undeclared
-.output unglued_section
+.output unglued_claim
+.output unclaimed_section
 .output glue_dangling
 .output claim_bad_derivation
 .output unknown_rule

@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.37 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.39 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -269,19 +269,47 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 
 **Perímetro binario de garantía (DL-060).** El sistema garantiza únicamente lo que emana de dos fuentes: **máquina** (reglas con mutación demostrada — auto-cobertura verificada: toda regla del validador tiene su caso de mutación, chequeado por `test.luau`, no por disciplina) y **contenido ratificado** (axiomas, elecciones, leyes — el PO). Los agentes no son titulares de garantía alguna: sus pasadas son advisory (hallazgos D-n como insumo, jamás como muro). La prosa no tiene autoridad (M4): un elemento normativo solo existe dentro de un slot de forma (claim, elección, regla+mutación, zona) y cada slot está verificado — mal-tipar un elemento lo hace fallar su slot o lo deja fuera del perímetro, sin autoridad. La única fuga posible es contenido que **cabe en la forma sin sostenerse semánticamente**; esas fugas no se asignan a nadie: se **registran** como zonas con camino y vencimiento — zona vencida = violación (`zone_expired`); el vencimiento fuerza la decisión (formalizar, disolver o re-acotar — re-acotar es del PO).
 
-**Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas:
+**Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas. El registro contiene lo *vigente*: una zona cerrada SALE de la tabla y su cierre queda en el DL que lo ejecuta (Z3 cerrada por DL-062 — el gluing ancla en claims D-n, no en prosa). Salir del registro exige haber cerrado, no haber caducado: `zone_expired` dispara antes.
 
 | ID | Zona — sin garantía del sistema | Camino de cierre | Vence |
 |---|---|---|---|
 | Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 |
 | Z2 | Relación valor↔eje en elecciones: que el Valor sea un valor del Eje declarado | Ejes como tipos con dominio de valores enumerado | 2026-08-11 |
-| Z3 | Realización del gluing: que la fila de §4.15 realmente realice su concepto de §3 | Autorar §3 en claims → gluing entre claims y módulos, no entre prosa y módulos | 2026-08-11 |
+| Z4 | Equivalencia normativa en refactor de claims: el grafo no distingue REUBICAR normatividad de CAMBIAR el compromiso, porque los enunciados de claim no están versionados. §3.0 queda exenta de obligación de ticket mientras dure | Versionar el enunciado de cada claim (hash) y exigir ticket cuando el enunciado —no su posición— cambia | 2026-08-11 |
 
 El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento y las zonas ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma).
 
 ---
 
 ## 3. Design Architecture
+
+### 3.0 Claims de Diseño (F8, DL-061)
+
+**Esta tabla es la capa normativa de §3.** Los claims se autoran en forma (M4): cada uno cita una regla del catálogo §2.7 sobre premisas que resuelven a axiomas (`C1a`…), elecciones (`E1`…) o claims (`[D-n]`, `[Nombre]` de §2.1). Las subsecciones §3.1–§3.9 son **comentario no normativo**: explican y ejemplifican estos claims, no fundan nada. Verificado por las mismas reglas F8 que §2.1 (`claim_*`) más totalidad (`unclaimed_section`: toda subsección de §3 tiene ≥1 claim o marcador legítimo).
+
+| ID | Sección | Claim | Derivación |
+|---|---|---|---|
+| D1 | §3.1 | El reto del loop vive en la coordinación decisional bajo escasez, no en el transporte. | R-COMP · C1b + C2′ |
+| D2 | §3.2 | La calidad del loop se mide por la densidad de interacción entre jugadores. | R-ESP · C1a — el umbral concreto es empírico (§3.2) |
+| D3 | §3.3 | La cooperación se genera cuando el entorno acopla los resultados de los jugadores; no es una feature. | R-ESP · C1b |
+| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 |
+| D5 | §3.3 | El espacio acopla por contención: negativo y pervasivo. | R-COMP · C1b + [Compresión Social] |
+| D6 | §3.3 | El objeto acopla por pooling — positivo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] |
+| D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 |
+| D8 | §3.3 | La cooperación obligatoria es legítima solo si emana de la naturaleza del elemento; una regla que impide iniciar la interacción está prohibida. | R-ESP · [D4] |
+| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | R-COMP · C2′ + [D1] |
+| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C2′ + E2 |
+| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay. | R-ESP · [Expresión sobre Ventaja] |
+| D12 | §3.5 | Ningún objeto vale más que otro (Neutralidad de Objetos). | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa |
+| D13 | §3.5 | Ninguna mecánica afecta solo al individuo sin beneficio del grupo. | R-ESP · C1b |
+| D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 |
+| D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] |
+| D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] |
+| D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-ESP · [D17] |
+| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores; no informa puntuaciones. | R-ESP · C1a |
+| D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest |
+| D21 | §3.9 | La evolución del juego fortalece gameplay, identidad o creación. | R-ESP · [Jugadores como Fuente de Contenido] |
 
 ### 3.1 Core Loop
 
@@ -326,7 +354,7 @@ Dos carriers generan el acoplamiento, con valencias distintas:
 
 El **objetivo colectivo** (§1.2) fija la valencia cooperativa: como el resultado es de equipo, todo acoplamiento suma en vez de competir.
 
-**Cooperación intrínseca, no impuesta (C3, C4).** La cooperación obligatoria es legítima *solo si es intrínseca*. Un objeto grande requiere dos porque su naturaleza lo exige — no porque una regla bloquee la interacción. Representación correcta: el líder **puede** engancharlo y moverlo con dificultad; el soporte lo vuelve normal. Representación prohibida: una regla que **impide iniciar** el carry sin soporte — se siente cerradura, no oportunidad.
+**Cooperación intrínseca, no impuesta (D4, D8).** La cooperación obligatoria es legítima *solo si es intrínseca*. Un objeto grande requiere dos porque su naturaleza lo exige — no porque una regla bloquee la interacción. Representación correcta: el líder **puede** engancharlo y moverlo con dificultad; el soporte lo vuelve normal. Representación prohibida: una regla que **impide iniciar** el carry sin soporte — se siente cerradura, no oportunidad.
 
 **La escasez vuelve la cooperación una decisión (C2′).** Tiempo y manos finitos ⇒ no se puede salvar todo ⇒ el equipo prioriza qué salvar y con quién. La coordinación es **decisional**: no basta ejecutar en sincronía, hay que decidir juntos bajo escasez.
 
@@ -982,22 +1010,31 @@ El framework de UI del proyecto es **Fusion** (`elttob/fusion`) — declarativo 
 
 ### 4.15 Gluing §3↔§4 y Registro de Módulos (DL-054)
 
-El **gluing** (Event-B) hace explícita la correspondencia entre el diseño (§3) y su realización técnica (§4): toda sección §3.N declara aquí **cómo se realiza** — con mecanismos de sistema, o con un marcador legítimo (`empírico → playtest` para lo que se mide, `normativo` para lo que restringe). El validador exige totalidad (`unglued_section`) y existencia de lo nombrado (`glue_dangling`): un concepto de diseño sin realización declarada es una **obligación pendiente**, no una omisión silenciosa. Los nombres en backticks son claims de módulo verificados contra el registro y `src/`.
+El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su realización técnica. Desde DL-062 su ancla izquierda es el **claim** `D-n` de §3.0 — no la prosa de una subsección (cierre de la zona Z3): cada claim normativo declara **cómo se realiza**, con mecanismos de sistema o con un marcador legítimo (`empírico → playtest` para lo que se mide, `normativo` para lo que restringe sin realizarse en código). El validador exige totalidad (`unglued_claim`: todo claim de §3.0 tiene realización) y existencia de lo nombrado (`glue_dangling`). Un claim sin realización es una **obligación pendiente**, no una omisión silenciosa. Los nombres en backticks se verifican contra el registro y `src/`.
 
-| §3.N | Concepto | Realización |
+| Claim | Enunciado (comentario) | Realización |
 |---|---|---|
-| §3.1 | Ciclo de ronda (core loop) | `GameManager` (estados Lobby/Summary) + `RoundManager` (ronda activa) — §4.4 |
-| §3.2 | Densidad de Interacción | — empírico → playtest (métrica de avance, §3.2) |
-| §3.3 | Contención (espacio — acoplamiento negativo, pervasivo) | layout + física del engine: `MapBootstrap` (placeholder, DL-036) / layout real (WLD-003, Compresión Social) |
-| §3.3 | Pooling (objeto — acoplamiento positivo, puntuado) | `CarryRules` carryEfficiency (§4.13, DL-047) + `CarryManager` / `CarrySupport` |
-| §3.3 | Escasez (tiempo → decisión, C2′) | timer de `RoundManager` (1 tick/s, §4.12) |
-| §3.3 | Apuesta (el objeto porta el objetivo) | `ObjectManager` (estados) + `TruckManager` (entrega y conteo) |
-| §3.4 | Entropía Social | `EventManager` (evento por ronda) + `NPCManager` (vecino) + spawn aleatorio de `ObjectManager` |
-| §3.5 | Prohibiciones de progresión | — normativo → Test de Diseño (§2.2) + auditoría DESIGN (D1) |
-| §3.6 | Monetización ética | — normativo (futuro, entidad Content) |
-| §3.7 | Percepción y feedback | `ClientStateManager` (§4.10) + contratos UX (§3.7) + `HUDManager` / `SummaryManager` / `PromptController` |
-| §3.8 | Criterios de éxito del MVP | — empírico → playtest (QA-001, P6 §6.7) |
-| §3.9 | Visión a largo plazo | — normativo (roadmap §5.7, dominios Identidad/Creación) |
+| D1 | Coordinación decisional bajo escasez | `GameManager` (Lobby/Summary) + `RoundManager` (ronda activa) — §4.4 |
+| D2 | Densidad de interacción | — empírico → playtest (métrica de avance, §3.2) |
+| D3 | El entorno acopla resultados | `MapBootstrap` + `CarryManager` + `RoundManager` — el acoplamiento emerge de sus interacciones |
+| D4 | Acoplamiento intrínseco | `CarryRules` carryEfficiency (resistencia física, no gate — §4.13, DL-047) |
+| D5 | Contención espacial (negativa, pervasiva) | layout + física del engine: `MapBootstrap` (placeholder, DL-036) / layout real (WLD-003) |
+| D6 | Pooling por objeto (positivo, puntuado) | `CarryRules` carryEfficiency + `CarryManager` / `CarrySupport` |
+| D7 | Valencia cooperativa | `TruckManager` (conteo de equipo) + `RoundManager` (RoundSummary único) |
+| D8 | Obligación intrínseca, nunca gate | `CarryManager` (el líder siempre puede iniciar — §4.4, DL-047) |
+| D9 | Escasez → decisión compartida | timer de `RoundManager` (1 tick/s, §4.12) + `ObjectManager` (spawn disperso) |
+| D10 | Situaciones distintas, objetivo fijo | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
+| D11 | Sin ventaja de gameplay | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D12 | Neutralidad de objetos | `TruckManager` (conteo uniforme) + definiciones de objeto sin campo de valor (§2.3) |
+| D13 | Nada solo-individual | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D14 | Sin castigo por fallo | `RoundRules` buildClientComment (3 umbrales sin derrota — §4.13) |
+| D15 | Estadísticas sin ventaja | `StatRules` + `PlayerDataService` (Stats es infraestructura, §2.5) |
+| D16 | Monetización de identidad/creación | — normativo (futuro, entidad Content §2.3) |
+| D17 | Estado legible | `ClientStateManager` (§4.10) + `HUDManager` / `PromptController` |
+| D18 | Contratos UX binarios | — normativo → contratos de §3.7 + auditoría UX |
+| D19 | Summary narra, no informa | `RoundRules` + `SummaryManager` + StoryEvents (§4.4) |
+| D20 | Criterios de éxito | — empírico → playtest (QA-001, P6 §6.7) |
+| D21 | Evolución en tres dominios | — normativo (roadmap §5.7) |
 
 **Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`. (⚠ `ProfileStoreConfig` existe en `src/server/Persistence/` pero §4.7 declara solo PlayerDataService y MigrationService como módulos propios — prosa desactualizada; armonizar en la re-derivación holística de §4.)
 
@@ -1050,11 +1087,11 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Formato de código uniforme | StyLua |
 | — | Convención de commits | commitlint (Lefthook commit-msg) |
 | §5.10 | PR `class:a` referencia un `DL-xxx` y toca `docs/` (trazabilidad, DL-041) | github-script en CI (labels + cuerpo/commits + archivos del PR) — solo CI, requiere contexto de PR |
-| §5.4/§5.5 | Grafo de derivación: integridad (`dangling`), procedencia (`orphan`, DL-032), frescura (`stale` — con diferimientos autorizados y acotados por fecha en `deferrals.txt`; vencido = violación), cobertura (`uncovered`: DL que modifica §3/§4 sin declarar derivación) altitud (`level_skip`: implementación sin fuente §3/§4/DL; `domain_mismatch`: Domain del DL incoherente con lo que Modifica; `impl_leak`: módulos de `src/` nombrados en §1–§3) determinación (`undeclared_free`: DL que modifica el master sin declarar `Libre:` — el juicio determinado-vs-libre es un acto explícito), código (`module_undeclared`: módulo en `src/` no declarado en §4) y gluing §3↔§4 (`unglued_section`: sección §3 sin realización en §4.15; `glue_dangling`: claim de módulo inexistente) — DL-048/049/050/051/053/054 | `lune run tools/derivation-graph/check.luau` (modelo: `tools/derivation-graph/derivation.dl`) |
+| §5.4/§5.5 | Grafo de derivación: integridad (`dangling`), procedencia (`orphan`, DL-032), frescura (`stale` — con diferimientos autorizados y acotados por fecha en `deferrals.txt`; vencido = violación), cobertura (`uncovered`: DL que modifica §3/§4 sin declarar derivación) altitud (`level_skip`: implementación sin fuente §3/§4/DL; `domain_mismatch`: Domain del DL incoherente con lo que Modifica; `impl_leak`: módulos de `src/` nombrados en §1–§3) determinación (`undeclared_free`: DL que modifica el master sin declarar `Libre:` — el juicio determinado-vs-libre es un acto explícito), código (`module_undeclared`: módulo en `src/` no declarado en §4) y gluing claim→§4 (`unglued_claim`: claim de §3.0 sin realización en §4.15; `glue_dangling`: claim de módulo inexistente) — DL-048/049/050/051/053/054/062. `uncovered` exime §3: §3.1–§3.9 no son normativas (derivado de DL-061) y §3.0 queda acotada por la zona Z4 — DL-062 | `lune run tools/derivation-graph/check.luau` (modelo: `tools/derivation-graph/derivation.dl`) |
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
-| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058 | mismo runner (`check.luau`) |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061 | mismo runner (`check.luau`) |
 | §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas y acotadas (`zone_malformed`, `zone_expired`: zona vencida = violación). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**

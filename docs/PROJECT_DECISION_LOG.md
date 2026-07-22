@@ -2753,4 +2753,108 @@ Libre:       Vencimientos de las zonas Z1–Z3 (re-acotar cada frontera) → PO
 Referencias: §2.8, §2.6, §5.0, DL-050, DL-056, DL-059
 ```
 
+---
+
+### DL-061
+
+```
+ID:          DL-061
+Fecha:       2026-07-19
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Primer paso del programa holístico bajo el aparato completo:
+             §3 fundaba normativamente desde prosa — sus afirmaciones de
+             diseño no eran verificables ni trazables a los axiomas, y su
+             gluing (§4.15) conectaba PROSA con módulos (zona Z3). Con F8 y
+             el metaframework en pie, la capa normativa de §3 se autora en
+             forma (M4), sin conversión (DL-055).
+Contenido:   Nueva §3.0 — Claims de Diseño: 21 claims (D1–D21) que portan
+             toda la carga normativa de §3, cada uno citando el catálogo
+             §2.7 sobre premisas que resuelven (axiomas, elecciones E1–E3,
+             claims de §2.1 y de §3). Las subsecciones §3.1–§3.9 quedan
+             como COMENTARIO NO NORMATIVO. Cobertura: §3.1→D1, §3.2→D2,
+             §3.3→D3–D9 (acoplamiento, carriers, valencia, intrínseco,
+             escasez), §3.4→D10, §3.5→D11–D15, §3.6→D16, §3.7→D17–D19,
+             §3.8→D20 (marcador empírico legítimo), §3.9→D21. Regla nueva
+             unclaimed_section: subsección de §3 sin claim ni marcador =
+             violación (sin ella, una sección podría volver a fundar desde
+             prosa de forma invisible). §3.0 exenta de gluing (es la tabla,
+             no un concepto a realizar). HALLAZGO: §3.3 citaba "(C3, C4)" —
+             C4 NO EXISTE (los axiomas son C1a/C1b/C2′/C3); era un residuo
+             de la numeración conversacional CL1–CL5, tolerado porque la
+             prosa no resuelve premisas. Corregido a (D4, D8).
+Hipótesis:   Con §3 en claims verificados, el diseño deja de depender de
+             lectura para su fundamento: una afirmación de diseño sin
+             derivación válida no puede entrar, y el gluing pasa a conectar
+             claims con módulos en vez de prosa con módulos (cierre de Z3).
+Razón:       CONTINGENCY P5 — permiso de proceder indefinidamente otorgado
+             por el PO tras ratificar el metaframework (2026-07-19).
+Impacto:     §3.0 nueva (21 claims); §3.3 corregida (C4 fantasma); header
+             v5.38. check.luau 25 reglas; test.luau 29 mutaciones.
+             Z3 (realización del gluing) queda lista para cerrarse: el
+             siguiente paso re-ancla §4.15 en claims D-n. §3.2 y §3.8
+             confirmados como empíricos — se miden, no se derivan.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §3.3
+Libre:       —
+Referencias: §3.0, §2.7, §2.8, §4.15, DL-055, DL-057, DL-060
+```
+
+### DL-062
+
+```
+ID:          DL-062
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    DL-061 dejó §3 en claims pero el gluing (§4.15) seguía anclado
+             en SECCIONES de prosa. Con §3.1–§3.9 ya no normativas, el
+             dominio del gluing era prosa sin autoridad: la zona Z3.
+Contenido:   §4.15 re-anclada — la columna izquierda es el CLAIM D-n, no la
+             sección. 21 filas (D1–D21), cada claim declara su realización
+             (mecanismo, o marcador legítimo empírico/normativo). Regla
+             unglued_section → unglued_claim: totalidad sobre claims, no
+             sobre secciones. Z3 CERRADA y retirada del registro; el
+             registro contiene lo vigente, el cierre vive en el DL.
+             HALLAZGOS del validador al nacer la sección:
+             (1) glue_dangling D12 → `ObjectDefinition` — módulo de
+                 Definitions/, exento del registro; era claim de módulo
+                 falso. Corregido a prosa.
+             (2) uncovered DL-061 — un DL que modifica §3 debía declarar
+                 ticket. Al tiparlo (MT0): §3.1–§3.9 son comentario no
+                 normativo, luego no pueden generar obligación de
+                 implementación — exención DERIVADA. §3.0 sí es normativa,
+                 pero el grafo no distingue REUBICAR normatividad de
+                 CAMBIAR el compromiso porque los enunciados de claim no
+                 están versionados: formalizable-pendiente → zona Z4
+                 ACOTADA (vence 2026-08-11), no fallback.
+             (3) El propio validador rechazó cerrar Z3 marcando la fila
+                 como "cerrada" (zone_malformed): el registro es de zonas
+                 NO verificadas, no un cementerio.
+Hipótesis:   Con el gluing anclado en claims, toda la cadena axioma →
+             claim → realización → módulo es verificable sin leer prosa.
+             La prosa queda estrictamente como comentario: puede borrarse
+             sin perder una sola obligación.
+Razón:       CONTINGENCY P5 — permiso de proceder indefinidamente otorgado
+             por el PO tras ratificar el metaframework (2026-07-19).
+Impacto:     §4.15 re-anclada (21 claims); §2.8 registro de zonas: Z3
+             cerrada, Z4 abierta. check.luau: unglued_claim reemplaza
+             unglued_section; uncovered exime §3 (derivado + Z4).
+             derivation.dl: glue/glued/unglued_claim re-tipados sobre
+             claim; design_claim y unclaimed_section declaradas.
+             test.luau 29/29 + auto-cobertura M9.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §4.15, §2.8
+Libre:       —
+Referencias: §4.15, §3.0, §2.8, DL-054, DL-060, DL-061
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
