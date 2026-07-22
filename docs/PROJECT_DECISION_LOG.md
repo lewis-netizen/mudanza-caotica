@@ -3183,4 +3183,90 @@ Libre:       Ratificación de E4–E10 → PO. Rango concreto del grupo (4–6),
 Referencias: §2.7, §2.3, §5.0, DL-047, DL-060, DL-064, DL-066
 ```
 
+### DL-068
+
+```
+ID:          DL-068
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Z1 — primera pasada de ENTAILMENT sobre los claims: no la
+             forma (ya verificada) sino si la premisa citada SOSTIENE la
+             conclusión. Bajo la directriz del PO: delimitar primero todo
+             lo válido; cuál valencia es mejor va después.
+             CORRECCIÓN DE ALCANCE: se venía diciendo "18 claims sin
+             verificar", contando los que provienen de prosa pre-axiomas.
+             Z1 no es eso: el entailment no se ha verificado en NINGUNO,
+             incluidos los de §3.1/§3.3 re-derivadas (DL-046). Son 22.
+             Se confundió "fuente heredada" con "entailment no verificado".
+Contenido:   SEIS DEFECTOS hallados, cinco corregidos (determinados) y dos
+             bloqueados (exigen ratificación):
+             (1) D1 — la ESCASEZ entraba sin premisa. Ni C1b ni C2′ la
+                 mencionan; C2′ exige ambigüedad interpretable pero no dice
+                 qué la genera (podría ser información oculta o
+                 complejidad combinatoria). Y D9 derivaba de [D1] tratando
+                 la escasez como dada: circularidad SUSTANTIVA que
+                 claim_cycle no ve porque D1 no cita a D9. D1 restado sin
+                 escasez; eje A11 y elección E11 registrados SIN RATIFICAR.
+                 D9 BLOQUEADO: su contenido ES la escasez, y
+                 election_unratified_cited impide reescribirlo citando E11
+                 hasta que el PO ratifique — el aparato bloquea la
+                 reintroducción por la puerta de atrás.
+                 HALLAZGO METODOLÓGICO: el barrido de valencias (DL-067)
+                 miró tablas de parámetros y prosa, no PREMISAS DE CLAIMS.
+                 A11 vivía dentro de una derivación. El barrido era
+                 incompleto por construcción.
+             (2) D3 — valencia cooperativa colada. Decía "la COOPERACIÓN se
+                 genera..." derivando de C1b a secas, que es NEUTRAL de
+                 valencia por su propio enunciado: de resultados acoplados
+                 sale interdependencia, no cooperación (podrían acoplarse
+                 compitiendo). E1 aparecía recién en D7. D3 se adelantaba a
+                 su propia elección — misma clase que el defecto de E1 que
+                 el PO cazó a mano. Corregido a neutral; D7 carga la
+                 valencia.
+             (3) D12 chocaba con D6. "Ningún objeto VALE más que otro"
+                 contra "el objeto acopla cuando su DEMANDA excede la
+                 capacidad de un individuo": los objetos sí difieren, en
+                 demanda. Precisado a "no otorga más puntuación; pueden
+                 diferir en demanda".
+             (4) Colisión terminológica: D5/D6 llamaban al acoplamiento
+                 "negativo"/"positivo" y E1 llama a la valencia
+                 "cooperativa" — dos ejes distintos con la misma palabra.
+                 Renombrados a RIVAL / ACUMULATIVO.
+             (5) D8 saltaba de contar a prohibir. D4 dice qué CUENTA como
+                 acoplamiento; D8 concluía que cierta regla está PROHIBIDA.
+                 Descompuesto (M5): D23 nuevo — "lo que no cuenta como
+                 acoplamiento no puede imponerse como obligación de
+                 cooperar" — y D8 deriva de [D23].
+             (6) D18 no deriva de D17. De "el estado es legible" a "los
+                 contratos de UX son binarios" hay un paso de MÉTODO, no
+                 una especialización. §2.1 Nivel 2 no tiene ningún
+                 postulado de verificabilidad que citar. BLOQUEADO: exige
+                 un postulado N2 nuevo, y R-POST significa ratificado, no
+                 derivado.
+             Prosa de §3.1 y §3.3 actualizada para no contradecir.
+Hipótesis:   Verificar entailment claim por claim encuentra defectos que la
+             forma no puede ver — circularidad sustantiva, premisas
+             coladas, colisiones de vocabulario — y separa lo determinado
+             de lo que exige decisión sin mezclarlos.
+Razón:       CONTINGENCY P5 — "delimitar primero lo válido; cuáles
+             valencias son mejores va después" (PO, 2026-07-22).
+Impacto:     §3.0: D1, D3, D5, D6, D8, D12 re-sellados; D9 y D18 marcados
+             bloqueados; D23 nuevo. §2.7: A11 y E11 nuevas (sin ratificar).
+             §3.1 y §3.3 (comentario) actualizadas. §4.15: fila de D23.
+             Header v5.45. check 31 reglas, test 37/37.
+             COLA DE RATIFICACIÓN: E11 (generador de la decisión
+             compartida) desbloquea D1/D9; postulado N2 de verificabilidad
+             desbloquea D18. Ninguno se escribe unilateralmente.
+             PENDIENTE de Z1: 14 claims restantes sin pasada de entailment.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §3.1, §3.3, §2.7, §4.15
+Libre:       Valor de A11 → PO. Postulado N2 de verificabilidad → PO.
+Referencias: §3.0, §2.7, §2.1, §4.15, DL-046, DL-061, DL-064, DL-067
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

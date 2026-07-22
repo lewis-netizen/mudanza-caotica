@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.44 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.45 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -244,6 +244,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado |
 | A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado |
 | A10 | Granularidad de la demanda | `binaria` · `graduada` | cerrado |
+| A11 | Generador de la decisión compartida | `escasez temporal` · `información oculta` · `complejidad combinatoria` · `interdependencia de roles` | abierto |
 
 **Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *uno* de los valores del dominio de ese eje; elegir otro es revisión de la elección (⚠), no del núcleo. Forma obligatoria: un eje registrado por elección, un valor perteneciente a su dominio, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_axis_unregistered`, `election_value_off_axis`).
 
@@ -261,6 +262,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | E8 | A8 | `el ciclo de vida completo` | Ningún axioma lo fija; postura de arquitectura (DL-039) | sin ratificar |
 | E9 | A9 | `ambos` | C2′ exige variación interpretable, no dice de dónde procede | sin ratificar |
 | E10 | A10 | `binaria` | C1b admite cualquier granularidad; DL-047 acota la demanda a ≤ 2 | sin ratificar |
+| E11 | A11 | `escasez temporal` | C2′ exige ambigüedad interpretable, no dice qué la genera — hallada dentro de D1, no en prosa (DL-068) | sin ratificar |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
@@ -318,28 +320,29 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 
 | ID | Sección | Claim | Derivación | Sello |
 |---|---|---|---|---|
-| D1 | §3.1 | El reto del loop vive en la coordinación decisional bajo escasez, no en el transporte. | R-COMP · C1b + C2′ | 9e3e83 |
+| D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb |
 | D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1b + C2′ | 05adac |
-| D3 | §3.3 | La cooperación se genera cuando el entorno acopla los resultados de los jugadores; no es una feature. | R-ESP · C1b | 138eb8 |
+| D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 |
 | D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 |
-| D5 | §3.3 | El espacio acopla por contención: negativo y pervasivo. | R-COMP · C1b + [Compresión Social] | a68e89 |
-| D6 | §3.3 | El objeto acopla por pooling — positivo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 91c113 |
+| D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b |
+| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 95178f |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 |
-| D8 | §3.3 | La cooperación obligatoria es legítima solo si emana de la naturaleza del elemento; una regla que impide iniciar la interacción está prohibida. | R-ESP · [D4] | 7e083b |
-| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | R-COMP · C2′ + [D1] | 0a5ad8 |
+| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-ESP · [D23] | 93d133 |
+| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 |
 | D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C2′ + E2 | 4a98c3 |
 | D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay. | R-ESP · [Expresión sobre Ventaja] | d5558e |
-| D12 | §3.5 | Ningún objeto vale más que otro (Neutralidad de Objetos). | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | 879670 |
+| D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | fea1c9 |
 | D13 | §3.5 | Ninguna mecánica afecta solo al individuo sin beneficio del grupo. | R-ESP · C1b | b8cbf6 |
 | D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b |
 | D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c |
 | D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 |
 | D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 |
-| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-ESP · [D17] | a01d00 |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: exige postulado N2 de verificabilidad, sin ratificar | a01d00 |
 | D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores; no informa puntuaciones. | R-ESP · C1a | 4e18f2 |
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f |
 | D21 | §3.9 | La evolución del juego fortalece gameplay, identidad o creación. | R-ESP · [Jugadores como Fuente de Contenido] | 731e4a |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 |
+| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-ESP · [D4] | 592d28 |
 
 ### 3.1 Core Loop
 
@@ -363,7 +366,7 @@ Summary Screen muestra lo que ocurrió
 Nueva ronda
 ```
 
-**Esencia (derivada de §2.1).** El reto no vive en el transporte sino en la **coordinación decisional bajo escasez**: tiempo y espacio finitos vuelven "sacar objetos" una decisión compartida de qué salvar, con quién y por qué ruta. El mecanismo por el que el entorno genera esa cooperación se deriva en §3.3.
+**Esencia (D1).** El reto no vive en la ejecución individual sino en la **coordinación decisional**. Que el generador concreto de esa decisión sea la ESCASEZ (tiempo y manos finitos) es una elección de diseño —A11/E11, sin ratificar— no una consecuencia de los axiomas: C2′ exige ambigüedad interpretable pero no dice qué la produce. Hasta que se ratifique, D9 queda bloqueado y la escasez no funda nada (DL-068). El mecanismo por el que el entorno acopla se deriva en §3.3.
 
 ### 3.2 Densidad de Interacción (DI)
 
@@ -379,12 +382,12 @@ Esta métrica es el criterio de avance entre semanas del Roadmap. No se avanza h
 
 ### 3.3 Dependencia Social y Cooperación
 
-La cooperación no es una feature: es lo que se genera cuando el **entorno acopla los resultados de los jugadores** (C1b — el valor reside en la interdependencia). Un acoplamiento cuenta cuando es **intrínseco** (C3): emana de la naturaleza de un elemento compartido, no de una regla externa.
+El **entorno acopla los resultados de los jugadores** (C1b — el valor reside en la interdependencia); el acoplamiento no es una feature. Que ese acoplamiento se resuelva en **cooperación** y no en competencia lo aporta E1, no C1b: el axioma es neutral de valencia y decirlo de otro modo adelantaría la elección (D3/D7, corregido en DL-068). Un acoplamiento cuenta cuando es **intrínseco** (C3): emana de la naturaleza de un elemento compartido, no de una regla externa.
 
 Dos carriers generan el acoplamiento, con valencias distintas:
 
-- **Espacio — contención (acoplamiento negativo):** finito y compartido; los cuerpos rivalizan por el mismo lugar. Es **pervasivo** — ocurre en cada movimiento (Compresión Social). Es la fricción de fondo que fuerza coordinar rutas y turnos.
-- **Objeto — pooling (acoplamiento positivo):** un objeto cuya demanda excede la capacidad de un individuo obliga a combinar esfuerzo. Es **puntuado** — solo al enganchar ese objeto. El objeto además porta la apuesta (el objetivo es salvar objetos).
+- **Espacio — contención (acoplamiento RIVAL):** finito y compartido; los cuerpos rivalizan por el mismo lugar. Es **pervasivo** — ocurre en cada movimiento (Compresión Social). Es la fricción de fondo que fuerza coordinar rutas y turnos.
+- **Objeto — pooling (acoplamiento ACUMULATIVO):** un objeto cuya demanda excede la capacidad de un individuo obliga a combinar esfuerzo. Es **puntuado** — solo al enganchar ese objeto. El objeto además porta la apuesta (el objetivo es salvar objetos).
 
 El **objetivo colectivo** (§1.2) fija la valencia cooperativa: como el resultado es de equipo, todo acoplamiento suma en vez de competir.
 
@@ -1056,6 +1059,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D6 | Pooling por objeto (positivo, puntuado) | `CarryRules` carryEfficiency + `CarryManager` / `CarrySupport` |
 | D7 | Valencia cooperativa | `TruckManager` (conteo de equipo) + `RoundManager` (RoundSummary único) |
 | D8 | Obligación intrínseca, nunca gate | `CarryManager` (el líder siempre puede iniciar — §4.4, DL-047) |
+| D23 | Lo no-acoplado no obliga | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D9 | Escasez → decisión compartida | timer de `RoundManager` (1 tick/s, §4.12) + `ObjectManager` (spawn disperso) |
 | D10 | Situaciones distintas, objetivo fijo | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
 | D11 | Sin ventaja de gameplay | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
