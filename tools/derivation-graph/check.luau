@@ -589,6 +589,7 @@ do
 end
 
 local f8BadDeriv, f8UnknownRule, f8UnknownPremise, f8Arity = {}, {}, {}, {}
+local electionUnratifiedCited = {} -- elección no ratificada citada como premisa
 local f8Edges = {} -- nombre → { claims premisa } para detección de ciclos
 for name, c in pairs(f8Claims) do
 	local formal = c.raw
@@ -629,6 +630,14 @@ for name, c in pairs(f8Claims) do
 				end
 			elseif f8Elections[tok] then
 				elecN += 1
+				-- una elección SIN RATIFICAR no es contenido garantizado
+				-- (perímetro binario, DL-060): no puede fundar un claim.
+				-- Registrar el valor vigente de un eje es DESCRIBIRLO;
+				-- citarlo como premisa es APOYARSE en él.
+				local erow = f8ElectionRows[tok]
+				if erow and erow.estado ~= "decidida" then
+					table.insert(electionUnratifiedCited, name .. " → " .. tok .. " (" .. erow.estado .. ")")
+				end
 			elseif f8Axioms[tok] then
 				otherN += 1
 			else
@@ -972,6 +981,9 @@ end)
 reportViolations("axis_domain_thin (eje con dominio < 2 valores: no es una elección)", axisDomainThin, function(r)
 	return r
 end)
+reportViolations("election_unratified_cited (claim que se apoya en elección sin ratificar)", electionUnratifiedCited, function(r)
+	return r
+end)
 reportViolations("election_axis_unregistered (elección sobre eje no registrado)", electionAxisUnregistered, function(r)
 	return r
 end)
@@ -1010,6 +1022,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
+	+ #electionUnratifiedCited
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

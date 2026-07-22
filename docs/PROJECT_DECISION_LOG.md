@@ -3117,4 +3117,70 @@ Libre:       —
 Referencias: §2.8, §2.7, §4.13, DL-060, DL-062, DL-063, DL-064
 ```
 
+### DL-067
+
+```
+ID:          DL-067
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El barrido del corpus (sesión 2026-07-22) encontró 13 valencias
+             fuera del registro. Con Z2 cerrada, toca enumerar sus dominios
+             para poder aplicar el criterio de optimalidad (DL-064).
+Contenido:   TIPADO PREVIO — no las 13 son ejes. Forzarlas al registro lo
+             habría inflado con cosas que no son elecciones:
+             · Partición ontológica (Player/Object/Map/Content): una
+               ontología no se elige de un menú, se deriva de qué necesita
+               nombrar el diseño. Si es derivada no es elección; si es
+               arbitraria es DEUDA DE MODELADO. Queda pendiente como tal,
+               no como eje.
+             · Alcance del MVP (un mapa + sin economía + sin ranking): es
+               compuesto; election_compound lo rechazaría con razón. Sus
+               partes o derivan (economía/ranking ← D11/D13) o son
+               parámetros de alcance.
+             · Dominios de evolución: ya deriva en D21; registrarlo como
+               elección duplicaría un claim.
+             · Duración de ronda, banda de DI, umbral de 2 s: se MIDEN, no
+               se eligen. Van como Libre:, no al registro de ejes.
+             Quedan SIETE ejes reales: A4 situación ficcional, A5 forma del
+             objetivo, A6 escala del grupo, A7 naturaleza del primer
+             release, A8 horizonte de diseño, A9 origen de la variación,
+             A10 granularidad de la demanda. Cuatro abiertos, tres
+             cerrados. Elecciones E4–E10 registradas con su valor vigente,
+             todas `sin ratificar`.
+             REGLA NUEVA election_unratified_cited: registrar el valor
+             vigente de un eje es DESCRIBIRLO; citarlo como premisa es
+             APOYARSE en él. Solo una elección `decidida` funda claims. Sin
+             esta separación, registrar las siete las habría vuelto
+             fundantes de facto — el barrido habría convertido trece
+             hallazgos en trece axiomas de contrabando.
+             HALLAZGO: A10. §2.3 declara tres tamaños (small/medium/large)
+             sugiriendo granularidad graduada, pero DL-047 acota la demanda
+             a ≤ 2 y small/medium son ambos demanda 1: la granularidad
+             EFECTIVA es binaria y el tercer tamaño es cosmético. Se
+             registra el valor real (`binaria`), no el aparente.
+Hipótesis:   Con los ejes tipados y sus valores registrados sin ratificar,
+             el criterio de optimalidad puede aplicarse eje por eje sin que
+             el registro contamine la fundación mientras tanto.
+Razón:       CONTINGENCY P5 — "mergea #121, después arranca con los 13
+             ejes" (PO, 2026-07-22).
+Impacto:     §2.7: A4–A10 y E4–E10 nuevas; párrafo "Registrar ≠ ratificar".
+             §5.0 fila. check.luau 31 reglas; test.luau 37/37 (ancla de
+             election_axis_unregistered re-anclada a A99: A9 pasó a existir).
+             Header v5.44.
+             PENDIENTE: aplicar el criterio de optimalidad a A4–A10. Z6
+             acota de antemano lo que podrá concluirse — en los cuatro ejes
+             ABIERTOS el veredicto máximo es "no dominado entre lo
+             considerado", no "óptimo".
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7, §5.0
+Libre:       Ratificación de E4–E10 → PO. Rango concreto del grupo (4–6),
+             duración de ronda, banda de DI, umbral de feedback → playtest.
+Referencias: §2.7, §2.3, §5.0, DL-047, DL-060, DL-064, DL-066
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

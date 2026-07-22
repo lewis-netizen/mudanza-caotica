@@ -258,10 +258,20 @@ local cases = {
 		end,
 	},
 	{
+		-- Registrar el valor vigente de un eje es DESCRIBIRLO; citarlo como
+		-- premisa es APOYARSE en él. Sin esta regla, registrar una elección
+		-- sin ratificar la volvería fundante de facto.
+		name = "election_unratified_cited",
+		expect = "✗ election_unratified_cited",
+		apply = function()
+			replaceOnce(MASTER, "| R-ELEC · [D3] + E1 |", "| R-ELEC · [D3] + E4 |")
+		end,
+	},
+	{
 		name = "election_axis_unregistered",
 		expect = "✗ election_axis_unregistered",
 		apply = function()
-			replaceOnce(MASTER, "| E1 | A1 |", "| E1 | A9 |")
+			replaceOnce(MASTER, "| E1 | A1 |", "| E1 | A99 |")
 		end,
 	},
 	{
