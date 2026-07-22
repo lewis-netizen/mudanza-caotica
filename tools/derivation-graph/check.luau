@@ -845,6 +845,86 @@ table.sort(claimSealMismatch)
 
 -- `--seals`: recalcula e imprime los sellos. Se corre al remodelar un claim,
 -- para obtener el sello nuevo que hay que escribir en la tabla.
+-- `--sensitivity`: ∂downstream/∂premisa sobre el grafo de claims. Responde
+-- "si toco esto, ¿qué se mueve?" — el radio de explosión de cada axioma,
+-- elección y claim. Es la lectura DISCRETA de la sensibilidad: el corpus no
+-- es continuo, así que no hay derivada sino diferencia. Un axioma con radio
+-- 0 no sostiene nada; uno con radio alto es donde el diseño se juega.
+-- No es una regla: no hay umbral correcto, luego no hay violación que
+-- reportar. Es medición, y se lee.
+if table.find(process.args, "--sensitivity") then
+	-- dependientes directos: premisa → claims que la citan
+	local dependents = {}
+	local function addDep(prem, claim)
+		dependents[prem] = dependents[prem] or {}
+		table.insert(dependents[prem], claim)
+	end
+	for name, c in pairs(f8Claims) do
+		local formal = c.raw
+		local dash = formal:find(" — ", 1, true)
+		if dash then
+			formal = formal:sub(1, dash - 1)
+		end
+		local _, premStr = formal:match("^(R%-%u+)%s*·%s*(.+)$")
+		if premStr then
+			for tok in premStr:gmatch("[^+]+") do
+				tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+				local claimRef = tok:match("^%[(.+)%]$")
+				if tok ~= "" then
+					addDep(claimRef or tok, name)
+				end
+			end
+		end
+	end
+
+	-- cierre transitivo: todo lo que se mueve si se toca la premisa
+	local function blastRadius(root)
+		local seen, stack = {}, { root }
+		while #stack > 0 do
+			local cur = table.remove(stack)
+			for _, d in ipairs(dependents[cur] or {}) do
+				if not seen[d] then
+					seen[d] = true
+					table.insert(stack, d)
+				end
+			end
+		end
+		local n = 0
+		for _ in pairs(seen) do
+			n += 1
+		end
+		return n
+	end
+
+	local roots = {}
+	for a in pairs(f8Axioms) do
+		table.insert(roots, { a, "axioma" })
+	end
+	for e in pairs(f8Elections) do
+		table.insert(roots, { e, "elección" })
+	end
+	for c in pairs(f8Claims) do
+		table.insert(roots, { c, "claim" })
+	end
+	for _, r in ipairs(roots) do
+		r[3] = blastRadius(r[1])
+	end
+	table.sort(roots, function(x, y)
+		if x[3] ~= y[3] then
+			return x[3] > y[3]
+		end
+		return x[1] < y[1]
+	end)
+
+	print("Sensibilidad — ∂downstream/∂premisa (radio de explosión)\n")
+	for _, r in ipairs(roots) do
+		if r[3] > 0 or r[2] ~= "claim" then
+			print(string.format("  %-28s %-9s %d", r[1], r[2], r[3]))
+		end
+	end
+	process.exit(0)
+end
+
 if table.find(process.args, "--seals") then
 	local ids = {}
 	for id in pairs(designClaims) do
