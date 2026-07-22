@@ -3409,7 +3409,7 @@ Hipótesis:   Con cobertura inversa, una clase de error que se repite deja
 Razón:       CONTINGENCY P5 — "¿por qué el aparato no señala sus deudas?
              haz lo que recomiendes" (PO, 2026-07-22).
 Impacto:     §2.8: registro de escapes (X1–X7) y columna Tipo MT0. §5.0
-             fila. check.luau 33 reglas; test.luau 40/40. Header v5.47.
+             fila. check.luau 31 reglas; test.luau 38/38. Header v5.47.
              La pasada manual de Z1 (DL-068/069) pasa de ser EL RESULTADO
              a ser el CONJUNTO DE PRUEBA: doce defectos que las reglas
              futuras deben encender.

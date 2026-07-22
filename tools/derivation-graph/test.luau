@@ -304,23 +304,6 @@ local cases = {
 		end,
 	},
 	{
-		name = "escape_malformed",
-		expect = "✗ escape_malformed",
-		apply = function()
-			replaceOnce(MASTER, "| zona: Z5 |", "| |")
-		end,
-	},
-	{
-		-- Un escape solo se cierra contra algo QUE EXISTA. Sin esto, el
-		-- registro se falsearía escribiendo el nombre de una regla que
-		-- nadie construyó — y volvería a ser prosa.
-		name = "escape_unresolved (resolución que apunta a nada)",
-		expect = "✗ escape_unresolved",
-		apply = function()
-			replaceOnce(MASTER, "| regla: election_unratified_cited |", "| regla: term_provenance |")
-		end,
-	},
-	{
 		-- Sin Tipo MT0 una zona de DEUDA se lee como frontera aceptada:
 		-- es lo que pasó con Z1 durante días.
 		name = "zone_malformed (zona sin Tipo MT0)",

@@ -1061,15 +1061,27 @@ do
 		end
 	end
 end
-reportViolations("escape_malformed (escape sin clase/hallazgo/resolución)", escapeMalformed, function(r)
-	return r
-end)
-reportViolations("escape_unresolved (clase de error sin regla ni zona que la cubra)", escapeUnresolved, function(r)
-	return r
-end)
+-- NO se reporta como regla ni suma a las violaciones (corrección del PO,
+-- DL-070): el registro es una HEURÍSTICA mantenida a mano. Si bloqueara el
+-- build, un artefacto que yo agrupo por clase reconociendo un patrón se
+-- comportaría como garantía — la deuda disfrazada de mecanismo. Se imprime
+-- como historial, junto a la deuda diferida, y no gobierna nada.
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
+
+do
+	local n, mal = 0, #escapeMalformed + #escapeUnresolved
+	for _ in pairs(escapes) do
+		n += 1
+	end
+	if n > 0 then
+		print(string.format("\n  · escapes registrados: %d — HISTORIAL, no cobertura. No gobierna nada.", n))
+		if mal > 0 then
+			print(string.format("      (%d fila(s) mal formadas — higiene del historial, sin efecto)", mal))
+		end
+	end
+end
 
 if #deferred > 0 then
 	print(string.format("\n  · deuda diferida vigente: %d — autorizada y acotada en deferrals.txt", #deferred))
@@ -1087,7 +1099,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
-	+ #electionUnratifiedCited + #escapeMalformed + #escapeUnresolved
+	+ #electionUnratifiedCited
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
