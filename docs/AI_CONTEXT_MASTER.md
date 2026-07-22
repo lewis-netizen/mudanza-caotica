@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.45 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.46 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -321,7 +321,7 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 | ID | Sección | Claim | Derivación | Sello |
 |---|---|---|---|---|
 | D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb |
-| D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1b + C2′ | 05adac |
+| D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac |
 | D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 |
 | D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 |
 | D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b |
@@ -329,18 +329,18 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 |
 | D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-ESP · [D23] | 93d133 |
 | D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 |
-| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C2′ + E2 | 4a98c3 |
-| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay. | R-ESP · [Expresión sobre Ventaja] | d5558e |
+| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 |
+| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a |
 | D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | fea1c9 |
-| D13 | §3.5 | Ninguna mecánica afecta solo al individuo sin beneficio del grupo. | R-ESP · C1b | b8cbf6 |
+| D13 | §3.5 | Una mecánica que afecta solo al individuo no produce valor y no entra. | R-COMP · C1b + [Simplicidad Mecánica] | 7b1a32 |
 | D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b |
 | D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c |
 | D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 |
 | D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 |
 | D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: exige postulado N2 de verificabilidad, sin ratificar | a01d00 |
-| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores; no informa puntuaciones. | R-ESP · C1a | 4e18f2 |
+| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores: su contenido es la interacción, no la puntuación. | R-ESP · C1a | ecff83 |
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f |
-| D21 | §3.9 | La evolución del juego fortalece gameplay, identidad o creación. | R-ESP · [Jugadores como Fuente de Contenido] | 731e4a |
+| D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 |
 | D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-ESP · [D4] | 592d28 |
 
@@ -399,7 +399,11 @@ Las magnitudes —cuánto se mueve un large en solitario, cuánta eficiencia añ
 
 ### 3.4 Entropía Social
 
-Cada partida debe producir situaciones distintas sin modificar el objetivo principal. La variabilidad emerge de:
+Cada partida debe producir situaciones distintas sin modificar el objetivo principal.
+
+**Estado normativo (DL-069): D10 bloqueado.** Que el objetivo no cambie deriva de E2 (el ancla es el objetivo). Que las situaciones **varíen** no deriva de C2′: la ambigüedad interpretable puede ser idéntica partida tras partida sin dejar de ser ambigua. La variabilidad exige una fuente, y elegirla es E9 (`A9 — origen de la variación`), hoy **sin ratificar**. Hasta entonces la lista siguiente describe la intención, no funda nada.
+
+La variabilidad emerge de:
 - Distribución de objetos en el edificio
 - Selección aleatoria de evento por ronda
 - Comportamiento del NPC vecino
@@ -467,11 +471,12 @@ Ejemplo:
 
 ### 3.9 Visión a Largo Plazo
 
-El MVP valida el gameplay y establece la infraestructura base. Las actualizaciones futuras deben fortalecer al menos uno de estos tres dominios:
+El MVP valida el gameplay y establece la infraestructura base. Las actualizaciones futuras fortalecen la **interacción entre jugadores** o la **creación de contenido por jugadores** (D21).
 
-1. **Gameplay** — nuevas mecánicas de cooperación, mapas, objetos
-2. **Identidad** — cosméticos, expresión personal, títulos
-3. **Creación** — herramientas para que los jugadores creen contenido para otros
+Los tres dominios con que se venía describiendo la evolución —Gameplay, Identidad, Creación— **no derivan de una sola premisa**: `[Jugadores como Fuente de Contenido]` da interacción y creación; **identidad no se sigue de ahí** (DL-069). La identidad sigue siendo legítima como dominio de *monetización* por D16, que sí la deriva. Que los dominios de evolución sean exactamente esos tres es, si acaso, una **elección sin registrar** — y en DL-067 se excluyó del registro de ejes alegando que D21 la derivaba, lo cual era falso.
+
+1. **Interacción** — nuevas mecánicas de cooperación, mapas, objetos
+2. **Creación** — herramientas para que los jugadores creen contenido para otros
 
 ---
 
@@ -1061,10 +1066,10 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D8 | Obligación intrínseca, nunca gate | `CarryManager` (el líder siempre puede iniciar — §4.4, DL-047) |
 | D23 | Lo no-acoplado no obliga | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D9 | Escasez → decisión compartida | timer de `RoundManager` (1 tick/s, §4.12) + `ObjectManager` (spawn disperso) |
-| D10 | Situaciones distintas, objetivo fijo | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
+| D10 | Situaciones distintas (bloqueado por E9) | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
 | D11 | Sin ventaja de gameplay | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D12 | Neutralidad de objetos | `TruckManager` (conteo uniforme) + definiciones de objeto sin campo de valor (§2.3) |
-| D13 | Nada solo-individual | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D13 | Lo solo-individual no entra | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D14 | Sin castigo por fallo | `RoundRules` buildClientComment (3 umbrales sin derrota — §4.13) |
 | D15 | Estadísticas sin ventaja | `StatRules` + `PlayerDataService` (Stats es infraestructura, §2.5) |
 | D16 | Monetización de identidad/creación | — normativo (futuro, entidad Content §2.3) |
@@ -1072,7 +1077,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D18 | Contratos UX binarios | — normativo → contratos de §3.7 + auditoría UX |
 | D19 | Summary narra, no informa | `RoundRules` + `SummaryManager` + StoryEvents (§4.4) |
 | D20 | Criterios de éxito | — empírico → playtest (QA-001, P6 §6.7) |
-| D21 | Evolución en tres dominios | — normativo (roadmap §5.7) |
+| D21 | Evolución: interacción o creación | — normativo (roadmap §5.7) |
 | D22 | Calidad del loop = frecuencia | — empírico → playtest (métrica de avance, §3.2; medida con el criterio de D2) |
 
 **Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`. (⚠ `ProfileStoreConfig` existe en `src/server/Persistence/` pero §4.7 declara solo PlayerDataService y MigrationService como módulos propios — prosa desactualizada; armonizar en la re-derivación holística de §4.)

@@ -3269,4 +3269,85 @@ Libre:       Valor de A11 → PO. Postulado N2 de verificabilidad → PO.
 Referencias: §3.0, §2.7, §2.1, §4.15, DL-046, DL-061, DL-064, DL-067
 ```
 
+### DL-069
+
+```
+ID:          DL-069
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Z1 — segunda pasada de entailment, los 14 claims restantes.
+             Cierra el barrido completo de los 23.
+Contenido:   SEIS DEFECTOS más:
+             (1) D2 — "cuenta como CONTENIDO" derivaba de C1b + C2′, pero
+                 "contenido" es la palabra de C1a, que no estaba entre las
+                 premisas. Misma clase de contrabando que D3/E1, y es
+                 DEFECTO PROPIO: D2 se re-derivó ayer en DL-065 y el
+                 contrabando entró ahí. Corregido a C1a + C1b + C2′.
+             (2) D10 — la VARIABILIDAD no deriva de C2′. Una ambigüedad
+                 interpretable puede ser idéntica partida tras partida sin
+                 dejar de ser ambigua; que las situaciones varíen exige una
+                 fuente, y elegirla es E9 (A9, origen de la variación),
+                 sin ratificar. BLOQUEADO. Mismo patrón que la escasez en
+                 D1: propiedad de diseño colada como si fuera axiomática.
+             (3) D11 — citaba [Expresión sobre Ventaja], que habla de
+                 MONETIZACIÓN, para prohibir en PROGRESIÓN. Ámbito
+                 equivocado. El razonamiento real vive en el comentario de
+                 esa premisa ("la ventaja rutea el resultado por el
+                 sistema") y eso es C1a. Re-anclado a C1a, con el motivo
+                 en el enunciado.
+             (4) D13 — "ninguna mecánica afecta solo al individuo" de C1b
+                 a secas: C1b dice dónde reside el valor, luego una
+                 mecánica individual no PRODUCE valor — no dice que esté
+                 PROHIBIDA. Mismo salto contar→prohibir que D8. Cerrado
+                 con [Simplicidad Mecánica] (§2.1 N2): lo que no aporta y
+                 añade complejidad no entra.
+             (5) D19 — la mitad prohibitiva ("no informa puntuaciones") no
+                 se seguía de C1a como enunciado añadido. Reformulado para
+                 que el negativo sea CONSECUENCIA del mismo enunciado (el
+                 contenido del Summary es la interacción, luego no la
+                 puntuación), no una prohibición extra sin premisa.
+             (6) D21 — "gameplay, identidad o creación" de [Jugadores como
+                 Fuente de Contenido], que da interacción y creación:
+                 IDENTIDAD NO SE SIGUE. Corregido a dos dominios.
+                 AUTOCORRECCIÓN: DL-067 excluyó "dominios de evolución"
+                 del registro de ejes alegando que D21 lo derivaba. Era
+                 falso — D21 nunca derivó los tres. El tipado de DL-067
+                 estaba mal en esa fila. La identidad sigue siendo legítima
+                 como dominio de MONETIZACIÓN por D16, que sí la deriva.
+             Prosa de §3.4 y §3.9 actualizada; ambas afirmaban lo que sus
+             claims ya no sostienen.
+Hipótesis:   Cerrada la pasada, el conjunto de claims queda partido en tres
+             estados explícitos: derivados, bloqueados por elección sin
+             ratificar, y empíricos. No queda ninguno cuyo entailment sea
+             desconocido.
+Razón:       CONTINGENCY P5 — "continúa" (PO, 2026-07-22), bajo la
+             directriz de delimitar lo válido antes de juzgar lo mejor.
+Impacto:     §3.0: D2, D11, D13, D19, D21 re-sellados; D10 bloqueado.
+             §3.4 y §3.9 (comentario) actualizadas. §4.15: etiquetas de
+             D10/D13/D21. Header v5.46. check 31 reglas, test 37/37.
+             BALANCE de Z1 (23 claims, 12 defectos):
+               · derivados y verificados: 19
+               · bloqueados por elección sin ratificar: 3 (D9←E11,
+                 D10←E9, D18←postulado N2)
+               · empíricos legítimos: 1 (D20)
+             PATRÓN DOMINANTE (7 de 12): premisa colada — el enunciado
+             concluye más de lo que sus premisas dan (escasez, cooperación,
+             contenido, variabilidad, identidad) o salta de "no cuenta" a
+             "está prohibido". La forma nunca podía verlo: es exactamente
+             el hueco que Z1 nombra.
+             Z1 NO se cierra: esta pasada la hizo un agente leyendo. El
+             resultado es auditable claim por claim, pero el PROCEDIMIENTO
+             sigue sin mecanizar.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §3.4, §3.9, §4.15
+Libre:       Valor de A9 → PO (desbloquea D10). Dominios de evolución como
+             eje, si se decide registrarlo → PO.
+Referencias: §3.0, §3.4, §3.9, §2.1, §4.15, DL-065, DL-067, DL-068
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
