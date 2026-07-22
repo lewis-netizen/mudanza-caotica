@@ -304,6 +304,15 @@ local cases = {
 		end,
 	},
 	{
+		-- Sin Tipo MT0 una zona de DEUDA se lee como frontera aceptada:
+		-- es lo que pasó con Z1 durante días.
+		name = "zone_malformed (zona sin Tipo MT0)",
+		expect = "✗ zone_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| formalizable pendiente |", "| |")
+		end,
+	},
+	{
 		name = "zone_malformed",
 		expect = "✗ zone_malformed",
 		apply = function()

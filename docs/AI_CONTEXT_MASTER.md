@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.44 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.47 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -77,7 +77,7 @@ Se deducen de los axiomas; frozen porque su fundamento lo es. ⚠ marca un **com
 Otro eje: no describen la experiencia del jugador sino **cómo se construye y se estructura el sistema**. Frozen, pero no se deducen de los axiomas de experiencia.
 
 | Principio | Definición | Eje | Derivación |
-|---|---|---|---|---|
+|---|---|---|---|---|---|
 | Simplicidad Mecánica | La profundidad surge de sistemas simples interactuando. | Método | R-POST |
 | Compresión Social | El espacio debe aumentar la frecuencia con la que los jugadores interfieren entre sí. | Método (táctica espacial al servicio de C1b) | R-POST |
 | Entidades Estables | Diseñar alrededor de entidades (Player, Object, Map, Content), no alrededor de nombres, archivos o features concretas. | Arquitectura | R-POST |
@@ -244,6 +244,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado |
 | A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado |
 | A10 | Granularidad de la demanda | `binaria` · `graduada` | cerrado |
+| A11 | Generador de la decisión compartida | `escasez temporal` · `información oculta` · `complejidad combinatoria` · `interdependencia de roles` | abierto |
 
 **Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *uno* de los valores del dominio de ese eje; elegir otro es revisión de la elección (⚠), no del núcleo. Forma obligatoria: un eje registrado por elección, un valor perteneciente a su dominio, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_axis_unregistered`, `election_value_off_axis`).
 
@@ -261,6 +262,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | E8 | A8 | `el ciclo de vida completo` | Ningún axioma lo fija; postura de arquitectura (DL-039) | sin ratificar |
 | E9 | A9 | `ambos` | C2′ exige variación interpretable, no dice de dónde procede | sin ratificar |
 | E10 | A10 | `binaria` | C1b admite cualquier granularidad; DL-047 acota la demanda a ≤ 2 | sin ratificar |
+| E11 | A11 | `escasez temporal` | C2′ exige ambigüedad interpretable, no dice qué la genera — hallada dentro de D1, no en prosa (DL-068) | sin ratificar |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
@@ -297,14 +299,32 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 
 **Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas. El registro contiene lo *vigente*: una zona cerrada SALE de la tabla y su cierre queda en el DL que lo ejecuta (Z3 cerrada por DL-062 — el gluing ancla en claims D-n, no en prosa; Z2 cerrada por DL-064 — los ejes son tipos con dominio enumerado). Salir del registro exige haber cerrado, no haber caducado: `zone_expired` dispara antes.
 
-| ID | Zona — sin garantía del sistema | Camino de cierre | Vence | Ratificada |
+| ID | Zona — sin garantía del sistema | Tipo MT0 | Camino de cierre | Vence | Ratificada |
 |---|---|---|---|---|
-| Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 |
-| Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 |
-| Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 |
-| Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 |
+| Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 |
+| Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | relación → máquina (deuda) | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 |
+| Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | relación → máquina (deuda) | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 |
+| Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 |
 
-El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento y las zonas ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma).
+La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (deuda)` significa que su terreno son relaciones y por tanto **el validador debería cubrirla**: es deuda, no frontera. `formalizable pendiente` es transitorio declarado. `contenido → PO` no se cierra formalizando: se ratifica. Sin ese tipo, Z1 se leyó como frontera aceptada durante días **siendo deuda** — la fila no decía de qué cubo era (DL-070).
+
+**Registro de Escapes (DL-070)** — clases de error que el validador **no cazó**, con sus instancias. Sirve para que un defecto hallado a mano no se evapore en la prosa de un DL: así "premisa colada" apareció **siete veces** sin que nada sumara esas siete.
+
+**Es una HEURÍSTICA, y por tanto DEUDA.** Agrupar instancias por clase lo hace un agente reconociendo un patrón — no hay nada mecánico en ello. En consecuencia **no gobierna nada**: no bloquea, no cuenta como violación, no es una regla y no tiene mutación. Es **historial**. Su valor entero es recordar; en el momento en que algo dependiera de él, una lista mantenida a mano estaría actuando como garantía, que es exactamente la dependencia de agente que estas páginas existen para eliminar. La deuda real no la salda el registro: la salda **mecanizar el entailment** (Z1).
+
+| ID | Clase de error | Hallado en | Resolución |
+|---|---|---|---|
+| X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069) | zona: Z1 |
+| X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) | zona: Z1 |
+| X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | zona: Z1 |
+| X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068) | zona: Z1 |
+| X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | zona: Z5 |
+| X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
+| X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
+
+**El registro es MEMORIA, no COBERTURA (DL-070).** Un escape ausente significa que **nadie lo notó**, no que no exista: la ausencia de fila no prueba nada. Por su naturaleza, el registro **no puede crear dependencia alguna** — ninguna garantía del sistema se deriva de su estado, ni de que esté completo, ni de que todos sus escapes estén resueltos, y **ninguna regla puede consumirlo como evidencia**. El registro **empuja** (acumula presión sobre una clase que se repite) pero **jamás respalda**. Un mecanismo que dependiera de su completitud heredaría precisamente la dependencia de agente que el registro existe para hacer visible.
+
+El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento, las zonas y los tipos ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma). El **registro de escapes** no es contenido ni garantía: es un hecho observado, y su resolución apunta a lo que sí carga garantía (una regla, una zona) sin cargarla él.
 
 ---
 
@@ -318,28 +338,29 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 
 | ID | Sección | Claim | Derivación | Sello |
 |---|---|---|---|---|
-| D1 | §3.1 | El reto del loop vive en la coordinación decisional bajo escasez, no en el transporte. | R-COMP · C1b + C2′ | 9e3e83 |
-| D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1b + C2′ | 05adac |
-| D3 | §3.3 | La cooperación se genera cuando el entorno acopla los resultados de los jugadores; no es una feature. | R-ESP · C1b | 138eb8 |
+| D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb |
+| D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac |
+| D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 |
 | D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 |
-| D5 | §3.3 | El espacio acopla por contención: negativo y pervasivo. | R-COMP · C1b + [Compresión Social] | a68e89 |
-| D6 | §3.3 | El objeto acopla por pooling — positivo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 91c113 |
+| D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b |
+| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 95178f |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 |
-| D8 | §3.3 | La cooperación obligatoria es legítima solo si emana de la naturaleza del elemento; una regla que impide iniciar la interacción está prohibida. | R-ESP · [D4] | 7e083b |
-| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | R-COMP · C2′ + [D1] | 0a5ad8 |
-| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C2′ + E2 | 4a98c3 |
-| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay. | R-ESP · [Expresión sobre Ventaja] | d5558e |
-| D12 | §3.5 | Ningún objeto vale más que otro (Neutralidad de Objetos). | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | 879670 |
-| D13 | §3.5 | Ninguna mecánica afecta solo al individuo sin beneficio del grupo. | R-ESP · C1b | b8cbf6 |
+| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-ESP · [D23] | 93d133 |
+| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 |
+| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 |
+| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a |
+| D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | fea1c9 |
+| D13 | §3.5 | Una mecánica que afecta solo al individuo no produce valor y no entra. | R-COMP · C1b + [Simplicidad Mecánica] | 7b1a32 |
 | D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b |
 | D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c |
 | D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 |
 | D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 |
-| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-ESP · [D17] | a01d00 |
-| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores; no informa puntuaciones. | R-ESP · C1a | 4e18f2 |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: exige postulado N2 de verificabilidad, sin ratificar | a01d00 |
+| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores: su contenido es la interacción, no la puntuación. | R-ESP · C1a | ecff83 |
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f |
-| D21 | §3.9 | La evolución del juego fortalece gameplay, identidad o creación. | R-ESP · [Jugadores como Fuente de Contenido] | 731e4a |
+| D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 |
+| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-ESP · [D4] | 592d28 |
 
 ### 3.1 Core Loop
 
@@ -363,7 +384,7 @@ Summary Screen muestra lo que ocurrió
 Nueva ronda
 ```
 
-**Esencia (derivada de §2.1).** El reto no vive en el transporte sino en la **coordinación decisional bajo escasez**: tiempo y espacio finitos vuelven "sacar objetos" una decisión compartida de qué salvar, con quién y por qué ruta. El mecanismo por el que el entorno genera esa cooperación se deriva en §3.3.
+**Esencia (D1).** El reto no vive en la ejecución individual sino en la **coordinación decisional**. Que el generador concreto de esa decisión sea la ESCASEZ (tiempo y manos finitos) es una elección de diseño —A11/E11, sin ratificar— no una consecuencia de los axiomas: C2′ exige ambigüedad interpretable pero no dice qué la produce. Hasta que se ratifique, D9 queda bloqueado y la escasez no funda nada (DL-068). El mecanismo por el que el entorno acopla se deriva en §3.3.
 
 ### 3.2 Densidad de Interacción (DI)
 
@@ -379,12 +400,12 @@ Esta métrica es el criterio de avance entre semanas del Roadmap. No se avanza h
 
 ### 3.3 Dependencia Social y Cooperación
 
-La cooperación no es una feature: es lo que se genera cuando el **entorno acopla los resultados de los jugadores** (C1b — el valor reside en la interdependencia). Un acoplamiento cuenta cuando es **intrínseco** (C3): emana de la naturaleza de un elemento compartido, no de una regla externa.
+El **entorno acopla los resultados de los jugadores** (C1b — el valor reside en la interdependencia); el acoplamiento no es una feature. Que ese acoplamiento se resuelva en **cooperación** y no en competencia lo aporta E1, no C1b: el axioma es neutral de valencia y decirlo de otro modo adelantaría la elección (D3/D7, corregido en DL-068). Un acoplamiento cuenta cuando es **intrínseco** (C3): emana de la naturaleza de un elemento compartido, no de una regla externa.
 
 Dos carriers generan el acoplamiento, con valencias distintas:
 
-- **Espacio — contención (acoplamiento negativo):** finito y compartido; los cuerpos rivalizan por el mismo lugar. Es **pervasivo** — ocurre en cada movimiento (Compresión Social). Es la fricción de fondo que fuerza coordinar rutas y turnos.
-- **Objeto — pooling (acoplamiento positivo):** un objeto cuya demanda excede la capacidad de un individuo obliga a combinar esfuerzo. Es **puntuado** — solo al enganchar ese objeto. El objeto además porta la apuesta (el objetivo es salvar objetos).
+- **Espacio — contención (acoplamiento RIVAL):** finito y compartido; los cuerpos rivalizan por el mismo lugar. Es **pervasivo** — ocurre en cada movimiento (Compresión Social). Es la fricción de fondo que fuerza coordinar rutas y turnos.
+- **Objeto — pooling (acoplamiento ACUMULATIVO):** un objeto cuya demanda excede la capacidad de un individuo obliga a combinar esfuerzo. Es **puntuado** — solo al enganchar ese objeto. El objeto además porta la apuesta (el objetivo es salvar objetos).
 
 El **objetivo colectivo** (§1.2) fija la valencia cooperativa: como el resultado es de equipo, todo acoplamiento suma en vez de competir.
 
@@ -396,7 +417,11 @@ Las magnitudes —cuánto se mueve un large en solitario, cuánta eficiencia añ
 
 ### 3.4 Entropía Social
 
-Cada partida debe producir situaciones distintas sin modificar el objetivo principal. La variabilidad emerge de:
+Cada partida debe producir situaciones distintas sin modificar el objetivo principal.
+
+**Estado normativo (DL-069): D10 bloqueado.** Que el objetivo no cambie deriva de E2 (el ancla es el objetivo). Que las situaciones **varíen** no deriva de C2′: la ambigüedad interpretable puede ser idéntica partida tras partida sin dejar de ser ambigua. La variabilidad exige una fuente, y elegirla es E9 (`A9 — origen de la variación`), hoy **sin ratificar**. Hasta entonces la lista siguiente describe la intención, no funda nada.
+
+La variabilidad emerge de:
 - Distribución de objetos en el edificio
 - Selección aleatoria de evento por ronda
 - Comportamiento del NPC vecino
@@ -464,11 +489,12 @@ Ejemplo:
 
 ### 3.9 Visión a Largo Plazo
 
-El MVP valida el gameplay y establece la infraestructura base. Las actualizaciones futuras deben fortalecer al menos uno de estos tres dominios:
+El MVP valida el gameplay y establece la infraestructura base. Las actualizaciones futuras fortalecen la **interacción entre jugadores** o la **creación de contenido por jugadores** (D21).
 
-1. **Gameplay** — nuevas mecánicas de cooperación, mapas, objetos
-2. **Identidad** — cosméticos, expresión personal, títulos
-3. **Creación** — herramientas para que los jugadores creen contenido para otros
+Los tres dominios con que se venía describiendo la evolución —Gameplay, Identidad, Creación— **no derivan de una sola premisa**: `[Jugadores como Fuente de Contenido]` da interacción y creación; **identidad no se sigue de ahí** (DL-069). La identidad sigue siendo legítima como dominio de *monetización* por D16, que sí la deriva. Que los dominios de evolución sean exactamente esos tres es, si acaso, una **elección sin registrar** — y en DL-067 se excluyó del registro de ejes alegando que D21 la derivaba, lo cual era falso.
+
+1. **Interacción** — nuevas mecánicas de cooperación, mapas, objetos
+2. **Creación** — herramientas para que los jugadores creen contenido para otros
 
 ---
 
@@ -1056,11 +1082,12 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D6 | Pooling por objeto (positivo, puntuado) | `CarryRules` carryEfficiency + `CarryManager` / `CarrySupport` |
 | D7 | Valencia cooperativa | `TruckManager` (conteo de equipo) + `RoundManager` (RoundSummary único) |
 | D8 | Obligación intrínseca, nunca gate | `CarryManager` (el líder siempre puede iniciar — §4.4, DL-047) |
+| D23 | Lo no-acoplado no obliga | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D9 | Escasez → decisión compartida | timer de `RoundManager` (1 tick/s, §4.12) + `ObjectManager` (spawn disperso) |
-| D10 | Situaciones distintas, objetivo fijo | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
+| D10 | Situaciones distintas (bloqueado por E9) | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
 | D11 | Sin ventaja de gameplay | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D12 | Neutralidad de objetos | `TruckManager` (conteo uniforme) + definiciones de objeto sin campo de valor (§2.3) |
-| D13 | Nada solo-individual | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D13 | Lo solo-individual no entra | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D14 | Sin castigo por fallo | `RoundRules` buildClientComment (3 umbrales sin derrota — §4.13) |
 | D15 | Estadísticas sin ventaja | `StatRules` + `PlayerDataService` (Stats es infraestructura, §2.5) |
 | D16 | Monetización de identidad/creación | — normativo (futuro, entidad Content §2.3) |
@@ -1068,7 +1095,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D18 | Contratos UX binarios | — normativo → contratos de §3.7 + auditoría UX |
 | D19 | Summary narra, no informa | `RoundRules` + `SummaryManager` + StoryEvents (§4.4) |
 | D20 | Criterios de éxito | — empírico → playtest (QA-001, P6 §6.7) |
-| D21 | Evolución en tres dominios | — normativo (roadmap §5.7) |
+| D21 | Evolución: interacción o creación | — normativo (roadmap §5.7) |
 | D22 | Calidad del loop = frecuencia | — empírico → playtest (métrica de avance, §3.2; medida con el criterio de D2) |
 
 **Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`. (⚠ `ProfileStoreConfig` existe en `src/server/Persistence/` pero §4.7 declara solo PlayerDataService y MigrationService como módulos propios — prosa desactualizada; armonizar en la re-derivación holística de §4.)
@@ -1127,7 +1154,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
 | §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado (A1–A10): eje bien formado con Cierre cerrado|abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Registrar ≠ ratificar: una elección `sin ratificar` no puede fundar un claim (`election_unratified_cited`) — DL-067. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
-| §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas, acotadas y **ratificadas** (`zone_malformed` exige descripción, camino, vencimiento y celda `PO <fecha>` — DL-062; `zone_expired`: zona vencida = violación). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
+| §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas, acotadas, **tipadas** y **ratificadas** (`zone_malformed` exige descripción, Tipo MT0, camino, vencimiento y celda `PO <fecha>` — DL-062/070; `zone_expired`: zona vencida = violación). El registro de escapes (§2.8) **no aparece aquí**: es heurística e historial, no contrato — no bloquea ni cuenta como violación (DL-070). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
 
