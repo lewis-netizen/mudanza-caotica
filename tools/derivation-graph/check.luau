@@ -459,7 +459,8 @@ local f8Elections = {}
 local f8ElectionRows = {} -- E-n → { eje (A-n), valor, abierto, estado }
 local axes = {} -- A-n → { nombre, dominio = {valores}, cierre } (Z2, DL-064)
 local metaLaws = {} -- M-n → { ley, fuente }
-local zones = {} -- Z-n → { zona, camino, vence } (registro de zonas no verificadas)
+local zones = {} -- Z-n → { zona, tipo, camino, vence, ratif }
+local escapes = {} -- X-n → { clase, hallado, resol } (registro de escapes, DL-070)
 local designClaims = {} -- D-n → { sec, deriv } (capa normativa de §3, DL-061)
 local claimedSections = {} -- §3.N con ≥1 claim o marcador
 do
@@ -576,13 +577,23 @@ do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
 				-- | ID | Zona | Camino de cierre | Vence |
-				-- | ID | Zona | Camino de cierre | Vence | Ratificada |
+				-- | ID | Zona | Tipo MT0 | Camino de cierre | Vence | Ratificada |
 				zones[z] = {
 					zona = cells[2] or "",
-					camino = cells[3] or "",
-					vence = cells[4] or "",
-					ratif = cells[5] or "",
+					tipo = cells[3] or "",
+					camino = cells[4] or "",
+					vence = cells[5] or "",
+					ratif = cells[6] or "",
 				}
+			end
+			-- registro de escapes: | ID | Clase | Hallado en | Resolución |
+			local x = line:match("^| (X%d+) |")
+			if x then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				escapes[x] = { clase = cells[2] or "", hallado = cells[3] or "", resol = cells[4] or "" }
 			end
 		end
 	end
@@ -878,7 +889,14 @@ do
 		-- DL-060): una zona SIN ratificar es una frontera que yo me concedí.
 		-- Por eso está en la forma, no en la prosa de un DL.
 		local ratified = z.ratif:match("^PO %d%d%d%d%-%d%d%-%d%d$") ~= nil
-		if z.zona == "" or z.camino == "" or not ratified or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
+		-- Tipo MT0 (DL-070): sin él, una zona cuyo terreno son RELACIONES —
+		-- es decir, deuda que la máquina debería cubrir — se lee igual que
+		-- una frontera aceptada. Z1 se trató como frontera durante días
+		-- siendo deuda: la fila no decía de qué cubo era.
+		local tipoOk = z.tipo == "relación → máquina (deuda)"
+			or z.tipo == "formalizable pendiente"
+			or z.tipo == "contenido → PO"
+		if z.zona == "" or z.camino == "" or not tipoOk or not ratified or not z.vence:match("^%d%d%d%d%-%d%d%-%d%d$") then
 			table.insert(zoneMalformed, id)
 		elseif today > z.vence then
 			table.insert(zoneExpired, id .. " (venció " .. z.vence .. ")")
@@ -901,7 +919,12 @@ print(
 	)
 )
 
+-- Nombres de regla emitidos, para verificar el registro de escapes: una
+-- clase de error solo puede declararse resuelta por una regla QUE EXISTA.
+local emittedRules = {}
+
 local function reportViolations(name, rows, fmt)
+	emittedRules[(name:match("^(%S+)"))] = true
 	if #rows == 0 then
 		print(string.format("  ✓ %s: 0", name))
 	else
@@ -1002,6 +1025,48 @@ end)
 reportViolations("zone_expired (zona no verificada VENCIDA)", zoneExpired, function(r)
 	return r
 end)
+-- ── registro de escapes (DL-070) ────────────────────────────────────────────
+-- M9 verifica que toda REGLA tenga mutación. Nada verificaba lo inverso: que
+-- toda CLASE DE ERROR CONOCIDA tenga regla. Por eso "premisa colada" pudo
+-- aparecer siete veces sin que nada acumulara esas siete en una señal — cada
+-- hallazgo se evaporaba en la prosa de un DL. Un escape es un defecto que el
+-- validador NO cazó; queda registrado hasta resolverse en una regla que
+-- exista o en una zona registrada. Se evalúa al final: necesita la lista de
+-- reglas realmente emitidas.
+local escapeMalformed, escapeUnresolved = {}, {}
+do
+	local ids = {}
+	for id in pairs(escapes) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local x = escapes[id]
+		if x.clase == "" or x.hallado == "" or x.resol == "" then
+			table.insert(escapeMalformed, id .. " → clase/hallazgo/resolución vacíos")
+		else
+			local regla = x.resol:match("^regla: (%S+)$")
+			local zona = x.resol:match("^zona: (Z%d+)$")
+			if regla then
+				if not emittedRules[regla] then
+					table.insert(escapeUnresolved, id .. " → regla \"" .. regla .. "\" no existe")
+				end
+			elseif zona then
+				if not zones[zona] then
+					table.insert(escapeUnresolved, id .. " → zona " .. zona .. " no registrada")
+				end
+			else
+				table.insert(escapeUnresolved, id .. " → resolución no es `regla: X` ni `zona: Z-n`")
+			end
+		end
+	end
+end
+reportViolations("escape_malformed (escape sin clase/hallazgo/resolución)", escapeMalformed, function(r)
+	return r
+end)
+reportViolations("escape_unresolved (clase de error sin regla ni zona que la cubra)", escapeUnresolved, function(r)
+	return r
+end)
 reportViolations("version-pin (referencia a versión del master — prohibido)", pins, function(r)
 	return r
 end)
@@ -1022,7 +1087,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
-	+ #electionUnratifiedCited
+	+ #electionUnratifiedCited + #escapeMalformed + #escapeUnresolved
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

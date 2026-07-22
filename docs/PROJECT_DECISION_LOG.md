@@ -3350,4 +3350,71 @@ Libre:       Valor de A9 → PO (desbloquea D10). Dominios de evolución como
 Referencias: §3.0, §3.4, §3.9, §2.1, §4.15, DL-065, DL-067, DL-068
 ```
 
+### DL-070
+
+```
+ID:          DL-070
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Pregunta del PO: ¿por qué el aparato no señala sus propias
+             deudas? Diagnóstico: dos huecos estructurales.
+             (a) M9 verifica cobertura en UNA dirección — toda regla tiene
+             mutación. Nada verificaba lo INVERSO: que toda clase de error
+             conocida tenga regla. Una clase sin regla es invisible porque
+             no hay nada que se queje de su ausencia. Por eso "premisa
+             colada" apareció SIETE veces esta sesión sin que nada
+             acumulara esas siete en una señal: cada hallazgo se evaporó en
+             la prosa de un DL.
+             (b) Las zonas perdieron su tipo MT0. MT0 clasifica en cuatro
+             cubos y `relación → máquina` significa DEUDA, mientras
+             `formalizable pendiente` significa transitorio. Z1 era del
+             primer tipo y se leyó como frontera aceptada durante días
+             porque la fila no dice de qué cubo es. El agente llegó a
+             declararla "frontera inherente" — corregido por el PO: si es
+             validación, debe poder mecanizarse; si no, es deuda.
+Contenido:   (1) REGISTRO DE ESCAPES en §2.8: X1–X7, cada clase de error
+             que el validador NO cazó, con sus instancias reales. Se
+             resuelve en `regla: <nombre>` — verificado contra las reglas
+             REALMENTE EMITIDAS por el runner — o en `zona: Z-n`
+             registrada. Cualquier otra cosa es violación. Sin la
+             verificación contra reglas emitidas el registro se falsearía
+             escribiendo el nombre de una regla que nadie construyó, y
+             volvería a ser prosa.
+             (2) Columna Tipo MT0 en el registro de zonas, con
+             zone_malformed exigiéndola. Z1/Z4/Z5 quedan marcadas
+             `relación → máquina (deuda)`; Z6 `formalizable pendiente`.
+             (3) Tres mutaciones nuevas, entre ellas una que apunta una
+             resolución a `term_provenance` — regla que NO existe — para
+             demostrar que el registro no se puede cerrar contra el vacío.
+             CONSECUENCIA INMEDIATA: X1–X4 apuntan a Z1, que ahora se lee
+             como DEUDA. Los tres mecanismos que la cierran quedan
+             especificados: procedencia de términos (caza X1), tipado de
+             modalidad (X2), contradicción como relación explícita (X3);
+             X4 lo previene un vocabulario controlado por construcción.
+Hipótesis:   Con cobertura inversa, una clase de error que se repite deja
+             de depender de que un agente recuerde haberla visto antes: la
+             segunda instancia cae en una fila que ya existe y la presión
+             es acumulativa y visible.
+Razón:       CONTINGENCY P5 — "¿por qué el aparato no señala sus deudas?
+             haz lo que recomiendes" (PO, 2026-07-22).
+Impacto:     §2.8: registro de escapes (X1–X7) y columna Tipo MT0. §5.0
+             fila. check.luau 33 reglas; test.luau 40/40. Header v5.47.
+             La pasada manual de Z1 (DL-068/069) pasa de ser EL RESULTADO
+             a ser el CONJUNTO DE PRUEBA: doce defectos que las reglas
+             futuras deben encender.
+             NO CIERRA: el registro de escapes depende de que alguien
+             REGISTRE el escape. Un defecto que nadie note sigue sin
+             existir para el sistema. Eso es Z1 por otra cara y no se
+             resuelve con más registro, sino mecanizando el entailment.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §5.0
+Libre:       —
+Referencias: §2.8, §5.0, §2.7, DL-056, DL-060, DL-066, DL-068, DL-069
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
