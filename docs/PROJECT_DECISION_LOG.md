@@ -3426,4 +3426,81 @@ Libre:       —
 Referencias: §2.8, §5.0, §2.7, DL-056, DL-060, DL-066, DL-068, DL-069
 ```
 
+### DL-071
+
+```
+ID:          DL-071
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO preguntó si la capa dinámica podía ser una METAcapa. Lo
+             era. El agente la había descartado con un argumento falso: "el
+             grafo no tiene eje temporal". El corpus SÍ evoluciona —DL-044 a
+             DL-070, v5.23 a v5.47— y cada commit es un estado, cada DL una
+             transición. La corrección necesaria es que la dinámica es
+             DISCRETA: diferencias y acumulados, no derivadas. Llamarlas
+             derivadas sería la metáfora que el material recibido ya tenía
+             marcada como defecto.
+Contenido:   (1) Modo `--sensitivity`: cierre transitivo de dependientes por
+             premisa — "si toco esto, ¿qué se mueve?". Lectura discreta de
+             ∂downstream/∂premisa. NO es regla: no hay radio correcto, luego
+             no hay violación. Se mide y se lee.
+             PRIMER RESULTADO: los axiomas cargan (C1a 11, C1b 11, C2′ 8,
+             C3 5) pero las elecciones RATIFICADAS cargan 1–3. E1 es la
+             valencia cooperativa —cambiarla a competitiva haría otro juego
+             entero— y mide 2. Esa distancia entre peso medido y peso
+             evidente es el test del PO con número: si se siente consecuente
+             y mide casi nada, faltan especificaciones, y eso es DEUDA.
+             CAUTELA: E4–E11 miden 0, pero ese cero lo FUERZA
+             election_unratified_cited. La medición no distingue ahí "no
+             sostiene nada" de "no se le permite sostener". El dato limpio
+             son E1–E3.
+             (2) INVARIANTE vs VARIANTE. Todo el aparato era safety: cada
+             estado consistente, nada sobre la trayectoria. El nombre estaba
+             importado sin usar — en Event-B safety son invariantes y la
+             convergencia es una VARIANTE bien fundada que decrece. Los
+             vencimientos eran su sustituto tosco: un reloj no es una
+             propiedad. Variante del corpus = zonas abiertas + claims
+             bloqueados + clases de escape sin regla. Hoy: 12 (4+3+5). Se
+             MIDE, no se gobierna: descubrir una zona la SUBE legítimamente
+             —progreso en conocimiento, retroceso en la medida— y ponerle
+             umbral repetiría la lección del registro de escapes.
+             (3) Regla nueva blocked_claim_dangling: lo decidible desde un
+             solo estado es la ESTRUCTURA de la deuda. Un claim bloqueado
+             debe nombrar a su bloqueador y el bloqueador debe existir
+             (E-n sin ratificar o Z-n registrada). Una deuda sin acreedor no
+             se cobra.
+             HALLAZGO: era el caso real de D18, que decía "— bloqueado:
+             exige postulado N2 de verificabilidad" sin nombrar ningún ID.
+             Re-anclado a Z1: su bloqueo es que [D17] no sostiene la
+             conclusión, que es literalmente el enunciado de Z1.
+             Z4 CONFIRMADA como petición de eje temporal: su camino de
+             cierre —"procedencia del sello: qué DL cambió cada uno"— es
+             exactamente historia. Se venía tratando como hueco estático.
+Hipótesis:   Medir la trayectoria, y no solo el estado, es lo que permite
+             auditar el PROCESO y no solo el producto: si la tasa de
+             defectos por pasada de revisión no baja, el corpus no está mal
+             — el método de revisión no es sólido.
+Razón:       CONTINGENCY P5 — "¿estás seguro que la capa dinámica no puede
+             ser una metacapa? continuemos" (PO, 2026-07-22).
+Impacto:     check.luau 32 reglas + modos --sensitivity/--seals; variante
+             impresa junto al historial. test.luau 39/39. §2.8 gana la
+             distinción invariante/variante. Header v5.48.
+             DATO PARA LA CONVERGENCIA: pasada 1 de Z1 (DL-068) halló 6
+             defectos; pasada 2 (DL-069) halló 6. Dos puntos no concluyen,
+             pero si la tercera repite, la tasa constante indica método de
+             revisión no convergente, no corpus defectuoso.
+             NO CIERRA: la variante se mide en un solo estado. La serie
+             temporal vive en el log de DLs y en git, y nadie la computa
+             todavía.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §3.0
+Libre:       —
+Referencias: §2.8, §3.0, §5.0, DL-060, DL-063, DL-068, DL-069, DL-070
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

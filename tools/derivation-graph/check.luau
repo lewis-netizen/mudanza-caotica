@@ -828,6 +828,53 @@ for id, kind in pairs(nodes) do
 end
 table.sort(unclaimedSection)
 
+-- ── estructura de la deuda (DL-071) ─────────────────────────────────────────
+-- Un claim BLOQUEADO debe nombrar a su bloqueador, y el bloqueador debe
+-- existir: una elección sin ratificar (E-n) o una zona registrada (Z-n).
+-- Sin esto, "— bloqueado: exige un postulado" es deuda que no apunta a nada
+-- — el caso real de D18 antes de DL-071. Una deuda sin acreedor no se cobra.
+local blockedClaimDangling = {}
+for id, c in pairs(designClaims) do
+	if c.deriv:match("^—%s*bloqueado") then
+		local ok = false
+		for e in c.deriv:gmatch("E(%d+)") do
+			if f8ElectionRows["E" .. e] then
+				ok = true
+			end
+		end
+		for z in c.deriv:gmatch("Z(%d+)") do
+			if zones["Z" .. z] then
+				ok = true
+			end
+		end
+		if not ok then
+			table.insert(blockedClaimDangling, id .. " → bloqueador inexistente o sin ID: \"" .. c.deriv .. "\"")
+		end
+	end
+end
+table.sort(blockedClaimDangling)
+
+-- VARIANTE del corpus (Event-B): la deuda abierta como número. Safety son
+-- invariantes; la convergencia es una VARIANTE bien fundada que decrece.
+-- Nuestras fechas de vencimiento eran un sustituto malo: un reloj no dice si
+-- el sistema tiende a algo. Esto se MIDE y se imprime, no se gobierna — no
+-- existe un valor correcto, y una zona nueva SUBE la variante legítimamente
+-- (descubrir deuda es progreso en conocimiento, retroceso en la medida).
+local variantZones, variantBlocked, variantEscapes = 0, 0, 0
+for _ in pairs(zones) do
+	variantZones += 1
+end
+for _, c in pairs(designClaims) do
+	if c.deriv:match("^—%s*bloqueado") then
+		variantBlocked += 1
+	end
+end
+for _, x in pairs(escapes) do
+	if not x.resol:match("^regla:") then
+		variantEscapes += 1
+	end
+end
+
 -- sello del enunciado (Z4, DL-063): el claim declara el hash de su propio
 -- enunciado. Reescribirlo sin re-sellar = violación; moverlo no toca nada.
 -- Re-sellar es el ACTO que hace visible una remodelación: no valida que el
@@ -1054,6 +1101,9 @@ end)
 reportViolations("claim_seal_mismatch (enunciado reescrito sin re-sellar)", claimSealMismatch, function(r)
 	return r
 end)
+reportViolations("blocked_claim_dangling (claim bloqueado sin bloqueador existente)", blockedClaimDangling, function(r)
+	return r
+end)
 reportViolations("glue_dangling (claim de módulo inexistente en §4.15)", glueDangling, function(r)
 	return r
 end)
@@ -1150,6 +1200,18 @@ reportViolations("version-pin (referencia a versión del master — prohibido)",
 	return r
 end)
 
+print(
+	string.format(
+		"\n  · VARIANTE del corpus: %d  (zonas abiertas %d + claims bloqueados %d + clases sin regla %d)",
+		variantZones + variantBlocked + variantEscapes,
+		variantZones,
+		variantBlocked,
+		variantEscapes
+	)
+)
+print("      Event-B: safety son invariantes, convergencia es una variante que decrece.")
+print("      Se MIDE, no se gobierna: descubrir deuda la sube, y eso es progreso.")
+
 do
 	local n, mal = 0, #escapeMalformed + #escapeUnresolved
 	for _ in pairs(escapes) do
@@ -1179,7 +1241,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
-	+ #electionUnratifiedCited
+	+ #electionUnratifiedCited + #blockedClaimDangling
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

@@ -338,6 +338,15 @@ local cases = {
 		end,
 	},
 	{
+		-- Una deuda sin acreedor no se cobra: D18 decía "exige un postulado"
+		-- sin nombrar ningún ID, y nada lo detectaba.
+		name = "blocked_claim_dangling (deuda que no apunta a nada)",
+		expect = "✗ blocked_claim_dangling",
+		apply = function()
+			replaceOnce(MASTER, "— bloqueado: la escasez es E11, sin ratificar", "— bloqueado: pendiente de decidir")
+		end,
+	},
+	{
 		name = "claim_seal_mismatch (remodelar sin declarar)",
 		expect = "✗ claim_seal_mismatch",
 		apply = function()

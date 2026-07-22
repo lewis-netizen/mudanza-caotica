@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.47 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.48 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -306,6 +306,12 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 | Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | relación → máquina (deuda) | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 |
 | Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 |
 
+**Invariante y variante (DL-071).** Todo el aparato descrito hasta aquí verifica **safety**: que cada estado del corpus sea consistente. No dice nada de la **trayectoria** — si las zonas efectivamente cierran, si las clases de escape acaban teniendo regla, si la tasa de defectos por pasada baja. Los vencimientos eran un sustituto tosco: **un reloj no es una propiedad**; "vence el 11 de agosto" no informa si el sistema tiende a algo.
+
+El nombre correcto lo teníamos importado sin usar: en Event-B, safety son **invariantes** y la convergencia es una **variante** — una medida bien fundada que decrece. La variante del corpus es `zonas abiertas + claims bloqueados + clases de escape sin regla`, y el runner la imprime. **Se mide, no se gobierna**: no existe un valor correcto, y descubrir una zona nueva la **sube** legítimamente — eso es progreso en conocimiento y retroceso en la medida, a la vez. Convertirla en umbral sería la lección del registro de escapes otra vez.
+
+Lo que sí es decidible desde un solo estado es la **estructura** de la deuda: un claim bloqueado debe **nombrar a su bloqueador**, y el bloqueador debe existir — elección sin ratificar (`E-n`) o zona registrada (`Z-n`). Una deuda sin acreedor no se cobra (`blocked_claim_dangling`; era el caso real de D18, que decía "exige un postulado" sin ID alguno).
+
 La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (deuda)` significa que su terreno son relaciones y por tanto **el validador debería cubrirla**: es deuda, no frontera. `formalizable pendiente` es transitorio declarado. `contenido → PO` no se cierra formalizando: se ratifica. Sin ese tipo, Z1 se leyó como frontera aceptada durante días **siendo deuda** — la fila no decía de qué cubo era (DL-070).
 
 **Registro de Escapes (DL-070)** — clases de error que el validador **no cazó**, con sus instancias. Sirve para que un defecto hallado a mano no se evapore en la prosa de un DL: así "premisa colada" apareció **siete veces** sin que nada sumara esas siete.
@@ -355,7 +361,7 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 | D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c |
 | D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 |
 | D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 |
-| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: exige postulado N2 de verificabilidad, sin ratificar | a01d00 |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: Z1 — [D17] no sostiene la conclusión; exige postulado N2 de verificabilidad | a01d00 |
 | D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores: su contenido es la interacción, no la puntuación. | R-ESP · C1a | ecff83 |
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f |
 | D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd |
