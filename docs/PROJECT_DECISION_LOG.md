@@ -3388,6 +3388,15 @@ Contenido:   (1) REGISTRO DE ESCAPES en §2.8: X1–X7, cada clase de error
              (3) Tres mutaciones nuevas, entre ellas una que apunta una
              resolución a `term_provenance` — regla que NO existe — para
              demostrar que el registro no se puede cerrar contra el vacío.
+             (4) RESTRICCIÓN DE NATURALEZA (corrección del PO): el registro
+             es MEMORIA, no COBERTURA, y no puede crear dependencia alguna.
+             Ausencia de fila = nadie lo notó, no = no existe. Ninguna
+             garantía se deriva de su estado ni de su completitud, y
+             ninguna regla puede consumirlo como evidencia: empuja, jamás
+             respalda. Un mecanismo que dependiera de que esté completo
+             heredaría la dependencia de agente que el registro existe para
+             hacer visible. Queda escrito en §2.8 como restricción, no como
+             nota.
              CONSECUENCIA INMEDIATA: X1–X4 apuntan a Z1, que ahora se lee
              como DEUDA. Los tres mecanismos que la cierran quedan
              especificados: procedencia de términos (caza X1), tipado de

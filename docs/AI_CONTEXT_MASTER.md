@@ -320,7 +320,9 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 
-El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento, las zonas y los tipos ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma). El **registro de escapes** no es contenido: es un hecho observado (esto se nos escapó) y su resolución es una relación verificada.
+**El registro es MEMORIA, no COBERTURA (DL-070).** Un escape ausente significa que **nadie lo notó**, no que no exista: la ausencia de fila no prueba nada. Por su naturaleza, el registro **no puede crear dependencia alguna** — ninguna garantía del sistema se deriva de su estado, ni de que esté completo, ni de que todos sus escapes estén resueltos, y **ninguna regla puede consumirlo como evidencia**. El registro **empuja** (acumula presión sobre una clase que se repite) pero **jamás respalda**. Un mecanismo que dependiera de su completitud heredaría precisamente la dependencia de agente que el registro existe para hacer visible.
+
+El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento, las zonas y los tipos ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma). El **registro de escapes** no es contenido ni garantía: es un hecho observado, y su resolución apunta a lo que sí carga garantía (una regla, una zona) sin cargarla él.
 
 ---
 
