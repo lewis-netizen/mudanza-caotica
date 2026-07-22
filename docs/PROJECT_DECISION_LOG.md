@@ -2927,4 +2927,77 @@ Libre:       Alcance re-acotado de Z4 tras el sello (mitad de obligación) →
 Referencias: §3.0, §2.8, §5.0, DL-044, DL-056, DL-060, DL-061, DL-062
 ```
 
+### DL-064
+
+```
+ID:          DL-064
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Z2. El PO exigió que las valencias no solo sean válidas sino
+             LAS MEJORES. Derivar el criterio de optimalidad (esta sesión)
+             mostró que "no existe otro valor que domine a este" es
+             indecidible sin el dominio del eje enumerado: la optimalidad
+             es estrictamente posterior a Z2. Z2 dejó de ser una zona
+             menor y pasó a ser precondición.
+Contenido:   Registro de Ejes en §2.7. Un eje es un TIPO: nombre + dominio
+             de valores + Cierre. A1 valencia del resultado (cerrado), A2
+             ancla interpretable (abierto), A3 tratamiento de la derrota
+             (cerrado). Las elecciones citan un eje por ID y su valor debe
+             pertenecer al dominio. Cuatro reglas: axis_malformed,
+             axis_domain_thin (dominio < 2 = no es elección sino
+             consecuencia disfrazada), election_axis_unregistered,
+             election_value_off_axis (el defecto que Z2 nombraba, antes
+             indetectable porque el eje era texto libre).
+             La columna Cierre es la parte honesta: `cerrado` = el dominio
+             agota el eje; `abierto` = son los valores CONSIDERADOS. Decide
+             qué puede afirmarse después: en dominio cerrado "no dominado"
+             significa óptimo; en abierto, óptimo entre lo considerado.
+             CRITERIO DE OPTIMALIDAD derivado (registrado aquí, aplicado
+             después): el maximando sale de los axiomas, única fuente
+             ratificada junto a las elecciones — medir una elección contra
+             otra sería circular. Los cuatro axiomas NO juegan el mismo
+             papel: C1a es el único enunciado en forma de "qué es la cosa",
+             luego el único maximando; C1b y C2′ son GENERADORES (C1b es
+             locativo: dice dónde reside el valor, no qué perseguir); C3 es
+             FILTRO, no dimensión de mérito — una interdependencia lograda
+             por regla impuesta no puntúa peor, está prohibida (D8 ya lo
+             dice así). Criterio: V es óptimo si (1) admisible bajo C3 y
+             los claims vigentes, (2) no dominado — no existe W admisible
+             en el dominio con ≥ interacción-como-contenido por ambas vías
+             (C1b y C2′) y > por al menos una, (3) si sobrevive más de un
+             valor el eje tiene FRONTERA y la elección es del PO: "la
+             mejor" deja de tener respuesta. Pareto y no suma ponderada
+             porque los pesos serían otra elección injustificable desde los
+             axiomas.
+Hipótesis:   Con los ejes tipados, la pregunta "¿es el mejor valor?" pasa
+             de retórica a decidible, y la frontera separa lo determinado
+             (valores dominados: se cambian) de lo genuinamente electivo.
+Razón:       CONTINGENCY P5 — "deriva el criterio de optimalidad primero,
+             luego arranca Z2" (PO, 2026-07-22).
+Impacto:     §2.7 gana Registro de Ejes; tabla de elecciones re-esquematizada
+             (E1→A1, E2→A2, E3→A3) sin cambio de contenido ratificado.
+             §2.8: Z2 CERRADA y retirada del registro. §5.0 fila. Header
+             v5.41. check.luau 30 reglas; test.luau 36/36.
+             RESIDUO no cubierto: que un dominio marcado `cerrado`
+             realmente agote su eje es una afirmación semántica que nadie
+             verifica. Se somete a ratificación junto con Z5/Z6; no se
+             registra unilateralmente (§2.8: una frontera que el sistema se
+             concede no es frontera).
+             DEUDA que el criterio arrastra: se apoya en D2 (la DI mide la
+             calidad del loop), que está entre los 19 claims formalizados
+             pero NO re-derivados (Z1). El criterio es provisional ahí. Y
+             la DI mide frecuencia, no profundidad: proxy imperfecto de
+             C1a.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7, §2.8, §5.0
+Libre:       Dominios de A1/A3 marcados `cerrado` (¿agotan el eje?) → PO.
+             Registro de Z5/Z6 y del residuo de cierre → PO.
+Referencias: §2.7, §2.8, §3.2, §5.0, DL-058, DL-060, DL-061, DL-063
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

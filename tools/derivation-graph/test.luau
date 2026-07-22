@@ -221,14 +221,14 @@ local cases = {
 		name = "election_malformed",
 		expect = "✗ election_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| E2 | Ancla interpretable |", "| E2 | |")
+			replaceOnce(MASTER, "| E2 | A2 | `el objetivo` |", "| E2 | A2 | |")
 		end,
 	},
 	{
 		name = "election_axis_dup",
 		expect = "✗ election_axis_dup",
 		apply = function()
-			replaceOnce(MASTER, "| E3 | Tratamiento de la derrota |", "| E3 | Ancla interpretable |")
+			replaceOnce(MASTER, "| E3 | A3 |", "| E3 | A2 |")
 		end,
 	},
 	{
@@ -237,11 +237,40 @@ local cases = {
 		apply = function()
 			-- Reconstruye exactamente la doble argumentación que el PO cazó a
 			-- mano en E1 — ahora la caza la máquina.
-			replaceOnce(
-				MASTER,
-				"| Cooperativa: el resultado es de equipo (§1.2) |",
-				"| Cooperativa: el resultado es de equipo (§1.2) — sin condición de derrota |"
-			)
+			replaceOnce(MASTER, "| E1 | A1 | `cooperativa` |", "| E1 | A1 | `cooperativa` — sin condición de derrota |")
+		end,
+	},
+	{
+		name = "axis_malformed",
+		expect = "✗ axis_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| cerrado |\n| A2 |", "| quizás |\n| A2 |")
+		end,
+	},
+	{
+		-- Un eje con un solo valor no es una elección: es una consecuencia
+		-- disfrazada de elección. Sin esta regla, "elegí X" pasaría aunque X
+		-- fuera lo único posible — y el registro mentiría sobre qué es libre.
+		name = "axis_domain_thin (eje de un solo valor)",
+		expect = "✗ axis_domain_thin",
+		apply = function()
+			replaceOnce(MASTER, "`ausente` · `declarada sin castigo` · `castigada`", "`ausente`")
+		end,
+	},
+	{
+		name = "election_axis_unregistered",
+		expect = "✗ election_axis_unregistered",
+		apply = function()
+			replaceOnce(MASTER, "| E1 | A1 |", "| E1 | A9 |")
+		end,
+	},
+	{
+		-- El defecto que Z2 nombraba: un valor que no pertenece a su eje.
+		-- Antes era indetectable porque el eje era texto libre.
+		name = "election_value_off_axis (el defecto que Z2 describía)",
+		expect = "✗ election_value_off_axis",
+		apply = function()
+			replaceOnce(MASTER, "| E1 | A1 | `cooperativa` |", "| E1 | A1 | `el objetivo` |")
 		end,
 	},
 	{
@@ -268,7 +297,7 @@ local cases = {
 		name = "zone_malformed",
 		expect = "✗ zone_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| Ejes como tipos con dominio de valores enumerado |", "| |")
+			replaceOnce(MASTER, "| Descomposición (M5) + catálogo más fino; contradicciones como relación explícita |", "| |")
 		end,
 	},
 	{

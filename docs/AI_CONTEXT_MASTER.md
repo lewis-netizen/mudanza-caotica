@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.40 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.41 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -228,13 +228,23 @@ La capa normativa del diseño se **autora directamente en forma** (DL-055): cada
 | R-COMP | composición | ≥ 2 premisas (axiomas o claims), sin elecciones. |
 | R-ELEC | composición con elección | ≥ 2 premisas: ≥ 1 axioma/claim y ≥ 1 elección (E-n). La conclusión se marca ⚠ composite. |
 
-**Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *una* de las valencias válidas que el eje admite; elegir otra es revisión de la elección (⚠), no del núcleo. Forma obligatoria: **un eje por elección, atómico** (sin conjunciones), un valor por eje, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_compound`).
+**Registro de Ejes (Z2, DL-064).** Un eje es un **tipo**: un nombre y el **dominio** de valores que admite. Sin dominio enumerado, "el valor elegido pertenece a su eje" no es comprobable, y "¿es el mejor valor?" no es una pregunta respondible — de ahí que el registro de ejes preceda a cualquier juicio de optimalidad. Un eje con un solo valor no es un eje: es una consecuencia disfrazada de elección (`axis_domain_thin`).
 
-| ID | Eje | Abierto por | Valor elegido | Estado |
+La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (típicamente ejes binarios o particiones exhaustivas); `abierto` = son los valores **considerados**, y añadir un candidato es siempre legítimo. La distinción decide qué puede afirmarse después: en un dominio cerrado, "no dominado" significa **óptimo**; en uno abierto, significa **óptimo entre lo considerado** — más débil, y decir lo contrario sería rigor inventado.
+
+| ID | Eje | Dominio de valores | Cierre |
+|---|---|---|---|
+| A1 | Valencia del resultado | `cooperativa` · `competitiva` · `mixta` · `individual` | cerrado |
+| A2 | Ancla interpretable | `el objetivo` · `las reglas` · `el rol` · `el espacio` | abierto |
+| A3 | Tratamiento de la derrota | `ausente` · `declarada sin castigo` · `castigada` | cerrado |
+
+**Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *uno* de los valores del dominio de ese eje; elegir otro es revisión de la elección (⚠), no del núcleo. Forma obligatoria: un eje registrado por elección, un valor perteneciente a su dominio, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_axis_unregistered`, `election_value_off_axis`).
+
+| ID | Eje | Valor elegido | Abierto por | Estado |
 |---|---|---|---|---|
-| E1 | Valencia del resultado | C1b (neutral de valencia: el axioma no la fija) | Cooperativa: el resultado es de equipo (§1.2) | decidida |
-| E2 | Ancla interpretable | C2′ (exige un ancla, no dice cuál) | El objetivo | decidida |
-| E3 | Tratamiento de la derrota | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | No se declara ni se castiga: no existe estado «Perdiste» (§1.2) | decidida |
+| E1 | A1 | `cooperativa` | C1b (neutral de valencia: el axioma no la fija) | decidida |
+| E2 | A2 | `el objetivo` | C2′ (exige un ancla, no dice cuál) | decidida |
+| E3 | A3 | `ausente` | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | decidida |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
@@ -269,12 +279,11 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 
 **Perímetro binario de garantía (DL-060).** El sistema garantiza únicamente lo que emana de dos fuentes: **máquina** (reglas con mutación demostrada — auto-cobertura verificada: toda regla del validador tiene su caso de mutación, chequeado por `test.luau`, no por disciplina) y **contenido ratificado** (axiomas, elecciones, leyes — el PO). Los agentes no son titulares de garantía alguna: sus pasadas son advisory (hallazgos D-n como insumo, jamás como muro). La prosa no tiene autoridad (M4): un elemento normativo solo existe dentro de un slot de forma (claim, elección, regla+mutación, zona) y cada slot está verificado — mal-tipar un elemento lo hace fallar su slot o lo deja fuera del perímetro, sin autoridad. La única fuga posible es contenido que **cabe en la forma sin sostenerse semánticamente**; esas fugas no se asignan a nadie: se **registran** como zonas con camino, vencimiento y **ratificación del PO** — zona vencida = violación (`zone_expired`); el vencimiento fuerza la decisión (formalizar, disolver o re-acotar — re-acotar es del PO). La ratificación va en la forma, no en la prosa de un DL: una frontera de garantía que el sistema se concede a sí mismo no es una frontera (`zone_malformed` exige la celda `PO <fecha>`).
 
-**Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas. El registro contiene lo *vigente*: una zona cerrada SALE de la tabla y su cierre queda en el DL que lo ejecuta (Z3 cerrada por DL-062 — el gluing ancla en claims D-n, no en prosa). Salir del registro exige haber cerrado, no haber caducado: `zone_expired` dispara antes.
+**Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas. El registro contiene lo *vigente*: una zona cerrada SALE de la tabla y su cierre queda en el DL que lo ejecuta (Z3 cerrada por DL-062 — el gluing ancla en claims D-n, no en prosa; Z2 cerrada por DL-064 — los ejes son tipos con dominio enumerado). Salir del registro exige haber cerrado, no haber caducado: `zone_expired` dispara antes.
 
 | ID | Zona — sin garantía del sistema | Camino de cierre | Vence | Ratificada |
 |---|---|---|---|---|
 | Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 |
-| Z2 | Relación valor↔eje en elecciones: que el Valor sea un valor del Eje declarado | Ejes como tipos con dominio de valores enumerado | 2026-08-11 | PO 2026-07-19 |
 | Z4 | Equivalencia normativa en refactor de claims: el grafo no distingue REUBICAR normatividad de CAMBIAR el compromiso, porque los enunciados de claim no están versionados. §3.0 queda exenta de obligación de ticket mientras dure | Versionar el enunciado de cada claim (hash) y exigir ticket cuando el enunciado —no su posición— cambia | 2026-08-11 | PO 2026-07-22 |
 
 El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento y las zonas ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma).
@@ -1093,7 +1102,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
-| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado: eje bien formado con Cierre cerrado|abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
 | §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas, acotadas y **ratificadas** (`zone_malformed` exige descripción, camino, vencimiento y celda `PO <fecha>` — DL-062; `zone_expired`: zona vencida = violación). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**

@@ -455,7 +455,8 @@ local f8Axioms = {}
 local f8Claims = {} -- nombre → { raw }
 local f8Rules = {}
 local f8Elections = {}
-local f8ElectionRows = {} -- E-n → { eje, abierto, valor, estado }
+local f8ElectionRows = {} -- E-n → { eje (A-n), valor, abierto, estado }
+local axes = {} -- A-n → { nombre, dominio = {valores}, cierre } (Z2, DL-064)
 local metaLaws = {} -- M-n → { ley, fuente }
 local zones = {} -- Z-n → { zona, camino, vence } (registro de zonas no verificadas)
 local designClaims = {} -- D-n → { sec, deriv } (capa normativa de §3, DL-061)
@@ -531,8 +532,26 @@ do
 				for cell in line:gmatch("|([^|]*)") do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
-				-- | ID | Eje | Abierto por | Valor elegido | Estado |
-				f8ElectionRows[e] = { eje = cells[2] or "", abierto = cells[3] or "", valor = cells[4] or "", estado = cells[5] or "" }
+				-- | ID | Eje (A-n) | Valor | Abierto por | Estado |
+				f8ElectionRows[e] = {
+					eje = cells[2] or "",
+					valor = cells[3] or "",
+					abierto = cells[4] or "",
+					estado = cells[5] or "",
+				}
+			end
+			-- registro de ejes (Z2): | ID | Eje | Dominio | Cierre |
+			local a = line:match("^| (A%d+) |")
+			if a then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local dominio = {}
+				for v in (cells[3] or ""):gmatch("`([^`]+)`") do
+					table.insert(dominio, v)
+				end
+				axes[a] = { nombre = cells[2] or "", dominio = dominio, cierre = cells[4] or "" }
 			end
 		elseif region == "2.8" then
 			local m = line:match("^| (MT?%d+) |")
@@ -694,10 +713,60 @@ do
 				axisSeen[norm2] = id
 			end
 		end
-		if row.eje:find(" — ", 1, true) or row.eje:find(" + ", 1, true) or row.eje:find(" y ", 1, true) then
-			table.insert(electionCompound, id .. " (eje compuesto)")
-		elseif row.valor:find(" — ", 1, true) or row.valor:find(" + ", 1, true) then
+		-- la atomicidad del eje vive ahora en el registro (un A-n es atómico
+		-- por construcción); aquí solo queda el valor sin conjunciones.
+		if row.valor:find(" — ", 1, true) or row.valor:find(" + ", 1, true) then
 			table.insert(electionCompound, id .. " (valor con conjunción)")
+		end
+	end
+end
+
+-- ── Z2 (DL-064): el eje es un TIPO con dominio enumerado ────────────────────
+-- Sin dominio, "el valor pertenece a su eje" no es comprobable y "¿es el
+-- mejor valor?" no es respondible. Estas reglas son la precondición del
+-- juicio de optimalidad, no un chequeo de forma más.
+local axisMalformed, axisDomainThin = {}, {}
+local electionAxisUnregistered, electionValueOffAxis = {}, {}
+do
+	local ids = {}
+	for id in pairs(axes) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local ax = axes[id]
+		if ax.nombre == "" or (ax.cierre ~= "cerrado" and ax.cierre ~= "abierto") then
+			table.insert(axisMalformed, id .. " → sin nombre o Cierre distinto de cerrado|abierto")
+		end
+		-- un eje con un solo valor no es una elección: es una consecuencia
+		-- disfrazada. El dominio mínimo de un eje real es 2.
+		if #ax.dominio < 2 then
+			table.insert(axisDomainThin, id .. " → dominio de " .. #ax.dominio .. " valor(es)")
+		end
+	end
+
+	local eids = {}
+	for id in pairs(f8ElectionRows) do
+		table.insert(eids, id)
+	end
+	table.sort(eids)
+	for _, id in ipairs(eids) do
+		local row = f8ElectionRows[id]
+		local ejeId = row.eje:match("^A%d+$")
+		if not ejeId or not axes[ejeId] then
+			table.insert(electionAxisUnregistered, id .. " → eje \"" .. row.eje .. "\" no está en el registro")
+		else
+			local valor = row.valor:match("^`(.+)`$") or row.valor
+			local pertenece = false
+			for _, v in ipairs(axes[ejeId].dominio) do
+				if v == valor then
+					pertenece = true
+					break
+				end
+			end
+			if not pertenece then
+				table.insert(electionValueOffAxis, id .. " → \"" .. valor .. "\" no está en el dominio de " .. ejeId)
+			end
 		end
 	end
 end
@@ -896,7 +965,19 @@ end)
 reportViolations("election_axis_dup (dos elecciones sobre el mismo eje)", electionAxisDup, function(r)
 	return r
 end)
-reportViolations("election_compound (eje no atómico o valor con conjunción)", electionCompound, function(r)
+reportViolations("axis_malformed (eje sin nombre o sin Cierre cerrado|abierto)", axisMalformed, function(r)
+	return r
+end)
+reportViolations("axis_domain_thin (eje con dominio < 2 valores: no es una elección)", axisDomainThin, function(r)
+	return r
+end)
+reportViolations("election_axis_unregistered (elección sobre eje no registrado)", electionAxisUnregistered, function(r)
+	return r
+end)
+reportViolations("election_value_off_axis (valor fuera del dominio de su eje)", electionValueOffAxis, function(r)
+	return r
+end)
+reportViolations("election_compound (valor con conjunción)", electionCompound, function(r)
 	return r
 end)
 reportViolations("meta_law_malformed (ley M-n vacía o fuente sin DL existente)", metaLawMalformed, function(r)
@@ -927,6 +1008,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
+	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
