@@ -313,8 +313,8 @@ local cases = {
 		apply = function()
 			replaceOnce(
 				MASTER,
-				"no su posición— cambia | 2026-08-11 |",
-				"no su posición— cambia | 2026-01-01 |"
+				"derivar la obligación del cambio | 2026-08-11 |",
+				"derivar la obligación del cambio | 2026-01-01 |"
 			)
 		end,
 	},

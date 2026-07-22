@@ -3064,4 +3064,57 @@ Libre:       Umbral de la banda (10–15 s) → playtest. Granularidad del
 Referencias: §3.0, §3.2, §4.15, §2.7, DL-061, DL-063, DL-064
 ```
 
+### DL-066
+
+```
+ID:          DL-066
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO ratificó cuatro fronteras pendientes: Z4 re-acotada, Z5
+             (claim↔código), Z6 (sello sin obligación) y el residuo de
+             `cerrado` (DL-064). Ninguna podía registrarse antes: la regla
+             de DL-062 exige celda `PO <fecha>`, y una frontera que el
+             sistema se concede a sí mismo no es frontera.
+Contenido:   HALLAZGO al registrar: dos de las cuatro eran la MISMA zona.
+             Z6 se propuso ("cambiar un sello no genera obligación") cuando
+             los sellos aún no existían; construidos en DL-063, el residuo
+             de Z4 ES esa zona. Registrar ambas habría duplicado un hueco
+             en el registro de huecos. Fusión: Z4 absorbe lo propuesto como
+             Z6 — decisión de relación, no de contenido — y el residuo de
+             `cerrado` ocupa el hueco Z6. No queda ID huérfano.
+             Registro resultante:
+             Z1 (contenido semántico de claims — 18 pendientes tras DL-065)
+             Z4 re-acotada: el sello hace VISIBLE el cambio pero no genera
+                deber de implementación; el grafo no guarda historia.
+                Cierre: procedencia del sello (qué DL cambió cada uno).
+             Z5: el gluing verifica que el claim NOMBRE un módulo existente,
+                no que el módulo HAGA lo que dice. Cierre: contratos de
+                función de §4.13 contra las firmas reales de src/.
+             Z6: exhaustividad de dominio — un eje `cerrado` de más
+                convierte "no dominado" en "óptimo" sin derecho. Cierre:
+                dominio derivado como partición demostrada.
+             HALLAZGO 2: `impl_leak` cazó el registro al escribirlo — la
+             evidencia de Z5 nombraba un módulo de src/ dentro del piso de
+             diseño. Reformulada sin el nombre del módulo (la firma de
+             función basta como evidencia); la regla NO se debilitó ni se
+             eximió §2.8.
+Hipótesis:   Con las cuatro fronteras registradas y ratificadas, el
+             perímetro binario vuelve a ser total: todo lo no garantizado
+             está nombrado, acotado y con camino de cierre.
+Razón:       CONTINGENCY P5 — ratificación del PO (2026-07-22).
+Impacto:     §2.8: Z4 re-escrita, Z5 y Z6 nuevas, las tres con `PO
+             2026-07-22`. check.luau: comentario de la exención de §3.0
+             re-anclado a la Z4 re-acotada. test.luau 36/36 (ancla de
+             zone_expired re-anclada). Header v5.43.
+Ejecución:   CONFIRM
+Costo:       C1
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, §2.7, §4.13, DL-060, DL-062, DL-063, DL-064
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

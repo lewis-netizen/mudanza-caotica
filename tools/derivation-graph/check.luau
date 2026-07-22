@@ -217,9 +217,10 @@ for _, m in ipairs(modifies) do
 	--  · §4.15 — registro de gluing, gobernado por unglued_claim/glue_dangling.
 	--  · §3.1–§3.9 — comentario NO NORMATIVO desde DL-061: prosa que no obliga
 	--    no puede generar obligación de implementación (exención DERIVADA).
-	--  · §3.0 — normativa, pero el grafo no distingue reubicar normatividad de
-	--    cambiar el compromiso: los enunciados no están versionados. Exención
-	--    ACOTADA por la zona Z4 (§2.8), con vencimiento — no es un fallback.
+	--  · §3.0 — normativa. Desde DL-063 el sello hace VISIBLE que un claim
+	--    cambió, pero el grafo no guarda historia: no sabe qué sello había
+	--    antes, luego no puede derivar obligación del cambio. Exención
+	--    ACOTADA por la zona Z4 re-acotada (§2.8) — no es un fallback.
 	local sec = m[2]
 	local exempt = sec == "§4.15" or sec:match("^§3") ~= nil
 	local isImpl = (sec:match("^§3") ~= nil or sec:match("^§4") ~= nil) and not exempt
