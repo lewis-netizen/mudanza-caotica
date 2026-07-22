@@ -146,7 +146,7 @@ local cases = {
 		apply = function()
 			-- claim normativo sin realización declarada: obligación pendiente
 			-- que quedaría invisible si el gluing no exigiera totalidad.
-			replaceOnce(MASTER, "\n| D2 | Densidad de interacción | — empírico → playtest (métrica de avance, §3.2) |", "")
+			replaceOnce(MASTER, "\n| D22 | Calidad del loop = frecuencia | — empírico → playtest (métrica de avance, §3.2; medida con el criterio de D2) |", "")
 		end,
 	},
 	{

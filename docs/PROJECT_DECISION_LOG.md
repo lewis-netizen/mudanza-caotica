@@ -3000,4 +3000,68 @@ Libre:       Dominios de A1/A3 marcados `cerrado` (¿agotan el eje?) → PO.
 Referencias: §2.7, §2.8, §3.2, §5.0, DL-058, DL-060, DL-061, DL-063
 ```
 
+### DL-065
+
+```
+ID:          DL-065
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    DL-064 dejó el criterio de optimalidad apoyado en D2 ("la
+             calidad del loop se mide por la DI") y declaró la DI como
+             proxy imperfecto de C1a: mide frecuencia, no profundidad. El
+             PO confirmó el diagnóstico. Al mirarlo, el defecto estaba un
+             nivel más abajo: §3.2 define la DI como "un momento
+             SIGNIFICATIVO cada 10–15 segundos" y "significativo" NUNCA se
+             definió. La DI no era un proxy vago — era un contador bien
+             definido sobre un predicado indefinido. Toda la profundidad
+             entraba ahí sin declararse.
+Contenido:   D2 re-derivado: de medida a PREDICADO. "Un momento cuenta como
+             contenido cuando acopla los resultados de dos o más jugadores
+             y exige decidir bajo ambigüedad; la sincronía sin decisión no
+             cuenta." R-COMP · C1b + C2′ — el predicado no se inventa: sale
+             de los dos generadores, y D9 ya lo enunciaba para la escasez
+             ("no basta ejecutar en sincronía"). El criterio de calificación
+             ya estaba derivado en el corpus y §3.2 no lo usaba.
+             D22 nuevo: "La calidad del loop es la frecuencia de momentos
+             que cuentan como contenido; el umbral concreto es empírico."
+             R-COMP · C1a + [D2]. Separa medida de predicado — estaban
+             fundidos en el D2 viejo.
+             Con el predicado explícito, la frecuencia vuelve a ser
+             suficiente: la profundidad se absorbe en si el momento
+             califica. El proxy deja de ser imperfecto por indefinición.
+             §3.2 (comentario) reescrita para no contradecir, con el límite
+             conocido declarado: si en playtest aparecen momentos que
+             califican pero difieren mucho en peso, el predicado es
+             demasiado grueso y se REFINA — no se compensa moviendo el
+             umbral.
+Hipótesis:   Un criterio de optimalidad calibrado sobre un predicado
+             definido produce veredictos auditables; sobre uno indefinido
+             habría producido trece veredictos con la indefinición dentro.
+Razón:       CONTINGENCY P5 — "DI es proxy imperfecto, el aparato sigue
+             incompleto, haz lo que recomiendes" (PO, 2026-07-22). Aplica
+             M1 al propio criterio: el instrumento precede a la medición.
+Impacto:     §3.0: D2 re-sellado (801e43 → 05adac) — PRIMER uso real del
+             sello de DL-063: la remodelación quedó declarada en el diff,
+             que es exactamente para lo que se construyó. D22 nuevo
+             (8c9248). §4.15: fila de D2 re-anclada (de empírico a
+             normativo: define el criterio de conteo), fila de D22 nueva.
+             §3.2 reescrita. Header v5.42. test.luau 36/36.
+             El validador cazó a D22 al nacer (unglued_claim): claim nuevo
+             sin realización declarada.
+             DEUDA QUE ESTO NO CIERRA: los 18 claims restantes del conjunto
+             formalizado-pero-no-re-derivado siguen sin verificar (Z1). Se
+             re-derivó SOLO el claim del que cuelga el instrumento.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §3.2, §4.15
+Libre:       Umbral de la banda (10–15 s) → playtest. Granularidad del
+             predicado de D2 si el playtest muestra momentos de peso muy
+             desigual → playtest.
+Referencias: §3.0, §3.2, §4.15, §2.7, DL-061, DL-063, DL-064
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

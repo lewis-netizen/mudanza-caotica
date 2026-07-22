@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.41 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.42 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -301,7 +301,7 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 | ID | Sección | Claim | Derivación | Sello |
 |---|---|---|---|---|
 | D1 | §3.1 | El reto del loop vive en la coordinación decisional bajo escasez, no en el transporte. | R-COMP · C1b + C2′ | 9e3e83 |
-| D2 | §3.2 | La calidad del loop se mide por la densidad de interacción entre jugadores. | R-ESP · C1a — el umbral concreto es empírico (§3.2) | 801e43 |
+| D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1b + C2′ | 05adac |
 | D3 | §3.3 | La cooperación se genera cuando el entorno acopla los resultados de los jugadores; no es una feature. | R-ESP · C1b | 138eb8 |
 | D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 |
 | D5 | §3.3 | El espacio acopla por contención: negativo y pervasivo. | R-COMP · C1b + [Compresión Social] | a68e89 |
@@ -321,6 +321,7 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 | D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores; no informa puntuaciones. | R-ESP · C1a | 4e18f2 |
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f |
 | D21 | §3.9 | La evolución del juego fortalece gameplay, identidad o creación. | R-ESP · [Jugadores como Fuente de Contenido] | 731e4a |
+| D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 |
 
 ### 3.1 Core Loop
 
@@ -348,11 +349,15 @@ Nueva ronda
 
 ### 3.2 Densidad de Interacción (DI)
 
-**Pregunta:** ¿Cada cuánto tiempo ocurre algo que provoque comunicación, coordinación, improvisación o reacción entre jugadores?
+**Pregunta:** ¿Cada cuánto tiempo ocurre un momento que **cuente como contenido**?
 
-**Objetivo MVP:** DI media-alta. Un momento significativo cada 10–15 segundos.
+**Qué cuenta (D2).** No todo lo que ocurre entre jugadores cuenta. Un momento se cuenta solo si **acopla los resultados** de dos o más jugadores (C1b) **y exige decidir bajo ambigüedad** (C2′). Saludarse no cuenta: no acopla nada. Ejecutar una acción en sincronía tampoco: no hay nada que decidir — es coordinación motora, no decisión compartida (D9). Antes de DL-065 este predicado vivía en la palabra "significativo", que nadie había definido: la métrica estaba bien contada sobre un criterio indefinido.
 
-Esta métrica es el criterio de avance entre semanas del Roadmap. No se avanza hasta que la DI objetivo esté confirmada en playtest real.
+**Objetivo MVP:** un momento que cuente cada 10–15 segundos. La banda es **empírica** — se mide, no se deriva (D22).
+
+Esta métrica es el criterio de avance entre semanas del Roadmap. No se avanza hasta que esté confirmada en playtest real.
+
+*Límite conocido:* la frecuencia trata todos los momentos que califican como equivalentes. Si en playtest aparecen momentos que califican pero difieren mucho en peso, el predicado de D2 es demasiado grueso y hay que refinarlo — no compensarlo con un umbral distinto.
 
 ### 3.3 Dependencia Social y Cooperación
 
@@ -1026,7 +1031,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | Claim | Enunciado (comentario) | Realización |
 |---|---|---|
 | D1 | Coordinación decisional bajo escasez | `GameManager` (Lobby/Summary) + `RoundManager` (ronda activa) — §4.4 |
-| D2 | Densidad de interacción | — empírico → playtest (métrica de avance, §3.2) |
+| D2 | Qué cuenta como contenido | — normativo → criterio de conteo del playtest: un momento se cuenta solo si acopla resultados y exige decidir (§3.2, QA-003) |
 | D3 | El entorno acopla resultados | `MapBootstrap` + `CarryManager` + `RoundManager` — el acoplamiento emerge de sus interacciones |
 | D4 | Acoplamiento intrínseco | `CarryRules` carryEfficiency (resistencia física, no gate — §4.13, DL-047) |
 | D5 | Contención espacial (negativa, pervasiva) | layout + física del engine: `MapBootstrap` (placeholder, DL-036) / layout real (WLD-003) |
@@ -1046,6 +1051,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D19 | Summary narra, no informa | `RoundRules` + `SummaryManager` + StoryEvents (§4.4) |
 | D20 | Criterios de éxito | — empírico → playtest (QA-001, P6 §6.7) |
 | D21 | Evolución en tres dominios | — normativo (roadmap §5.7) |
+| D22 | Calidad del loop = frecuencia | — empírico → playtest (métrica de avance, §3.2; medida con el criterio de D2) |
 
 **Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`. (⚠ `ProfileStoreConfig` existe en `src/server/Persistence/` pero §4.7 declara solo PlayerDataService y MigrationService como módulos propios — prosa desactualizada; armonizar en la re-derivación holística de §4.)
 
