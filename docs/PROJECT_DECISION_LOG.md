@@ -2864,4 +2864,67 @@ Libre:       —
 Referencias: §4.15, §3.0, §2.8, DL-054, DL-060, DL-061
 ```
 
+### DL-063
+
+```
+ID:          DL-063
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Z4: el grafo no distinguía REUBICAR normatividad de CAMBIAR el
+             compromiso. Consecuencia práctica detectada por el PO: el
+             programa de trabajo se re-priorizaba en cada turno sin que
+             nada chillara, porque una remodelación era indistinguible de
+             un refactor cosmético. Prioridad ordenada por el PO: el
+             aparato antes que la implementación, por motivo objetivo —
+             implementar contra un modelo no verificado produce trabajo
+             que habrá que rehacer.
+Contenido:   Sello del enunciado. Cada claim de §3.0 porta el hash FNV-1a
+             (6 hex) de su propio enunciado normalizado. Regla
+             claim_seal_mismatch: enunciado reescrito sin re-sellar =
+             violación. Lo sellado es el ENUNCIADO, no la fila: mover un
+             claim no altera su sello, reescribirlo sí. Modo `--seals`
+             recalcula los sellos al remodelar legítimamente. Re-sellar es
+             el ACTO que declara una remodelación; no valida que el
+             contenido nuevo sea correcto (eso es Z1), valida que el cambio
+             se hizo visible.
+             Segundo caso de mutación NUEVO en clase: `reject` — la regla
+             NO debe encender. El control de Z4 mueve un claim de sección y
+             exige que el sello siga válido. Sin él, un sello sobre la fila
+             entera pasaría los tests igual y Z4 quedaría cerrada en falso;
+             una regla que enciende de más bloquea trabajo legítimo y
+             entrena a ignorarla.
+             HALLAZGO (causa raíz del shift de prioridades): DL-044 declaró
+             en su campo Impacto: "pendiente de propagación (paso
+             siguiente): §2.2, SCRATCHPAD_INTAKE, AUDITOR_DESIGN,
+             vocabulario en TICKETS". Nunca se ejecutó — §2.2 no ha sido
+             modificada por ningún DL desde 2026-07-17. Impacto: es PROSA:
+             un paso siguiente declarado ahí no es obligación que el grafo
+             persiga. `uncovered` exige ticket o derivadores, nada exige
+             que una propagación declarada se descargue. Por eso el orden
+             se pudo abandonar sin señal. Se corrige en el paso siguiente
+             (campo `Propaga:`), NO aquí: un PR, un cambio.
+Hipótesis:   Con el enunciado sellado, remodelar deja de ser silencioso: el
+             diff muestra el sello cambiando y el acto queda declarado.
+Razón:       CONTINGENCY P5 — "arranca por Z4" (PO, 2026-07-22), bajo su
+             corrección de que el aparato precede a la implementación.
+Impacto:     §3.0 gana columna Sello (21 claims sellados); §5.0 fila.
+             check.luau 26 reglas + modo --seals; test.luau 32 casos
+             (soporte `reject` nuevo). Header v5.40.
+             Z4 NO se cierra: el sello descarga su mitad de DETECCIÓN, no
+             la de OBLIGACIÓN — el grafo no guarda historia, luego no sabe
+             que un sello cambió respecto a ayer, y §3.0 sigue exenta de
+             obligación de ticket. Re-acotar la zona es del PO (§2.8); la
+             fila queda intacta hasta que se ratifique su nuevo alcance.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §5.0
+Libre:       Alcance re-acotado de Z4 tras el sello (mitad de obligación) →
+             PO. Idem el registro de las zonas propuestas Z5/Z6 → PO.
+Referencias: §3.0, §2.8, §5.0, DL-044, DL-056, DL-060, DL-061, DL-062
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

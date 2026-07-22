@@ -290,6 +290,29 @@ local cases = {
 		end,
 	},
 	{
+		name = "claim_seal_mismatch (remodelar sin declarar)",
+		expect = "✗ claim_seal_mismatch",
+		apply = function()
+			-- invierte el compromiso de D14 dejando el sello viejo: es la
+			-- remodelación silenciosa que Z4 existe para hacer visible.
+			replaceOnce(MASTER, "| D14 | §3.5 | El juego no castiga el fallo. |", "| D14 | §3.5 | El juego castiga el fallo. |")
+		end,
+	},
+	{
+		-- CONTROL de Z4: reubicar NO es remodelar. Cambiar la sección de un
+		-- claim no toca su enunciado, luego el sello sigue válido y el corpus
+		-- pasa limpio. Si esto encendiera claim_seal_mismatch, el sello
+		-- estaría sellando la FILA en vez del COMPROMISO — el defecto que Z4
+		-- describe, invertido. Sin este caso, un sello sobre la fila entera
+		-- pasaría los tests igual y Z4 quedaría cerrada en falso.
+		name = "control Z4 — reubicar un claim NO enciende el sello",
+		expect = nil,
+		reject = "✗ claim_seal_mismatch",
+		apply = function()
+			replaceOnce(MASTER, "| D19 | §3.7 |", "| D19 | §3.2 |")
+		end,
+	},
+	{
 		name = "unclaimed_section",
 		expect = "✗ unclaimed_section",
 		apply = function()
@@ -326,6 +349,12 @@ for _, case in ipairs(cases) do
 		ok = (code == 0)
 	else
 		ok = (code ~= 0) and out:find(case.expect, 1, true) ~= nil
+	end
+	-- `reject`: la regla NO debe encender. Una regla que enciende de más es
+	-- tan inútil como una que no enciende — bloquea trabajo legítimo y
+	-- entrena a ignorarla.
+	if ok and case.reject then
+		ok = out:find(case.reject, 1, true) == nil
 	end
 	if ok then
 		print("  ✓ " .. case.name)

@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.39 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.40 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -77,7 +77,7 @@ Se deducen de los axiomas; frozen porque su fundamento lo es. ⚠ marca un **com
 Otro eje: no describen la experiencia del jugador sino **cómo se construye y se estructura el sistema**. Frozen, pero no se deducen de los axiomas de experiencia.
 
 | Principio | Definición | Eje | Derivación |
-|---|---|---|---|
+|---|---|---|---|---|
 | Simplicidad Mecánica | La profundidad surge de sistemas simples interactuando. | Método | R-POST |
 | Compresión Social | El espacio debe aumentar la frecuencia con la que los jugadores interfieren entre sí. | Método (táctica espacial al servicio de C1b) | R-POST |
 | Entidades Estables | Diseñar alrededor de entidades (Player, Object, Map, Content), no alrededor de nombres, archivos o features concretas. | Arquitectura | R-POST |
@@ -252,7 +252,7 @@ El validador gobierna los artefactos; esta sección gobierna **el diseño del si
 Si X se resiste a tipar, X no es atómico: **se descompone (M5) y se tipa por partes.** La exhaustividad del case-split más la descomposición a átomos garantizan totalidad: *no existe elemento sin titular*. El fallback humano no es parte del procedimiento — es su **falsación** (M10).
 
 | ID | Ley | Revelada por | Derivación |
-|---|---|---|---|
+|---|---|---|---|---|
 | MT0 | **Ley de Asignación Total**: todo elemento del sistema (contenido, relación, residuo, cambio) tiene exactamente un titular determinado por su naturaleza; nada queda asignado implícitamente. | DL-060 | R-POST |
 | M1 | **El validador precede al trabajo**: el enforcement de una clase de error existe antes del trabajo que la produce; el validador nunca es un paso del programa que valida. | DL-053 | R-ESP · [MT0] — forma temporal: una clase sin enforcement está sin titular durante el gap |
 | M2 | **El determinismo vive fuera de los agentes**: ninguna verificación descansa en agente alguno — incluidos el que modela y el AUDITOR: sus pasadas son advisory, nunca titulares de garantía. | DL-055, DL-060 | R-ESP · [MT0] — los agentes no son titulares válidos de verificación |
@@ -287,29 +287,31 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 
 **Esta tabla es la capa normativa de §3.** Los claims se autoran en forma (M4): cada uno cita una regla del catálogo §2.7 sobre premisas que resuelven a axiomas (`C1a`…), elecciones (`E1`…) o claims (`[D-n]`, `[Nombre]` de §2.1). Las subsecciones §3.1–§3.9 son **comentario no normativo**: explican y ejemplifican estos claims, no fundan nada. Verificado por las mismas reglas F8 que §2.1 (`claim_*`) más totalidad (`unclaimed_section`: toda subsección de §3 tiene ≥1 claim o marcador legítimo).
 
-| ID | Sección | Claim | Derivación |
-|---|---|---|---|
-| D1 | §3.1 | El reto del loop vive en la coordinación decisional bajo escasez, no en el transporte. | R-COMP · C1b + C2′ |
-| D2 | §3.2 | La calidad del loop se mide por la densidad de interacción entre jugadores. | R-ESP · C1a — el umbral concreto es empírico (§3.2) |
-| D3 | §3.3 | La cooperación se genera cuando el entorno acopla los resultados de los jugadores; no es una feature. | R-ESP · C1b |
-| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 |
-| D5 | §3.3 | El espacio acopla por contención: negativo y pervasivo. | R-COMP · C1b + [Compresión Social] |
-| D6 | §3.3 | El objeto acopla por pooling — positivo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] |
-| D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 |
-| D8 | §3.3 | La cooperación obligatoria es legítima solo si emana de la naturaleza del elemento; una regla que impide iniciar la interacción está prohibida. | R-ESP · [D4] |
-| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | R-COMP · C2′ + [D1] |
-| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C2′ + E2 |
-| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay. | R-ESP · [Expresión sobre Ventaja] |
-| D12 | §3.5 | Ningún objeto vale más que otro (Neutralidad de Objetos). | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa |
-| D13 | §3.5 | Ninguna mecánica afecta solo al individuo sin beneficio del grupo. | R-ESP · C1b |
-| D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 |
-| D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] |
-| D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] |
-| D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ |
-| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-ESP · [D17] |
-| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores; no informa puntuaciones. | R-ESP · C1a |
-| D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest |
-| D21 | §3.9 | La evolución del juego fortalece gameplay, identidad o creación. | R-ESP · [Jugadores como Fuente de Contenido] |
+**Sello (DL-063).** Cada claim porta el hash de su propio enunciado. Lo sellado es el **enunciado**, no la fila: reubicar un claim no altera su sello, reescribirlo sí (`claim_seal_mismatch`). Re-sellar es el acto que declara una **remodelación** — sin él, cambiar un compromiso de diseño es indistinguible de un refactor cosmético. Al remodelar legítimamente, `lune run tools/derivation-graph/check.luau --seals` emite los sellos nuevos. El sello no dice que el contenido sea correcto (eso es Z1): dice que el cambio se hizo visible.
+
+| ID | Sección | Claim | Derivación | Sello |
+|---|---|---|---|---|
+| D1 | §3.1 | El reto del loop vive en la coordinación decisional bajo escasez, no en el transporte. | R-COMP · C1b + C2′ | 9e3e83 |
+| D2 | §3.2 | La calidad del loop se mide por la densidad de interacción entre jugadores. | R-ESP · C1a — el umbral concreto es empírico (§3.2) | 801e43 |
+| D3 | §3.3 | La cooperación se genera cuando el entorno acopla los resultados de los jugadores; no es una feature. | R-ESP · C1b | 138eb8 |
+| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 |
+| D5 | §3.3 | El espacio acopla por contención: negativo y pervasivo. | R-COMP · C1b + [Compresión Social] | a68e89 |
+| D6 | §3.3 | El objeto acopla por pooling — positivo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 91c113 |
+| D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 |
+| D8 | §3.3 | La cooperación obligatoria es legítima solo si emana de la naturaleza del elemento; una regla que impide iniciar la interacción está prohibida. | R-ESP · [D4] | 7e083b |
+| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | R-COMP · C2′ + [D1] | 0a5ad8 |
+| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C2′ + E2 | 4a98c3 |
+| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay. | R-ESP · [Expresión sobre Ventaja] | d5558e |
+| D12 | §3.5 | Ningún objeto vale más que otro (Neutralidad de Objetos). | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | 879670 |
+| D13 | §3.5 | Ninguna mecánica afecta solo al individuo sin beneficio del grupo. | R-ESP · C1b | b8cbf6 |
+| D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b |
+| D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c |
+| D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 |
+| D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-ESP · [D17] | a01d00 |
+| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores; no informa puntuaciones. | R-ESP · C1a | 4e18f2 |
+| D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f |
+| D21 | §3.9 | La evolución del juego fortalece gameplay, identidad o creación. | R-ESP · [Jugadores como Fuente de Contenido] | 731e4a |
 
 ### 3.1 Core Loop
 
@@ -558,7 +560,7 @@ UI / HUD               ←     Lógica de objetos
 ### 4.3 RemoteEvents y Contratos
 
 | Evento | Grupo | Dirección | Payload |
-|---|---|---|---|
+|---|---|---|---|---|
 | InteractObject | Gameplay | cliente → servidor | `{ instanceId }` |
 | DeliverObject | Gameplay | servidor → clientes | `{ instanceId }` |
 | ObjectStateChanged | Gameplay | servidor → clientes | `{ instanceId, objectId, state, leaderId, supportId }` |
@@ -1091,7 +1093,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
-| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061 | mismo runner (`check.luau`) |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
 | §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas, acotadas y **ratificadas** (`zone_malformed` exige descripción, camino, vencimiento y celda `PO <fecha>` — DL-062; `zone_expired`: zona vencida = violación). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
@@ -1421,7 +1423,7 @@ Subagent
 ```
 
 | Tipo | Función | Puede usar | No puede |
-|---|---|---|---|
+|---|---|---|---|---|
 | **Auditor** | Detectar problemas | Context Master, Decision Log, código, tickets | Proponer arquitectura, expandir scope, aprobar cambios |
 | **Constructor** | Implementar diseño aprobado | Context Master, Decision Log, código, tickets | Rediseñar, salir del scope del ticket, emitir hallazgos de auditoría |
 | **Ideador** | Explorar y proponer diseño | Context Master, heurísticas, métricas subjetivas (pre-playtest) | Aprobar cambios, emitir hallazgos formales, implementar |
@@ -1581,7 +1583,7 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 ### 6.1 File Taxonomy
 
 | Tipo | Descripción | Riesgo principal | Ejemplos |
-|---|---|---|---|
+|---|---|---|---|---|
 | A — Humano semipuro | Estructura creada por IA. Contenido llenado por humano sin filtro. Subagent solo filtra y formaliza via intake. Orchestrator audita solo estructura. | Contenido sin filtrar ingresa al ciclo sin pasar por intake | SCRATCHPAD.md |
 | B — Insumo primario de Orchestrator | Ciclo de vida largo. Se modifica solo con aprobación del PO. | Modificación sin auditoría previa | Prompts de auditores, AI_CONTEXT_MASTER (parcial) |
 | C — Comprensión humana | Para lectura humana. IA puede auditarlo y redactarlo. No es crítico. | Desactualización silenciosa | Onboarding, READMEs |

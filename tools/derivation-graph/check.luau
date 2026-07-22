@@ -23,6 +23,28 @@ local function norm(sec)
 	return "§" .. (sec:gsub("%.$", ""))
 end
 
+-- Sello del enunciado (Z4, DL-063). FNV-1a de 32 bits sobre el texto
+-- normalizado; 6 hex. Lo que sella es el ENUNCIADO, no la fila: mover un
+-- claim no altera su sello, reescribirlo sí. Así el grafo distingue
+-- REUBICAR normatividad de CAMBIAR el compromiso — sin esa distinción, una
+-- remodelación de diseño es indistinguible de un refactor cosmético.
+-- La multiplicación va partida en dos mitades: 32 bits × 16777619 desborda
+-- la precisión exacta de un double antes del módulo.
+local function mul32(a, b)
+	local hi = math.floor(a / 65536)
+	local lo = a % 65536
+	return ((hi * b % 65536) * 65536 + lo * b) % 4294967296
+end
+
+local function sealOf(text)
+	local s = text:gsub("%s+", " "):gsub("^ ", ""):gsub(" $", "")
+	local h = 2166136261
+	for i = 1, #s do
+		h = mul32(bit32.bxor(h, string.byte(s, i)), 16777619)
+	end
+	return string.format("%08x", h):sub(1, 6)
+end
+
 -- ── relaciones (EDB) ────────────────────────────────────────────────────────
 local nodes = {}
 local derives = {}
@@ -482,7 +504,12 @@ do
 					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
 				end
 				local sec, deriv = cells[2] or "", cells[4] or ""
-				designClaims[did] = { sec = sec, deriv = deriv }
+				designClaims[did] = {
+					sec = sec,
+					deriv = deriv,
+					enunciado = cells[3] or "",
+					sello = cells[5] or "",
+				}
 				if sec ~= "" then
 					claimedSections[sec] = true
 				end
@@ -711,6 +738,38 @@ for id, kind in pairs(nodes) do
 end
 table.sort(unclaimedSection)
 
+-- sello del enunciado (Z4, DL-063): el claim declara el hash de su propio
+-- enunciado. Reescribirlo sin re-sellar = violación; moverlo no toca nada.
+-- Re-sellar es el ACTO que hace visible una remodelación: no valida que el
+-- contenido nuevo sea correcto (eso es Z1), valida que el cambio se declaró.
+local claimSealMismatch = {}
+for id, c in pairs(designClaims) do
+	local esperado = sealOf(c.enunciado)
+	if c.sello == "" then
+		table.insert(claimSealMismatch, id .. " → sin sello (esperado " .. esperado .. ")")
+	elseif c.sello ~= esperado then
+		table.insert(claimSealMismatch, id .. " → sello " .. c.sello .. ", enunciado sella " .. esperado)
+	end
+end
+table.sort(claimSealMismatch)
+
+-- `--seals`: recalcula e imprime los sellos. Se corre al remodelar un claim,
+-- para obtener el sello nuevo que hay que escribir en la tabla.
+if table.find(process.args, "--seals") then
+	local ids = {}
+	for id in pairs(designClaims) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	print("Sellos de §3.0 (enunciado normalizado → FNV-1a/6):\n")
+	for _, id in ipairs(ids) do
+		print(string.format("  %-4s %s", id, sealOf(designClaims[id].enunciado)))
+	end
+	process.exit(0)
+end
+
 -- totalidad del gluing (DL-062): todo claim normativo de §3.0 declara CÓMO se
 -- realiza. El ancla es el claim, no la prosa (cierre de Z3): un claim sin
 -- realización es obligación pendiente, no omisión silenciosa.
@@ -810,6 +869,9 @@ end)
 reportViolations("unclaimed_section (sección §3 sin claim normativo en §3.0)", unclaimedSection, function(r)
 	return r
 end)
+reportViolations("claim_seal_mismatch (enunciado reescrito sin re-sellar)", claimSealMismatch, function(r)
+	return r
+end)
 reportViolations("glue_dangling (claim de módulo inexistente en §4.15)", glueDangling, function(r)
 	return r
 end)
@@ -865,7 +927,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
-	+ #zoneMalformed + #zoneExpired
+	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)
