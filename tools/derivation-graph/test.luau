@@ -340,6 +340,23 @@ local cases = {
 	{
 		-- Una deuda sin acreedor no se cobra: D18 decía "exige un postulado"
 		-- sin nombrar ningún ID, y nada lo detectaba.
+		name = "seal_unprovenanced",
+		expect = "✗ seal_unprovenanced",
+		apply = function()
+			replaceOnce(MASTER, "| 677030 | DL-063 |", "| 677030 | |")
+		end,
+	},
+	{
+		-- La procedencia se verifica SIN historia: el DL nombrado debe
+		-- declarar §3.0 en su Modifica. Un DL que nunca tocó los claims no
+		-- pudo sellarlos — una procedencia que miente se cae sola.
+		name = "seal_provenance_inconsistent (procedencia que miente)",
+		expect = "✗ seal_provenance_inconsistent",
+		apply = function()
+			replaceOnce(MASTER, "| 677030 | DL-063 |", "| 677030 | DL-050 |")
+		end,
+	},
+	{
 		name = "blocked_claim_dangling (deuda que no apunta a nada)",
 		expect = "✗ blocked_claim_dangling",
 		apply = function()

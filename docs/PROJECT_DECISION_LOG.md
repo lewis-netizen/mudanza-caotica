@@ -3566,4 +3566,50 @@ Libre:       —
 Referencias: §2.8, DL-060, DL-062, DL-070, DL-071
 ```
 
+### DL-073
+
+```
+ID:          DL-073
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Tres hilos independientes terminaron pidiendo lo mismo: el
+             sello (DL-063) hacía visible el cambio pero no atribuible; la
+             liveness (DL-071) exigía eventos y no estado; la serie
+             (DL-072) tuvo que reconstruirse contra git porque el corpus no
+             recuerda quién cambió qué. Los tres son Z4 — procedencia.
+Contenido:   Columna `Sellado por` en §3.0: cada claim declara el DL que lo
+             selló. La verificación es AUTO-CONSISTENTE SIN HISTORIA, que
+             es la parte que hacía falta: el DL debe existir Y declarar
+             §3.0 en su `Modifica:`. Un DL que nunca tocó los claims no
+             pudo sellarlos, luego una procedencia falsa se detecta desde
+             un solo estado (seal_unprovenanced,
+             seal_provenance_inconsistent). No hace falta diffear commits.
+             Consecuencia: el CHURN de claims por DL sale ahora del corpus
+             —DL-063:7, DL-065:1, DL-068:9, DL-069:6— en vez de
+             reconstruirse contra git. Es la diferencia discreta: cuánta
+             normatividad movió cada decisión. Medición, no regla.
+             Z4 NO SE CIERRA. Se salda su mitad de ATRIBUCIÓN: ya se sabe
+             qué DL cambió cada claim. Queda su mitad de OBLIGACIÓN: saber
+             QUÉ cambió dentro del enunciado —y por tanto si el cambio
+             exige implementación— requiere el delta, no solo el autor. El
+             sello es un hash: dice que algo cambió, no qué. Re-acotar la
+             zona es del PO (§2.8); la fila queda intacta.
+Hipótesis:   Con atribución, la serie deja de depender de una herramienta
+             externa al corpus, y el corpus pasa a recordar su propia
+             evolución sin que nadie la reconstruya a mano.
+Razón:       CONTINGENCY P5 — "continuemos" (PO, 2026-07-22).
+Impacto:     §3.0 gana `Sellado por` (23 claims); §2.8 documenta la
+             procedencia. check.luau 34 reglas + churn impreso; test.luau
+             41/41. Header v5.50.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §2.8
+Libre:       Re-acotar Z4 tras saldar su mitad de atribución → PO.
+Referencias: §3.0, §2.8, DL-063, DL-071, DL-072
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

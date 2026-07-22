@@ -513,6 +513,7 @@ do
 					deriv = deriv,
 					enunciado = cells[3] or "",
 					sello = cells[5] or "",
+					selladoPor = cells[6] or "",
 				}
 				if sec ~= "" then
 					claimedSections[sec] = true
@@ -838,6 +839,39 @@ for id, kind in pairs(nodes) do
 end
 table.sort(unclaimedSection)
 
+-- ── procedencia del sello (Z4, DL-073) ──────────────────────────────────────
+-- Cada claim declara QUÉ DL lo selló. La declaración es AUTO-CONSISTENTE sin
+-- necesitar historia: el DL debe existir Y debe declarar §3.0 en su
+-- `Modifica:`. Una procedencia que miente —un DL que nunca tocó los claims—
+-- se detecta desde un solo estado. Con esto, remodelar deja de ser solo
+-- visible (el sello, DL-063) y pasa a ser ATRIBUIBLE.
+local sealUnprovenanced, sealProvenanceInconsistent = {}, {}
+do
+	local modifiesClaims = {} -- DL → declara §3.0 en Modifica
+	for _, m in ipairs(modifies) do
+		if m[2] == "§3.0" then
+			modifiesClaims[m[1]] = true
+		end
+	end
+	local ids = {}
+	for id in pairs(designClaims) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	for _, id in ipairs(ids) do
+		local dl = designClaims[id].selladoPor
+		if not dl:match("^DL%-%d+$") then
+			table.insert(sealUnprovenanced, id .. " → \"" .. dl .. "\" no es un DL")
+		elseif not nodes[dl] then
+			table.insert(sealUnprovenanced, id .. " → " .. dl .. " no existe")
+		elseif not modifiesClaims[dl] then
+			table.insert(sealProvenanceInconsistent, id .. " → " .. dl .. " no declara §3.0 en Modifica:")
+		end
+	end
+end
+
 -- ── estructura de la deuda (DL-071) ─────────────────────────────────────────
 -- Un claim BLOQUEADO debe nombrar a su bloqueador, y el bloqueador debe
 -- existir: una elección sin ratificar (E-n) o una zona registrada (Z-n).
@@ -1111,6 +1145,12 @@ end)
 reportViolations("claim_seal_mismatch (enunciado reescrito sin re-sellar)", claimSealMismatch, function(r)
 	return r
 end)
+reportViolations("seal_unprovenanced (claim sin DL que declare su sellado)", sealUnprovenanced, function(r)
+	return r
+end)
+reportViolations("seal_provenance_inconsistent (el DL sellador no declara §3.0)", sealProvenanceInconsistent, function(r)
+	return r
+end)
 reportViolations("blocked_claim_dangling (claim bloqueado sin bloqueador existente)", blockedClaimDangling, function(r)
 	return r
 end)
@@ -1210,6 +1250,28 @@ reportViolations("version-pin (referencia a versión del master — prohibido)",
 	return r
 end)
 
+-- Churn de claims por DL (Z4, DL-073): la serie sale ahora del CORPUS, no
+-- de git. Es la diferencia discreta — cuánta normatividad movió cada
+-- decisión. Medición, no regla.
+do
+	local churn, dls = {}, {}
+	for _, c in pairs(designClaims) do
+		if c.selladoPor ~= "" then
+			if not churn[c.selladoPor] then
+				churn[c.selladoPor] = 0
+				table.insert(dls, c.selladoPor)
+			end
+			churn[c.selladoPor] += 1
+		end
+	end
+	table.sort(dls)
+	local parts = {}
+	for _, d in ipairs(dls) do
+		table.insert(parts, d .. ":" .. churn[d])
+	end
+	print("\n  · churn de claims por DL: " .. table.concat(parts, "  "))
+end
+
 print(
 	string.format(
 		"\n  · VARIANTE del corpus: %d  (zonas abiertas %d + claims bloqueados %d + clases sin regla %d)",
@@ -1252,6 +1314,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
+	+ #sealUnprovenanced + #sealProvenanceInconsistent
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
