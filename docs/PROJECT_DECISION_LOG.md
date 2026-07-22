@@ -3612,4 +3612,70 @@ Libre:       Re-acotar Z4 tras saldar su mitad de atribución → PO.
 Referencias: §3.0, §2.8, DL-063, DL-071, DL-072
 ```
 
+### DL-074
+
+```
+ID:          DL-074
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO entregó un borrador (instancia de agente) sobre
+             vocabulario controlado, advirtiendo versión desactualizada y
+             mucho ruido. Verificado contra el repo antes de heredar:
+             RUIDO DESCARTADO:
+             · El borrador trata X4 como ABIERTO con ejemplo negativo/
+               positivo. Falso: esas formas ya no aparecen en claims
+               (renombradas a rival/acumulativo en DL-068); X4 es memoria
+               de una captura pasada.
+             · "Z1..Z6 vigentes" — Z2/Z3 están cerradas.
+             · "Tipos de relación satisfy/refine/motivate/trace —
+               Controlado" — no existen en el repo (0 ocurrencias); residuo
+               de SysML heredado sin verificar.
+             · term_used como `.input` — etiquetado a mano de qué claim usa
+               qué término: la dependencia de agente que ya se mató dos
+               veces (registro de escapes). NO se hereda.
+             SEÑAL CONSERVADA: el vocabulario ES la metacapa —los términos
+             de que están hechos los claims— y sirve a X1 (procedencia de
+             términos) y al espacio de predicados del discriminante de
+             optimalidad.
+Contenido:   §2.9 Vocabulario Controlado: término preferido, eje,
+             definición y FORMAS PROHIBIDAS. Regla vocab_banned_term:
+             escanea el texto normativo de §3 por formas prohibidas — mismo
+             patrón que impl_leak, scan de superficie SIN etiquetar por
+             claim. Las formas son frases distintivas (dos palabras) para
+             no dar falsos positivos con palabras comunes.
+             Semilla: acoplamiento rival/acumulativo (prohíbe negativo/
+             positivo), valencia (eje independiente del mecanismo).
+             Mutación: regresión exacta de X4 — reintroduce "acoplamiento
+             negativo" en §3.3 y la máquina la caza.
+             LÍMITES DECLARADOS: (1) léxico, no semántico — que la premisa
+             SOSTENGA la conclusión sigue siendo Z1 y pide ontología, no
+             vocabulario. (2) Cobertura = formas declaradas; una colisión
+             no anotada no se caza (falso negativo, como toda memoria). Por
+             eso la regla REGRESIÓN-PRUEBA la instancia de X4 y SIEMBRA el
+             espacio de términos; NO cierra la clase X4 ni Z1. El escape X4
+             NO se gradúa a `regla:` —seguiría en zona: Z1— porque sería
+             sobre-declarar cobertura que la regla no tiene.
+Hipótesis:   El vocabulario controlado es el primer ladrillo de la
+             mecanización de X1: con términos definidos, "la conclusión
+             introduce un término ausente de las premisas" pasa a ser
+             comprobable léxicamente en un paso futuro.
+Razón:       CONTINGENCY P5 — borrador entregado por el PO con mandato de
+             extraer señal y no heredar ruido (2026-07-22).
+Impacto:     §2.9 nueva; X4 anotado (instancia cubierta, clase en Z1).
+             check.luau 35 reglas; test.luau 42/42. Header v5.51.
+             Variante SIN CAMBIO (12): la instancia cubierta no cierra la
+             clase, luego X4 sigue contando — habría sido deshonesto
+             bajarla.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.9, §2.8
+Libre:       Crecimiento del vocabulario conforme aparezcan colisiones → se
+             añaden filas; no es decisión anticipable.
+Referencias: §2.9, §2.8, §3.3, DL-068, DL-070
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

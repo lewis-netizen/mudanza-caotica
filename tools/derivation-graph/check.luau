@@ -331,6 +331,51 @@ do
 end
 table.sort(implLeak)
 
+-- vocabulario controlado (§2.9, DL-074): forma prohibida en texto normativo
+-- de §3 = colisión léxica. Mismo patrón que impl_leak — scan de superficie,
+-- sin etiquetar qué claim usa qué término (eso sería dependencia de agente).
+-- Las formas se leen de §2.9, que NO se escanea (vive en §2).
+local bannedForms = {} -- forma prohibida (minúsculas) → término preferido
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "2.9" and line:match("^| ") and not line:match("^| Término") and not line:match("^|%-") then
+			local cells = {}
+			for cell in line:gmatch("|([^|]*)") do
+				table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+			end
+			local pref = cells[1] or ""
+			for form in (cells[4] or ""):gmatch("`([^`]+)`") do
+				bannedForms[form:lower()] = pref
+			end
+		end
+	end
+end
+local vocabBanned = {}
+do
+	local region, i = nil, 0
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		i += 1
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region and region:match("^3") then
+			local low = line:lower()
+			for form, pref in pairs(bannedForms) do
+				if low:find(form, 1, true) then
+					table.insert(vocabBanned, "§3 L" .. i .. ' → "' .. form .. '" (usar "' .. pref .. '")')
+				end
+			end
+		end
+	end
+end
+table.sort(vocabBanned)
+
 -- version-pins: ningún artefacto referencia "AI_CONTEXT_MASTER vN.N" (DL-050).
 -- El master se lee siempre vigente. Entradas históricas del log exentas
 -- (solo se escanea su header). El master mismo está exento.
@@ -1127,6 +1172,9 @@ end)
 reportViolations("domain_mismatch (Domain del DL vs nivel que Modifica)", domainMismatch, function(r)
 	return r[1] .. " (Domain " .. r[3] .. ") modifica " .. r[2]
 end)
+reportViolations("vocab_banned_term (forma léxica prohibida en §3 — §2.9)", vocabBanned, function(r)
+	return r
+end)
 reportViolations("impl_leak (módulo de src/ nombrado en §1–§3)", implLeak, function(r)
 	return r
 end)
@@ -1314,7 +1362,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

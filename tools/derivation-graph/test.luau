@@ -340,6 +340,15 @@ local cases = {
 	{
 		-- Una deuda sin acreedor no se cobra: D18 decía "exige un postulado"
 		-- sin nombrar ningún ID, y nada lo detectaba.
+		-- Regresión exacta de X4: reintroduce la colisión de vocabulario que
+		-- se corrigió a mano en DL-068. Ahora la caza la máquina.
+		name = "vocab_banned_term (regresión de X4)",
+		expect = "✗ vocab_banned_term",
+		apply = function()
+			replaceOnce(MASTER, "El espacio acopla por contención: rival y pervasivo.", "El espacio acopla por contención: acoplamiento negativo y pervasivo.")
+		end,
+	},
+	{
 		name = "seal_unprovenanced",
 		expect = "✗ seal_unprovenanced",
 		apply = function()
