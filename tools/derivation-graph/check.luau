@@ -140,6 +140,30 @@ do
 	end
 end
 
+-- ── entidades como premisas citables (§2.3, DL-077) ─────────────────────────
+-- Las entidades fundamentales son PRIMITIVOS: nunca se derivaron (deuda de
+-- ontología conocida). Hacerlas citables no las deriva — hace VISIBLE que un
+-- claim se apoya en ellas, en vez de que la dependencia entre por debajo.
+local entities = {} -- nombre → texto de su bloque en §2.3
+do
+	local region, cur = nil, nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region, cur = (h:gsub("%.$", "")), nil
+		end
+		if region == "2.3" then
+			local name = line:match("^%*%*(%u%w+)%*%*")
+			if name then
+				cur = name
+				entities[cur] = line
+			elseif cur then
+				entities[cur] = entities[cur] .. " " .. line
+			end
+		end
+	end
+end
+
 -- ── diferimientos autorizados y acotados (DL-050) ───────────────────────────
 local deferrals = {} -- "ticket\0dl" → fecha límite YYYY-MM-DD
 do
@@ -692,6 +716,9 @@ for name, c in pairs(f8Claims) do
 				if f8Claims[claimRef] then
 					otherN += 1
 					table.insert(f8Edges[name], claimRef)
+				elseif entities[claimRef] then
+					-- primitivo de §2.3: hoja del grafo, sin arista de ciclo
+					otherN += 1
 				else
 					table.insert(f8UnknownPremise, name .. " → [" .. claimRef .. "]")
 				end
@@ -997,6 +1024,7 @@ table.sort(claimSealMismatch)
 -- sinonimia — que es CONTENIDO, no relación pura. Por eso no bloquea: empuja.
 if table.find(process.args, "--provenance") then
 	local termForms = {} -- término preferido → { formas de superficie }
+	local termDefinedIn = {} -- término → claim que lo define (extensión conservativa)
 	do
 		local region = nil
 		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
@@ -1016,6 +1044,14 @@ if table.find(process.args, "--provenance") then
 						table.insert(forms, s:lower())
 					end
 					termForms[pref] = forms
+					-- «Definido en»: el claim que INTRODUCE el término. Un
+					-- término no flota en su propia definición — eso es una
+					-- extensión conservativa (nombrar una configuración de
+					-- términos ya presentes), no una premisa colada.
+					local def = (cells[6] or ""):match("^(D%d+)$")
+					if def then
+						termDefinedIn[pref] = def
+					end
 				end
 			end
 		end
@@ -1058,6 +1094,9 @@ if table.find(process.args, "--provenance") then
 	end
 	-- una elección introduce el término de SU EJE (A-n): E1 sobre A1
 	-- "valencia del resultado" aporta el término «valencia».
+	for n, txt in pairs(entities) do
+		nodeText[n] = txt:lower()
+	end
 	for e, row in pairs(f8ElectionRows) do
 		local ax = axes[row.eje]
 		if ax then
@@ -1106,7 +1145,7 @@ if table.find(process.args, "--provenance") then
 				local concl = termsIn(nodeText[id])
 				local floating = {}
 				for t in pairs(concl) do
-					if not premTerms[t] then
+					if not premTerms[t] and termDefinedIn[t] ~= id then
 						table.insert(floating, t)
 					end
 				end

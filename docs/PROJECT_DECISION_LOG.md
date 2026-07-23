@@ -3821,4 +3821,61 @@ Libre:       Integración de §2.3 al vocabulario de términos → modelado
 Referencias: §2.8, §3.0, §2.3, DL-068, DL-074, DL-075
 ```
 
+### DL-077
+
+```
+ID:          DL-077
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Cerrar D6 integrando §2.3 al vocabulario de términos, que
+             DL-076 dejó localizado como la deuda de ontología.
+Contenido:   (1) DERIVA REAL HALLADA: §2.3 ObjectDefinition NO declaraba
+             `Demand`, pero §4.13 (carryEfficiency(demand, carriers), DL-047)
+             y D6 la usan desde hace días. El término flotante rastreó hasta
+             un schema desactualizado — la under-definition localizada,
+             literalmente. Campo añadido.
+             (2) Vocabulario gana «Definido en»: un término NO flota en el
+             claim que lo introduce con su definición — eso es una extensión
+             conservativa (nombrar una configuración de términos ya
+             presentes), no una premisa colada. `acoplamiento rival`→D5,
+             `acoplamiento acumulativo`→D6.
+             (3) ENTIDADES COMO PREMISAS CITABLES. Las entidades de §2.3 son
+             PRIMITIVOS —nunca se derivaron, deuda de ontología conocida—.
+             Hacerlas citables no las deriva: hace VISIBLE que un claim se
+             apoya en ellas, en vez de que la dependencia entre por debajo.
+             D6 → R-COMP · [D3] + [D4] + [Object]; D12 → R-COMP · C1b +
+             [Object].
+             HONESTIDAD METODOLÓGICA: tras (1) y (2) el detector marcaba 0.
+             Ese 0 era RELATIVO AL VOCABULARIO — exactamente lo advertido en
+             DL-075. Se probó contra sí mismo añadiendo `demanda` como
+             término: reaparecieron DOS claims (D6 y D12) apoyados en la
+             entidad sin citarla. Solo tras (3) el 0 es real. Registrar el
+             experimento importa más que el 0: un detector cuya cobertura
+             es el vocabulario puede dar 0 por ceguera, y la única defensa
+             es ampliarlo a propósito y ver qué aparece.
+             (4) D12 ganó premisa: «pueden diferir en demanda» se apoyaba en
+             Object sin citarlo (R-ESP · C1b → R-COMP · C1b + [Object]).
+Hipótesis:   Con las entidades citables, la capa ontológica deja de ser un
+             sustrato invisible: cada claim que se apoya en un primitivo no
+             derivado lo declara, y la deuda de ontología se vuelve contable
+             en vez de difusa.
+Razón:       CONTINGENCY P5 — "hazlo así" (PO, 2026-07-22).
+Impacto:     §2.3 gana Demand (deriva saldada); §2.9 gana «Definido en» y el
+             término `demanda`; D6 y D12 citan [Object]. check.luau: entidades
+             como premisas + detector consciente de definiciones. Header
+             v5.54. check 35 reglas, test 42/42, detector 0 real.
+             NO CIERRA: las entidades siguen SIN DERIVAR (§2.3 es primitivo
+             heredado). Citarlas hace visible la dependencia, no la funda.
+             Esa sigue siendo la deuda de ontología de fondo.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.3, §2.9, §3.0
+Libre:       Derivación de las entidades desde los axiomas → trabajo abierto.
+Referencias: §2.3, §2.9, §3.0, §4.13, DL-047, DL-075, DL-076
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
