@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.67 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.68 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -309,7 +309,8 @@ Si X se resiste a tipar, X no es atómico: **se descompone (M5) y se tipa por pa
 | M7 | **Disolver sobre vigilar**: una relación frágil se elimina como clase antes que policiarse como instancias. | DL-050 | R-ESP · [MT0] — caso 4 del procedimiento |
 | M8 | **Exhaustividad declarada**: todo lo formalizable se formaliza; el residuo restante lleva dueño explícito. | DL-055 | R-ESP · [MT0] — caso 3: residuo sin dueño = asignación implícita, prohibida |
 | M9 | **Evolución conductual**: cambiar el sistema es acto etiquetado (tripwire) y toda regla nueva demuestra detectar (mutation). | DL-052, DL-056 | R-ESP · [MT0] — los cambios del sistema son elementos y tipan |
-| M10 | **Falsación**: un catch del PO no es motor del sistema — es un **defecto del framework**: un elemento mal tipado o el procedimiento mal aplicado. Se trata como bug (¿cuál de las 4 preguntas se respondió mal?), se corrige el tipado y, si la clase es formalizable, baja a regla. Un catch sobre una zona registrada no es falsación — ahí el sistema no garantizaba. **La métrica del metaframework es que esta ley no se dispare fuera de zonas.** | DL-059, DL-060 | R-ESP · [MT0] — el catch revela una violación de asignación, no una ley nueva |
+| M11 | **Auto-aplicación y su límite**: todo mecanismo está sujeto a la disciplina que impone —un guardián exento de su propia guardia no guarda—, pero la auto-verificación NO puede detectar un defecto AUTO-CONSISTENTE (Thompson, «Reflections on Trusting Trust»: un sistema auto-hospedado oculta lo que sobrevive a su propia verificación). Luego la DIVERSIDAD —una segunda implementación independiente (Wheeler, DDC)— es estructuralmente necesaria, no un respaldo. El PO no es auditor de reserva: **es la implementación diversa**, y acota a M10. | DL-091 | R-ESP · [MT0] — MT0 asigna por naturaleza; la del defecto auto-consistente excluye a la máquina auto-hospedada |
+| M10 | **Falsación**: un catch del PO no es motor del sistema — es un **defecto del framework**: un elemento mal tipado o el procedimiento mal aplicado. Se trata como bug (¿cuál de las 4 preguntas se respondió mal?), se corrige el tipado y, si la clase es formalizable, baja a regla. Un catch sobre una zona registrada no es falsación — ahí el sistema no garantizaba. **La métrica del metaframework es que esta ley no se dispare fuera de zonas** — acotado por M11: la fracción AUTO-CONSISTENTE de los catch no es defecto del framework ni es internalizable, y esperar que desaparezca sería negar el límite de Thompson. | DL-059, DL-060 | R-ESP · [MT0] — el catch revela una violación de asignación, no una ley nueva |
 
 Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_*`); su forma por `meta_law_malformed`.
 
@@ -346,6 +347,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 | X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
+| X13 | **Defecto auto-consistente**: la falsificación que hace pasar al verificador Y a sus mutaciones — indetectable por auto-verificación (Thompson) | el agente confló `capacidad` con `demanda` para que el detector diera 0: pasó el check y pasaron los tests; lo cazó el PO (DL-085, DL-091). Igual la autoridad sobre sinónimos y sobre el aparato | zona: Z1 |
 | X12 | **Completitud del aparato indecidible**: la adecuación por mutación es relativa por construcción y el mutante equivalente es NP-completo, luego «¿falta algo en el metanivel?» no se infiere | ninguna instancia concreta — es un límite, no un defecto; se acota declarando y encogiendo la TCB (DL-090) | zona: Z1 |
 | X11 | **Modo del validador sin cobertura de mutación**: M9 solo alcanza las reglas del reporte por defecto, luego `--provenance`, `--sensitivity` y `--seals` no tenían ni un test | los tres defectos de aparato de la sesión vivían ahí y los halló un agente leyendo salida, no el aparato (DL-088) | regla: los tres modos con línea base en test.luau (DL-089) |
 | X10 | **Coincidencia léxica sin frontera de palabra**: un término casa dentro de otro y produce un flotante falso | `entidad` casaba dentro de `identidad` y marcaba a D16 (DL-082) | regla: --provenance con frontera UTF-8 |
@@ -1789,6 +1791,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
 | P16 | Disolver §2.2 (Test Oficial de Diseño) en claims: hoy sus cinco criterios fundan desde prosa, contra M4 | P1 | DL-061 | pendiente |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
+| P20 | Implementación DIVERSA (DDC) del invariante más crítico: un segundo verificador mínimo escrito independientemente — la única defensa conocida contra el defecto auto-consistente | — | X13 | pendiente |
 | P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma en §2.7, §2.8, §5.11 y §5.12 | — | X12 | pendiente |
 | P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pendiente-PO |
 

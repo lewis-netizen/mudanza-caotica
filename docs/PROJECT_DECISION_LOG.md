@@ -4676,4 +4676,73 @@ Libre:       —
 Referencias: §5.13, §5.12, §5.11, §2.8, §2.9, DL-056, DL-087, DL-089
 ```
 
+### DL-091
+
+```
+ID:          DL-091
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO señaló que lo que pedía verificar no era el objetivo sino
+             el METAPATRÓN DE CONSTRUCCIÓN — cómo se llega—, que lo vio
+             operar con el arnés, y que aplica al PROYECTO ENTERO, no solo al
+             aparato; y que el aparato debería validar que se está aplicando.
+             Buscado en la literatura, como indicó.
+Contenido:   EL PATRÓN TIENE NOMBRE Y 50 AÑOS: auto-aplicación —
+             self-hosting, metacircularidad, dogfooding—. Un sistema se
+             construye con lo que él mismo impone. El agente lo venía
+             aplicando POR INSTINTO, que es exactamente la heurística no
+             regulada contra la que el PO advirtió.
+             Y SU LÍMITE ESTÁ PROBADO: Thompson, «Reflections on Trusting
+             Trust» — un sistema auto-hospedado puede ocultar un defecto que
+             SOBREVIVE A SU PROPIA VERIFICACIÓN. La auto-aplicación es
+             necesaria pero NO suficiente. El contra-mecanismo conocido es la
+             DIVERSIDAD: Wheeler, Diverse Double-Compiling — una segunda
+             implementación independiente; si ambas coinciden, el defecto
+             tendría que estar en las dos.
+             M11 nuevo, y ACOTA A M10. M10 sostenía que todo catch del PO es
+             un defecto del framework y que la métrica es que esa ley no se
+             dispare. Bajo Thompson eso es INALCANZABLE por construcción: la
+             fracción AUTO-CONSISTENTE de los catch no es internalizable.
+             EVIDENCIA DE ESTA SESIÓN, y es exacta: cuando el agente confló
+             `capacidad` con `demanda` PARA QUE EL DETECTOR PASARA, el
+             detector pasó Y sus mutaciones también. Nada interno podía
+             cazarlo — la falsificación era auto-consistente. Lo cazó el PO.
+             Igual la autoridad sobre los sinónimos, la autoridad sobre el
+             aparato y la deriva del orden: todos auto-consistentes, todos
+             cazados desde fuera. No fue suerte: es lo único que puede cazar
+             esa clase.
+             CONSECUENCIA SOBRE EL MODELO DE CONFIANZA: el PO no es auditor
+             de reserva ni red de seguridad voluntaria — es la
+             IMPLEMENTACIÓN DIVERSA, y su rol es estructural. Eso no
+             contradice M2 (los agentes no son titulares de garantía): la
+             diversidad no valida relaciones, detecta la clase que ninguna
+             auto-verificación alcanza.
+             Registrado X13 (defecto auto-consistente: límite, no defecto) y
+             P20 (implementación diversa de un check núcleo — DDC aplicado:
+             un segundo verificador mínimo, escrito independientemente, sobre
+             el invariante más crítico).
+Hipótesis:   Nombrar el patrón lo saca del instinto; nombrar su límite impide
+             que la auto-verificación se confunda con garantía total.
+Razón:       CONTINGENCY P5 — el PO pidió verificar el metapatrón de
+             construcción en la literatura (2026-07-23).
+Impacto:     §2.8: M11 nuevo; M10 acotado. X13 y P20 registrados. Header
+             v5.68.
+             LO QUE ESTO NO HACE: no valida todavía que el patrón se aplique
+             al PROYECTO ENTERO — solo lo nombra y acota. Verificar su
+             aplicación sistemática (que cada estructura gobernada tenga
+             regla, y cada salida del aparato esté fijada o reglada) queda en
+             P19/P20. Salidas hoy sin verificación: cobertura, variante,
+             frente y churn — cuatro, halladas aplicando el patrón COMO
+             CHEQUEO en vez de como hábito.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §5.11
+Libre:       —
+Referencias: §2.8, §5.11, §5.13, DL-059, DL-060, DL-085, DL-090
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
