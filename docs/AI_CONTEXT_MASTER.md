@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.63 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.64 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1719,6 +1719,29 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 **Gate automático (Nivel 1).** `Contract: class:a traceability (DL-041)`: si el PR es `class:a`, debe (a) referenciar un `DL-xxx` y (b) tocar `docs/`; si no, falla. Si el cambio no es arquitectónico, se reclasifica a `class:b`.
 
 **Candidato diferido.** Un gate que detecte "el PR añade un directorio/capa nuevo bajo `src/` pero está etiquetado `class:b`" cazaría el caso #44 en origen. Es heurístico (falsos positivos en adiciones `class:b` legítimas) — se registra como candidato a gate futuro, no se implementa aún (mismo criterio que DL-035).
+
+### 5.12 Registro de Reglas y Asimetría de Enforcement (DL-087)
+
+**El problema.** Nada guardaba la ELIMINACIÓN de una regla. M9 verifica que toda regla *existente* tenga mutación; borrando la regla y su mutación en el mismo PR el build seguía verde y el conteo bajaba sin que nada chillara. Un agente que puede cambiar la regla que lo juzga no está constreñido por ella: el aparato pierde su valía.
+
+**Asimetría (ratificada por el PO, 2026-07-23).** El agente puede **apretar** —añadir reglas, añadir mutaciones, endurecer condiciones—: eso solo aumenta el rigor sobre sí mismo. **Aflojar** —borrar una regla, relajar una condición, eximir un caso— exige ratificación del PO. Es **transitoria**: rige mientras el aparato tenga deuda; uno terminado no necesita ni apretar ni aflojar.
+
+**Mecanismo.** Este registro declara el conjunto de reglas. `rule_missing` verifica que toda regla declarada la emita el runner; `rule_undeclared`, lo inverso. Borrar una regla exige borrar su fila **aquí** — acto normativo en `docs/`, `class:a`, con DL — en vez de un diff de código que nadie lee. Añadir exige declararla, que es barato y visible.
+
+```
+dangling · orphan · stale NUEVO · diferimiento VENCIDO · uncovered · level_skip
+domain_mismatch · impl_leak · undeclared_free · module_undeclared · version-pin
+unglued_claim · glue_dangling · unclaimed_section
+claim_bad_derivation · unknown_rule · unknown_premise · rule_arity · claim_cycle
+claim_seal_mismatch · seal_unprovenanced · seal_provenance_inconsistent
+election_malformed · election_axis_dup · election_compound · election_value_off_axis
+election_axis_unregistered · election_unratified_cited
+axis_malformed · axis_domain_thin
+meta_law_malformed · zone_malformed · zone_expired
+blocked_claim_dangling · vocab_banned_term
+plan_dangling · plan_uncovered_debt
+rule_missing · rule_undeclared
+```
 
 ### 5.11 Plan del Programa de Modelado (DL-079)
 

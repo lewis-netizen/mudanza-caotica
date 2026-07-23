@@ -371,6 +371,24 @@ local cases = {
 		-- La única completitud que el plan admite probar: que ninguna deuda
 		-- YA DECLARADA quede sin paso. Frente a deuda no declarada sigue
 		-- ciego — eso es X8 y no se cierra con filas.
+		-- La asimetría en acción: borrar una regla del runner sin borrar su
+		-- declaración = el aflojamiento silencioso que §5.12 impide.
+		-- La otra mitad: emitir una regla sin declararla deja el registro
+		-- desincronizado, y un registro que no refleja el runner no guarda nada.
+		name = "rule_undeclared",
+		expect = "✗ rule_undeclared",
+		apply = function()
+			replaceOnce(MASTER, "blocked_claim_dangling · vocab_banned_term", "blocked_claim_dangling")
+		end,
+	},
+	{
+		name = "rule_missing (aflojar el aparato en silencio)",
+		expect = "✗ rule_missing",
+		apply = function()
+			replaceOnce(MASTER, "blocked_claim_dangling · vocab_banned_term", "blocked_claim_dangling · vocab_banned_term · regla_fantasma")
+		end,
+	},
+	{
 		name = "plan_uncovered_debt",
 		expect = "✗ plan_uncovered_debt",
 		apply = function()

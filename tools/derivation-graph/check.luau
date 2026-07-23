@@ -1805,7 +1805,67 @@ if #deferred > 0 then
 	end
 end
 
+-- ── asimetría de enforcement (§5.12, DL-087) ────────────────────────────────
+-- El conjunto declarado y el emitido deben coincidir. Borrar una regla exige
+-- borrar su fila del registro: acto normativo en docs/, no diff de código.
+-- El agente puede APRETAR (declarar + emitir una regla nueva) pero no AFLOJAR
+-- sin que la eliminación quede como cambio constitucional visible.
+local ruleMissing, ruleUndeclared = {}, {}
+do
+	-- Estas dos se registran a mano: se comprueban ANTES de reportarse, luego
+	-- se auto-eximirían. Un guardián exento de su propia guardia no guarda.
+	emittedRules["rule_missing"] = true
+	emittedRules["rule_undeclared"] = true
+	local declared = {}
+	local region, inBlock = nil, false
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region, inBlock = (h:gsub("%.$", "")), false
+		end
+		if region == "5.12" then
+			if line:match("^```") then
+				inBlock = not inBlock
+			elseif inBlock then
+				for r in line:gmatch("[^·%s][^·]*") do
+					r = r:gsub("^%s+", ""):gsub("%s+$", "")
+					if r ~= "" then
+						declared[r] = true
+					end
+				end
+			end
+		end
+	end
+	for r in pairs(declared) do
+		if not emittedRules[r] and not emittedRules[(r:match("^(%S+)"))] then
+			table.insert(ruleMissing, r .. " → declarada en §5.12, no emitida por el runner")
+		end
+	end
+	for r in pairs(emittedRules) do
+		local ok = declared[r]
+		if not ok then
+			for d in pairs(declared) do
+				if d:match("^" .. r:gsub("%-", "%%-")) then
+					ok = true
+				end
+			end
+		end
+		if not ok then
+			table.insert(ruleUndeclared, r .. " → emitida, no declarada en §5.12")
+		end
+	end
+	table.sort(ruleMissing)
+	table.sort(ruleUndeclared)
+end
+reportViolations("rule_missing (regla declarada en §5.12 que el runner no emite)", ruleMissing, function(r)
+	return r
+end)
+reportViolations("rule_undeclared (regla emitida sin declarar en §5.12)", ruleUndeclared, function(r)
+	return r
+end)
+
 local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
+	+ #ruleMissing + #ruleUndeclared
 	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
 	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle

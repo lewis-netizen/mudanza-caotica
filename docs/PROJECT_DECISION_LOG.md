@@ -4441,4 +4441,60 @@ Libre:       Ratificación de cada equivalencia → PO.
 Referencias: §2.9, §2.8, §5.11, DL-060, DL-067, DL-077, DL-085
 ```
 
+### DL-087
+
+```
+ID:          DL-087
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO señaló que el agente no debe tener autoridad sobre el
+             aparato —eso le quita su valía— y que no debe modificarlo por
+             heurística. VERIFICADO: nada guardaba la ELIMINACIÓN de una
+             regla. M9 comprueba que toda regla EXISTENTE tenga mutación;
+             borrando regla y mutación en el mismo PR el build seguía verde y
+             el conteo bajaba en silencio. El agente tocó el aparato ~20
+             veces en la sesión por su propio juicio.
+Contenido:   ASIMETRÍA (ratificada por el PO): el agente puede APRETAR
+             —añadir reglas, mutaciones, endurecer condiciones—, que solo
+             aumenta el rigor sobre sí mismo. AFLOJAR —borrar, relajar,
+             eximir— exige ratificación. Es TRANSITORIA por marco del PO:
+             rige mientras el aparato tenga deuda; uno terminado no necesita
+             ni apretar ni aflojar.
+             §5.12: registro del conjunto de reglas. `rule_missing` (declarada
+             y no emitida) y `rule_undeclared` (emitida y no declarada) lo
+             mantienen sincronizado en ambas direcciones. Borrar una regla
+             exige borrar su fila del master: acto normativo class:a con DL,
+             en vez de un diff de código que nadie lee.
+             HALLAZGO AL CONSTRUIRLO: las dos reglas guardianas se
+             AUTO-EXIMÍAN. Se comprueban antes de reportarse, luego no
+             estaban en el conjunto emitido en el momento de comprobarse. Un
+             guardián exento de su propia guardia no guarda. Pre-registradas
+             a mano.
+             SEGUNDO HALLAZGO: M9 rechazó el primer intento — `rule_undeclared`
+             no tenía mutación. El aparato exigió cubrir la regla que lo
+             protege de sí mismo, antes de aceptarla.
+Hipótesis:   Un agente que solo puede endurecer el aparato conserva su
+             utilidad y pierde la autoridad peligrosa; la asimetría es más
+             barata que la prohibición y no detiene el trabajo.
+Razón:       CONTINGENCY P5 — asimetría propuesta por el agente y ratificada
+             por el PO (2026-07-23).
+Impacto:     §5.12 nueva con el registro de 39 reglas; rule_missing y
+             rule_undeclared. check 39 reglas, test 46/46. Header v5.64.
+             NO CIERRA: la asimetría hace VISIBLE el aflojamiento, no lo
+             impide — el agente sigue pudiendo editar el master. Lo que
+             cambia es que pasa de invisible a acto constitucional con DL.
+             La prevención real seguiría siendo el PO leyendo el diff de
+             §5.12, que es una superficie de una pantalla en vez de todo el
+             código del validador.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.12
+Libre:       —
+Referencias: §5.12, §5.0, §2.8, DL-052, DL-056, DL-086
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
