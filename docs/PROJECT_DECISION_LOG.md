@@ -4123,4 +4123,63 @@ Libre:       —
 Referencias: §5.11, §2.8, DL-079, DL-080
 ```
 
+### DL-082
+
+```
+ID:          DL-082
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P1 — primera tanda real de la cola de refinamiento, ejecutada en
+             autonomía tras validar la objetividad del plan (DL-081).
+Contenido:   Siete términos definidos desde el tope de la cola: creación,
+             elemento compartido, objeto, obligación, progresión, puntuación,
+             sincronía. Cobertura 25% → 36%.
+             El lazo expuso SEIS claims flotantes; triaje MT0:
+             · DETERMINADOS (citas faltantes, corregidas):
+               D23 «obligación» — imponerse una obligación ES la restricción
+               impuesta de C3, y D23 solo citaba [D4]. → R-COMP · [D4] + C3.
+               D8 «elemento compartido» — «lo que no emana del elemento» es
+               la cláusula de C3, no citada. → R-COMP · [D23] + C1a + C3.
+               D4 — resuelto modelando la sinonimia elemento ≈ «entidad», que
+               es la palabra con la que C3 nombra al portador.
+             · CATEGORÍAS EXTERNAS (clase nueva): `progresión` y `puntuación`
+               no se derivan de ningún axioma porque el diseño las EXCLUYE —
+               se nombran para prohibirlas. Exigirles procedencia axiomática
+               es un error de categoría. Eje `externo` en §2.9: el detector
+               las trata como siempre disponibles. Es un acto declarado y
+               auditable; usarlo para silenciar un flotante genuino falsearía
+               el vocabulario, no al detector.
+             DEFECTO DEL PROPIO DETECTOR, hallado por su salida: marcaba a
+             D16 con «elemento compartido» porque la coincidencia era por
+             SUBCADENA y `entidad` casa dentro de `identidad`. Corregido a
+             coincidencia con FRONTERA DE PALABRA (bytes ≥ 128 = continuación
+             UTF-8, cuentan como letra). Registrado como escape X10 —
+             resuelto por regla, no por zona: el arreglo está en el código y
+             la mutación de la clase la cubre el propio detector.
+             Es la primera vez que la salida del instrumento delata un fallo
+             DEL INSTRUMENTO y no del corpus. Sin ese arreglo, cada término
+             corto añadido al vocabulario habría generado ruido creciente.
+Hipótesis:   Recorrer la cola no es tarea de volumen: cada tanda expone una
+             clase distinta (cita faltante, sinonimia, error de categoría,
+             defecto del detector), y son esas clases —no los términos— lo
+             que hace avanzar el aparato.
+Razón:       CONTINGENCY P5 — autonomía concedida tras validar el plan
+             (PO, 2026-07-23).
+Impacto:     §2.9 +7 términos y eje `externo`; D8 y D23 con premisas
+             corregidas; X10 registrado con regla. check.luau con frontera
+             de palabra. Cobertura 36%. check 37 reglas, test 44/44. Header
+             v5.59.
+             P1 SIGUE EN CURSO: 62 términos en cola. El criterio de cierre es
+             que deje de exponer clases nuevas, no que la cola llegue a cero.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.9, §3.0, §2.8
+Libre:       —
+Referencias: §2.9, §3.0, §2.8, §5.11, DL-078, DL-081
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

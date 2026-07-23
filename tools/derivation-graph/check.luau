@@ -1187,6 +1187,7 @@ end
 if table.find(process.args, "--provenance") then
 	local termForms = {} -- término preferido → { formas de superficie }
 	local termDefinedIn = {} -- término → claim que lo define (extensión conservativa)
+	local termExternal = {} -- eje «externo»: categoría que el diseño EXCLUYE, no deriva
 	do
 		local region = nil
 		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
@@ -1210,6 +1211,9 @@ if table.find(process.args, "--provenance") then
 					-- término no flota en su propia definición — eso es una
 					-- extensión conservativa (nombrar una configuración de
 					-- términos ya presentes), no una premisa colada.
+					if (cells[2] or ""):lower() == "externo" then
+						termExternal[pref] = true
+					end
 					local def = (cells[6] or ""):match("^(D%d+)$")
 					if def then
 						termDefinedIn[pref] = def
@@ -1265,11 +1269,32 @@ if table.find(process.args, "--provenance") then
 			nodeText[e] = ax.nombre:lower()
 		end
 	end
+	-- Coincidencia con FRONTERA DE PALABRA. La subcadena a secas daba falsos
+	-- positivos reales: `entidad` casaba dentro de `identidad` y marcaba a D16.
+	-- Los bytes ≥ 128 son continuación UTF-8, luego cuentan como letra.
+	local function isWordByte(ch)
+		return ch ~= "" and (ch:match("[%w]") ~= nil or ch:byte() >= 128)
+	end
+	local function containsWord(txt, form)
+		local init = 1
+		while true do
+			local s, e = txt:find(form, init, true)
+			if not s then
+				return false
+			end
+			local before = s > 1 and txt:sub(s - 1, s - 1) or ""
+			if not isWordByte(before) and not isWordByte(txt:sub(e + 1, e + 1)) then
+				return true
+			end
+			init = s + 1
+		end
+	end
+
 	local function termsIn(txt)
 		local present = {}
 		for term, forms in pairs(termForms) do
 			for _, f in ipairs(forms) do
-				if txt and txt:find(f, 1, true) then
+				if txt and containsWord(txt, f) then
 					present[term] = true
 					break
 				end
@@ -1307,7 +1332,7 @@ if table.find(process.args, "--provenance") then
 				local concl = termsIn(nodeText[id])
 				local floating = {}
 				for t in pairs(concl) do
-					if not premTerms[t] and termDefinedIn[t] ~= id then
+					if not premTerms[t] and termDefinedIn[t] ~= id and not termExternal[t] then
 						table.insert(floating, t)
 					end
 				end

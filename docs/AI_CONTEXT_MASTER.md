@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.58 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.59 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -330,6 +330,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 | X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
+| X10 | **Coincidencia léxica sin frontera de palabra**: un término casa dentro de otro y produce un flotante falso | `entidad` casaba dentro de `identidad` y marcaba a D16 (DL-082) | regla: --provenance con frontera UTF-8 |
 | X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | zona: Z1 |
 
 **Historial de zonas cerradas (DL-072)** — una zona cerrada sale del registro vigente, y sin este historial sus eventos de apertura y cierre sobrevivirían solo en prosa. Con `Abierta por` en el registro y esta tabla, **descubrimiento y cierre se vuelven eventos distinguibles**, que es lo que la variante necesita para significar convergencia en vez de resolución del instrumento. Como el registro de escapes: es **memoria y no gobierna nada**.
@@ -360,6 +361,15 @@ Los claims se construyen de **términos**. Un defecto puede vivir no en ningún 
 | contenido | predicado | Lo que el juego ofrece como experiencia; los jugadores lo son (C1a). | — | `contenido principal` | — |
 | ventaja | predicado | Ruteo del resultado por el sistema en vez de por la interacción (anti-poder, §2.1). | — | `ventaja competitiva` · `ventaja de gameplay` | D11 |
 | demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `capacidad de un individuo` · `demand` | — |
+| creación | predicado | Contenido producido por jugadores para otros jugadores (entidad Content). | — | `creación de contenido` | — |
+| elemento compartido | predicado | Aquello que dos o más jugadores usan a la vez y por eso acopla: espacio u objeto. Es la «entidad» cuya naturaleza invoca C3. | — | `elemento` · `entidad` | — |
+| objeto | entidad | Instancia transportable con demanda; entidad Object (§2.3). | — | `objetos` | — |
+| obligación | predicado | Deber impuesto sobre el jugador; su legitimidad depende de si emana del elemento o de una regla externa (C3). | — | `obligación de cooperar` · `obligatoria` · `impuesta` | — |
+| progresión | externo | Acumulación persistente que altera lo que el jugador puede hacer entre rondas. | — | `progresiones` | — |
+| puntuación | externo | Valor numérico asignado a un objeto o a un resultado. | — | `puntuaciones` | — |
+| sincronía | predicado | Ejecutar a la vez sin decidir juntos; polo negativo de la decisión compartida. | — | `en sincronía` | D2 |
+
+**Eje `externo` (DL-082).** Un término marcado `externo` es una categoría que el diseño **excluye** en vez de derivar —`progresión`, `puntuación`—: se nombra para prohibirla, y exigirle procedencia axiomática no tendría sentido. El detector la trata como siempre disponible. Es un acto declarado y auditable en la tabla, igual que «Definido en»; usarlo para silenciar un flotante genuino sería falsear el vocabulario, no el detector.
 
 La columna **Sinónimos** existe para el detector de procedencia (abajo): las formas de superficie bajo las que un mismo término aparece. La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
 
@@ -394,7 +404,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b | DL-068 |
 | D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] + [Object] | 95178f | DL-068 |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
-| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-COMP · [D23] + C1a | 93d133 | DL-068 |
+| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-COMP · [D23] + C1a + C3 | 93d133 | DL-068 |
 | D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
 | D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 | DL-069 |
 | D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
@@ -409,7 +419,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f | DL-063 |
 | D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd | DL-069 |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 | DL-065 |
-| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-ESP · [D4] | 592d28 | DL-068 |
+| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-COMP · [D4] + C3 | 592d28 | DL-068 |
 
 ### 3.1 Core Loop
 
