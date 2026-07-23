@@ -4317,4 +4317,66 @@ Libre:       Valores de E4–E8, E10, E11 → PO. Rango del grupo → playtest.
 Referencias: §2.7, §3.0, §4.15, §5.11, DL-064, DL-067, DL-078
 ```
 
+### DL-085
+
+```
+ID:          DL-085
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P5 — derivar las entidades de §2.3 desde los axiomas. Eran
+             primitivos heredados del bootstrap: citables desde DL-077, pero
+             nunca derivados. Es la deuda de ontología más antigua del
+             proyecto ("una ontología no se elige de un menú, se deriva de
+             qué necesita nombrar el diseño").
+Contenido:   DERIVACIÓN DEL CONJUNTO. Cada entidad se deriva de qué obliga a
+             nombrarla:
+             · Player ← C1a · C1b: los jugadores SON el contenido y el valor
+               reside en su interdependencia; el portador debe existir.
+             · Object ← [D6]: el acoplamiento acumulativo exige un portador
+               con demanda que exceda la capacidad individual.
+             · Map ← [D5] · [Compresión Social]: el acoplamiento rival exige
+               un espacio finito compartido cuyo layout imponga contención.
+             · Content ← [D21] · [D16]: evolución y monetización emanan de la
+               creación por jugadores; su producto debe ser nombrable aunque
+               no se implemente en el MVP.
+             C3 cierra el argumento: cuantifica sobre «la naturaleza de la
+             ENTIDAD», luego presupone entidades con naturaleza.
+             RESULTADO: el conjunto heredado es CORRECTO. Lo que faltaba era
+             su justificación. Derivar no siempre cambia el modelo — a veces
+             lo confirma, y esa confirmación es el producto.
+             DOS HALLAZGOS AL DERIVAR:
+             (1) `Player = { PlayerId }` no declaraba CAPACIDAD, aunque D6
+             depende de «la capacidad de un individuo» desde su redacción.
+             Mismo hueco que `Demand` en Object (DL-077). Añadida, con la
+             derivación de que es UNIFORME: una capacidad variable entre
+             jugadores sería ventaja de gameplay (D11), no interdependencia.
+             (2) ERROR PROPIO, CORREGIDO: en DL-077 se declaró `capacidad de
+             un individuo` como SINÓNIMO de `demanda` — conflando una
+             propiedad del objeto con una del jugador— y se hizo para que el
+             detector llegara a 0. Es exactamente la falsificación que §2.9
+             advierte: silenciar un flotante falseando el vocabulario. Ambos
+             términos separados; D6 ahora cita [Object] Y [Player], que es lo
+             que de verdad usa.
+Hipótesis:   Una ontología derivada no se justifica por elegancia sino por
+             necesidad de nombrar: si nada obliga a nombrar algo, no es
+             entidad; si algo lo obliga y no está, es hueco de schema.
+Razón:       CONTINGENCY P5 — plan §5.11 en autonomía (PO, 2026-07-23).
+Impacto:     §2.3 con la derivación del conjunto y `Capacity` en Player; §2.9
+             separa `capacidad` de `demanda`; D6 cita ambas entidades.
+             check 37 reglas, test 44/44, detector 0. Header v5.62.
+             NO CIERRA: que el conjunto sea COMPLETO (que no falte una quinta
+             entidad) no se demuestra aquí — solo que las cuatro presentes
+             son necesarias. La completitud del conjunto es X8 aplicado a la
+             ontología: un conjunto suficiente y uno ciego se ven igual.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.3, §2.9, §3.0
+Libre:       —
+Referencias: §2.3, §2.9, §3.0, §5.11, DL-077, DL-084
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

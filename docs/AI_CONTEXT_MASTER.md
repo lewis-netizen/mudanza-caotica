@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.61 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.62 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -97,9 +97,25 @@ Toda idea nueva debe superar los cinco criterios. Si falla uno, no entra al MVP.
 
 Toda funcionalidad presente o futura debe derivarse de una de estas cuatro entidades.
 
+**Derivación del conjunto (DL-085).** Las cuatro entidades se heredaron del bootstrap y nunca se derivaron — «una ontología no se elige de un menú». Derivadas ahora desde qué necesita **nombrar** el diseño:
+
+| Entidad | Se deriva de | Qué obliga a nombrarla |
+|---|---|---|
+| Player | C1a · C1b | Los jugadores **son** el contenido y el valor reside en su interdependencia: el portador de ambas cosas debe existir. |
+| Object | [D6] | El acoplamiento acumulativo exige un portador con **demanda** que exceda la capacidad individual. |
+| Map | [D5] · [Compresión Social] | El acoplamiento rival exige un espacio finito compartido cuyo layout imponga contención. |
+| Content | [D21] · [D16] | La evolución y la monetización emanan de la **creación por jugadores**; su producto debe ser nombrable aunque no se implemente en el MVP. |
+
+C3 cierra el argumento: cuantifica sobre «la naturaleza de la **entidad**», luego presupone que existen entidades con naturaleza. El conjunto heredado resulta **correcto**; lo que faltaba era su justificación — y al derivarlo aparecieron dos huecos de schema: `Demand` en Object (DL-077) y `Capacity` en Player (DL-085), ambos usados por D6 sin estar declarados.
+
 **Player** — Representa un jugador activo.
 ```
-Player = { PlayerId }
+Player = {
+    PlayerId,
+    Capacity      -- demanda que un jugador satisface por sí solo. UNIFORME
+                  -- entre jugadores: una capacidad variable sería ventaja de
+                  -- gameplay (D11), no interdependencia (C1b)
+}
 ```
 
 **Object** — Identidad y apariencia son separadas.
@@ -360,7 +376,8 @@ Los claims se construyen de **términos**. Un defecto puede vivir no en ningún 
 | restricción intrínseca | predicado | Límite que emana de la naturaleza de una entidad, no de una regla externa (C3). | — | `intrínseco` · `intrínseca` | — |
 | contenido | predicado | Lo que el juego ofrece como experiencia; los jugadores lo son (C1a). | — | `contenido principal` | — |
 | ventaja | predicado | Ruteo del resultado por el sistema en vez de por la interacción (anti-poder, §2.1). | — | `ventaja competitiva` · `ventaja de gameplay` | D11 |
-| demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `capacidad de un individuo` · `demand` | — |
+| demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `demand` | — |
+| capacidad | entidad | Demanda que un jugador satisface por sí solo; propiedad de Player (§2.3). Uniforme por D11. | — | `capacidad de un individuo` · `capacity` | — |
 | creación | predicado | Contenido producido por jugadores para otros jugadores (entidad Content). | — | `creación de contenido` | — |
 | elemento compartido | predicado | Aquello que dos o más jugadores usan a la vez y por eso acopla: espacio u objeto. Es la «entidad» cuya naturaleza invoca C3. | — | `elemento` · `entidad` | — |
 | objeto | entidad | Instancia transportable con demanda; entidad Object (§2.3). | — | `objetos` | — |
@@ -404,7 +421,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 | DL-068 |
 | D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-COMP · [D3] + C3 | 677030 | DL-063 |
 | D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b | DL-068 |
-| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] + [Object] | 95178f | DL-068 |
+| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] + [Object] + [Player] | 95178f | DL-068 |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
 | D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-COMP · [D23] + C1a + C3 | 93d133 | DL-068 |
 | D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
@@ -1709,7 +1726,7 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 | P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | DL-064 | hecho (DL-084) |
 | P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | pendiente |
 | P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | — | disuelto (DL-080) |
-| P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | pendiente |
+| P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | hecho (DL-085) |
 | P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | pendiente |
 | P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | pendiente |
 | P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | pendiente |
