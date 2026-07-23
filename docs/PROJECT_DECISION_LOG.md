@@ -4975,4 +4975,67 @@ Libre:       —
 Referencias: §5.13, §5.12, §2.8, §5.0, DL-090, DL-092
 ```
 
+### DL-096
+
+```
+ID:          DL-096
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO aportó un concepto para ordenar el proyecto holísticamente:
+             los metaniveles del OMG/MOF (Model-Driven Engineering). Buscado
+             en la literatura (MOF M0–M3, MDA; Atkinson–Kühne lingüístico vs.
+             ontológico; metamodelado estricto).
+Contenido:   §2.10 — ARQUITECTURA DE METANIVELES. El proyecto se mapea a la
+             pila de cuatro capas de MOF sin forzarlo:
+             · M3 (meta-metamodelo): §2.8 MT0 + leyes M-n + §2.7 catálogo.
+             · M2 (metamodelo): axiomas + ejes/elecciones + entidades §2.3 +
+               vocabulario §2.9.
+             · M1 (modelo): claims D1–D24 + sistemas §4 + tickets.
+             · M0 (instancias): src/ + juego + playtest.
+             Cada nivel tiene sus reglas de conformance ya existentes: el
+             mapa no inventa aparato, REORGANIZA el que hay.
+             HALLAZGO CENTRAL — la distinción LINGÜÍSTICA vs ONTOLÓGICA
+             (Atkinson–Kühne) nombra con precisión la frontera abierta toda
+             la sesión:
+             · conformance LINGÜÍSTICA = ¿bien formado? Decidible. El aparato
+               la mecaniza por completo — casi todas las reglas son de esta
+               clase.
+             · conformance ONTOLÓGICA = ¿es de veras instancia de su tipo en
+               el dominio? NO decidible por forma. Es exactamente Z1, donde
+               --provenance es aproximación léxica, no prueba.
+             Esto CIERRA con vocabulario de la literatura la pregunta de por
+             qué el aparato es completo donde lo es: es completo en lo
+             lingüístico, estructuralmente incompleto en lo ontológico. Y da
+             la palabra final sobre P20/M11: el PO es necesario justo en la
+             capa ontológica, porque esa instanciación no se verifica por
+             forma.
+             METAMODELADO ESTRICTO: solo conformsTo cruza niveles. La
+             «premisa colada» cazada repetidamente (escasez, cooperación) ES
+             una violación de esto: contenido de M2 (una elección) usado en
+             la derivación de un claim M1 sin declararse como instanciación.
+             election_unratified_cited ya lo enforza para elecciones; P21
+             generaliza.
+Hipótesis:   Nombrar los niveles y las dos clases de instanciación convierte
+             una intuición dispersa («el aparato funciona aquí y no allá») en
+             una frontera con nombre en la literatura, que explica el límite
+             en vez de solo constatarlo.
+Razón:       CONTINGENCY P5 — concepto aportado por el PO (2026-07-23).
+Impacto:     §2.10 nueva (mapa MOF + lingüístico/ontológico + metamodelado
+             estricto). P21 registrado. Header v5.73. Sin cambio de reglas:
+             es reorganización conceptual, no aparato nuevo.
+             NO CIERRA: el mapa es descriptivo; P21 lo vuelve enforzado
+             (clasificar reglas, generalizar strict metamodeling). Y la capa
+             ontológica sigue siendo indecidible por definición — el mapa la
+             NOMBRA como tal, no la resuelve.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.10
+Libre:       —
+Referencias: §2.10, §2.8, §2.7, §5.11, DL-060, DL-075
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

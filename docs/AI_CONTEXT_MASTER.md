@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.72 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.73 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -365,6 +365,26 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 **El registro es MEMORIA, no COBERTURA (DL-070).** Un escape ausente significa que **nadie lo notó**, no que no exista: la ausencia de fila no prueba nada. Por su naturaleza, el registro **no puede crear dependencia alguna** — ninguna garantía del sistema se deriva de su estado, ni de que esté completo, ni de que todos sus escapes estén resueltos, y **ninguna regla puede consumirlo como evidencia**. El registro **empuja** (acumula presión sobre una clase que se repite) pero **jamás respalda**. Un mecanismo que dependiera de su completitud heredaría precisamente la dependencia de agente que el registro existe para hacer visible.
 
 El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento, las zonas y los tipos ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma). El **registro de escapes** no es contenido ni garantía: es un hecho observado, y su resolución apunta a lo que sí carga garantía (una regla, una zona) sin cargarla él.
+
+### 2.10 Arquitectura de Metaniveles (MOF/MDE, DL-096)
+
+El proyecto es una **pila de metaniveles** en el sentido del OMG/MOF: cada nivel es un *lenguaje* que especifica el nivel de abajo, y la única relación que cruza una frontera de nivel es `conformsTo` (una instancia respeta la forma de su tipo). Nombrarlos hace explícito lo que estaba implícito, y —más importante— **explica dónde el aparato es completo y dónde no puede serlo**.
+
+| Nivel | Qué es | En el proyecto | `conformsTo` verificado por |
+|---|---|---|---|
+| **M3** meta-metamodelo | el lenguaje para escribir metamodelos | §2.8 MT0 + leyes M-n · §2.7 catálogo de reglas de inferencia | `meta_law_malformed`, `rule_missing/undeclared`, `unknown_rule`, `rule_arity` |
+| **M2** metamodelo | el lenguaje del diseño | axiomas C1a–C3 · ejes/elecciones · entidades §2.3 · vocabulario §2.9 | `axis_malformed`, `election_*`, `vocab_*`, `claim_bad_derivation` |
+| **M1** modelo | el diseño de Mudanza Caótica | claims D1–D24 · sistemas §4 · tickets | `unknown_premise`, `claim_cycle`, `unglued_claim`, `--provenance` |
+| **M0** instancias | la ejecución | `src/` · el juego corriendo · el playtest | `contract_missing`, specs, verificación de runtime (§6.7) |
+
+**Lo que esto revela — la distinción lingüística vs. ontológica (Atkinson–Kühne).** Hay dos clases de `conformsTo`, y confundirlas fue la raíz de media sesión:
+
+- **Lingüística** — «¿está bien *formado* según la gramática del nivel superior?». Aridad, sellos, columnas, forma de una elección. Es **conformance de forma**, decidible, y el aparato la mecaniza por completo: casi todas nuestras reglas son de esta clase.
+- **Ontológica** — «¿es *de veras* una instancia de su tipo en el dominio?». Que la premisa citada *sostenga* la conclusión; que `escasez temporal` sea *realmente* el mejor generador. Es **conformance de contenido**, y **no es decidible por forma** — es exactamente Z1, y es donde vive el detector `--provenance` como aproximación léxica, no como prueba.
+
+Esto cierra, con vocabulario de la literatura, la pregunta abierta toda la sesión: el aparato es completo en lo **lingüístico** y estructuralmente incompleto en lo **ontológico**. Y da la palabra final sobre la diversidad (P20/M11): el PO es necesario precisamente en la capa ontológica, porque la instanciación ontológica no se verifica lingüísticamente — ninguna cantidad de reglas de forma decide si el diseño *es* el correcto.
+
+**Metamodelado estricto.** Solo `conformsTo` debe cruzar niveles; una relación que salta de nivel sin ser instanciación es un defecto. La «premisa colada» que se cazó repetidamente (D1 escasez, D3 cooperación) es exactamente eso: contenido de M2 (una elección) usado en la derivación de un claim M1 sin declararse como instanciación. `election_unratified_cited` ya lo enforza para elecciones; la generalización queda en el plan (P21).
 
 ### 2.9 Vocabulario Controlado (DL-074)
 
@@ -1794,6 +1814,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P16 | Disolver §2.2 (Test Oficial de Diseño) en claims: hoy sus cinco criterios fundan desde prosa, contra M4 | P1 | DL-061 | pendiente |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
 | P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X12 · X13 | deuda declarada (PO 2026-07-23) |
+| P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | X2 | pendiente |
 | P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma | — | X12 | hecho (DL-095) |
 | P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pospuesto (PO 2026-07-23) |
 
