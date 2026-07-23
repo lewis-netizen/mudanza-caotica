@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.56 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.57 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -329,6 +329,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | zona: Z5 |
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
+| X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
 | X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | zona: Z1 |
 
 **Historial de zonas cerradas (DL-072)** — una zona cerrada sale del registro vigente, y sin este historial sus eventos de apertura y cierre sobrevivirían solo en prosa. Con `Abierta por` en el registro y esta tabla, **descubrimiento y cierre se vuelven eventos distinguibles**, que es lo que la variante necesita para significar convergencia en vez de resolución del instrumento. Como el registro de escapes: es **memoria y no gobierna nada**.
@@ -403,7 +404,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c | DL-063 |
 | D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 | DL-063 |
 | D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 | DL-063 |
-| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: Z1 — [D17] no sostiene la conclusión; exige postulado N2 de verificabilidad | a01d00 | DL-068 |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-COMP · [D17] + [MT0] — un contrato de UX es relación, luego su titular es la máquina: binario o no es criterio | a01d00 | DL-068 |
 | D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores: su contenido es la interacción, no la puntuación. | R-ESP · C1a | ecff83 | DL-069 |
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f | DL-063 |
 | D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd | DL-069 |
@@ -1693,7 +1694,7 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 | P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer deuda | — | en curso |
 | P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | pendiente |
 | P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | pendiente |
-| P4 | Desbloquear D18: postulado N2 de verificabilidad | — | pendiente-PO |
+| P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | disuelto (DL-080) |
 | P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | pendiente |
 | P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | pendiente |
 | P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | pendiente |

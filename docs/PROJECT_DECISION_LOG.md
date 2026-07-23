@@ -4006,4 +4006,69 @@ Libre:       Orden interno de P1 (qué términos de la cola primero) → lo dict
 Referencias: §5.11, §2.8, §2.9, DL-044, DL-075, DL-076, DL-078
 ```
 
+### DL-080
+
+```
+ID:          DL-080
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P4 del plan enrutaba al PO un "postulado N2 de verificabilidad"
+             para desbloquear D18. El PO no recordaba el asunto y observó
+             que el término "verificabilidad" no le sonaba responsabilidad
+             suya, recordando su regla: todo error observado en el
+             metaframework es DEUDA.
+             VERIFICADO: el instinto era correcto.
+Contenido:   D18 NUNCA ESTUVO BLOQUEADO. El principio existía por partida
+             doble:
+             · §5.0 lo enuncia en prosa desde hace semanas — "si una regla
+               puede expresarse como condición binaria verificable, se
+               convierte en CI; si requiere juicio, queda para IA o humano".
+             · MT0 lo funda en forma citable: todo elemento tiene un titular
+               determinado POR SU NATURALEZA. Un contrato de UX es una
+               relación, luego su titular es la máquina, luego binario — o
+               no es criterio.
+             D18 pasa de bloqueado a R-COMP · [D17] + [MT0]. P4 DISUELTO.
+             EL ERROR, nombrado: se buscó un postulado en §2.1 Nivel 2, no
+             se halló, y se concluyó "hace falta uno nuevo → PO". Búsqueda
+             restringida a una sección, presentada como frontera. El
+             conjunto de premisas citables incluye MT0 (§2.8), y nunca se
+             miró ahí.
+             SEGUNDA INSTANCIA DE LA MISMA CLASE: en DL-076, "el entailment
+             no se binariza de una vez" era también búsqueda/modelado
+             incompleto tipado como frontera. Registrada como escape X9:
+             búsqueda incompleta presentada como frontera. La clase es
+             grave porque su efecto es DELEGAR AL PO trabajo determinado —
+             exactamente lo que [[modeling-determinism]] prohíbe y lo que el
+             aparato entero existe para evitar.
+             CONSECUENCIA PARA LOS OTROS BLOQUEOS: D9 (←E11) y D10 (←E9)
+             deben pasar por la misma sospecha antes de darse por
+             bloqueados. No se hace aquí: es P2, y P2 depende de P1 en el
+             plan. Seguir el orden es parte de no derivar.
+Hipótesis:   Un bloqueo solo es legítimo tras agotar el conjunto de premisas
+             citables; declararlo antes convierte una omisión propia en una
+             obligación ajena.
+Razón:       CONTINGENCY P5 — observación del PO sobre P4 (2026-07-22).
+Impacto:     D18 derivado; P4 disuelto en §5.11; X9 registrado. El frente
+             del plan queda P1 · P6 (el PO deja de estar en el camino
+             crítico). VARIANTE 13 → 12 — bajada LEGÍTIMA: un claim
+             genuinamente derivado, no uno escondido. check 36 reglas,
+             test 43/43. Header v5.57.
+             NO CIERRA: la clase X9 no tiene regla. Detectarla exigiría
+             buscar, para un claim bloqueado, si alguna combinación de
+             premisas existentes cubriría su conclusión — mecanizable con la
+             maquinaria de procedencia, no construido. Puede merecer zona
+             propia (es distinto de Z1: no es "la premisa citada no
+             sostiene" sino "existía una premisa y no se buscó"); registrar
+             zona nueva es del PO.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §5.11, §2.8
+Libre:       Zona propia para X9 → PO.
+Referencias: §3.0, §5.11, §2.8, §5.0, DL-060, DL-068, DL-076, DL-079
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

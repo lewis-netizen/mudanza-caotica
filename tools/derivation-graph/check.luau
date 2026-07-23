@@ -1663,10 +1663,13 @@ do
 	local frente = {}
 	for _, id in ipairs(ids) do
 		local s = planSteps[id]
-		if s.estado ~= "hecho" then
+		local function closed(e)
+			return e == "hecho" or e:match("^disuelto") ~= nil
+		end
+		if not closed(s.estado) then
 			local ready = true
 			for _, d in ipairs(s.deps) do
-				if planSteps[d] and planSteps[d].estado ~= "hecho" then
+				if planSteps[d] and not closed(planSteps[d].estado) then
 					ready = false
 				end
 			end
