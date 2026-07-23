@@ -3878,4 +3878,73 @@ Libre:       Derivación de las entidades desde los axiomas → trabajo abierto.
 Referencias: §2.3, §2.9, §3.0, §4.13, DL-047, DL-075, DL-076
 ```
 
+### DL-078
+
+```
+ID:          DL-078
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO señaló deuda en el detector — "si no es con el detector,
+             es con el modelo del aparato" — y pidió implementar bien lo
+             hallado en la literatura (CEGAR, attribute exploration/FCA,
+             abducción/ALP, L*/Daikon).
+             LA DEUDA, nombrada: el detector solo ve términos MODELADOS. Su
+             0 es relativo al vocabulario, que es hand-authored. Un 0 puede
+             significar "limpio" o "ciego" y son INDISTINGUIBLES. Se
+             demostró en DL-077 añadiendo `demanda`: reaparecieron dos
+             claims. El propio agente estuvo a punto de celebrar ese 0.
+             SEGUNDA INSTANCIA DE UNA CLASE YA COMETIDA: en DL-072 la
+             variante medía la resolución del instrumento, no la deuda —
+             valía 0 durante 32 versiones por ceguera, no por salud. Misma
+             forma, un piso más arriba. Registrada como escape X8.
+Contenido:   (1) COBERTURA MEDIDA Y VISIBLE POR DEFECTO. El runner extrae
+             los términos de contenido de los enunciados (tokenización,
+             stopwords, sin etiquetado por claim) y reporta qué fracción
+             está modelada. HOY: 22% al medirlo por primera vez → 25% tras
+             definir el tope de la cola. El 78% restante era la ceguera que
+             el 0 ocultaba. Va en la salida POR DEFECTO: una medida de
+             ceguera que solo aparece en un modo que nadie corre no corrige
+             nada.
+             (2) COLA DE REFINAMIENTO en `--provenance`: términos sin
+             modelar ordenados por uso. Es CEGAR aplicado al corpus —la
+             brecha entre lo abstraído y lo real dirige qué refinar— y la
+             heurística práctica de attribute exploration: el término más
+             usado gana más cobertura al definirse (preguntar lo mínimo).
+             (3) EL LAZO SE PROBÓ CERRANDO SU TOPE. La cola señaló
+             `contenido` (×4) y `ventaja` (×4) — el término de C1a y el
+             anti-poder de D11/D16, ambos sin modelar. Al definirlos, el
+             detector expuso a D11 apoyándose en «ventaja» sin premisa que
+             la aporte. Resuelto como introducción DEFINICIONAL: el propio
+             enunciado de D11 la define desde términos de C1a ("rutea el
+             resultado por el sistema, no por la interacción"), extensión
+             conservativa igual que D6. El lazo encontró deuda real en su
+             primera iteración: eso es la evidencia de que refina, no de que
+             adorna.
+Hipótesis:   Un instrumento que reporta su propia cobertura deja de poder
+             mentir por omisión; y la brecha, ordenada por uso, convierte
+             "qué falta definir" de intuición en cola computada.
+Razón:       CONTINGENCY P5 — "hay una deuda con el detector… asegúrate de
+             implementar bien lo que encontraste" (PO, 2026-07-22).
+Impacto:     check.luau: cobertura por defecto + cola de refinamiento en
+             --provenance. §2.9 gana `contenido`, `ventaja`, `demanda`.
+             §2.8 documenta cobertura y el mapeo a CEGAR/FCA. X8 registrado.
+             Header v5.55. check 35 reglas, test 42/42, detector 0 sobre 25%
+             de cobertura DECLARADA.
+             LO QUE NO CIERRA — y es deliberado: 72 términos siguen sin
+             modelar. No se definen de golpe: la cola existe para recorrerse
+             encontrando deuda, no para vaciarse por completitud cosmética.
+             Y la cobertura NO es una reja: no bloquea, se lee — un umbral
+             de cobertura repetiría X8 en su tercera forma.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.9, §2.8
+Libre:       Recorrido de la cola de refinamiento → incremental, guiado por
+             la deuda que exponga.
+Referencias: §2.9, §2.8, §3.0, DL-072, DL-075, DL-076, DL-077
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

@@ -359,6 +359,7 @@ table.sort(implLeak)
 -- de §3 = colisión léxica. Mismo patrón que impl_leak — scan de superficie,
 -- sin etiquetar qué claim usa qué término (eso sería dependencia de agente).
 -- Las formas se leen de §2.9, que NO se escanea (vive en §2).
+local vocabSurfaces = {} -- todas las formas modeladas (pref + sinónimos)
 local bannedForms = {} -- forma prohibida (minúsculas) → término preferido
 do
 	local region = nil
@@ -376,8 +377,51 @@ do
 			for form in (cells[4] or ""):gmatch("`([^`]+)`") do
 				bannedForms[form:lower()] = pref
 			end
+			-- superficies MODELADAS: lo único que el detector de procedencia
+			-- puede ver. Fuera de aquí está su ceguera (DL-078).
+			if pref ~= "" then
+				table.insert(vocabSurfaces, pref:lower())
+				for s in (cells[5] or ""):gmatch("`([^`]+)`") do
+					table.insert(vocabSurfaces, s:lower())
+				end
+			end
 		end
 	end
+end
+
+-- ── cobertura del vocabulario (DL-078) ──────────────────────────────────────
+-- El detector `--provenance` solo ve términos MODELADOS. Un 0 suyo puede
+-- significar "limpio" o "ciego", y son indistinguibles sin medir la brecha.
+-- Es la segunda instancia de esa clase: la variante (DL-072) valía 0 durante
+-- 32 versiones por falta de instrumento, no por salud.
+-- El conjunto NO cubierto no es ruido: es la COLA DE TRABAJO — qué definir a
+-- continuación, ordenado por frecuencia (más uso = más cobertura ganada).
+-- Es el movimiento de CEGAR (la brecha dirige el refinamiento) y de
+-- attribute exploration (preguntar lo mínimo que completa la teoría).
+local STOP = {}
+for w in
+	(
+		"para pero como cuando donde entre sobre desde hasta segun sino solo "
+		.. "cada todo toda todos todas otro otra otros otras mismo misma este esta "
+		.. "esto ese esa eso aquel aquella algun alguna ningun ninguna mas menos "
+		.. "muy tanto tanta poco poca gran grande mayor menor bien vive vive "
+		.. "existe existen tiene tienen puede pueden debe deben hace hacen dice "
+		.. "estan esta son ser sido siendo haber habia sera seran cuenta cuentan "
+		.. "genera generan produce producen vale valen basta requiere requieren "
+		.. "porque aunque mientras ademas tambien nunca siempre nada algo"
+	):gmatch("%S+")
+do
+	STOP[w] = true
+end
+
+local function contentWords(txt)
+	local out = {}
+	for w in txt:lower():gmatch("[^%s%.,;:%(%)%[%]%-—«»\"'?!/]+") do
+		if #w >= 6 and not STOP[w] and not w:match("%d") then
+			table.insert(out, w)
+		end
+	end
+	return out
 end
 local vocabBanned = {}
 do
@@ -1015,6 +1059,36 @@ table.sort(claimSealMismatch)
 -- 0 no sostiene nada; uno con radio alto es donde el diseño se juega.
 -- No es una regla: no hay umbral correcto, luego no hay violación que
 -- reportar. Es medición, y se lee.
+-- Cobertura del detector: qué fracción del vocabulario real de los claims
+-- está modelada. Sin esto, un 0 de `--provenance` es indistinguible de
+-- ceguera (DL-078).
+local vocabCovered, vocabUncovered, vocabFreq = 0, 0, {}
+do
+	local seen = {}
+	for _, c in pairs(designClaims) do
+		for _, w in ipairs(contentWords(c.enunciado or "")) do
+			local isCovered = false
+			for _, s in ipairs(vocabSurfaces) do
+				if s:find(w, 1, true) then
+					isCovered = true
+					break
+				end
+			end
+			if not seen[w] then
+				seen[w] = true
+				if isCovered then
+					vocabCovered += 1
+				else
+					vocabUncovered += 1
+				end
+			end
+			if not isCovered then
+				vocabFreq[w] = (vocabFreq[w] or 0) + 1
+			end
+		end
+	end
+end
+
 -- `--provenance` (Z1, DL-075): procedencia de términos. Para cada claim
 -- derivado, ¿qué términos de la CONCLUSIÓN no aparecen en ninguna PREMISA?
 -- Es la propiedad de subfórmula: una derivación sana no introduce vocabulario
@@ -1158,6 +1232,26 @@ if table.find(process.args, "--provenance") then
 		end
 	end
 	print(string.format("\n  %d claim(s) con términos flotantes — cada uno: premisa colada O sinonimia no modelada.", flaggedTotal))
+
+	-- COLA DE REFINAMIENTO (DL-078). El movimiento de CEGAR: la brecha entre
+	-- lo modelado y lo real dirige qué definir después. El orden es por
+	-- frecuencia — el término más usado gana más cobertura al definirse, que
+	-- es la heurística práctica de "preguntar lo mínimo" (attribute
+	-- exploration). No es una lista de defectos: es qué mirar a continuación.
+	local queue = {}
+	for w, n in pairs(vocabFreq) do
+		table.insert(queue, { w, n })
+	end
+	table.sort(queue, function(a, b)
+		if a[2] ~= b[2] then
+			return a[2] > b[2]
+		end
+		return a[1] < b[1]
+	end)
+	print(string.format("\n  Cola de refinamiento — %d términos sin modelar (top 15 por uso):\n", #queue))
+	for i = 1, math.min(15, #queue) do
+		print(string.format("    %-28s ×%d", queue[i][1], queue[i][2]))
+	end
 	process.exit(0)
 end
 
@@ -1491,6 +1585,21 @@ do
 		table.insert(parts, d .. ":" .. churn[d])
 	end
 	print("\n  · churn de claims por DL: " .. table.concat(parts, "  "))
+end
+
+do
+	local total = vocabCovered + vocabUncovered
+	local pct = total > 0 and math.floor(vocabCovered / total * 100) or 0
+	print(
+		string.format(
+			"\n  · cobertura del vocabulario: %d%% (%d/%d términos de claims modelados) — %d sin modelar",
+			pct,
+			vocabCovered,
+			total,
+			vocabUncovered
+		)
+	)
+	print("      Fuera de esos términos el detector de procedencia es CIEGO: su 0 no prueba nada ahí.")
 end
 
 print(

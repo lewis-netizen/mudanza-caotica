@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.54 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.55 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -329,6 +329,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | zona: Z5 |
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
+| X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | zona: Z1 |
 
 **Historial de zonas cerradas (DL-072)** — una zona cerrada sale del registro vigente, y sin este historial sus eventos de apertura y cierre sobrevivirían solo en prosa. Con `Abierta por` en el registro y esta tabla, **descubrimiento y cierre se vuelven eventos distinguibles**, que es lo que la variante necesita para significar convergencia en vez de resolución del instrumento. Como el registro de escapes: es **memoria y no gobierna nada**.
 
@@ -355,11 +356,15 @@ Los claims se construyen de **términos**. Un defecto puede vivir no en ningún 
 | decisión compartida | predicado | Elegir juntos bajo criterio, entre lo determinado y lo aleatorio (C2′). | — | `coordinación decisional` · `decisión conjunta` · `decidir juntos` · `coordinación` | — |
 | ambigüedad | predicado | El margen interpretable donde vive la decisión (C2′). | — | `ambigüedad interpretable` · `interpretable` | — |
 | restricción intrínseca | predicado | Límite que emana de la naturaleza de una entidad, no de una regla externa (C3). | — | `intrínseco` · `intrínseca` | — |
+| contenido | predicado | Lo que el juego ofrece como experiencia; los jugadores lo son (C1a). | — | `contenido principal` | — |
+| ventaja | predicado | Ruteo del resultado por el sistema en vez de por la interacción (anti-poder, §2.1). | — | `ventaja competitiva` · `ventaja de gameplay` | D11 |
 | demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `capacidad de un individuo` · `demand` | — |
 
 La columna **Sinónimos** existe para el detector de procedencia (abajo): las formas de superficie bajo las que un mismo término aparece. La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
 
 **Procedencia de términos (`--provenance`, DL-075) — y el límite honesto de la binarización.** El detector responde, por cada claim derivado: ¿qué términos de la conclusión no aparecen en ninguna premisa? Es la **propiedad de subfórmula** — una derivación sana no introduce vocabulario de la nada. Mecaniza la heurística que más deuda ha cazado esta sesión (halló D4: `R-ESP · C3` concluía sobre *acoplamiento* sin citar a D3, corregido a `R-COMP · [D3] + C3`).
+
+**Cobertura, o el detector se lee a sí mismo (DL-078).** El detector solo ve términos **modelados**; fuera de ellos es ciego, y un `0` suyo sería indistinguible de no mirar. Por eso el runner imprime siempre su **cobertura** (hoy 25% del vocabulario real de los claims) y `--provenance` emite la **cola de refinamiento**: los términos sin modelar, ordenados por uso. Esa cola no es ruido — es **qué definir a continuación**, y es el movimiento de **CEGAR** (la brecha entre lo abstraído y lo real dirige el refinamiento) y de **attribute exploration** en FCA (preguntar lo mínimo que completa la teoría). El lazo se probó cerrando su tope: definir `contenido` y `ventaja` expuso a D11 apoyándose en un término que su premisa no aportaba.
 
 Pero es **detector, no reja**, y el porqué es el hallazgo central. Un término flotante es **o** una premisa colada (defecto) **o** una paráfrasis de un término de premisa cuya sinonimia no está modelada (`coordinación decisional` ≈ `decisión compartida` de C2′). Distinguirlos exige la capa de **sinonimia** — que es **contenido/ontología, no relación pura**. Por eso el detector no bloquea: **empuja**, como el registro de escapes.
 
