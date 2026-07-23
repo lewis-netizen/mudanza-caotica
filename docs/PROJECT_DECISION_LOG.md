@@ -4071,4 +4071,56 @@ Libre:       Zona propia para X9 → PO.
 Referencias: §3.0, §5.11, §2.8, §5.0, DL-060, DL-068, DL-076, DL-079
 ```
 
+### DL-081
+
+```
+ID:          DL-081
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO pidió (a) anotar en el plan todo trabajo pendiente
+             mencionado y (b) validar la objetividad del plan antes de
+             proceder en automático.
+Contenido:   (1) AUDITORÍA DEL PLAN. Se barrió la sesión por trabajo
+             mencionado y no declarado. Ocho pasos nuevos: P11 (mecanizar la
+             detección de X9), P12 (mecanizar el triaje MT0 — el paso que la
+             metaherramienta aún hace a mano), P13 (mitad de obligación de
+             Z4: el delta del enunciado), P14 (cerrar Z6), P15 (dar regla a
+             las clases de escape sin ella), P16 (disolver §2.2, que aún
+             funda desde prosa contra M4), P17 (los 16 diferimientos, que
+             vencen 2026-08-11 y romperán el build en bloque), P18
+             (ratificaciones pendientes del PO).
+             (2) VALIDACIÓN DE OBJETIVIDAD, mecanizada. Columna `Salda`:
+             cada paso ancla la deuda declarada que resuelve. Regla
+             plan_uncovered_debt: toda zona abierta, toda clase de escape
+             sin regla y todo claim bloqueado DEBE aparecer en algún paso.
+             Resultado: 0. El plan cubre toda la deuda declarada.
+             LÍMITE, dicho sin adorno: esa es la ÚNICA completitud que el
+             plan admite probar. Frente a deuda NO declarada sigue ciego —
+             es X8, y no se cierra con más filas. "Espero que el plan
+             capture el todo" no puede volverse teorema; lo que sí puede es
+             "ninguna deuda conocida quedó fuera", y eso ahora lo verifica
+             la máquina en vez de mi palabra.
+             (3) El frente queda P1 · P6 · P13 (míos) y P18 (del PO, sin
+             dependientes: no bloquea nada).
+Hipótesis:   Anclar cada paso a la deuda que salda convierte el plan de lista
+             de intenciones en índice verificable de lo conocido.
+Razón:       CONTINGENCY P5 — "anota todo trabajo pendiente… una vez validada
+             su objetividad, sigue en automático" (PO, 2026-07-23).
+Impacto:     §5.11 con 18 pasos y columna Salda; regla plan_uncovered_debt.
+             check.luau 37 reglas; test.luau 44/44. Header v5.58.
+             AUTONOMÍA: validada la objetividad en el sentido decidible, el
+             agente procede sin consultar hasta que aparezca una decisión de
+             contenido (ratificación de elección, axioma, zona o eje) — que
+             es lo único que MT0 asigna al PO.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.11
+Libre:       —
+Referencias: §5.11, §2.8, DL-079, DL-080
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

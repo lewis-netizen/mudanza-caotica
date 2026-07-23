@@ -368,6 +368,16 @@ local cases = {
 	{
 		-- Un plan cuyo paso depende de algo inexistente no ordena nada: es la
 		-- forma en que un plan vuelve a ser prosa sin avisar.
+		-- La única completitud que el plan admite probar: que ninguna deuda
+		-- YA DECLARADA quede sin paso. Frente a deuda no declarada sigue
+		-- ciego — eso es X8 y no se cierra con filas.
+		name = "plan_uncovered_debt",
+		expect = "✗ plan_uncovered_debt",
+		apply = function()
+			replaceOnce(MASTER, "| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 |", "| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | — |")
+		end,
+	},
+	{
 		name = "plan_dangling",
 		expect = "✗ plan_dangling",
 		apply = function()

@@ -186,7 +186,11 @@ do
 				for d in (cells[3] or ""):gmatch("(P%d+)") do
 					table.insert(deps, d)
 				end
-				planSteps[id] = { trabajo = cells[2] or "", deps = deps, estado = cells[4] or "" }
+				local salda = {}
+				for s in (cells[4] or ""):gmatch("([ZXD]%d+)") do
+					salda[s] = true
+				end
+				planSteps[id] = { trabajo = cells[2] or "", deps = deps, salda = salda, estado = cells[5] or "" }
 			end
 		end
 	end
@@ -1061,6 +1065,43 @@ for id, c in pairs(designClaims) do
 end
 table.sort(blockedClaimDangling)
 
+-- Validación de objetividad del plan (DL-081): toda deuda DECLARADA —zona
+-- abierta, clase de escape sin regla, claim bloqueado— debe estar saldada por
+-- algún paso. Es la única completitud que el plan admite probar; frente a
+-- deuda NO declarada sigue siendo ciego, y eso es X8, no se cierra con filas.
+local planUncoveredDebt = {}
+do
+	local covered = {}
+	for _, s in pairs(planSteps) do
+		if s.estado ~= "hecho" and not s.estado:match("^disuelto") then
+			for d in pairs(s.salda) do
+				covered[d] = true
+			end
+		end
+	end
+	local debt = {}
+	for z in pairs(zones) do
+		table.insert(debt, z)
+	end
+	for id, c in pairs(designClaims) do
+		if c.deriv:match("^—%s*bloqueado") then
+			table.insert(debt, id)
+		end
+	end
+	for x, e in pairs(escapes) do
+		if not e.resol:match("^regla:") then
+			table.insert(debt, x)
+		end
+	end
+	table.sort(debt)
+	for _, id in ipairs(debt) do
+		if not covered[id] then
+			table.insert(planUncoveredDebt, id .. " → ningún paso del plan lo salda")
+		end
+	end
+end
+
+
 -- VARIANTE del corpus (Event-B): la deuda abierta como número. Safety son
 -- invariantes; la convergencia es una VARIANTE bien fundada que decrece.
 -- Nuestras fechas de vencimiento eran un sustituto malo: un reloj no dice si
@@ -1513,6 +1554,9 @@ end)
 reportViolations("seal_provenance_inconsistent (el DL sellador no declara §3.0)", sealProvenanceInconsistent, function(r)
 	return r
 end)
+reportViolations("plan_uncovered_debt (deuda declarada que ningún paso del plan salda)", planUncoveredDebt, function(r)
+	return r
+end)
 reportViolations("plan_dangling (paso del plan §5.11 sin estado o con dependencia inexistente)", planDangling, function(r)
 	return r
 end)
@@ -1726,7 +1770,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

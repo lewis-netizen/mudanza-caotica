@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.57 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.58 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1689,18 +1689,28 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 
 **Por qué existe.** DL-044 declaró su propagación pendiente en el campo `Impacto:` — prosa — y nunca se ejecutó; el orden se perdió sin que nada chillara y el programa derivó turno a turno. Un plan que vive en prosa (o en la cabeza de un agente) no es un plan: es una intención. Aquí el orden es un **artefacto con dependencias declaradas**, y **el frente accionable se computa**, no se recuerda.
 
-| ID | Trabajo | Depende de | Estado |
-|---|---|---|---|
-| P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer deuda | — | en curso |
-| P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | pendiente |
-| P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | pendiente |
-| P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | disuelto (DL-080) |
-| P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | pendiente |
-| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | pendiente |
-| P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | pendiente |
-| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | pendiente |
-| P9 | Re-anclar TICKETS a claims D-n | P8 | pendiente |
-| P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | pendiente |
+| ID | Trabajo | Depende de | Salda | Estado |
+|---|---|---|---|---|
+| P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer deuda | — | Z1 · X1 | en curso |
+| P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | DL-064 | pendiente |
+| P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | pendiente |
+| P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | — | disuelto (DL-080) |
+| P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | pendiente |
+| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | pendiente |
+| P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | pendiente |
+| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | pendiente |
+| P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | pendiente |
+| P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | D20 | pendiente |
+| P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | pendiente |
+| P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | X1 · X2 | pendiente |
+| P13 | Cerrar la mitad de obligación de Z4: el delta del enunciado, no solo su hash y su autor | — | Z4 | pendiente |
+| P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
+| P15 | Dar regla a las clases de escape que no la tienen | P12 | X3 · X4 · X8 | pendiente |
+| P16 | Disolver §2.2 (Test Oficial de Diseño) en claims: hoy sus cinco criterios fundan desde prosa, contra M4 | P1 | DL-061 | pendiente |
+| P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
+| P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pendiente-PO |
+
+La columna **Salda** ancla cada paso a la deuda declarada que resuelve. `plan_uncovered_debt` verifica lo inverso y es la validación de objetividad que el plan sí admite: **toda zona abierta, toda clase de escape sin regla y todo claim bloqueado debe aparecer en algún paso**. Lo que el plan no puede probar sigue siendo su completitud frente a deuda **no declarada** — eso es X8 y no se cierra con más filas.
 
 `plan_dangling` verifica que toda dependencia exista. El runner imprime el **frente accionable** — los pasos cuyas dependencias están todas `hecho`.
 
