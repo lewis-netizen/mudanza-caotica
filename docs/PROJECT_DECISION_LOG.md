@@ -4607,4 +4607,73 @@ Libre:       —
 Referencias: §2.8, §5.12, DL-056, DL-087, DL-088
 ```
 
+### DL-090
+
+```
+ID:          DL-090
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO condicionó continuar a estar SEGURO de haber definido el
+             metanivel, y recomendó buscar en la literatura si no. No se
+             estaba seguro. Buscado.
+             RESULTADO: no es que el agente no esté seguro — es que NO SE
+             PUEDE estar. La adecuación por mutación es RELATIVA por
+             construcción y nunca prueba completitud; decidir si un mutante
+             es EQUIVALENTE (indetectable por cualquier test) es NP-completo;
+             «quién verifica al verificador» es problema abierto. Luego
+             «inferir determinísticamente qué falta en el metanivel» no es
+             alcanzable en general.
+             El PO ya había anticipado la consecuencia: si no se puede
+             inferir, ESO es deuda y necesita un mecanismo acotante análogo a
+             la asimetría. Y su intuición de que había un patrón es correcta:
+             la asimetría es un RATCHET (solo aprieta) sobre un régimen de
+             FAULT-BASED TESTING (cada defecto observado añade su constraint).
+             Lo que faltaba es su pareja.
+Contenido:   §5.13 — BASE DE CONFIANZA (TCB), declarada y medida. La respuesta
+             de la literatura al regreso no es recursión infinita sino
+             MINIMIZAR LA TCB: encoger lo que debe confiarse hasta que un
+             humano lo audite de una sentada (referencia: verificador de
+             pruebas llevado de ~50.000 líneas a ~50).
+             Nuestra TCB: check.luau ~1.900 líneas (riesgo dominante:
+             MISPARSE SILENCIOSO — celdas corridas dan veredictos falsos sin
+             avisar), test.luau ~600, contenido ratificado (frontera del PO),
+             cadena externa. ≈2.500 líneas: INAUDITABLE de una sentada. Ese
+             es el número honesto y es la deuda.
+             REDUCCIÓN, primera entrega: `vocab_malformed`. §3.0 ya estaba
+             protegida por forma (sello hex, Sellado por = DL-nnn); §2.9 no
+             tenía nada y sus columnas se movieron DOS veces en esta sesión
+             sin que nada avisara. Ahora se verifica conteo de columnas, eje
+             conocido y ratificación en forma. Eso saca a ese parser de la
+             TCB: de confiado a comprobado.
+             HALLAZGO AL CONSTRUIRLO: la primera versión de la regla ENCENDÍA
+             en el reporte pero NO SUMABA a las violaciones — el build seguía
+             verde. Un guardián decorativo, que es peor que ninguno porque
+             aparenta cobertura. Lo cazó el propio arnés (M9 + el caso de
+             mutación), no una relectura.
+             Registrado X12 (completitud indecidible: es un LÍMITE, no un
+             defecto) y P19 (reducir la TCB en las tablas restantes: §2.7,
+             §2.8, §5.11, §5.12).
+Hipótesis:   La completitud no se demuestra; se sustituye por dos magnitudes
+             declaradas que pueden bajar — cuánta autoridad tiene el agente
+             (asimetría) y cuánto hay que confiar (TCB). Una pregunta sin
+             fondo se vuelve dos números con dirección.
+Razón:       CONTINGENCY P5 — condición del PO y su indicación de buscar en
+             la literatura (2026-07-23).
+Impacto:     §5.13 nueva con la TCB medida; vocab_malformed (40 reglas);
+             test 52/52; X12 y P19 registrados. Header v5.67.
+             LA CONDICIÓN DEL PO: el metanivel está definido y enforceado
+             HASTA DONDE ES DECIDIBLE. Lo indecidible queda nombrado (X12) y
+             acotado (TCB medida, con dirección de reducción). No se afirma
+             completitud porque no puede afirmarse.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.13, §5.11, §2.8
+Libre:       —
+Referencias: §5.13, §5.12, §5.11, §2.8, §2.9, DL-056, DL-087, DL-089
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

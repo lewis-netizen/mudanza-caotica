@@ -443,6 +443,45 @@ do
 	end
 end
 
+-- ── forma de las filas de §2.9 (TCB, DL-090) ────────────────────────────────
+-- El fallo más peligroso de un parser es leer celdas CORRIDAS en silencio: el
+-- veredicto sale mal sin que nada avise. §3.0 ya está protegida por la forma
+-- de sus celdas (sello hex, `Sellado por` = DL-nnn); §2.9 no tenía nada, y sus
+-- columnas se movieron dos veces en esta sesión. Validar la forma de cada
+-- celda mueve al parser de «confiado» a «comprobado»: TCB más pequeña.
+local VOCAB_EJES = { mecanismo = true, polaridad = true, predicado = true, entidad = true, externo = true }
+local vocabMalformed = {}
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "2.9" and line:match("^| ") and not line:match("^| Término") and not line:match("^|%-") then
+			local cells = {}
+			for cell in line:gmatch("|([^|]*)") do
+				table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+			end
+			local term = cells[1] or "?"
+			local eje = (cells[2] or ""):lower()
+			local ratif = cells[7] or ""
+			-- 7 columnas + el vacío tras la barra final. El conteo es lo que
+			-- caza una columna CORRIDA: los valores desplazados pueden caer
+			-- en celdas que parecen válidas por casualidad.
+			if #cells ~= 8 then
+				table.insert(vocabMalformed, term .. " → " .. (#cells - 1) .. " columnas, se esperaban 7")
+			else			if not VOCAB_EJES[eje] then
+				table.insert(vocabMalformed, term .. " → eje \"" .. eje .. "\" desconocido")
+			elseif ratif ~= "—" and not ratif:match("^PO %d%d%d%d%-%d%d%-%d%d$") then
+				table.insert(vocabMalformed, term .. " → Ratificada \"" .. ratif .. "\" no es «—» ni «PO <fecha>»")
+			end
+			end
+		end
+	end
+end
+table.sort(vocabMalformed)
+
 -- ── cobertura del vocabulario (DL-078) ──────────────────────────────────────
 -- El detector `--provenance` solo ve términos MODELADOS. Un 0 suyo puede
 -- significar "limpio" o "ciego", y son indistinguibles sin medir la brecha.
@@ -1572,6 +1611,9 @@ end)
 reportViolations("domain_mismatch (Domain del DL vs nivel que Modifica)", domainMismatch, function(r)
 	return r[1] .. " (Domain " .. r[3] .. ") modifica " .. r[2]
 end)
+reportViolations("vocab_malformed (fila de §2.9 con eje o ratificación fuera de forma)", vocabMalformed, function(r)
+	return r
+end)
 reportViolations("vocab_banned_term (forma léxica prohibida en §3 — §2.9)", vocabBanned, function(r)
 	return r
 end)
@@ -1872,7 +1914,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

@@ -402,6 +402,15 @@ local cases = {
 		-- sin nombrar ningún ID, y nada lo detectaba.
 		-- Regresión exacta de X4: reintroduce la colisión de vocabulario que
 		-- se corrigió a mano en DL-068. Ahora la caza la máquina.
+		-- Columna corrida: el fallo silencioso de parser que ya ocurrió dos
+		-- veces en esta sesión. Mueve al parser de confiado a comprobado.
+		name = "vocab_malformed (celda corrida en §2.9)",
+		expect = "✗ vocab_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| interacción | predicado |", "| interacción | predicado | extra |")
+		end,
+	},
+	{
 		name = "vocab_banned_term (regresión de X4)",
 		expect = "✗ vocab_banned_term",
 		apply = function()
