@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.73 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.74 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -85,13 +85,17 @@ Otro eje: no describen la experiencia del jugador sino **cómo se construye y se
 
 ### 2.2 Test Oficial de Diseño
 
-Toda idea nueva debe superar los cinco criterios. Si falla uno, no entra al MVP.
+**Procedimiento de conformance M1→M2 (DL-097), no fuente de normatividad.** Este test no *funda* nada: es la rutina que aplica a una idea nueva la forma que ya existe (§2.10). Cada criterio es un **puntero a su fuente formal**, no una norma propia — sin esto, §2.2 fundaría desde prosa y violaría M4. Toda idea nueva debe conformar a los cinco; si falla uno, no entra.
 
-1. ¿Aumenta la Dependencia Social?
-2. ¿Aumenta la Entropía (espacial o informacional)?
-3. ¿Mantiene la Simplicidad Mecánica?
-4. ¿Genera interacción entre jugadores más que entre jugador y sistema?
-5. ¿Respeta las entidades fundamentales definidas en §2.3?
+| # | Criterio (pregunta de review) | Conforma a (la norma vive aquí) |
+|---|---|---|
+| 1 | ¿Aumenta la dependencia social? | C1b · [D3] (el entorno acopla resultados) |
+| 2 | ¿Aumenta la entropía interpretable? | C2′ · [D10] (situaciones distintas) |
+| 3 | ¿Mantiene la simplicidad mecánica? | [Simplicidad Mecánica] (§2.1 N2) |
+| 4 | ¿Es interacción jugador↔jugador, no jugador↔sistema? | C1a · [D2] (acopla a dos o más) |
+| 5 | ¿Respeta las entidades fundamentales? | §2.3 · §2.4 (regla de entidades) |
+
+El test es **advisory de review** (lo aplica el AUDITOR DESIGN y el IDEADOR): detecta que una idea no conforma, no la garantiza. La garantía la cargan las fuentes citadas, cada una ya en su slot de forma.
 
 ### 2.3 Entidades Fundamentales
 
@@ -1811,7 +1815,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P13 | Cerrar la mitad de obligación de Z4: el delta del enunciado, no solo su hash y su autor | — | Z4 | pendiente |
 | P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
-| P16 | Disolver §2.2 (Test Oficial de Diseño) en claims: hoy sus cinco criterios fundan desde prosa, contra M4 | P1 | DL-061 | pendiente |
+| P16 | §2.2 (Test Oficial) tipado como conformance M1→M2: deja de fundar desde prosa (M4) | P1 | DL-061 | hecho (DL-097) |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
 | P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X12 · X13 | deuda declarada (PO 2026-07-23) |
 | P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | X2 | pendiente |

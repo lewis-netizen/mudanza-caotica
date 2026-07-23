@@ -5038,4 +5038,59 @@ Libre:       —
 Referencias: §2.10, §2.8, §2.7, §5.11, DL-060, DL-075
 ```
 
+### DL-097
+
+```
+ID:          DL-097
+Fecha:       2026-07-23
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P16 — §2.2 (Test Oficial de Diseño) aún fundaba desde prosa,
+             contra M4. Es la propagación que DL-044 declaró pendiente en su
+             campo Impacto (2026-07-17) y nunca se ejecutó: la deuda más
+             antigua del corpus. D11, D13 y D23 declaraban su realización
+             como «Test de Diseño (§2.2)», apuntando a cinco criterios en
+             prosa.
+Contenido:   VERIFICADO con el mapa MOF (DL-096): §2.2 NO es una fuente de
+             normatividad — es un PROCEDIMIENTO DE CONFORMANCE M1→M2 que
+             aplica a una idea nueva la forma que ya existe. Cada uno de los
+             cinco criterios reduce a un axioma o claim que ya vive en su
+             slot de forma:
+             1 dependencia social → C1b · [D3]
+             2 entropía interpretable → C2′ · [D10]
+             3 simplicidad mecánica → [Simplicidad Mecánica] (§2.1 N2)
+             4 interacción jugador↔jugador → C1a · [D2]
+             5 entidades → §2.3 · §2.4
+             Reescrita como tabla-índice: cada criterio CITA su fuente; el
+             test es advisory de review (AUDITOR DESIGN, IDEADOR), detecta
+             no-conformidad, no la garantiza. La garantía la cargan las
+             fuentes, ya en forma. Ninguna norma nueva se introduce, luego
+             M4 deja de violarse.
+             LECCIÓN CONFIRMADA: el test no era normatividad redundante que
+             hubiera que borrar, sino un procedimiento mal tipado —parecía
+             fuente y era router—. El mapa MOF fue lo que permitió tiparlo
+             bien; sin él la tentación era «disolverlo en claims», que habría
+             perdido el procedimiento de review.
+Hipótesis:   Un procedimiento que APLICA normatividad no la FUNDA; tiparlo
+             como conformance M1→M2 lo mantiene útil (review) sin que viole
+             M4 (prosa sin autoridad).
+Razón:       CONTINGENCY P5 — P16 en autonomía (PO, 2026-07-23).
+Impacto:     §2.2 reescrita como índice de conformance; los cinco criterios
+             citan su fuente. P16 hecho. La propagación abandonada de DL-044
+             queda saldada, ~6 días después. check 42 reglas, test 54/54.
+             Header v5.74.
+             NO CIERRA: que un criterio de review APLIQUE bien su fuente
+             sigue siendo juicio ontológico del auditor —no verificable por
+             forma—, igual que toda la capa M1→M2. El test enruta a la forma;
+             aplicarla es review.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.2
+Libre:       —
+Referencias: §2.2, §2.10, §2.3, §5.11, DL-044, DL-096
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
