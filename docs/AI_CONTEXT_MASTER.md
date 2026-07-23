@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.60 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.61 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -241,7 +241,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | A3 | Tratamiento de la derrota | `ausente` · `declarada sin castigo` · `castigada` | cerrado |
 | A4 | Situación ficcional | `mudanza` · `evacuación de incendio` · `naufragio` · `atraco` · `rescate` | abierto |
 | A5 | Forma del objetivo | `maximización acumulativa` · `umbral fijo` · `lista específica` · `supervivencia` | abierto |
-| A6 | Escala del grupo | `individual` · `pareja` · `grupo pequeño` · `grupo grande` | abierto |
+| A6 | Escala del grupo | `individual` (inadmisible: sin varios humanos no hay interacción, C1a) · `pareja` · `grupo pequeño` · `grupo grande` | abierto |
 | A7 | Naturaleza del primer release | `prototipo de validación` · `early access` · `producto shippable` | abierto |
 | A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado |
 | A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado |
@@ -258,11 +258,11 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | E2 | A2 | `el objetivo` | C2′ (exige un ancla, no dice cuál) | decidida |
 | E3 | A3 | `ausente` | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | decidida |
 | E4 | A4 | `mudanza` | Ningún axioma fija la ficción; debe admitir espacio compartido finito, objetos de demanda variable y escasez temporal | sin ratificar |
-| E5 | A5 | `maximización acumulativa` | Ningún axioma fija la forma del objetivo; E2 exige que el objetivo sea el ancla, no dice cuál | sin ratificar |
+| E5 | A5 | `maximización acumulativa` | Ningún axioma fija la forma; **restringida por D24**: debe sostener la decisión toda la ronda — `umbral fijo` y `lista específica` la agotan | sin ratificar |
 | E6 | A6 | `grupo pequeño` | C1a exige varios humanos, no dice cuántos (el rango concreto 4–6 es empírico) | sin ratificar |
 | E7 | A7 | `producto shippable` | Ningún axioma lo fija; postura de proyecto (DL-024) | sin ratificar |
 | E8 | A8 | `el ciclo de vida completo` | Ningún axioma lo fija; postura de arquitectura (DL-039) | sin ratificar |
-| E9 | A9 | `ambos` | C2′ exige variación interpretable, no dice de dónde procede | sin ratificar |
+| E9 | A9 | `ambos` | ~~C2′ exige variación interpretable~~ — **no era elección**: dominio cerrado y C1a excluye los dos valores puros (los jugadores SON el contenido; los sistemas existen para provocarlo) | disuelta (DL-084) |
 | E10 | A10 | `binaria` | C1b admite cualquier granularidad; DL-047 acota la demanda a ≤ 2 | sin ratificar |
 | E11 | A11 | `escasez temporal` | C2′ exige ambigüedad interpretable, no dice qué la genera — hallada dentro de D1, no en prosa (DL-068) | sin ratificar |
 
@@ -408,7 +408,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
 | D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-COMP · [D23] + C1a + C3 | 93d133 | DL-068 |
 | D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
-| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 | DL-069 |
+| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C1a + E2 | 4a98c3 | DL-069 |
 | D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
 | D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-COMP · C1b + [Object] — el valor reside en la interdependencia, no en la cosa | fea1c9 | DL-068 |
 | D13 | §3.5 | Una mecánica que afecta solo al individuo no produce valor y no entra. | R-COMP · C1b + [Simplicidad Mecánica] | 7b1a32 | DL-069 |
@@ -422,6 +422,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd | DL-069 |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 | DL-065 |
 | D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación. | R-COMP · [D4] + C3 | 149c7f | DL-083 |
+| D24 | §3.1 | La forma del objetivo debe sostener la decisión compartida durante toda la ronda: una forma que la agota antes del final contradice la ambigüedad interpretable. | R-ESP · C2′ | f82b10 | DL-084 |
 
 ### 3.1 Core Loop
 
@@ -1144,8 +1145,9 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D7 | Valencia cooperativa | `TruckManager` (conteo de equipo) + `RoundManager` (RoundSummary único) |
 | D8 | Obligación intrínseca, nunca gate | `CarryManager` (el líder siempre puede iniciar — §4.4, DL-047) |
 | D23 | Lo no-acoplado no obliga (neutral de valencia) | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D24 | La forma del objetivo sostiene la decisión | — normativo → restringe el dominio de A5 (forma del objetivo) |
 | D9 | Escasez → decisión compartida | timer de `RoundManager` (1 tick/s, §4.12) + `ObjectManager` (spawn disperso) |
-| D10 | Situaciones distintas (bloqueado por E9) | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
+| D10 | Situaciones distintas, objetivo fijo | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
 | D11 | Sin ventaja de gameplay | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D12 | Neutralidad de objetos | `TruckManager` (conteo uniforme) + definiciones de objeto sin campo de valor (§2.3) |
 | D13 | Lo solo-individual no entra | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
@@ -1704,7 +1706,7 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 | ID | Trabajo | Depende de | Salda | Estado |
 |---|---|---|---|---|
 | P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer clases nuevas | — | Z1 · X1 | hecho (DL-083) |
-| P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | DL-064 | pendiente |
+| P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | DL-064 | hecho (DL-084) |
 | P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | pendiente |
 | P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | — | disuelto (DL-080) |
 | P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | pendiente |

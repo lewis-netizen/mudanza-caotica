@@ -4242,4 +4242,79 @@ Libre:       —
 Referencias: §2.9, §3.0, §5.11, DL-068, DL-078, DL-082
 ```
 
+### DL-084
+
+```
+ID:          DL-084
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P2 — aplicar el criterio de optimalidad a E4–E11 buscando el
+             predicado discriminante, bajo la tesis del PO: si una relación
+             válida no es óptima, el universo no se definió lo suficiente.
+Contenido:   RESULTADO POR EJE:
+             · E9 (origen de la variación) DISUELTA. Dominio CERRADO
+               {sistema, jugadores, ambos} y C1a excluye los dos valores
+               puros: los jugadores SON el contenido (no solo el sistema) y
+               los sistemas existen para provocarlo (no solo los jugadores).
+               Queda `ambos` como único admisible: no era elección, era
+               derivación. Desbloquea D10 → R-ELEC · C1a + E2.
+             · E5 (forma del objetivo): el discriminante EXISTE —C2′ exige
+               que la decisión viva entre lo determinado y lo aleatorio— pero
+               el dominio es ABIERTO y Z6 impide concluir "óptimo". En vez de
+               forzar la disolución se DERIVÓ EL DISCRIMINANTE COMO CLAIM:
+               D24 «la forma del objetivo debe sostener la decisión compartida
+               durante toda la ronda». Eso es más fuerte que elegir un valor:
+               restringe a CUALQUIER candidato, incluidos los no considerados.
+               `umbral fijo` y `lista específica` quedan excluidos por D24.
+               Es el procedimiento del PO ejecutado: definir más el universo
+               en vez de rendirse ante la frontera.
+             · E6 (escala del grupo): `individual` INADMISIBLE por C1a (sin
+               varios humanos no hay interacción que sea contenido). Marcado
+               en A6. El rango concreto (4–6) es empírico, no electivo.
+             · E11 (generador de la decisión): entre los valores considerados
+               solo `escasez temporal` satisface D2 en sus DOS piernas —
+               acopla resultados (reloj compartido) y exige decidir.
+               `información oculta` genera incertidumbre sin acoplar;
+               `complejidad combinatoria` genera decisión sin acoplar;
+               `interdependencia de roles` acopla pero determina. Dominio
+               abierto ⇒ "óptimo entre lo considerado", no óptimo: NO se
+               disuelve. La ratificación queda casi mecánica.
+             · E7, E8 (naturaleza del release, horizonte de diseño): no son
+               valencias de DISEÑO sino postura de proyecto; ningún axioma
+               sobre la experiencia del jugador discrimina. Frontera legítima
+               del PO.
+             · E10 (granularidad de la demanda): [Simplicidad Mecánica]
+               favorece `binaria`, pero `graduada` no queda dominada en C1b.
+               Frontera estrecha.
+             · E4 (situación ficcional) — CORRECCIÓN DE UNA AFIRMACIÓN
+               PROPIA. Se dijo (barrido de DL-067) que era "la elección más
+               grande del proyecto". Es falso: ningún claim discrimina entre
+               mudanza, naufragio, incendio o atraco — todas admiten espacio
+               finito compartido, objetos de demanda > 1 y escasez. Lo que
+               SÍ porta el diseño es el LAYOUT (cuánta contención impone el
+               espacio, [Compresión Social]), no la etiqueta ficcional. La
+               ficción es casi neutra respecto al diseño; el peso estaba en
+               otro sitio.
+Hipótesis:   Un eje de dominio abierto no obliga a rendirse: derivar el
+             discriminante como claim restringe el dominio entero, incluidos
+             los valores que nadie enumeró.
+Razón:       CONTINGENCY P5 — P2 en autonomía (PO, 2026-07-23).
+Impacto:     E9 disuelta; D10 desbloqueado; D24 nuevo; A6 con `individual`
+             marcado inadmisible; E5 y E11 con su análisis de dominancia.
+             VARIANTE 13 → 12 (claims bloqueados 3 → 1; solo queda D9←E11).
+             check 37 reglas, test 44/44. Header v5.61.
+             PARA EL PO — ratificaciones pendientes, ahora informadas: E11
+             (desbloquea D9), E5, E4, E6, E7, E8, E10. Ninguna bloquea otro
+             trabajo salvo E11→D9.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7, §3.0, §4.15
+Libre:       Valores de E4–E8, E10, E11 → PO. Rango del grupo → playtest.
+Referencias: §2.7, §3.0, §4.15, §5.11, DL-064, DL-067, DL-078
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
