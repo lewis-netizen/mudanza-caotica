@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.65 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.66 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -346,7 +346,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 | X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
-| X11 | **Modo del validador sin cobertura de mutación**: M9 solo alcanza las reglas del reporte por defecto, luego `--provenance`, `--sensitivity` y `--seals` no tenían ni un test | los tres defectos de aparato de la sesión vivían ahí y los halló un agente leyendo salida, no el aparato (DL-088) | regla: línea base pinneada en test.luau |
+| X11 | **Modo del validador sin cobertura de mutación**: M9 solo alcanza las reglas del reporte por defecto, luego `--provenance`, `--sensitivity` y `--seals` no tenían ni un test | los tres defectos de aparato de la sesión vivían ahí y los halló un agente leyendo salida, no el aparato (DL-088) | regla: los tres modos con línea base en test.luau (DL-089) |
 | X10 | **Coincidencia léxica sin frontera de palabra**: un término casa dentro de otro y produce un flotante falso | `entidad` casaba dentro de `identidad` y marcaba a D16 (DL-082) | regla: --provenance con frontera UTF-8 |
 | X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | zona: Z1 |
 

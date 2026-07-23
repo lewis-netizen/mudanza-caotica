@@ -4555,4 +4555,56 @@ Libre:       —
 Referencias: §2.8, §5.11, §5.12, DL-056, DL-083, DL-087
 ```
 
+### DL-089
+
+```
+ID:          DL-089
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO condicionó continuar a que el metanivel estuviera definido
+             Y ENFORCEADO. Verificado antes de seguir: NO se cumplía.
+             DL-088 definió el criterio y cubrió --provenance, pero dejó dos
+             huecos que el propio DL declaraba como "mecánicos, no ahora":
+             (1) la corrección de la auto-exención de los guardianes (DL-087)
+             no tenía regresión — revertirla no encendía nada; (2)
+             --sensitivity y --seals seguían sin cobertura.
+             Diferir lo "mecánico" es exactamente el patrón que ha mordido
+             toda la sesión: lo diferido no vuelve solo.
+Contenido:   Tres casos nuevos, 48 → 51:
+             · REGRESIÓN DE DL-087, y es MUTACIÓN DEL APARATO, no del corpus
+               — la primera de su clase. Quita el pre-registro de las reglas
+               guardianas en check.luau (el sandbox copia tools/) y exige que
+               rule_missing encienda: declaradas en §5.12 y no emitidas. Un
+               guardián exento de su propia guardia no guarda, y ahora
+               revertir esa corrección rompe el build.
+             · LÍNEA BASE DE --seals: el sello es la identidad del enunciado;
+               si el hash cambiara sin cambiar el texto, todo DL-063 mentiría
+               en silencio.
+             · LÍNEA BASE DE --sensitivity: el radio de C1b (14). Un cambio
+               silencioso en el cierre transitivo falsearía la medida sin que
+               nada más lo notara.
+             Con esto los TRES modos tienen cobertura y los TRES defectos de
+             aparato de la sesión tienen regresión. X11 se resuelve.
+Hipótesis:   Un aparato cuyos modos no se testean no es un aparato: es código
+             que produce números creíbles. La cobertura de los modos es lo que
+             convierte sus salidas en evidencia.
+Razón:       CONTINGENCY P5 — condición del PO: continuar solo si el metanivel
+             está definido y enforceado (2026-07-23).
+Impacto:     test.luau 51/51 con mutación de aparato; X11 resuelto por regla.
+             check 39 reglas. Header v5.66.
+             METANIVEL: definido (criterio de veredicto-silencioso) y
+             ENFORCEADO (regla para defectos de corpus, mutación de regresión
+             para defectos de aparato, los tres modos con línea base). La
+             condición del PO se cumple.
+Ejecución:   CONFIRM
+Costo:       C1
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, §5.12, DL-056, DL-087, DL-088
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

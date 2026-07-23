@@ -14,6 +14,7 @@ local LOG = "docs/PROJECT_DECISION_LOG.md"
 local MASTER = "docs/AI_CONTEXT_MASTER.md"
 local TICKETS = "docs/TICKETS.md"
 local DEFER = "tools/derivation-graph/deferrals.txt"
+local CHECK = "tools/derivation-graph/check.luau"
 
 local function rmrf(path)
 	if fs.isDir(path) then
@@ -69,6 +70,37 @@ local cases = {
 		name = "línea base de --provenance (veredicto pinneado)",
 		mode = "--provenance",
 		expect = "6 claim(s) con términos flotantes",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
+		-- MUTACIÓN DEL APARATO, no del corpus. Las dos reglas guardianas se
+		-- comprueban antes de reportarse: sin su pre-registro se auto-eximen y
+		-- un guardián exento de su propia guardia no guarda (DL-087). Quitarlo
+		-- debe encender rule_missing — declaradas en §5.12 y no emitidas.
+		name = "guardián auto-eximido (regresión de DL-087)",
+		expect = "✗ rule_missing",
+		apply = function()
+			replaceOnce(CHECK, '\temittedRules["rule_missing"] = true\n', "")
+		end,
+	},
+	{
+		-- Línea base de --seals: el sello es la identidad del enunciado. Si el
+		-- hash cambiara sin que cambie el texto, todo el mecanismo de DL-063
+		-- mentiría en silencio.
+		name = "línea base de --seals",
+		mode = "--seals",
+		expect = "D1   d3eabb",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
+		-- Línea base de --sensitivity: el radio de explosión de C1b. Mide qué
+		-- sostiene el axioma; un cambio silencioso en el cierre transitivo lo
+		-- falsearía sin que nada más lo note.
+		name = "línea base de --sensitivity",
+		mode = "--sensitivity",
+		expect = "axioma    14",
 		expectPass = true,
 		apply = function() end,
 	},
