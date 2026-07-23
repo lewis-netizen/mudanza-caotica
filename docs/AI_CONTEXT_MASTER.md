@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.47 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.51 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -77,7 +77,7 @@ Se deducen de los axiomas; frozen porque su fundamento lo es. ⚠ marca un **com
 Otro eje: no describen la experiencia del jugador sino **cómo se construye y se estructura el sistema**. Frozen, pero no se deducen de los axiomas de experiencia.
 
 | Principio | Definición | Eje | Derivación |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Simplicidad Mecánica | La profundidad surge de sistemas simples interactuando. | Método | R-POST |
 | Compresión Social | El espacio debe aumentar la frecuencia con la que los jugadores interfieren entre sí. | Método (táctica espacial al servicio de C1b) | R-POST |
 | Entidades Estables | Diseñar alrededor de entidades (Player, Object, Map, Content), no alrededor de nombres, archivos o features concretas. | Arquitectura | R-POST |
@@ -251,7 +251,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 **Registrar ≠ ratificar (DL-067).** Registrar el valor vigente de un eje es **describirlo**: deja constancia de que ahí hubo una elección, aunque nadie la haya examinado. Citarlo como premisa es **apoyarse** en él. Solo una elección con `Estado: decidida` — ratificada por el PO — es contenido garantizado y puede fundar un claim; una `sin ratificar` que aparezca como premisa es violación (`election_unratified_cited`). Sin esa separación, registrar una elección la volvería fundante de facto, y el barrido del corpus habría convertido trece hallazgos en trece axiomas de contrabando.
 
 | ID | Eje | Valor elegido | Abierto por | Estado |
-|---|---|---|---|---|
+|---|---|---|---|---|---|
 | E1 | A1 | `cooperativa` | C1b (neutral de valencia: el axioma no la fija) | decidida |
 | E2 | A2 | `el objetivo` | C2′ (exige un ancla, no dice cuál) | decidida |
 | E3 | A3 | `ausente` | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | decidida |
@@ -299,12 +299,18 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 
 **Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas. El registro contiene lo *vigente*: una zona cerrada SALE de la tabla y su cierre queda en el DL que lo ejecuta (Z3 cerrada por DL-062 — el gluing ancla en claims D-n, no en prosa; Z2 cerrada por DL-064 — los ejes son tipos con dominio enumerado). Salir del registro exige haber cerrado, no haber caducado: `zone_expired` dispara antes.
 
-| ID | Zona — sin garantía del sistema | Tipo MT0 | Camino de cierre | Vence | Ratificada |
+| ID | Zona — sin garantía del sistema | Tipo MT0 | Camino de cierre | Vence | Ratificada | Abierta por |
 |---|---|---|---|---|
-| Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 |
-| Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | relación → máquina (deuda) | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 |
-| Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | relación → máquina (deuda) | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 |
-| Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 |
+| Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 | DL-060 |
+| Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | relación → máquina (deuda) | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 | DL-062 |
+| Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | relación → máquina (deuda) | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 | DL-066 |
+| Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 | DL-066 |
+
+**Invariante y variante (DL-071).** Todo el aparato descrito hasta aquí verifica **safety**: que cada estado del corpus sea consistente. No dice nada de la **trayectoria** — si las zonas efectivamente cierran, si las clases de escape acaban teniendo regla, si la tasa de defectos por pasada baja. Los vencimientos eran un sustituto tosco: **un reloj no es una propiedad**; "vence el 11 de agosto" no informa si el sistema tiende a algo.
+
+El nombre correcto lo teníamos importado sin usar: en Event-B, safety son **invariantes** y la convergencia es una **variante** — una medida bien fundada que decrece. La variante del corpus es `zonas abiertas + claims bloqueados + clases de escape sin regla`, y el runner la imprime. **Se mide, no se gobierna**: no existe un valor correcto, y descubrir una zona nueva la **sube** legítimamente — eso es progreso en conocimiento y retroceso en la medida, a la vez. Convertirla en umbral sería la lección del registro de escapes otra vez.
+
+Lo que sí es decidible desde un solo estado es la **estructura** de la deuda: un claim bloqueado debe **nombrar a su bloqueador**, y el bloqueador debe existir — elección sin ratificar (`E-n`) o zona registrada (`Z-n`). Una deuda sin acreedor no se cobra (`blocked_claim_dangling`; era el caso real de D18, que decía "exige un postulado" sin ID alguno).
 
 La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (deuda)` significa que su terreno son relaciones y por tanto **el validador debería cubrirla**: es deuda, no frontera. `formalizable pendiente` es transitorio declarado. `contenido → PO` no se cierra formalizando: se ratifica. Sin ese tipo, Z1 se leyó como frontera aceptada durante días **siendo deuda** — la fila no decía de qué cubo era (DL-070).
 
@@ -317,14 +323,35 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069) | zona: Z1 |
 | X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) | zona: Z1 |
 | X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | zona: Z1 |
-| X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068) | zona: Z1 |
+| X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068). Instancia regresión-probada por `vocab_banned_term` (DL-074); la clase general (colisiones no declaradas) sigue en Z1 | zona: Z1 |
 | X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | zona: Z5 |
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 
+**Historial de zonas cerradas (DL-072)** — una zona cerrada sale del registro vigente, y sin este historial sus eventos de apertura y cierre sobrevivirían solo en prosa. Con `Abierta por` en el registro y esta tabla, **descubrimiento y cierre se vuelven eventos distinguibles**, que es lo que la variante necesita para significar convergencia en vez de resolución del instrumento. Como el registro de escapes: es **memoria y no gobierna nada**.
+
+| ID | Zona | Abierta por | Cerrada por |
+|---|---|---|---|
+| Z2 | Relación valor↔eje: que el Valor sea un valor del Eje declarado | DL-060 | DL-064 |
+| Z3 | Realización del gluing: que la fila de §4.15 realice su concepto | DL-060 | DL-062 |
+
 **El registro es MEMORIA, no COBERTURA (DL-070).** Un escape ausente significa que **nadie lo notó**, no que no exista: la ausencia de fila no prueba nada. Por su naturaleza, el registro **no puede crear dependencia alguna** — ninguna garantía del sistema se deriva de su estado, ni de que esté completo, ni de que todos sus escapes estén resueltos, y **ninguna regla puede consumirlo como evidencia**. El registro **empuja** (acumula presión sobre una clase que se repite) pero **jamás respalda**. Un mecanismo que dependiera de su completitud heredaría precisamente la dependencia de agente que el registro existe para hacer visible.
 
 El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento, las zonas y los tipos ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma). El **registro de escapes** no es contenido ni garantía: es un hecho observado, y su resolución apunta a lo que sí carga garantía (una regla, una zona) sin cargarla él.
+
+### 2.9 Vocabulario Controlado (DL-074)
+
+Los claims se construyen de **términos**. Un defecto puede vivir no en ningún claim sino en el vocabulario del que están hechos: un término con dos sentidos normativos, o dos términos que parecen del mismo eje sin serlo. Ese fue el escape **X4** — `acoplamiento negativo/positivo` (mecanismo) leía como `cooperativa/competitiva` (valencia), dos ejes independientes. Esta tabla fija el término preferido de cada predicado y **prohíbe las formas que colisionan**.
+
+| Término preferido | Eje | Definición (comentario) | Formas prohibidas |
+|---|---|---|---|
+| acoplamiento rival | mecanismo | Contención: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` |
+| acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` |
+| valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — |
+
+La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
+
+**Límites, declarados.** (1) Es **léxico**, no semántico: caza que dos claims usen palabras que colisionan, no que una premisa *sostenga* su conclusión — eso sigue siendo Z1 y pide una ontología, no un vocabulario. (2) La cobertura es **las formas declaradas**: una colisión no anotada no se caza (falso negativo posible, como toda memoria). Por eso la regla **regresión-prueba** la colisión ya hallada y **siembra** el espacio de términos que X1 necesita; **no cierra** la clase X4. Las formas prohibidas son **frases distintivas** (dos palabras), no palabras comunes, para que el scan no dé falsos positivos.
 
 ---
 
@@ -336,31 +363,33 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 
 **Sello (DL-063).** Cada claim porta el hash de su propio enunciado. Lo sellado es el **enunciado**, no la fila: reubicar un claim no altera su sello, reescribirlo sí (`claim_seal_mismatch`). Re-sellar es el acto que declara una **remodelación** — sin él, cambiar un compromiso de diseño es indistinguible de un refactor cosmético. Al remodelar legítimamente, `lune run tools/derivation-graph/check.luau --seals` emite los sellos nuevos. El sello no dice que el contenido sea correcto (eso es Z1): dice que el cambio se hizo visible.
 
-| ID | Sección | Claim | Derivación | Sello |
+**Procedencia (DL-073).** Cada claim declara además **qué DL lo selló**, y esa declaración es **auto-consistente sin necesitar historia**: el DL debe existir y debe declarar `§3.0` en su `Modifica:`. Un DL que nunca tocó los claims no pudo sellarlos, luego una procedencia que miente se cae sola (`seal_unprovenanced`, `seal_provenance_inconsistent`). Con esto, remodelar deja de ser solo **visible** y pasa a ser **atribuible**, y el churn de claims por DL —cuánta normatividad movió cada decisión— se computa desde el corpus en vez de reconstruirse contra git.
+
+| ID | Sección | Claim | Derivación | Sello | Sellado por |
 |---|---|---|---|---|
-| D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb |
-| D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac |
-| D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 |
-| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 |
-| D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b |
-| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 95178f |
-| D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 |
-| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-ESP · [D23] | 93d133 |
-| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 |
-| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 |
-| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a |
-| D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | fea1c9 |
-| D13 | §3.5 | Una mecánica que afecta solo al individuo no produce valor y no entra. | R-COMP · C1b + [Simplicidad Mecánica] | 7b1a32 |
-| D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b |
-| D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c |
-| D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 |
-| D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 |
-| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: exige postulado N2 de verificabilidad, sin ratificar | a01d00 |
-| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores: su contenido es la interacción, no la puntuación. | R-ESP · C1a | ecff83 |
-| D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f |
-| D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd |
-| D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 |
-| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-ESP · [D4] | 592d28 |
+| D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb | DL-068 |
+| D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac | DL-069 |
+| D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 | DL-068 |
+| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 | DL-063 |
+| D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b | DL-068 |
+| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 95178f | DL-068 |
+| D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
+| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-ESP · [D23] | 93d133 | DL-068 |
+| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
+| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 | DL-069 |
+| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
+| D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | fea1c9 | DL-068 |
+| D13 | §3.5 | Una mecánica que afecta solo al individuo no produce valor y no entra. | R-COMP · C1b + [Simplicidad Mecánica] | 7b1a32 | DL-069 |
+| D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b | DL-063 |
+| D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c | DL-063 |
+| D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 | DL-063 |
+| D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 | DL-063 |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: Z1 — [D17] no sostiene la conclusión; exige postulado N2 de verificabilidad | a01d00 | DL-068 |
+| D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores: su contenido es la interacción, no la puntuación. | R-ESP · C1a | ecff83 | DL-069 |
+| D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f | DL-063 |
+| D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd | DL-069 |
+| D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 | DL-065 |
+| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-ESP · [D4] | 592d28 | DL-068 |
 
 ### 3.1 Core Loop
 

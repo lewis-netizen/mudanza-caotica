@@ -331,6 +331,51 @@ do
 end
 table.sort(implLeak)
 
+-- vocabulario controlado (§2.9, DL-074): forma prohibida en texto normativo
+-- de §3 = colisión léxica. Mismo patrón que impl_leak — scan de superficie,
+-- sin etiquetar qué claim usa qué término (eso sería dependencia de agente).
+-- Las formas se leen de §2.9, que NO se escanea (vive en §2).
+local bannedForms = {} -- forma prohibida (minúsculas) → término preferido
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "2.9" and line:match("^| ") and not line:match("^| Término") and not line:match("^|%-") then
+			local cells = {}
+			for cell in line:gmatch("|([^|]*)") do
+				table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+			end
+			local pref = cells[1] or ""
+			for form in (cells[4] or ""):gmatch("`([^`]+)`") do
+				bannedForms[form:lower()] = pref
+			end
+		end
+	end
+end
+local vocabBanned = {}
+do
+	local region, i = nil, 0
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		i += 1
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region and region:match("^3") then
+			local low = line:lower()
+			for form, pref in pairs(bannedForms) do
+				if low:find(form, 1, true) then
+					table.insert(vocabBanned, "§3 L" .. i .. ' → "' .. form .. '" (usar "' .. pref .. '")')
+				end
+			end
+		end
+	end
+end
+table.sort(vocabBanned)
+
 -- version-pins: ningún artefacto referencia "AI_CONTEXT_MASTER vN.N" (DL-050).
 -- El master se lee siempre vigente. Entradas históricas del log exentas
 -- (solo se escanea su header). El master mismo está exento.
@@ -465,6 +510,7 @@ local designClaims = {} -- D-n → { sec, deriv } (capa normativa de §3, DL-061
 local claimedSections = {} -- §3.N con ≥1 claim o marcador
 do
 	local region, nivel = nil, nil
+	local inZoneHistory = false
 	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
 		local h = line:match("^#+%s+(%d[%d%.]*)")
 		if h then
@@ -512,6 +558,7 @@ do
 					deriv = deriv,
 					enunciado = cells[3] or "",
 					sello = cells[5] or "",
+					selladoPor = cells[6] or "",
 				}
 				if sec ~= "" then
 					claimedSections[sec] = true
@@ -570,7 +617,16 @@ do
 					f8Claims[m] = { raw = cells[4] }
 				end
 			end
-			local z = line:match("^| (Z%d+) |")
+			-- §2.8 tiene DOS tablas de zonas: el registro VIGENTE y el
+			-- historial de cerradas. Ambas empiezan por | Z-n |, así que se
+			-- distinguen por cabecera — contar celdas enmascararía filas
+			-- realmente malformadas, que es lo que zone_malformed debe ver.
+			if line:match("^| ID | Zona | Abierta por | Cerrada por |") then
+				inZoneHistory = true
+			elseif line:match("^| ID | Zona — sin garantía") then
+				inZoneHistory = false
+			end
+			local z = not inZoneHistory and line:match("^| (Z%d+) |") or nil
 			if z then
 				local cells = {}
 				for cell in line:gmatch("|([^|]*)") do
@@ -828,6 +884,86 @@ for id, kind in pairs(nodes) do
 end
 table.sort(unclaimedSection)
 
+-- ── procedencia del sello (Z4, DL-073) ──────────────────────────────────────
+-- Cada claim declara QUÉ DL lo selló. La declaración es AUTO-CONSISTENTE sin
+-- necesitar historia: el DL debe existir Y debe declarar §3.0 en su
+-- `Modifica:`. Una procedencia que miente —un DL que nunca tocó los claims—
+-- se detecta desde un solo estado. Con esto, remodelar deja de ser solo
+-- visible (el sello, DL-063) y pasa a ser ATRIBUIBLE.
+local sealUnprovenanced, sealProvenanceInconsistent = {}, {}
+do
+	local modifiesClaims = {} -- DL → declara §3.0 en Modifica
+	for _, m in ipairs(modifies) do
+		if m[2] == "§3.0" then
+			modifiesClaims[m[1]] = true
+		end
+	end
+	local ids = {}
+	for id in pairs(designClaims) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	for _, id in ipairs(ids) do
+		local dl = designClaims[id].selladoPor
+		if not dl:match("^DL%-%d+$") then
+			table.insert(sealUnprovenanced, id .. " → \"" .. dl .. "\" no es un DL")
+		elseif not nodes[dl] then
+			table.insert(sealUnprovenanced, id .. " → " .. dl .. " no existe")
+		elseif not modifiesClaims[dl] then
+			table.insert(sealProvenanceInconsistent, id .. " → " .. dl .. " no declara §3.0 en Modifica:")
+		end
+	end
+end
+
+-- ── estructura de la deuda (DL-071) ─────────────────────────────────────────
+-- Un claim BLOQUEADO debe nombrar a su bloqueador, y el bloqueador debe
+-- existir: una elección sin ratificar (E-n) o una zona registrada (Z-n).
+-- Sin esto, "— bloqueado: exige un postulado" es deuda que no apunta a nada
+-- — el caso real de D18 antes de DL-071. Una deuda sin acreedor no se cobra.
+local blockedClaimDangling = {}
+for id, c in pairs(designClaims) do
+	if c.deriv:match("^—%s*bloqueado") then
+		local ok = false
+		for e in c.deriv:gmatch("E(%d+)") do
+			if f8ElectionRows["E" .. e] then
+				ok = true
+			end
+		end
+		for z in c.deriv:gmatch("Z(%d+)") do
+			if zones["Z" .. z] then
+				ok = true
+			end
+		end
+		if not ok then
+			table.insert(blockedClaimDangling, id .. " → bloqueador inexistente o sin ID: \"" .. c.deriv .. "\"")
+		end
+	end
+end
+table.sort(blockedClaimDangling)
+
+-- VARIANTE del corpus (Event-B): la deuda abierta como número. Safety son
+-- invariantes; la convergencia es una VARIANTE bien fundada que decrece.
+-- Nuestras fechas de vencimiento eran un sustituto malo: un reloj no dice si
+-- el sistema tiende a algo. Esto se MIDE y se imprime, no se gobierna — no
+-- existe un valor correcto, y una zona nueva SUBE la variante legítimamente
+-- (descubrir deuda es progreso en conocimiento, retroceso en la medida).
+local variantZones, variantBlocked, variantEscapes = 0, 0, 0
+for _ in pairs(zones) do
+	variantZones += 1
+end
+for _, c in pairs(designClaims) do
+	if c.deriv:match("^—%s*bloqueado") then
+		variantBlocked += 1
+	end
+end
+for _, x in pairs(escapes) do
+	if not x.resol:match("^regla:") then
+		variantEscapes += 1
+	end
+end
+
 -- sello del enunciado (Z4, DL-063): el claim declara el hash de su propio
 -- enunciado. Reescribirlo sin re-sellar = violación; moverlo no toca nada.
 -- Re-sellar es el ACTO que hace visible una remodelación: no valida que el
@@ -845,6 +981,86 @@ table.sort(claimSealMismatch)
 
 -- `--seals`: recalcula e imprime los sellos. Se corre al remodelar un claim,
 -- para obtener el sello nuevo que hay que escribir en la tabla.
+-- `--sensitivity`: ∂downstream/∂premisa sobre el grafo de claims. Responde
+-- "si toco esto, ¿qué se mueve?" — el radio de explosión de cada axioma,
+-- elección y claim. Es la lectura DISCRETA de la sensibilidad: el corpus no
+-- es continuo, así que no hay derivada sino diferencia. Un axioma con radio
+-- 0 no sostiene nada; uno con radio alto es donde el diseño se juega.
+-- No es una regla: no hay umbral correcto, luego no hay violación que
+-- reportar. Es medición, y se lee.
+if table.find(process.args, "--sensitivity") then
+	-- dependientes directos: premisa → claims que la citan
+	local dependents = {}
+	local function addDep(prem, claim)
+		dependents[prem] = dependents[prem] or {}
+		table.insert(dependents[prem], claim)
+	end
+	for name, c in pairs(f8Claims) do
+		local formal = c.raw
+		local dash = formal:find(" — ", 1, true)
+		if dash then
+			formal = formal:sub(1, dash - 1)
+		end
+		local _, premStr = formal:match("^(R%-%u+)%s*·%s*(.+)$")
+		if premStr then
+			for tok in premStr:gmatch("[^+]+") do
+				tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+				local claimRef = tok:match("^%[(.+)%]$")
+				if tok ~= "" then
+					addDep(claimRef or tok, name)
+				end
+			end
+		end
+	end
+
+	-- cierre transitivo: todo lo que se mueve si se toca la premisa
+	local function blastRadius(root)
+		local seen, stack = {}, { root }
+		while #stack > 0 do
+			local cur = table.remove(stack)
+			for _, d in ipairs(dependents[cur] or {}) do
+				if not seen[d] then
+					seen[d] = true
+					table.insert(stack, d)
+				end
+			end
+		end
+		local n = 0
+		for _ in pairs(seen) do
+			n += 1
+		end
+		return n
+	end
+
+	local roots = {}
+	for a in pairs(f8Axioms) do
+		table.insert(roots, { a, "axioma" })
+	end
+	for e in pairs(f8Elections) do
+		table.insert(roots, { e, "elección" })
+	end
+	for c in pairs(f8Claims) do
+		table.insert(roots, { c, "claim" })
+	end
+	for _, r in ipairs(roots) do
+		r[3] = blastRadius(r[1])
+	end
+	table.sort(roots, function(x, y)
+		if x[3] ~= y[3] then
+			return x[3] > y[3]
+		end
+		return x[1] < y[1]
+	end)
+
+	print("Sensibilidad — ∂downstream/∂premisa (radio de explosión)\n")
+	for _, r in ipairs(roots) do
+		if r[3] > 0 or r[2] ~= "claim" then
+			print(string.format("  %-28s %-9s %d", r[1], r[2], r[3]))
+		end
+	end
+	process.exit(0)
+end
+
 if table.find(process.args, "--seals") then
 	local ids = {}
 	for id in pairs(designClaims) do
@@ -956,6 +1172,9 @@ end)
 reportViolations("domain_mismatch (Domain del DL vs nivel que Modifica)", domainMismatch, function(r)
 	return r[1] .. " (Domain " .. r[3] .. ") modifica " .. r[2]
 end)
+reportViolations("vocab_banned_term (forma léxica prohibida en §3 — §2.9)", vocabBanned, function(r)
+	return r
+end)
 reportViolations("impl_leak (módulo de src/ nombrado en §1–§3)", implLeak, function(r)
 	return r
 end)
@@ -972,6 +1191,15 @@ reportViolations("unclaimed_section (sección §3 sin claim normativo en §3.0)"
 	return r
 end)
 reportViolations("claim_seal_mismatch (enunciado reescrito sin re-sellar)", claimSealMismatch, function(r)
+	return r
+end)
+reportViolations("seal_unprovenanced (claim sin DL que declare su sellado)", sealUnprovenanced, function(r)
+	return r
+end)
+reportViolations("seal_provenance_inconsistent (el DL sellador no declara §3.0)", sealProvenanceInconsistent, function(r)
+	return r
+end)
+reportViolations("blocked_claim_dangling (claim bloqueado sin bloqueador existente)", blockedClaimDangling, function(r)
 	return r
 end)
 reportViolations("glue_dangling (claim de módulo inexistente en §4.15)", glueDangling, function(r)
@@ -1070,6 +1298,40 @@ reportViolations("version-pin (referencia a versión del master — prohibido)",
 	return r
 end)
 
+-- Churn de claims por DL (Z4, DL-073): la serie sale ahora del CORPUS, no
+-- de git. Es la diferencia discreta — cuánta normatividad movió cada
+-- decisión. Medición, no regla.
+do
+	local churn, dls = {}, {}
+	for _, c in pairs(designClaims) do
+		if c.selladoPor ~= "" then
+			if not churn[c.selladoPor] then
+				churn[c.selladoPor] = 0
+				table.insert(dls, c.selladoPor)
+			end
+			churn[c.selladoPor] += 1
+		end
+	end
+	table.sort(dls)
+	local parts = {}
+	for _, d in ipairs(dls) do
+		table.insert(parts, d .. ":" .. churn[d])
+	end
+	print("\n  · churn de claims por DL: " .. table.concat(parts, "  "))
+end
+
+print(
+	string.format(
+		"\n  · VARIANTE del corpus: %d  (zonas abiertas %d + claims bloqueados %d + clases sin regla %d)",
+		variantZones + variantBlocked + variantEscapes,
+		variantZones,
+		variantBlocked,
+		variantEscapes
+	)
+)
+print("      Event-B: safety son invariantes, convergencia es una variante que decrece.")
+print("      Se MIDE, no se gobierna: descubrir deuda la sube, y eso es progreso.")
+
 do
 	local n, mal = 0, #escapeMalformed + #escapeUnresolved
 	for _ in pairs(escapes) do
@@ -1099,7 +1361,8 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
-	+ #electionUnratifiedCited
+	+ #electionUnratifiedCited + #blockedClaimDangling
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

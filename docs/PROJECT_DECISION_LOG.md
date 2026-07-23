@@ -3426,4 +3426,256 @@ Libre:       —
 Referencias: §2.8, §5.0, §2.7, DL-056, DL-060, DL-066, DL-068, DL-069
 ```
 
+### DL-071
+
+```
+ID:          DL-071
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO preguntó si la capa dinámica podía ser una METAcapa. Lo
+             era. El agente la había descartado con un argumento falso: "el
+             grafo no tiene eje temporal". El corpus SÍ evoluciona —DL-044 a
+             DL-070, v5.23 a v5.47— y cada commit es un estado, cada DL una
+             transición. La corrección necesaria es que la dinámica es
+             DISCRETA: diferencias y acumulados, no derivadas. Llamarlas
+             derivadas sería la metáfora que el material recibido ya tenía
+             marcada como defecto.
+Contenido:   (1) Modo `--sensitivity`: cierre transitivo de dependientes por
+             premisa — "si toco esto, ¿qué se mueve?". Lectura discreta de
+             ∂downstream/∂premisa. NO es regla: no hay radio correcto, luego
+             no hay violación. Se mide y se lee.
+             PRIMER RESULTADO: los axiomas cargan (C1a 11, C1b 11, C2′ 8,
+             C3 5) pero las elecciones RATIFICADAS cargan 1–3. E1 es la
+             valencia cooperativa —cambiarla a competitiva haría otro juego
+             entero— y mide 2. Esa distancia entre peso medido y peso
+             evidente es el test del PO con número: si se siente consecuente
+             y mide casi nada, faltan especificaciones, y eso es DEUDA.
+             CAUTELA: E4–E11 miden 0, pero ese cero lo FUERZA
+             election_unratified_cited. La medición no distingue ahí "no
+             sostiene nada" de "no se le permite sostener". El dato limpio
+             son E1–E3.
+             (2) INVARIANTE vs VARIANTE. Todo el aparato era safety: cada
+             estado consistente, nada sobre la trayectoria. El nombre estaba
+             importado sin usar — en Event-B safety son invariantes y la
+             convergencia es una VARIANTE bien fundada que decrece. Los
+             vencimientos eran su sustituto tosco: un reloj no es una
+             propiedad. Variante del corpus = zonas abiertas + claims
+             bloqueados + clases de escape sin regla. Hoy: 12 (4+3+5). Se
+             MIDE, no se gobierna: descubrir una zona la SUBE legítimamente
+             —progreso en conocimiento, retroceso en la medida— y ponerle
+             umbral repetiría la lección del registro de escapes.
+             (3) Regla nueva blocked_claim_dangling: lo decidible desde un
+             solo estado es la ESTRUCTURA de la deuda. Un claim bloqueado
+             debe nombrar a su bloqueador y el bloqueador debe existir
+             (E-n sin ratificar o Z-n registrada). Una deuda sin acreedor no
+             se cobra.
+             HALLAZGO: era el caso real de D18, que decía "— bloqueado:
+             exige postulado N2 de verificabilidad" sin nombrar ningún ID.
+             Re-anclado a Z1: su bloqueo es que [D17] no sostiene la
+             conclusión, que es literalmente el enunciado de Z1.
+             Z4 CONFIRMADA como petición de eje temporal: su camino de
+             cierre —"procedencia del sello: qué DL cambió cada uno"— es
+             exactamente historia. Se venía tratando como hueco estático.
+Hipótesis:   Medir la trayectoria, y no solo el estado, es lo que permite
+             auditar el PROCESO y no solo el producto: si la tasa de
+             defectos por pasada de revisión no baja, el corpus no está mal
+             — el método de revisión no es sólido.
+Razón:       CONTINGENCY P5 — "¿estás seguro que la capa dinámica no puede
+             ser una metacapa? continuemos" (PO, 2026-07-22).
+Impacto:     check.luau 32 reglas + modos --sensitivity/--seals; variante
+             impresa junto al historial. test.luau 39/39. §2.8 gana la
+             distinción invariante/variante. Header v5.48.
+             DATO PARA LA CONVERGENCIA: pasada 1 de Z1 (DL-068) halló 6
+             defectos; pasada 2 (DL-069) halló 6. Dos puntos no concluyen,
+             pero si la tercera repite, la tasa constante indica método de
+             revisión no convergente, no corpus defectuoso.
+             NO CIERRA: la variante se mide en un solo estado. La serie
+             temporal vive en el log de DLs y en git, y nadie la computa
+             todavía.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §3.0
+Libre:       —
+Referencias: §2.8, §3.0, §5.0, DL-060, DL-063, DL-068, DL-069, DL-070
+```
+
+### DL-072
+
+```
+ID:          DL-072
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Se computó la SERIE de la variante sobre el historial de git,
+             contando las tres estructuras de deuda en cada estado del
+             master (sin correr las reglas actuales sobre corpus viejos,
+             que estaría confundido).
+             RESULTADO: v5.2 → v5.34 la variante vale CERO durante 32
+             versiones y semanas de trabajo. No porque no hubiera deuda
+             —era toda la que se lleva encontrando— sino porque NO EXISTÍA
+             EL INSTRUMENTO: el registro de zonas nace en DL-060. Desde
+             ahí: 3 → 3 → 4 → 4 → 12. Solo SUBE; nunca baja neto.
+Contenido:   HALLAZGO QUE INVALIDA PARTE DE DL-071: la variante se presentó
+             como si su descenso fuera a señalar convergencia. No puede.
+             No mide deuda: mide la RESOLUCIÓN DE LOS INSTRUMENTOS. Y por
+             eso es trivialmente falseable — borrar el registro de zonas la
+             lleva a 0 y simularía convergencia. Un cero de 32 versiones no
+             dice "sano", dice "ciego". Es el defecto del registro de
+             escapes un nivel más arriba: un número que mejora encogiendo
+             el artefacto que lo produce.
+             CORRECCIÓN: la variante es DESCRIPCIÓN DE ESTADO. La
+             convergencia exige EVENTOS —cuánto se descubrió y cuánto se
+             cerró, por separado— y hoy eran indistinguibles porque una
+             zona cerrada SALE del registro (DL-062) y su cierre vivía solo
+             en prosa.
+             (1) Columna `Abierta por` en el registro de zonas.
+             (2) Historial de zonas cerradas (Z2, Z3) con apertura y
+             cierre. Como el registro de escapes: MEMORIA, no gobierna
+             nada.
+             Con ambos, descubrimiento y cierre son eventos distinguibles.
+             HALLAZGO al construirlo: las filas del historial matchean el
+             mismo patrón `| Z-n |` que el registro vigente, y el parser
+             las tragó como zonas abiertas — la variante saltó a 14 y
+             zone_malformed encendió con 2. El validador cazó el error en
+             el acto. Se distinguen por CABECERA y no por número de celdas:
+             contar celdas enmascararía filas realmente malformadas, que es
+             lo que zone_malformed debe ver.
+             TERCERA VEZ que un hilo independiente termina pidiendo Z4
+             (procedencia): el sello, la liveness y ahora la serie.
+Hipótesis:   Separando descubrimiento de cierre, la pregunta "¿converge?"
+             deja de confundirse con "¿cuánto vemos?".
+Razón:       CONTINGENCY P5 — "continuemos" (PO, 2026-07-22).
+Impacto:     §2.8: zonas con `Abierta por`; historial de cerradas. Parser
+             de zonas distingue ambas tablas. Header v5.49. check 32
+             reglas, test 39/39. Variante: 12 (sin cambio real; el 14
+             transitorio era el bug).
+             NO CIERRA: la serie sigue calculándose a mano contra git. Y el
+             historial de cerradas es memoria mantenida por un agente —
+             misma naturaleza y misma deuda que el registro de escapes.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, DL-060, DL-062, DL-070, DL-071
+```
+
+### DL-073
+
+```
+ID:          DL-073
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Tres hilos independientes terminaron pidiendo lo mismo: el
+             sello (DL-063) hacía visible el cambio pero no atribuible; la
+             liveness (DL-071) exigía eventos y no estado; la serie
+             (DL-072) tuvo que reconstruirse contra git porque el corpus no
+             recuerda quién cambió qué. Los tres son Z4 — procedencia.
+Contenido:   Columna `Sellado por` en §3.0: cada claim declara el DL que lo
+             selló. La verificación es AUTO-CONSISTENTE SIN HISTORIA, que
+             es la parte que hacía falta: el DL debe existir Y declarar
+             §3.0 en su `Modifica:`. Un DL que nunca tocó los claims no
+             pudo sellarlos, luego una procedencia falsa se detecta desde
+             un solo estado (seal_unprovenanced,
+             seal_provenance_inconsistent). No hace falta diffear commits.
+             Consecuencia: el CHURN de claims por DL sale ahora del corpus
+             —DL-063:7, DL-065:1, DL-068:9, DL-069:6— en vez de
+             reconstruirse contra git. Es la diferencia discreta: cuánta
+             normatividad movió cada decisión. Medición, no regla.
+             Z4 NO SE CIERRA. Se salda su mitad de ATRIBUCIÓN: ya se sabe
+             qué DL cambió cada claim. Queda su mitad de OBLIGACIÓN: saber
+             QUÉ cambió dentro del enunciado —y por tanto si el cambio
+             exige implementación— requiere el delta, no solo el autor. El
+             sello es un hash: dice que algo cambió, no qué. Re-acotar la
+             zona es del PO (§2.8); la fila queda intacta.
+Hipótesis:   Con atribución, la serie deja de depender de una herramienta
+             externa al corpus, y el corpus pasa a recordar su propia
+             evolución sin que nadie la reconstruya a mano.
+Razón:       CONTINGENCY P5 — "continuemos" (PO, 2026-07-22).
+Impacto:     §3.0 gana `Sellado por` (23 claims); §2.8 documenta la
+             procedencia. check.luau 34 reglas + churn impreso; test.luau
+             41/41. Header v5.50.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §2.8
+Libre:       Re-acotar Z4 tras saldar su mitad de atribución → PO.
+Referencias: §3.0, §2.8, DL-063, DL-071, DL-072
+```
+
+### DL-074
+
+```
+ID:          DL-074
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO entregó un borrador (instancia de agente) sobre
+             vocabulario controlado, advirtiendo versión desactualizada y
+             mucho ruido. Verificado contra el repo antes de heredar:
+             RUIDO DESCARTADO:
+             · El borrador trata X4 como ABIERTO con ejemplo negativo/
+               positivo. Falso: esas formas ya no aparecen en claims
+               (renombradas a rival/acumulativo en DL-068); X4 es memoria
+               de una captura pasada.
+             · "Z1..Z6 vigentes" — Z2/Z3 están cerradas.
+             · "Tipos de relación satisfy/refine/motivate/trace —
+               Controlado" — no existen en el repo (0 ocurrencias); residuo
+               de SysML heredado sin verificar.
+             · term_used como `.input` — etiquetado a mano de qué claim usa
+               qué término: la dependencia de agente que ya se mató dos
+               veces (registro de escapes). NO se hereda.
+             SEÑAL CONSERVADA: el vocabulario ES la metacapa —los términos
+             de que están hechos los claims— y sirve a X1 (procedencia de
+             términos) y al espacio de predicados del discriminante de
+             optimalidad.
+Contenido:   §2.9 Vocabulario Controlado: término preferido, eje,
+             definición y FORMAS PROHIBIDAS. Regla vocab_banned_term:
+             escanea el texto normativo de §3 por formas prohibidas — mismo
+             patrón que impl_leak, scan de superficie SIN etiquetar por
+             claim. Las formas son frases distintivas (dos palabras) para
+             no dar falsos positivos con palabras comunes.
+             Semilla: acoplamiento rival/acumulativo (prohíbe negativo/
+             positivo), valencia (eje independiente del mecanismo).
+             Mutación: regresión exacta de X4 — reintroduce "acoplamiento
+             negativo" en §3.3 y la máquina la caza.
+             LÍMITES DECLARADOS: (1) léxico, no semántico — que la premisa
+             SOSTENGA la conclusión sigue siendo Z1 y pide ontología, no
+             vocabulario. (2) Cobertura = formas declaradas; una colisión
+             no anotada no se caza (falso negativo, como toda memoria). Por
+             eso la regla REGRESIÓN-PRUEBA la instancia de X4 y SIEMBRA el
+             espacio de términos; NO cierra la clase X4 ni Z1. El escape X4
+             NO se gradúa a `regla:` —seguiría en zona: Z1— porque sería
+             sobre-declarar cobertura que la regla no tiene.
+Hipótesis:   El vocabulario controlado es el primer ladrillo de la
+             mecanización de X1: con términos definidos, "la conclusión
+             introduce un término ausente de las premisas" pasa a ser
+             comprobable léxicamente en un paso futuro.
+Razón:       CONTINGENCY P5 — borrador entregado por el PO con mandato de
+             extraer señal y no heredar ruido (2026-07-22).
+Impacto:     §2.9 nueva; X4 anotado (instancia cubierta, clase en Z1).
+             check.luau 35 reglas; test.luau 42/42. Header v5.51.
+             Variante SIN CAMBIO (12): la instancia cubierta no cierra la
+             clase, luego X4 sigue contando — habría sido deshonesto
+             bajarla.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.9, §2.8
+Libre:       Crecimiento del vocabulario conforme aparezcan colisiones → se
+             añaden filas; no es decisión anticipable.
+Referencias: §2.9, §2.8, §3.3, DL-068, DL-070
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
