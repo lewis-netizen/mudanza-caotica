@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.69 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.70 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -371,27 +371,27 @@ Los claims se construyen de **términos**. Un defecto puede vivir no en ningún 
 
 | Término preferido | Eje | Definición (comentario) | Formas prohibidas | Sinónimos | Definido en | Ratificada |
 |---|---|---|---|---|---|---|
-| acoplamiento rival | mecanismo | Contención: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` | `contención` · `interfieren` · `interferencia` | D5 | — |
+| interferencia | mecanismo | Acoplamiento rival: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` | `interfieren` | — | — |
 | acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` | `pooling` | D6 | — |
 | valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — | — | — | — |
-| interacción | predicado | Lo que ocurre entre jugadores; el contenido del juego (C1a). | — | `interacción entre jugadores` | — | — |
+| interacción | predicado | Lo que ocurre entre jugadores; el contenido del juego (C1a). | — | — | — | — |
 | interdependencia | predicado | Que el resultado de un jugador dependa del de otro (C1b). | — | `acoplamiento` · `resultados acoplados` · `resultados de los jugadores` | — | — |
 | decisión compartida | predicado | Elegir juntos bajo criterio, entre lo determinado y lo aleatorio (C2′). | — | `coordinación decisional` · `decisión conjunta` · `decidir juntos` · `coordinación` | — | — |
-| ambigüedad | predicado | El margen interpretable donde vive la decisión (C2′). | — | `ambigüedad interpretable` · `interpretable` | — | — |
+| ambigüedad | predicado | El margen interpretable donde vive la decisión (C2′). | — | — | — | — |
 | restricción intrínseca | predicado | Límite que emana de la naturaleza de una entidad, no de una regla externa (C3). | — | `intrínseco` · `intrínseca` | — | — |
 | contenido | predicado | Lo que el juego ofrece como experiencia; los jugadores lo son (C1a). | — | `contenido principal` | — | — |
 | ventaja | predicado | Ruteo del resultado por el sistema en vez de por la interacción (anti-poder, §2.1). | — | `ventaja competitiva` · `ventaja de gameplay` | D11 | — |
 | demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `demand` | — | — |
-| capacidad | entidad | Demanda que un jugador satisface por sí solo; propiedad de Player (§2.3). Uniforme por D11. | — | `capacidad de un individuo` · `capacity` | — | — |
+| capacidad | entidad | Demanda que un jugador satisface por sí solo; propiedad de Player (§2.3). Uniforme por D11. | — | `capacity` | — | — |
 | creación | predicado | Contenido producido por jugadores para otros jugadores (entidad Content). | — | `creación de contenido` | — | — |
-| elemento compartido | predicado | Aquello que dos o más jugadores usan a la vez y por eso acopla: espacio u objeto. Es la «entidad» cuya naturaleza invoca C3. | — | `elemento` · `entidad` | — | — |
+| entidad | predicado | El portador cuya naturaleza invoca C3: aquello que dos o más jugadores usan a la vez y por eso acopla — espacio u objeto. | — | — | — | — |
 | objeto | entidad | Instancia transportable con demanda; entidad Object (§2.3). | — | `objetos` | — | — |
-| obligación | predicado | Deber impuesto sobre el jugador; su legitimidad depende de si emana del elemento o de una regla externa (C3). | — | `obligación de cooperar` · `obligatoria` · `impuesta` | — | — |
+| obligación | predicado | Deber sobre el jugador; su legitimidad depende de si emana de la entidad o de una regla externa (C3). | — | `obligatoria` | — | — |
 | progresión | externo | Acumulación persistente que altera lo que el jugador puede hacer entre rondas. | — | `progresiones` | — | — |
 | puntuación | externo | Valor numérico asignado a un objeto o a un resultado. | — | `puntuaciones` | — | — |
 | sincronía | predicado | Ejecutar a la vez sin decidir juntos; polo negativo de la decisión compartida. | — | `en sincronía` | D2 | — |
 | cooperación | predicado | Acoplamiento cuya valencia es de equipo: el resultado de uno suma al de otro. | — | `cooperativa` · `cooperar` · `cooperativo` | — | — |
-| contrato de UX | predicado | Condición observable sobre la interfaz, con veredicto binario. | — | `contratos de UX` · `contrato` | D18 | — |
+| contrato de UX | predicado | Condición observable sobre la interfaz, con veredicto binario. | — | `contratos` | D18 | — |
 
 **Eje `externo` (DL-082).** Un término marcado `externo` es una categoría que el diseño **excluye** en vez de derivar —`progresión`, `puntuación`—: se nombra para prohibirla, y exigirle procedencia axiomática no tendría sentido. El detector la trata como siempre disponible. Es un acto declarado y auditable en la tabla, igual que «Definido en»; usarlo para silenciar un flotante genuino sería falsear el vocabulario, no el detector.
 
@@ -425,14 +425,14 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 
 | ID | Sección | Claim | Derivación | Sello | Sellado por |
 |---|---|---|---|---|---|---|
-| D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb | DL-068 |
+| D1 | §3.1 | El reto del loop vive en la decisión compartida, no en la ejecución individual. | R-COMP · C1b + C2′ | a6ec39 | DL-093 |
 | D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac | DL-069 |
 | D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 | DL-068 |
-| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-COMP · [D3] + C3 | 677030 | DL-063 |
-| D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b | DL-068 |
+| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco a la naturaleza de la entidad que se comparte. | R-COMP · [D3] + C3 | 67816b | DL-093 |
+| D5 | §3.3 | El espacio acopla por interferencia: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 1e8046 | DL-093 |
 | D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] + [Object] + [Player] | 95178f | DL-068 |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
-| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-COMP · [D23] + C1a + C3 | 93d133 | DL-068 |
+| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone lo que no emana de la entidad. | R-COMP · [D23] + C1a + C3 | 28e853 | DL-093 |
 | D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
 | D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C1a + E2 | 4a98c3 | DL-069 |
 | D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
@@ -447,7 +447,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f | DL-063 |
 | D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd | DL-069 |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 | DL-065 |
-| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación. | R-COMP · [D4] + C3 | 149c7f | DL-083 |
+| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede ser una restricción impuesta. | R-COMP · [D4] + C3 | c990f7 | DL-093 |
 | D24 | §3.1 | La forma del objetivo debe sostener la decisión compartida durante toda la ronda: una forma que la agota antes del final contradice la ambigüedad interpretable. | R-ESP · C2′ | f82b10 | DL-084 |
 
 ### 3.1 Core Loop

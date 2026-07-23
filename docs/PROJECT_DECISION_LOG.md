@@ -4812,4 +4812,70 @@ Libre:       Curva concreta de degradación si el playtest muestra que
 Referencias: §5.11, §4.13, §3.0, §5.12, DL-047, DL-090, DL-091
 ```
 
+### DL-093
+
+```
+ID:          DL-093
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    DL-086 dejó siete equivalencias semánticas esperando ratificación
+             del PO. El agente había propuesto una alternativa mejor y no la
+             había ejecutado: si la premisa YA TIENE la palabra, el claim debe
+             usarla — así la equivalencia no hace falta y no hay nada que
+             ratificar. Un sinónimo suele ser síntoma de deriva de vocabulario
+             del propio agente, no una necesidad semántica.
+Contenido:   (1) REESCRITURA. Cinco claims alineados con el vocabulario de sus
+             premisas, sin cambio de significado:
+             · D1 «coordinación decisional» → «decisión compartida» (C2′).
+             · D4 «elemento compartido» → «la naturaleza de la entidad que se
+               comparte» (C3 cuantifica sobre «entidad»).
+             · D5 «contención» → «interferencia» ([Compresión Social] dice
+               «interfieren»).
+             · D8 «impone como obligación» → «impone lo que no emana de la
+               entidad» (C3).
+             · D23 «imponerse como obligación» → «ser una restricción
+               impuesta» (C3 literal).
+             (2) FORMA PREFERIDA = LA MÁS CORTA. Con `entidad` en vez de
+             `elemento compartido`, `interacción` en vez de `interacción entre
+             jugadores`, etc., los sinónimos que solo AÑADÍAN palabras se
+             vuelven redundantes: la forma corta ya casa dentro de la larga.
+             Eliminados sin pérdida.
+             (3) LA MÁQUINA DISTINGUE MORFOLOGÍA DE AFIRMACIÓN. Una variante
+             flexionada —`interfieren`/`interferencia`, `obligatoria`/
+             `obligación`, `demand`/`demanda`— comparte raíz y es COMPROBABLE:
+             no afirma nada, luego no necesita ratificación. Una equivalencia
+             como `pooling` ≈ `acoplamiento acumulativo` SÍ afirma, y sin
+             `PO <fecha>` queda inerte. El PO decide solo lo que de verdad es
+             una decisión.
+             RESULTADO: la cola del PO pasa de SIETE equivalencias semánticas
+             a CERO. Lo que queda son CINCO marcadores —`sincronía` y
+             `ventaja` (definidos en D2 y D11), `progresión` y `puntuación`
+             (eje `externo`), `contrato de UX` (definido en D18)— que sí son
+             preguntas conceptuales: ¿este término se introduce por
+             definición? ¿esta categoría el diseño la EXCLUYE en vez de
+             derivarla?
+Hipótesis:   Un sinónimo que hace falta suele delatar que el claim se apartó
+             del vocabulario de su premisa; alinearlo es trabajo determinado y
+             elimina la decisión en vez de delegarla.
+Razón:       CONTINGENCY P5 — «continúa con la reescritura» (PO, 2026-07-23).
+Impacto:     D1, D4, D5, D8, D23 reescritos y re-sellados; §2.9 con formas
+             preferidas cortas y clasificación morfología/semántica
+             automática. Detector: 6 → 5 flotantes, todos por marcador.
+             check 41 reglas. Header v5.70.
+             NO CIERRA: la raíz común (5 caracteres) es un criterio
+             sintáctico, no un análisis morfológico real; puede aceptar una
+             equivalencia semántica que comparta prefijo por casualidad. Su
+             fallo es acotado —solo puede activar formas que YA comparten
+             raíz— y queda declarado aquí, no escondido.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §3.0, §2.9
+Libre:       Ratificación de los cinco marcadores → PO.
+Referencias: §3.0, §2.9, §5.11, DL-086, DL-090
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

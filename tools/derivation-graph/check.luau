@@ -1299,9 +1299,47 @@ if table.find(process.args, "--provenance") then
 					-- nombrar no es afirmar equivalencia.
 					local ratified = (cells[7] or ""):match("^PO %d%d%d%d%-%d%d%-%d%d$") ~= nil
 					local forms = { pref }
-					if ratified then
-						for s in (cells[5] or ""):gmatch("`([^`]+)`") do
-							table.insert(forms, s:lower())
+					-- La máquina distingue MORFOLOGÍA de AFIRMACIÓN SEMÁNTICA
+					-- (DL-093). `interfieren`/`interferencia` es la misma
+					-- palabra flexionada: comprobable por raíz común, no es
+					-- una afirmación y no necesita ratificación. `pooling` ≈
+					-- `acoplamiento acumulativo` SÍ afirma algo, y sin la
+					-- celda `PO <fecha>` queda inerte. Así el PO solo decide
+					-- lo que de verdad es una decisión.
+					local prefWords = {}
+					for w in pref:gmatch("[^%s]+") do
+						table.insert(prefWords, w)
+					end
+					local function sharesStem(a, b)
+						local n = math.min(#a, #b)
+						if n < 5 then
+							return false
+						end
+						return a:sub(1, math.min(5, n)) == b:sub(1, math.min(5, n))
+					end
+					local function isMorph(form)
+						if form:find(pref, 1, true) then
+							return true
+						end
+						for w in form:gmatch("[^%s]+") do
+							if #w >= 5 then
+								local ok = false
+								for _, pw in ipairs(prefWords) do
+									if sharesStem(w, pw) then
+										ok = true
+									end
+								end
+								if not ok then
+									return false
+								end
+							end
+						end
+						return true
+					end
+					for s in (cells[5] or ""):gmatch("`([^`]+)`") do
+						s = s:lower()
+						if isMorph(s) or ratified then
+							table.insert(forms, s)
 						end
 					end
 					termForms[pref] = forms

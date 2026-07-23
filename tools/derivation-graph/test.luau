@@ -69,7 +69,7 @@ local cases = {
 		-- (se actualiza esta cifra en el diff), no un efecto colateral.
 		name = "línea base de --provenance (veredicto pinneado)",
 		mode = "--provenance",
-		expect = "6 claim(s) con términos flotantes",
+		expect = "5 claim(s) con términos flotantes",
 		expectPass = true,
 		apply = function() end,
 	},
@@ -90,7 +90,7 @@ local cases = {
 		-- mentiría en silencio.
 		name = "línea base de --seals",
 		mode = "--seals",
-		expect = "D1   d3eabb",
+		expect = "D1   a6ec39",
 		expectPass = true,
 		apply = function() end,
 	},
@@ -110,13 +110,13 @@ local cases = {
 		-- pasaría la línea base por estar roto.
 		name = "--provenance responde a un término sin premisa",
 		mode = "--provenance",
-		expect = "7 claim(s) con términos flotantes",
+		expect = "6 claim(s) con términos flotantes",
 		expectPass = true,
 		apply = function()
 			replaceOnce(
 				MASTER,
-				"El reto del loop vive en la coordinación decisional, no en la ejecución individual.",
-				"El reto del loop vive en la coordinación decisional y en la sincronía, no en la ejecución individual."
+				"El reto del loop vive en la decisión compartida, no en la ejecución individual.",
+				"El reto del loop vive en la decisión compartida y en la sincronía, no en la ejecución individual."
 			)
 		end,
 	},
@@ -190,7 +190,7 @@ local cases = {
 		name = "undeclared_free",
 		expect = "✗ undeclared_free",
 		apply = function()
-			append(LOG, dlBlock("093", "Modifica:    §5.0\nReferencias: §5.0"))
+			append(LOG, dlBlock("099", "Modifica:    §5.0\nReferencias: §5.0"))
 		end,
 	},
 	{
@@ -423,14 +423,14 @@ local cases = {
 		name = "vocab_banned_term (regresión de X4)",
 		expect = "✗ vocab_banned_term",
 		apply = function()
-			replaceOnce(MASTER, "El espacio acopla por contención: rival y pervasivo.", "El espacio acopla por contención: acoplamiento negativo y pervasivo.")
+			replaceOnce(MASTER, "El espacio acopla por interferencia: rival y pervasivo.", "El espacio acopla por interferencia: acoplamiento negativo y pervasivo.")
 		end,
 	},
 	{
 		name = "seal_unprovenanced",
 		expect = "✗ seal_unprovenanced",
 		apply = function()
-			replaceOnce(MASTER, "| 677030 | DL-063 |", "| 677030 | |")
+			replaceOnce(MASTER, "| 67816b | DL-093 |", "| 67816b | |")
 		end,
 	},
 	{
@@ -440,7 +440,7 @@ local cases = {
 		name = "seal_provenance_inconsistent (procedencia que miente)",
 		expect = "✗ seal_provenance_inconsistent",
 		apply = function()
-			replaceOnce(MASTER, "| 677030 | DL-063 |", "| 677030 | DL-050 |")
+			replaceOnce(MASTER, "| 67816b | DL-093 |", "| 67816b | DL-050 |")
 		end,
 	},
 	{
