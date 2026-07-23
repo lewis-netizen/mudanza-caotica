@@ -3678,4 +3678,76 @@ Libre:       Crecimiento del vocabulario conforme aparezcan colisiones → se
 Referencias: §2.9, §2.8, §3.3, DL-068, DL-070
 ```
 
+### DL-075
+
+```
+ID:          DL-075
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Construir el terreno semántico (Z1) tras el vocabulario léxico
+             (DL-074). El PO autorizó proceder sin consolidar su propuesta
+             —"solo disminuiría ruido, no aportaría nada nuevo"— con dos
+             mandatos: no heredar ruido, y detectar deudas (la heurística
+             más útil hasta ahora).
+Contenido:   Detector `--provenance`: por cada claim derivado, qué términos
+             de la CONCLUSIÓN no aparecen en ninguna PREMISA (propiedad de
+             subfórmula). Vocabulario §2.9 extendido con términos de axioma
+             y columna Sinónimos. Premisas modeladas: axiomas (§2.1 N0),
+             claims N1/N2, claims D-n, y elecciones (que aportan el término
+             de su eje).
+             HALLAZGO CENTRAL — por qué es DETECTOR y no REJA: un término
+             flotante es O premisa colada O paráfrasis de un término de
+             premisa cuya sinonimia no está modelada. Distinguirlos exige
+             la capa de sinonimia, que es CONTENIDO/ontología, no relación
+             pura. Esto ACOTA la creencia (del PO, DL-055) de que "el
+             entailment se binariza porque es relación": verdadera solo
+             hasta la sinonimia modelada. El esqueleto relacional se
+             binariza; que la premisa SOSTENGA la conclusión no, hasta
+             formalizar cada claim en lógica decidible — costo de modelado
+             POR CLAIM, no un validador universal, y no termina. Parte de
+             Z1 no es "máquina no construida" sino "no construible de una
+             vez".
+             DEUDA CAZADA POR LA MÁQUINA: el detector halló D4 —R-ESP · C3
+             concluía sobre «acoplamiento» sin citar quién lo introduce
+             (D3)—. Corregido a R-COMP · [D3] + C3. Es la primera vez que
+             la heurística de "premisa colada" la ejecuta el aparato y no
+             el agente leyendo. Registrado en X1 como instancia hallada.
+             EMPÍRICA del detector: 6 flotantes crudos → 4 tras modelar
+             premisas N1/N2 y elecciones (D7, D21 eran falsos positivos por
+             premisa sin cargar) → 2 tras corregir D4 y modelar la
+             sinonimia interfieren≈contención (D5). Residuo D6/D8: vocabulario
+             de diseño introducido sin premisa axiomática — el núcleo que
+             exige juicio. La tasa de falsos positivos la domina el
+             modelado incompleto, no el defecto: prueba empírica de que
+             soundness del detector = completitud de la sinonimia.
+Hipótesis:   Un detector que empuja (no bloquea) mecaniza la heurística más
+             útil sin heredar su dependencia: halla candidatos, el juicio
+             de cuál es defecto sigue siendo modelado, y esa frontera queda
+             medida en vez de supuesta.
+Razón:       CONTINGENCY P5 — "construir el terreno semántico… cuidado con
+             heredar ruido, detecta deudas" (PO, 2026-07-22).
+Impacto:     §2.9 extendido (términos de axioma + Sinónimos); §2.8 documenta
+             el detector y el límite de binarización; D4 corregido; X1
+             anota la instancia D4. check.luau: modo --provenance (no es
+             regla, no suma a violaciones ni a M9). test.luau 42/42 sin
+             cambio. Header v5.52.
+             PARA EL PO: Z1 se revela como DOS capas —procedencia (detector
+             parcial) y soundness de inferencia (no mecanizable de una
+             vez)—. Re-tipar o partir Z1, y si su parte profunda sigue
+             siendo "relación → máquina" o pasa a incompletitud honesta
+             declarada, es decisión del PO. La fila queda intacta.
+             NO CIERRA Z1: el detector es necesario, no suficiente; y su
+             cobertura crece con la sinonimia, que es modelado sin fin.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.9, §2.8, §3.0
+Libre:       Crecimiento de la sinonimia del vocabulario → modelado
+             incremental. Re-tipado de Z1 → PO.
+Referencias: §2.9, §2.8, §3.0, §3.3, DL-055, DL-068, DL-074
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

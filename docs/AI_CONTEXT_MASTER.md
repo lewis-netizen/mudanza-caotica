@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.51 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.52 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -320,7 +320,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 
 | ID | Clase de error | Hallado en | Resolución |
 |---|---|---|---|
-| X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069) | zona: Z1 |
+| X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069); D4 acoplamiento hallado por `--provenance` (DL-075) | zona: Z1 |
 | X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) | zona: Z1 |
 | X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | zona: Z1 |
 | X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068). Instancia regresión-probada por `vocab_banned_term` (DL-074); la clase general (colisiones no declaradas) sigue en Z1 | zona: Z1 |
@@ -343,13 +343,24 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 
 Los claims se construyen de **términos**. Un defecto puede vivir no en ningún claim sino en el vocabulario del que están hechos: un término con dos sentidos normativos, o dos términos que parecen del mismo eje sin serlo. Ese fue el escape **X4** — `acoplamiento negativo/positivo` (mecanismo) leía como `cooperativa/competitiva` (valencia), dos ejes independientes. Esta tabla fija el término preferido de cada predicado y **prohíbe las formas que colisionan**.
 
-| Término preferido | Eje | Definición (comentario) | Formas prohibidas |
-|---|---|---|---|
-| acoplamiento rival | mecanismo | Contención: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` |
-| acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` |
-| valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — |
+| Término preferido | Eje | Definición (comentario) | Formas prohibidas | Sinónimos |
+|---|---|---|---|---|
+| acoplamiento rival | mecanismo | Contención: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` | `contención` · `interfieren` · `interferencia` |
+| acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` | `pooling` |
+| valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — | — |
+| interacción | predicado | Lo que ocurre entre jugadores; el contenido del juego (C1a). | — | `interacción entre jugadores` |
+| interdependencia | predicado | Que el resultado de un jugador dependa del de otro (C1b). | — | `acoplamiento` · `resultados acoplados` · `resultados de los jugadores` |
+| decisión compartida | predicado | Elegir juntos bajo criterio, entre lo determinado y lo aleatorio (C2′). | — | `coordinación decisional` · `decisión conjunta` · `decidir juntos` · `coordinación` |
+| ambigüedad | predicado | El margen interpretable donde vive la decisión (C2′). | — | `ambigüedad interpretable` · `interpretable` |
+| restricción intrínseca | predicado | Límite que emana de la naturaleza de una entidad, no de una regla externa (C3). | — | `intrínseco` · `intrínseca` |
 
-La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
+La columna **Sinónimos** existe para el detector de procedencia (abajo): las formas de superficie bajo las que un mismo término aparece. La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
+
+**Procedencia de términos (`--provenance`, DL-075) — y el límite honesto de la binarización.** El detector responde, por cada claim derivado: ¿qué términos de la conclusión no aparecen en ninguna premisa? Es la **propiedad de subfórmula** — una derivación sana no introduce vocabulario de la nada. Mecaniza la heurística que más deuda ha cazado esta sesión (halló D4: `R-ESP · C3` concluía sobre *acoplamiento* sin citar a D3, corregido a `R-COMP · [D3] + C3`).
+
+Pero es **detector, no reja**, y el porqué es el hallazgo central. Un término flotante es **o** una premisa colada (defecto) **o** una paráfrasis de un término de premisa cuya sinonimia no está modelada (`coordinación decisional` ≈ `decisión compartida` de C2′). Distinguirlos exige la capa de **sinonimia** — que es **contenido/ontología, no relación pura**. Por eso el detector no bloquea: **empuja**, como el registro de escapes.
+
+Esto acota con precisión la creencia de que *"el entailment se binariza porque es relación"*: **es verdadera solo hasta la sinonimia modelada.** El esqueleto relacional (¿qué cita qué?) se binariza; que la premisa *sostenga* la conclusión no, hasta formalizar cada claim en una lógica decidible — y ese costo es **modelado por claim, no un validador universal**, y no termina (cada claim y cada término nuevo lo reabren). No es que Z1 sea "máquina no construida": parte de Z1 es **máquina no construible de una vez**. El detector mide la brecha (términos flotantes tras modelar la sinonimia conocida); el residuo actual —D6, D8— es el núcleo que exige juicio de modelado. **Re-tipar o partir Z1 a la luz de esto es del PO** (§2.8): la fila queda intacta.
 
 **Límites, declarados.** (1) Es **léxico**, no semántico: caza que dos claims usen palabras que colisionan, no que una premisa *sostenga* su conclusión — eso sigue siendo Z1 y pide una ontología, no un vocabulario. (2) La cobertura es **las formas declaradas**: una colisión no anotada no se caza (falso negativo posible, como toda memoria). Por eso la regla **regresión-prueba** la colisión ya hallada y **siembra** el espacio de términos que X1 necesita; **no cierra** la clase X4. Las formas prohibidas son **frases distintivas** (dos palabras), no palabras comunes, para que el scan no dé falsos positivos.
 
@@ -370,7 +381,7 @@ La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de forma
 | D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb | DL-068 |
 | D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac | DL-069 |
 | D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 | DL-068 |
-| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 | DL-063 |
+| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-COMP · [D3] + C3 | 677030 | DL-063 |
 | D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b | DL-068 |
 | D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 95178f | DL-068 |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |

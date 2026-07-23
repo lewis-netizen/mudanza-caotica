@@ -988,6 +988,140 @@ table.sort(claimSealMismatch)
 -- 0 no sostiene nada; uno con radio alto es donde el diseño se juega.
 -- No es una regla: no hay umbral correcto, luego no hay violación que
 -- reportar. Es medición, y se lee.
+-- `--provenance` (Z1, DL-075): procedencia de términos. Para cada claim
+-- derivado, ¿qué términos de la CONCLUSIÓN no aparecen en ninguna PREMISA?
+-- Es la propiedad de subfórmula: una derivación sana no introduce vocabulario
+-- de la nada. PERO es DETECTOR, no reja: un término flotante puede ser una
+-- premisa colada (defecto) O una paráfrasis de un término de premisa cuya
+-- sinonimia no está modelada (falso positivo). Distinguirlos exige la capa de
+-- sinonimia — que es CONTENIDO, no relación pura. Por eso no bloquea: empuja.
+if table.find(process.args, "--provenance") then
+	local termForms = {} -- término preferido → { formas de superficie }
+	do
+		local region = nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region = (h:gsub("%.$", ""))
+			end
+			if region == "2.9" and line:match("^| ") and not line:match("^| Término") and not line:match("^|%-") then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local pref = (cells[1] or ""):lower()
+				if pref ~= "" then
+					local forms = { pref }
+					for s in (cells[5] or ""):gmatch("`([^`]+)`") do
+						table.insert(forms, s:lower())
+					end
+					termForms[pref] = forms
+				end
+			end
+		end
+	end
+	-- texto por nodo: axiomas (§2.1 N0) y claims (§3.0 enunciado)
+	local nodeText = {}
+	do
+		local region, nivel = nil, nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region, nivel = (h:gsub("%.$", "")), nil
+			end
+			local nv = line:match("^#### Nivel (%d)")
+			if nv then
+				nivel = tonumber(nv)
+			end
+			if region == "2.1" and nivel == 0 then
+				local id = line:match("%((C[%w′]+)%)")
+				if id then
+					nodeText[id] = line:lower()
+				end
+			elseif region == "2.1" and (nivel == 1 or nivel == 2) then
+				-- claims N1/N2 por nombre: nombre + definición como texto
+				if line:match("^|") and not line:match("^|%-") and not line:match("^| Principio") then
+					local cells = {}
+					for cell in line:gmatch("|([^|]*)") do
+						table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+					end
+					local nm = (cells[1] or ""):gsub("%s*⚠%s*$", "")
+					if nm ~= "" then
+						nodeText[nm] = ((cells[1] or "") .. " " .. (cells[2] or "")):lower()
+					end
+				end
+			end
+		end
+	end
+	for id, c in pairs(designClaims) do
+		nodeText[id] = (c.enunciado or ""):lower()
+	end
+	-- una elección introduce el término de SU EJE (A-n): E1 sobre A1
+	-- "valencia del resultado" aporta el término «valencia».
+	for e, row in pairs(f8ElectionRows) do
+		local ax = axes[row.eje]
+		if ax then
+			nodeText[e] = ax.nombre:lower()
+		end
+	end
+	local function termsIn(txt)
+		local present = {}
+		for term, forms in pairs(termForms) do
+			for _, f in ipairs(forms) do
+				if txt and txt:find(f, 1, true) then
+					present[term] = true
+					break
+				end
+			end
+		end
+		return present
+	end
+
+	print("Procedencia de términos — conclusión \\ premisas (DETECTOR, no reja)\n")
+	local ids = {}
+	for id in pairs(designClaims) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	local flaggedTotal = 0
+	for _, id in ipairs(ids) do
+		local deriv = designClaims[id].deriv
+		if not deriv:match("^—") then -- salta bloqueados/empíricos
+			local premStr = deriv:match("·%s*(.+)$")
+			if premStr then
+				premStr = (premStr:gsub(" — .*$", ""))
+				local premTerms = {}
+				for tok in premStr:gmatch("[^+]+") do
+					tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+					local ref = tok:match("^%[(.+)%]$") or tok
+					local txt = nodeText[ref]
+					if txt then
+						for t in pairs(termsIn(txt)) do
+							premTerms[t] = true
+						end
+					end
+				end
+				local concl = termsIn(nodeText[id])
+				local floating = {}
+				for t in pairs(concl) do
+					if not premTerms[t] then
+						table.insert(floating, t)
+					end
+				end
+				table.sort(floating)
+				if #floating > 0 then
+					flaggedTotal += 1
+					print(string.format("  %-4s %s", id, table.concat(floating, " · ")))
+				end
+			end
+		end
+	end
+	print(string.format("\n  %d claim(s) con términos flotantes — cada uno: premisa colada O sinonimia no modelada.", flaggedTotal))
+	process.exit(0)
+end
+
 if table.find(process.args, "--sensitivity") then
 	-- dependientes directos: premisa → claims que la citan
 	local dependents = {}
