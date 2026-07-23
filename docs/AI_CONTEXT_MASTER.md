@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.64 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.65 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -346,6 +346,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 | X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
+| X11 | **Modo del validador sin cobertura de mutación**: M9 solo alcanza las reglas del reporte por defecto, luego `--provenance`, `--sensitivity` y `--seals` no tenían ni un test | los tres defectos de aparato de la sesión vivían ahí y los halló un agente leyendo salida, no el aparato (DL-088) | regla: línea base pinneada en test.luau |
 | X10 | **Coincidencia léxica sin frontera de palabra**: un término casa dentro de otro y produce un flotante falso | `entidad` casaba dentro de `identidad` y marcaba a D16 (DL-082) | regla: --provenance con frontera UTF-8 |
 | X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | zona: Z1 |
 
@@ -1763,7 +1764,7 @@ rule_missing · rule_undeclared
 | P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | X1 · X2 | pendiente |
 | P13 | Cerrar la mitad de obligación de Z4: el delta del enunciado, no solo su hash y su autor | — | Z4 | pendiente |
 | P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
-| P15 | Dar regla a las clases de escape que no la tienen | P12 | X3 · X4 · X8 | pendiente |
+| P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
 | P16 | Disolver §2.2 (Test Oficial de Diseño) en claims: hoy sus cinco criterios fundan desde prosa, contra M4 | P1 | DL-061 | pendiente |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
 | P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pendiente-PO |

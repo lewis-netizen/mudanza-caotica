@@ -4497,4 +4497,62 @@ Libre:       —
 Referencias: §5.12, §5.0, §2.8, DL-052, DL-056, DL-086
 ```
 
+### DL-088
+
+```
+ID:          DL-088
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Principio del PO: cada error del aparato es deuda de METANIVEL,
+             debe identificarse objetivamente y recibir enforcement
+             determinista.
+             CRITERIO OBJETIVO derivado para "error de aparato": uno que puede
+             producir un VEREDICTO EQUIVOCADO EN SILENCIO. Un crash se anuncia
+             solo; un falso positivo o negativo corrompe la garantía sin
+             avisar. Bajo ese criterio son deuda de metanivel los tres de esta
+             sesión —coincidencia por subcadena (X10), elección que aportaba
+             su eje pero no su valor (DL-083), guardián auto-eximido
+             (DL-087)— y NO lo son los errores de ordenación o parseo que
+             produjeron crashes.
+             LA DEUDA DE FONDO, hallada al buscar su enforcement: runCheck()
+             corría el validador SIN ARGUMENTOS. Los modos —--provenance,
+             --sensitivity, --seals— no tenían NI UNA mutación; M9 solo
+             alcanza las reglas del reporte por defecto. Los tres defectos
+             vivían exactamente ahí: en código que ningún test tocaba. No los
+             encontró el aparato — los encontró un agente leyendo salida, que
+             es la dependencia que el proyecto existe para eliminar.
+Contenido:   El arnés de mutación se parametriza por MODO. Dos casos nuevos
+             sobre --provenance:
+             · LÍNEA BASE PINNEADA: su veredicto sobre el corpus real queda
+               fijado. Un cambio del aparato que altere cómo casa términos
+               —como la subcadena que marcaba a D16— mueve el conteo y falla.
+               Cambiar el veredicto del detector pasa a ser acto declarado
+               (se actualiza la cifra en el diff), no efecto colateral.
+             · RESPUESTA: un término sin premisa debe flotar. Sin este caso un
+               detector roto que nunca marca nada pasaría la línea base.
+             Registrado X11: modo del validador sin cobertura de mutación.
+             P15 ampliado: enforcement determinista es REGLA para defectos del
+             corpus y MUTACIÓN DE REGRESIÓN para defectos del aparato — son
+             mecanismos distintos y antes solo se contemplaba el primero.
+Hipótesis:   Un defecto del aparato se salda con una mutación que lo
+             reproduce, igual que uno del corpus se salda con una regla; sin
+             esa simetría el aparato queda exento de su propia disciplina.
+Razón:       CONTINGENCY P5 — principio del PO sobre deuda de metanivel
+             (2026-07-23).
+Impacto:     test.luau parametrizado por modo; 46 a 48 casos. X11 registrado;
+             P15 ampliado. check 39 reglas, test 48/48. Header v5.65.
+             NO CIERRA: --sensitivity y --seals siguen sin cobertura. Queda en
+             X11 y no se construye ahora: la línea base de --provenance
+             establece el mecanismo, y extenderlo es mecánico.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §5.11
+Libre:       —
+Referencias: §2.8, §5.11, §5.12, DL-056, DL-083, DL-087
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

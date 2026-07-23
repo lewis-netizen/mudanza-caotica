@@ -61,6 +61,34 @@ end
 local cases = {
 	{ name = "control — el corpus real pasa", expect = nil, apply = function() end },
 	{
+		-- LÍNEA BASE DEL DETECTOR. Fija su veredicto sobre el corpus real: si
+		-- un cambio del aparato altera cómo casa términos —como la coincidencia
+		-- por subcadena que marcaba a D16 (X10)— el conteo se mueve y esto
+		-- falla. Cambiar el veredicto del detector pasa a ser un acto declarado
+		-- (se actualiza esta cifra en el diff), no un efecto colateral.
+		name = "línea base de --provenance (veredicto pinneado)",
+		mode = "--provenance",
+		expect = "6 claim(s) con términos flotantes",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
+		-- El detector RESPONDE: un término en la conclusión que ninguna premisa
+		-- aporta debe flotar. Sin este caso, un detector que nunca marca nada
+		-- pasaría la línea base por estar roto.
+		name = "--provenance responde a un término sin premisa",
+		mode = "--provenance",
+		expect = "7 claim(s) con términos flotantes",
+		expectPass = true,
+		apply = function()
+			replaceOnce(
+				MASTER,
+				"El reto del loop vive en la coordinación decisional, no en la ejecución individual.",
+				"El reto del loop vive en la coordinación decisional y en la sincronía, no en la ejecución individual."
+			)
+		end,
+	},
+	{
 		name = "dangling",
 		expect = "✗ dangling",
 		apply = function()
@@ -452,8 +480,17 @@ local cases = {
 -- ── runner ──────────────────────────────────────────────────────────────────
 local exec = (process :: any).exec or (process :: any).spawn
 
-local function runCheck()
-	local r = exec("lune", { "run", "tools/derivation-graph/check.luau" }, { cwd = SANDBOX })
+-- Los MODOS (--provenance, --sensitivity, --seals) no tenían ninguna
+-- cobertura: M9 solo alcanza las reglas del reporte por defecto. Los tres
+-- defectos de aparato de esta sesión vivían ahí, en código que ningún test
+-- tocaba, y los halló un agente leyendo salida — la dependencia que el
+-- proyecto existe para eliminar (DL-088).
+local function runCheck(mode)
+	local args = { "run", "tools/derivation-graph/check.luau" }
+	if mode then
+		table.insert(args, mode)
+	end
+	local r = exec("lune", args, { cwd = SANDBOX })
 	return r.code, (r.stdout or "") .. (r.stderr or "")
 end
 
@@ -463,10 +500,13 @@ local failures = 0
 for _, case in ipairs(cases) do
 	freshSandbox()
 	case.apply()
-	local code, out = runCheck()
+	local code, out = runCheck(case.mode)
 	local ok
 	if case.expect == nil then
 		ok = (code == 0)
+	elseif case.expectPass then
+		-- los MODOS salen con 0: se juzga su salida, no su código.
+		ok = out:find(case.expect, 1, true) ~= nil
 	else
 		ok = (code ~= 0) and out:find(case.expect, 1, true) ~= nil
 	end
