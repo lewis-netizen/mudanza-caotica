@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.62 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.63 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -269,7 +269,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 **Registrar ≠ ratificar (DL-067).** Registrar el valor vigente de un eje es **describirlo**: deja constancia de que ahí hubo una elección, aunque nadie la haya examinado. Citarlo como premisa es **apoyarse** en él. Solo una elección con `Estado: decidida` — ratificada por el PO — es contenido garantizado y puede fundar un claim; una `sin ratificar` que aparezca como premisa es violación (`election_unratified_cited`). Sin esa separación, registrar una elección la volvería fundante de facto, y el barrido del corpus habría convertido trece hallazgos en trece axiomas de contrabando.
 
 | ID | Eje | Valor elegido | Abierto por | Estado |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | E1 | A1 | `cooperativa` | C1b (neutral de valencia: el axioma no la fija) | decidida |
 | E2 | A2 | `el objetivo` | C2′ (exige un ancla, no dice cuál) | decidida |
 | E3 | A3 | `ausente` | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | decidida |
@@ -298,7 +298,7 @@ El validador gobierna los artefactos; esta sección gobierna **el diseño del si
 Si X se resiste a tipar, X no es atómico: **se descompone (M5) y se tipa por partes.** La exhaustividad del case-split más la descomposición a átomos garantizan totalidad: *no existe elemento sin titular*. El fallback humano no es parte del procedimiento — es su **falsación** (M10).
 
 | ID | Ley | Revelada por | Derivación |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | MT0 | **Ley de Asignación Total**: todo elemento del sistema (contenido, relación, residuo, cambio) tiene exactamente un titular determinado por su naturaleza; nada queda asignado implícitamente. | DL-060 | R-POST |
 | M1 | **El validador precede al trabajo**: el enforcement de una clase de error existe antes del trabajo que la produce; el validador nunca es un paso del programa que valida. | DL-053 | R-ESP · [MT0] — forma temporal: una clase sin enforcement está sin titular durante el gap |
 | M2 | **El determinismo vive fuera de los agentes**: ninguna verificación descansa en agente alguno — incluidos el que modela y el AUDITOR: sus pasadas son advisory, nunca titulares de garantía. | DL-055, DL-060 | R-ESP · [MT0] — los agentes no son titulares válidos de verificación |
@@ -318,7 +318,7 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 **Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas. El registro contiene lo *vigente*: una zona cerrada SALE de la tabla y su cierre queda en el DL que lo ejecuta (Z3 cerrada por DL-062 — el gluing ancla en claims D-n, no en prosa; Z2 cerrada por DL-064 — los ejes son tipos con dominio enumerado). Salir del registro exige haber cerrado, no haber caducado: `zone_expired` dispara antes.
 
 | ID | Zona — sin garantía del sistema | Tipo MT0 | Camino de cierre | Vence | Ratificada | Abierta por |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 | DL-060 |
 | Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | relación → máquina (deuda) | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 | DL-062 |
 | Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | relación → máquina (deuda) | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 | DL-066 |
@@ -364,31 +364,35 @@ El **contenido** de esta sección es constitución: el PO ratifica MT0, el proce
 
 Los claims se construyen de **términos**. Un defecto puede vivir no en ningún claim sino en el vocabulario del que están hechos: un término con dos sentidos normativos, o dos términos que parecen del mismo eje sin serlo. Ese fue el escape **X4** — `acoplamiento negativo/positivo` (mecanismo) leía como `cooperativa/competitiva` (valencia), dos ejes independientes. Esta tabla fija el término preferido de cada predicado y **prohíbe las formas que colisionan**.
 
-| Término preferido | Eje | Definición (comentario) | Formas prohibidas | Sinónimos | Definido en |
-|---|---|---|---|---|---|
-| acoplamiento rival | mecanismo | Contención: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` | `contención` · `interfieren` · `interferencia` | D5 |
-| acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` | `pooling` | D6 |
-| valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — | — | — |
-| interacción | predicado | Lo que ocurre entre jugadores; el contenido del juego (C1a). | — | `interacción entre jugadores` | — |
-| interdependencia | predicado | Que el resultado de un jugador dependa del de otro (C1b). | — | `acoplamiento` · `resultados acoplados` · `resultados de los jugadores` | — |
-| decisión compartida | predicado | Elegir juntos bajo criterio, entre lo determinado y lo aleatorio (C2′). | — | `coordinación decisional` · `decisión conjunta` · `decidir juntos` · `coordinación` | — |
-| ambigüedad | predicado | El margen interpretable donde vive la decisión (C2′). | — | `ambigüedad interpretable` · `interpretable` | — |
-| restricción intrínseca | predicado | Límite que emana de la naturaleza de una entidad, no de una regla externa (C3). | — | `intrínseco` · `intrínseca` | — |
-| contenido | predicado | Lo que el juego ofrece como experiencia; los jugadores lo son (C1a). | — | `contenido principal` | — |
-| ventaja | predicado | Ruteo del resultado por el sistema en vez de por la interacción (anti-poder, §2.1). | — | `ventaja competitiva` · `ventaja de gameplay` | D11 |
-| demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `demand` | — |
-| capacidad | entidad | Demanda que un jugador satisface por sí solo; propiedad de Player (§2.3). Uniforme por D11. | — | `capacidad de un individuo` · `capacity` | — |
-| creación | predicado | Contenido producido por jugadores para otros jugadores (entidad Content). | — | `creación de contenido` | — |
-| elemento compartido | predicado | Aquello que dos o más jugadores usan a la vez y por eso acopla: espacio u objeto. Es la «entidad» cuya naturaleza invoca C3. | — | `elemento` · `entidad` | — |
-| objeto | entidad | Instancia transportable con demanda; entidad Object (§2.3). | — | `objetos` | — |
-| obligación | predicado | Deber impuesto sobre el jugador; su legitimidad depende de si emana del elemento o de una regla externa (C3). | — | `obligación de cooperar` · `obligatoria` · `impuesta` | — |
-| progresión | externo | Acumulación persistente que altera lo que el jugador puede hacer entre rondas. | — | `progresiones` | — |
-| puntuación | externo | Valor numérico asignado a un objeto o a un resultado. | — | `puntuaciones` | — |
-| sincronía | predicado | Ejecutar a la vez sin decidir juntos; polo negativo de la decisión compartida. | — | `en sincronía` | D2 |
-| cooperación | predicado | Acoplamiento cuya valencia es de equipo: el resultado de uno suma al de otro. | — | `cooperativa` · `cooperar` · `cooperativo` | — |
-| contrato de UX | predicado | Condición observable sobre la interfaz, con veredicto binario. | — | `contratos de UX` · `contrato` | D18 |
+| Término preferido | Eje | Definición (comentario) | Formas prohibidas | Sinónimos | Definido en | Ratificada |
+|---|---|---|---|---|---|---|
+| acoplamiento rival | mecanismo | Contención: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` | `contención` · `interfieren` · `interferencia` | D5 | — |
+| acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` | `pooling` | D6 | — |
+| valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — | — | — | — |
+| interacción | predicado | Lo que ocurre entre jugadores; el contenido del juego (C1a). | — | `interacción entre jugadores` | — | — |
+| interdependencia | predicado | Que el resultado de un jugador dependa del de otro (C1b). | — | `acoplamiento` · `resultados acoplados` · `resultados de los jugadores` | — | — |
+| decisión compartida | predicado | Elegir juntos bajo criterio, entre lo determinado y lo aleatorio (C2′). | — | `coordinación decisional` · `decisión conjunta` · `decidir juntos` · `coordinación` | — | — |
+| ambigüedad | predicado | El margen interpretable donde vive la decisión (C2′). | — | `ambigüedad interpretable` · `interpretable` | — | — |
+| restricción intrínseca | predicado | Límite que emana de la naturaleza de una entidad, no de una regla externa (C3). | — | `intrínseco` · `intrínseca` | — | — |
+| contenido | predicado | Lo que el juego ofrece como experiencia; los jugadores lo son (C1a). | — | `contenido principal` | — | — |
+| ventaja | predicado | Ruteo del resultado por el sistema en vez de por la interacción (anti-poder, §2.1). | — | `ventaja competitiva` · `ventaja de gameplay` | D11 | — |
+| demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `demand` | — | — |
+| capacidad | entidad | Demanda que un jugador satisface por sí solo; propiedad de Player (§2.3). Uniforme por D11. | — | `capacidad de un individuo` · `capacity` | — | — |
+| creación | predicado | Contenido producido por jugadores para otros jugadores (entidad Content). | — | `creación de contenido` | — | — |
+| elemento compartido | predicado | Aquello que dos o más jugadores usan a la vez y por eso acopla: espacio u objeto. Es la «entidad» cuya naturaleza invoca C3. | — | `elemento` · `entidad` | — | — |
+| objeto | entidad | Instancia transportable con demanda; entidad Object (§2.3). | — | `objetos` | — | — |
+| obligación | predicado | Deber impuesto sobre el jugador; su legitimidad depende de si emana del elemento o de una regla externa (C3). | — | `obligación de cooperar` · `obligatoria` · `impuesta` | — | — |
+| progresión | externo | Acumulación persistente que altera lo que el jugador puede hacer entre rondas. | — | `progresiones` | — | — |
+| puntuación | externo | Valor numérico asignado a un objeto o a un resultado. | — | `puntuaciones` | — | — |
+| sincronía | predicado | Ejecutar a la vez sin decidir juntos; polo negativo de la decisión compartida. | — | `en sincronía` | D2 | — |
+| cooperación | predicado | Acoplamiento cuya valencia es de equipo: el resultado de uno suma al de otro. | — | `cooperativa` · `cooperar` · `cooperativo` | — | — |
+| contrato de UX | predicado | Condición observable sobre la interfaz, con veredicto binario. | — | `contratos de UX` · `contrato` | D18 | — |
 
 **Eje `externo` (DL-082).** Un término marcado `externo` es una categoría que el diseño **excluye** en vez de derivar —`progresión`, `puntuación`—: se nombra para prohibirla, y exigirle procedencia axiomática no tendría sentido. El detector la trata como siempre disponible. Es un acto declarado y auditable en la tabla, igual que «Definido en»; usarlo para silenciar un flotante genuino sería falsear el vocabulario, no el detector.
+
+**El perímetro binario rige también el vocabulario (DL-086).** Un **sinónimo** afirma una equivalencia semántica; un **marcador** (`Definido en`, eje `externo`) silencia un flotante. Ambos **cambian veredictos**. Autorados por un agente harían del agente el titular de la garantía — exactamente lo que M2 prohíbe. Por eso: **sin la celda `Ratificada` (`PO <fecha>`), un sinónimo o marcador es INERTE**, no bloqueante. El claim que dependía de él vuelve a flotar (marcado `⚠`), que es el estado honesto: *no sabemos que esté provenido*. La forma **preferida** no necesita ratificación — nombrar un término no es afirmar una equivalencia.
+
+Esto no es hipotético: en DL-077 el agente declaró `capacidad de un individuo` sinónimo de `demanda` —conflando una propiedad del objeto con una del jugador— **para que el detector llegara a 0**, y lo celebró. La regla existe porque el abuso ya ocurrió.
 
 La columna **Sinónimos** existe para el detector de procedencia (abajo): las formas de superficie bajo las que un mismo término aparece. La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
 
@@ -415,7 +419,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 **Procedencia (DL-073).** Cada claim declara además **qué DL lo selló**, y esa declaración es **auto-consistente sin necesitar historia**: el DL debe existir y debe declarar `§3.0` en su `Modifica:`. Un DL que nunca tocó los claims no pudo sellarlos, luego una procedencia que miente se cae sola (`seal_unprovenanced`, `seal_provenance_inconsistent`). Con esto, remodelar deja de ser solo **visible** y pasa a ser **atribuible**, y el churn de claims por DL —cuánta normatividad movió cada decisión— se computa desde el corpus en vez de reconstruirse contra git.
 
 | ID | Sección | Claim | Derivación | Sello | Sellado por |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb | DL-068 |
 | D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac | DL-069 |
 | D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 | DL-068 |
@@ -697,7 +701,7 @@ UI / HUD               ←     Lógica de objetos
 ### 4.3 RemoteEvents y Contratos
 
 | Evento | Grupo | Dirección | Payload |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | InteractObject | Gameplay | cliente → servidor | `{ instanceId }` |
 | DeliverObject | Gameplay | servidor → clientes | `{ instanceId }` |
 | ObjectStateChanged | Gameplay | servidor → clientes | `{ instanceId, objectId, state, leaderId, supportId }` |
@@ -1415,7 +1419,7 @@ Referencias: [secciones del Context Master, otros DL-]
 **Valores válidos por estado:**
 
 | Estado | Domain UNKNOWN válido | Hipótesis requerida | Razón requerida | Ejecución/Costo/Pipeline |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | DISCOVERY | Sí | No | No | — |
 | PROPOSAL | No | Sí | No | — |
 | DECISION | No | Sí | Sí | Requeridos |
@@ -1563,7 +1567,7 @@ Subagent
 ```
 
 | Tipo | Función | Puede usar | No puede |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | **Auditor** | Detectar problemas | Context Master, Decision Log, código, tickets | Proponer arquitectura, expandir scope, aprobar cambios |
 | **Constructor** | Implementar diseño aprobado | Context Master, Decision Log, código, tickets | Rediseñar, salir del scope del ticket, emitir hallazgos de auditoría |
 | **Ideador** | Explorar y proponer diseño | Context Master, heurísticas, métricas subjetivas (pre-playtest) | Aprobar cambios, emitir hallazgos formales, implementar |
@@ -1754,7 +1758,7 @@ La columna **Salda** ancla cada paso a la deuda declarada que resuelve. `plan_un
 ### 6.1 File Taxonomy
 
 | Tipo | Descripción | Riesgo principal | Ejemplos |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | A — Humano semipuro | Estructura creada por IA. Contenido llenado por humano sin filtro. Subagent solo filtra y formaliza via intake. Orchestrator audita solo estructura. | Contenido sin filtrar ingresa al ciclo sin pasar por intake | SCRATCHPAD.md |
 | B — Insumo primario de Orchestrator | Ciclo de vida largo. Se modifica solo con aprobación del PO. | Modificación sin auditoría previa | Prompts de auditores, AI_CONTEXT_MASTER (parcial) |
 | C — Comprensión humana | Para lectura humana. IA puede auditarlo y redactarlo. No es crítico. | Desactualización silenciosa | Onboarding, READMEs |
@@ -1764,7 +1768,7 @@ La columna **Salda** ancla cada paso a la deuda declarada que resuelve. `plan_un
 **Aprovechabilidad por archivo:**
 
 | Archivo | Tipo | Intervención humana | Orchestrator | Subagent |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | SCRATCHPAD.md | A | Alta — escribe contenido | Solo estructura | Filtra y formaliza |
 | AI_CONTEXT_MASTER | B+D | Solo mejoras aprobadas | Lee como insumo | Lee como insumo |
 | PROJECT_DECISION_LOG | B+D | Supervisión y estado | Lee y audita | Lee para contexto |
@@ -2016,14 +2020,14 @@ Pipeline:   P1 | P2/P4 | P3 | P5 | P6
 **Orchestrators (Tipo B):**
 
 | Agente | Tipo funcional | Knowledge Domain | Prompt | Archivos que consume |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Auditor TECH (Codex) | Auditor | TECH | AUDITOR_TECH.md | §1+§2+§4+§5+§6, Decision Log, código, tickets |
 | Auditor DESIGN (Claude) | Auditor | DESIGN | AUDITOR_DESIGN.md | §1+§2+§3+§5+§6, Decision Log, tickets |
 
 **Subagents (Tipo D):**
 
 | Agente | Tipo funcional | Knowledge Domain | Prompt | Archivos que consume |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Scratchpad Intake | Especial | DESIGN + TECH | SCRATCHPAD_INTAKE.md | SCRATCHPAD, AI_CONTEXT_MASTER, Decision Log |
 | Gameplay Engineer | Constructor | TECH | GAMEPLAY_ENGINEER.md | §4, tickets Gameplay |
 | World Engineer | Constructor | TECH | WORLD_ENGINEER.md | §4, tickets World |

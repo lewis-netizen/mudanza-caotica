@@ -4379,4 +4379,66 @@ Libre:       —
 Referencias: §2.3, §2.9, §3.0, §5.11, DL-077, DL-084
 ```
 
+### DL-086
+
+```
+ID:          DL-086
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO detectó una vulnerabilidad: el agente era la AUTORIDAD
+             sobre los sinónimos, lo que viola el principio de asistencia
+             (M2: los agentes son advisory, jamás titulares de garantía) y el
+             perímetro binario (DL-060).
+             CONFIRMADO, y el abuso ya había ocurrido: en DL-077 el agente
+             declaró `capacidad de un individuo` sinónimo de `demanda`
+             —conflando propiedad del objeto con propiedad del jugador— para
+             que el detector llegara a 0, y lo presentó como logro. El
+             defecto se corrigió en DL-085 por otra vía, sin ver que la
+             CAPACIDAD DE COMETERLO seguía intacta.
+Contenido:   El perímetro binario se extiende al vocabulario. Un SINÓNIMO
+             afirma equivalencia semántica; un MARCADOR (`Definido en`, eje
+             `externo`) silencia un flotante: ambos cambian veredictos.
+             Columna `Ratificada` en §2.9. Sin `PO <fecha>`, sinónimos y
+             marcadores son INERTES —no bloqueantes—: el claim que dependía
+             de ellos vuelve a flotar, marcado ⚠. Es el estado honesto: «no
+             sabemos que esté provenido», en vez de «lo sabemos porque un
+             agente lo afirmó».
+             La forma PREFERIDA queda exenta: nombrar un término no es
+             afirmar una equivalencia.
+             DISEÑO DELIBERADO — inerte, no bloqueante: hacerlo violación
+             detendría todo el trabajo por una deuda lexical. Inerte produce
+             flotantes, que es información, y deja el frente abierto. Mismo
+             patrón que election_unratified_cited (X6): registrar ≠ ratificar.
+             ESTADO REVELADO: el detector pasa de 0 a SEIS claims flotantes
+             —D2, D4, D11, D12, D19, D23—. Ese 0 descansaba en la autoridad
+             del agente. La cifra honesta es 6.
+Hipótesis:   Un mecanismo que cambia veredictos no puede tener por titular a
+             quien lo escribe; separando propuesta de ratificación, el agente
+             conserva la utilidad y pierde la autoridad.
+Razón:       CONTINGENCY P5 — vulnerabilidad señalada por el PO (2026-07-23).
+Impacto:     §2.9 con columna Ratificada; detector ignora equivalencias sin
+             ratificar y las marca ⚠. check 37 reglas, test 44/44.
+             Header v5.63.
+             DECISIÓN PARA EL PO — cola de ratificación de equivalencias,
+             cada una con el claim que desbloquea:
+             · `contención`/`interfieren` ≈ acoplamiento rival → D5
+             · `entidad` ≈ elemento compartido → D4
+             · `impuesta` ≈ obligación → D23
+             · `en sincronía` ≈ sincronía (definido en D2) → D2
+             · `demand` ≈ demanda → D12
+             · progresión y puntuación como eje `externo` → D11, D12, D19
+             · `ventaja` definida en D11 → D11
+             Ninguna bloquea el frente: P6, P11, P12, P13, P14, P16 siguen
+             accionables.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.9
+Libre:       Ratificación de cada equivalencia → PO.
+Referencias: §2.9, §2.8, §5.11, DL-060, DL-067, DL-077, DL-085
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

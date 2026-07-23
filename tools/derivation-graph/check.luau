@@ -1190,6 +1190,7 @@ end
 if table.find(process.args, "--provenance") then
 	local termForms = {} -- término preferido → { formas de superficie }
 	local termDefinedIn = {} -- término → claim que lo define (extensión conservativa)
+	local termRatified = {} -- término → sus sinónimos y marcadores están ratificados
 	local termExternal = {} -- eje «externo»: categoría que el diseño EXCLUYE, no deriva
 	do
 		local region = nil
@@ -1205,19 +1206,33 @@ if table.find(process.args, "--provenance") then
 				end
 				local pref = (cells[1] or ""):lower()
 				if pref ~= "" then
+					-- El PERÍMETRO BINARIO también rige el vocabulario (DL-086).
+					-- Un SINÓNIMO es una afirmación de equivalencia semántica, y
+					-- un marcador («Definido en», eje `externo`) silencia un
+					-- flotante: ambos CAMBIAN VEREDICTOS. Autorados por un
+					-- agente, harían del agente el titular de la garantía —
+					-- justo lo que M2 prohíbe. Sin ratificar son INERTES, no
+					-- bloqueantes: el claim que dependía de ellos vuelve a
+					-- flotar, que es el estado honesto («no sabemos que esté
+					-- provenido»). La forma PREFERIDA no necesita ratificación:
+					-- nombrar no es afirmar equivalencia.
+					local ratified = (cells[7] or ""):match("^PO %d%d%d%d%-%d%d%-%d%d$") ~= nil
 					local forms = { pref }
-					for s in (cells[5] or ""):gmatch("`([^`]+)`") do
-						table.insert(forms, s:lower())
+					if ratified then
+						for s in (cells[5] or ""):gmatch("`([^`]+)`") do
+							table.insert(forms, s:lower())
+						end
 					end
 					termForms[pref] = forms
+					termRatified[pref] = ratified
 					-- «Definido en»: el claim que INTRODUCE el término. Un
 					-- término no flota en su propia definición — eso es una
 					-- extensión conservativa (nombrar una configuración de
 					-- términos ya presentes), no una premisa colada.
-					if (cells[2] or ""):lower() == "externo" then
+					if ratified and (cells[2] or ""):lower() == "externo" then
 						termExternal[pref] = true
 					end
-					local def = (cells[6] or ""):match("^(D%d+)$")
+					local def = ratified and (cells[6] or ""):match("^(D%d+)$") or nil
 					if def then
 						termDefinedIn[pref] = def
 					end
@@ -1338,7 +1353,7 @@ if table.find(process.args, "--provenance") then
 				local floating = {}
 				for t in pairs(concl) do
 					if not premTerms[t] and termDefinedIn[t] ~= id and not termExternal[t] then
-						table.insert(floating, t)
+						table.insert(floating, t .. (termRatified[t] and "" or " ⚠"))
 					end
 				end
 				table.sort(floating)
