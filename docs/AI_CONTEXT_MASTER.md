@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.70 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.71 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -280,7 +280,7 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 | E8 | A8 | `el ciclo de vida completo` | Ningún axioma lo fija; postura de arquitectura (DL-039) | sin ratificar |
 | E9 | A9 | `ambos` | ~~C2′ exige variación interpretable~~ — **no era elección**: dominio cerrado y C1a excluye los dos valores puros (los jugadores SON el contenido; los sistemas existen para provocarlo) | disuelta (DL-084) |
 | E10 | A10 | `binaria` | C1b admite cualquier granularidad; DL-047 acota la demanda a ≤ 2 | sin ratificar |
-| E11 | A11 | `escasez temporal` | C2′ exige ambigüedad interpretable, no dice qué la genera — hallada dentro de D1, no en prosa (DL-068) | sin ratificar |
+| E11 | A11 | `escasez temporal` | C2′ exige ambigüedad interpretable, no dice qué la genera. Bajo D2 es el único candidato considerado que acopla resultados Y exige decidir — **el mejor HALLADO, no el mejor: A11 es de dominio abierto (Z6)** | decidida |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
@@ -433,7 +433,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] + [Object] + [Player] | 95178f | DL-068 |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
 | D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone lo que no emana de la entidad. | R-COMP · [D23] + C1a + C3 | 28e853 | DL-093 |
-| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
+| D9 | §3.3 | La escasez vuelve inevitable la decisión compartida: sin recursos para todo, qué salvar se elige en conjunto. | R-ELEC · C2′ + E11 | 4ac818 | DL-094 |
 | D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C1a + E2 | 4a98c3 | DL-069 |
 | D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
 | D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-COMP · C1b + [Object] — el valor reside en la interdependencia, no en la cosa | fea1c9 | DL-068 |
@@ -1777,7 +1777,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 |---|---|---|---|---|
 | P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer clases nuevas | — | Z1 · X1 | hecho (DL-083) |
 | P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | DL-064 | hecho (DL-084) |
-| P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | pendiente |
+| P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | hecho (DL-094) |
 | P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | — | disuelto (DL-080) |
 | P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | hecho (DL-085) |
 | P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | hecho (DL-092) |
@@ -1786,7 +1786,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | pendiente |
 | P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | D20 | pendiente |
 | P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | pendiente |
-| P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | X1 · X2 | pendiente |
+| P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 | pendiente |
 | P13 | Cerrar la mitad de obligación de Z4: el delta del enunciado, no solo su hash y su autor | — | Z4 | pendiente |
 | P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
@@ -1794,7 +1794,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
 | P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X13 | pendiente-externo |
 | P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma en §2.7, §2.8, §5.11 y §5.12 | — | X12 | pendiente |
-| P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pendiente-PO |
+| P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pospuesto (PO 2026-07-23) |
 
 La columna **Salda** ancla cada paso a la deuda declarada que resuelve. `plan_uncovered_debt` verifica lo inverso y es la validación de objetividad que el plan sí admite: **toda zona abierta, toda clase de escape sin regla y todo claim bloqueado debe aparecer en algún paso**. Lo que el plan no puede probar sigue siendo su completitud frente a deuda **no declarada** — eso es X8 y no se cierra con más filas.
 

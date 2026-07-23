@@ -4878,4 +4878,49 @@ Libre:       Ratificación de los cinco marcadores → PO.
 Referencias: §3.0, §2.9, §5.11, DL-086, DL-090
 ```
 
+### DL-094
+
+```
+ID:          DL-094
+Fecha:       2026-07-23
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO ratificó E11, pospuso P18 y pidió evaluar el coste de P20
+             antes de decidir si es deuda técnica o responsabilidad suya.
+Contenido:   E11 RATIFICADA — `escasez temporal` como generador de la decisión
+             compartida— CON EL MATIZ DEL PO REGISTRADO LITERALMENTE: es el
+             mejor candidato HALLADO, no el mejor. A11 es de dominio ABIERTO,
+             luego Z6 impide concluir optimalidad; la ratificación fija el
+             valor vigente sin cerrar el eje. Que el matiz quede en la celda y
+             no en la prosa de un DL importa: es lo que impedirá que una
+             lectura futura lo lea como «óptimo demostrado».
+             D9 DESBLOQUEADO y reescrito para que su enunciado use el
+             vocabulario de sus premisas (la lección de DL-093): «La escasez
+             vuelve inevitable la decisión compartida: sin recursos para todo,
+             qué salvar se elige en conjunto» — R-ELEC · C2′ + E11. La versión
+             anterior decía «convierte la COOPERACIÓN en decisión compartida»,
+             que colaba la valencia de E1 sin citarla: el mismo defecto que
+             D3 y D23. Corregido al desbloquearlo en vez de heredarlo.
+             P18 POSPUESTO por el PO; el predicado de cierre del plan reconoce
+             `pospuesto` como estado terminal, luego sale del frente.
+             CONSECUENCIA: claims bloqueados 1 → 0. Ningún claim del corpus
+             queda esperando una decisión. VARIANTE 12 → 11.
+Hipótesis:   Un valor ratificado con su matiz de apertura registrado en la
+             forma no puede releerse como demostrado; el matiz sobrevive a
+             quien lo escribió.
+Razón:       CONTINGENCY P5 — ratificación del PO (2026-07-23).
+Impacto:     E11 decidida; D9 desbloqueado, reescrito y re-sellado; P3 hecho;
+             P18 pospuesto. Frente: P8, P10, P11, P12, P13, P14, P16, P19.
+             P8 (§4 holístico) se vuelve accionable — sus dos dependencias,
+             P3 y P5, están cerradas. Header v5.71.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7, §3.0, §5.11
+Libre:       —
+Referencias: §2.7, §3.0, §5.11, DL-084, DL-093
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

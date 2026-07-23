@@ -196,7 +196,7 @@ do
 	end
 end
 local function planClosed(e)
-	return e:match("^hecho") ~= nil or e:match("^disuelto") ~= nil
+	return e:match("^hecho") ~= nil or e:match("^disuelto") ~= nil or e:match("^pospuesto") ~= nil
 end
 local planDangling = {}
 do

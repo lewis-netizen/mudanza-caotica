@@ -484,7 +484,7 @@ local cases = {
 		name = "blocked_claim_dangling (deuda que no apunta a nada)",
 		expect = "✗ blocked_claim_dangling",
 		apply = function()
-			replaceOnce(MASTER, "— bloqueado: la escasez es E11, sin ratificar", "— bloqueado: pendiente de decidir")
+			replaceOnce(MASTER, "| — empírico → playtest | ac7a1f |", "| — bloqueado: pendiente de decidir | ac7a1f |")
 		end,
 	},
 	{
