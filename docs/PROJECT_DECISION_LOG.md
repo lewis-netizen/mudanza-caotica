@@ -3750,4 +3750,75 @@ Libre:       Crecimiento de la sinonimia del vocabulario → modelado
 Referencias: §2.9, §2.8, §3.0, §3.3, DL-055, DL-068, DL-074
 ```
 
+### DL-076
+
+```
+ID:          DL-076
+Fecha:       2026-07-22
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO observó un error de metamodelado en el razonamiento de
+             DL-075: se dijo "el entailment no se binariza de una vez;
+             requiere formalización por-claim que no termina". El PO señaló
+             que eso huele a heurística sobre una realidad sesgadamente
+             abstraída, y conectó con su tesis previa: si una relación
+             válida no es óptima, es que el universo no se definió lo
+             suficiente — la ambigüedad es DEUDA de definición, no frontera.
+             Observación, no autoridad; evaluada objetivamente.
+Contenido:   CONCESIÓN: el error es real. "No termina" metió de contrabando
+             "unbounded". Para un corpus FIJO los términos son finitos: cada
+             flotante se resuelve o se tipa. "No termina" solo vale si el
+             corpus crece — cierto de TODA verificación, no propio del
+             entailment. Se confundió "el corpus crece" con "el entailment
+             es irreduciblemente no-verificable".
+             ESTRUCTURA CORRECTA: un término flotante es un PUNTERO a una
+             definición faltante, finito y localizado. Triaje por MT0:
+             reducible a primitivos presentes → extraer definición
+             (mecánico); irreducible a axiomas/elecciones → primitivo
+             faltante, ratificación ESPECÍFICA (patrón escasez→E11);
+             empírico → medir. Ninguna rama es juicio vago. Convergente
+             para corpus fijo (resolver un flag solo quita flags); la
+             terminación la guarda claim_cycle (definición circular no
+             funda). Terminus: axiomas ratificados + medición — "definir más
+             el universo", acto del PO, no incapacidad de la máquina. Esto
+             es la meta-herramienta del PO (ingeniería inversa que extrae
+             las definiciones faltantes) — y escasez→E11 (DL-068) fue su
+             primera instancia, ejecutada sin reconocerla como método.
+             PRUEBA sobre los dos residuos que DL-075 llamó "juicio":
+             · D8 «interacción» flotaba: faltaba citar C1a. Corregido
+               R-ESP·[D23] → R-COMP·[D23]+C1a. DETERMINADO, no juicio.
+             · D6 «acumulativo» flota vía "demanda excede capacidad":
+               depende de la entidad Object (§2.3), que NO está integrada al
+               vocabulario de premisas. LOCALIZADO — es la deuda de
+               ontología/entidades, no un misterio. No se corrige a la
+               ligera (integrar §2.3 al espacio de términos es trabajo
+               deliberado).
+             Prosa de §2.8 (el sobre-afirmado "no construible de una vez")
+             corregida.
+Hipótesis:   Tratar cada residuo como under-definition localizada —no como
+             frontera— convierte "juicio irreducible" en un work-queue
+             finito y convergente de preguntas tipadas.
+Razón:       CONTINGENCY P5 — observación del PO sobre metamodelado
+             (2026-07-22), evaluada objetivamente sin heredar.
+Impacto:     §2.8 prosa corregida; D8 corregido (detector 2→1); D6
+             localizado en X1; §2.3-integración nombrada como la deuda que
+             sostiene D6. Header v5.53. check 35 reglas, test 42/42.
+             LÍMITE OBJETIVO (no pushback, precisión): el terminus sigue
+             siendo ratificación de primitivos genuinamente nuevos +
+             medición empírica. El método no elimina al PO ni al playtest;
+             elimina el juicio VAGO, sustituyéndolo por preguntas
+             específicas. Eso es exactamente "definir más el universo".
+             NO CIERRA: integrar §2.3 al vocabulario (resuelve D6) y
+             sistematizar el triaje como procedimiento son trabajo abierto.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §3.0
+Libre:       Integración de §2.3 al vocabulario de términos → modelado
+             deliberado. Sistematización del triaje MT0-sobre-términos → PO.
+Referencias: §2.8, §3.0, §2.3, DL-068, DL-074, DL-075
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

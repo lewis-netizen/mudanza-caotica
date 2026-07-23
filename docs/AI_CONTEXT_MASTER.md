@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.52 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.53 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -320,7 +320,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 
 | ID | Clase de error | Hallado en | Resolución |
 |---|---|---|---|
-| X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069); D4 acoplamiento hallado por `--provenance` (DL-075) | zona: Z1 |
+| X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069); D4 acoplamiento hallado por `--provenance` (DL-075); D8 → faltaba C1a, corregido; D6 → depende de §2.3 (Object/demanda), localizado (DL-076) | zona: Z1 |
 | X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) | zona: Z1 |
 | X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | zona: Z1 |
 | X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068). Instancia regresión-probada por `vocab_banned_term` (DL-074); la clase general (colisiones no declaradas) sigue en Z1 | zona: Z1 |
@@ -360,7 +360,7 @@ La columna **Sinónimos** existe para el detector de procedencia (abajo): las fo
 
 Pero es **detector, no reja**, y el porqué es el hallazgo central. Un término flotante es **o** una premisa colada (defecto) **o** una paráfrasis de un término de premisa cuya sinonimia no está modelada (`coordinación decisional` ≈ `decisión compartida` de C2′). Distinguirlos exige la capa de **sinonimia** — que es **contenido/ontología, no relación pura**. Por eso el detector no bloquea: **empuja**, como el registro de escapes.
 
-Esto acota con precisión la creencia de que *"el entailment se binariza porque es relación"*: **es verdadera solo hasta la sinonimia modelada.** El esqueleto relacional (¿qué cita qué?) se binariza; que la premisa *sostenga* la conclusión no, hasta formalizar cada claim en una lógica decidible — y ese costo es **modelado por claim, no un validador universal**, y no termina (cada claim y cada término nuevo lo reabren). No es que Z1 sea "máquina no construida": parte de Z1 es **máquina no construible de una vez**. El detector mide la brecha (términos flotantes tras modelar la sinonimia conocida); el residuo actual —D6, D8— es el núcleo que exige juicio de modelado. **Re-tipar o partir Z1 a la luz de esto es del PO** (§2.8): la fila queda intacta.
+Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, DL-076). Un término flotante no es una frontera irreducible: es un **puntero a una definición faltante**, finito y localizado. Cada uno se **triajea por MT0** — reducible a primitivos presentes → extraer la definición (mecánico); irreducible a los axiomas/elecciones actuales → primitivo faltante, ratificación *específica* (el patrón `escasez → E11`, DL-068); empírico → medir. Ninguna rama es juicio vago; cada residuo es una **pregunta tipada**. Es **convergente** para corpus fijo (resolver un flag solo quita flags) y la terminación la guarda `claim_cycle` (una definición circular no puede fundar). El terminus honesto son los axiomas ratificados y la medición empírica — *definir más el universo*, que es acto del PO, no incapacidad de la máquina. **Re-tipar Z1 a la luz de esto es del PO** (§2.8): la fila queda intacta.
 
 **Límites, declarados.** (1) Es **léxico**, no semántico: caza que dos claims usen palabras que colisionan, no que una premisa *sostenga* su conclusión — eso sigue siendo Z1 y pide una ontología, no un vocabulario. (2) La cobertura es **las formas declaradas**: una colisión no anotada no se caza (falso negativo posible, como toda memoria). Por eso la regla **regresión-prueba** la colisión ya hallada y **siembra** el espacio de términos que X1 necesita; **no cierra** la clase X4. Las formas prohibidas son **frases distintivas** (dos palabras), no palabras comunes, para que el scan no dé falsos positivos.
 
@@ -385,7 +385,7 @@ Esto acota con precisión la creencia de que *"el entailment se binariza porque 
 | D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b | DL-068 |
 | D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 95178f | DL-068 |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
-| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-ESP · [D23] | 93d133 | DL-068 |
+| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-COMP · [D23] + C1a | 93d133 | DL-068 |
 | D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
 | D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 | DL-069 |
 | D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
