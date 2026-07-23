@@ -443,6 +443,48 @@ do
 	end
 end
 
+-- ── contrato de función vs firma real (Z5, DL-092) ──────────────────────────
+-- El gluing verificaba que el claim NOMBRE un módulo existente, no que el
+-- módulo HAGA lo que su contrato declara (Z5). §4.13 declara las funciones de
+-- cada núcleo puro; aquí se comprueban contra `src/` de verdad. Es el primer
+-- chequeo que cruza de los documentos al código.
+local contractMissing = {}
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "4.13" then
+			local mod = line:match("^| `(%u%w+)` |")
+			if mod then
+				local body = line:match("^| `%u%w+` |(.*)")
+				local src = nil
+				for _, dir in ipairs({ "src/shared/Rules/", "src/shared/Lib/", "src/server/", "src/client/" }) do
+					local p = dir .. mod .. ".lua"
+					if fs.isFile(p) then
+						src = fs.readFile(p)
+						break
+					end
+				end
+				if src then
+					local seen = {}
+					for fn in (body or ""):gmatch("`(%a[%w_]*)%(") do
+						if not seen[fn] then
+							seen[fn] = true
+							if not src:find("function " .. mod .. "." .. fn, 1, true) and not src:find("function " .. mod .. ":" .. fn, 1, true) then
+								table.insert(contractMissing, mod .. "." .. fn .. " → declarada en §4.13, ausente en src/")
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+table.sort(contractMissing)
+
 -- ── forma de las filas de §2.9 (TCB, DL-090) ────────────────────────────────
 -- El fallo más peligroso de un parser es leer celdas CORRIDAS en silencio: el
 -- veredicto sale mal sin que nada avise. §3.0 ya está protegida por la forma
@@ -1578,8 +1620,13 @@ print(
 -- clase de error solo puede declararse resuelta por una regla QUE EXISTA.
 local emittedRules = {}
 
+local anyReported = false
+
 local function reportViolations(name, rows, fmt)
 	emittedRules[(name:match("^(%S+)"))] = true
+	if #rows > 0 then
+		anyReported = true
+	end
 	if #rows == 0 then
 		print(string.format("  ✓ %s: 0", name))
 	else
@@ -1610,6 +1657,9 @@ reportViolations("level_skip (implementación sin fuente §3/§4/DL)", levelSkip
 end)
 reportViolations("domain_mismatch (Domain del DL vs nivel que Modifica)", domainMismatch, function(r)
 	return r[1] .. " (Domain " .. r[3] .. ") modifica " .. r[2]
+end)
+reportViolations("contract_missing (función de §4.13 ausente en src/)", contractMissing, function(r)
+	return r
 end)
 reportViolations("vocab_malformed (fila de §2.9 con eje o ratificación fuera de forma)", vocabMalformed, function(r)
 	return r
@@ -1914,7 +1964,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

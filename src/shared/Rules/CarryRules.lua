@@ -108,6 +108,31 @@ function CarryRules.evaluateSupport(facts: SupportFacts): (string, number?)
     return "grace", lostSince
 end
 
+--- Eficiencia de transporte por POOLING (§4.13, DL-047; claims D6 y D8).
+--- La forma se deriva, no se elige:
+---   · carriers >= demand → 1: la demanda está cubierta, sin penalización.
+---     Un objeto de demanda 1 con un cargador va normal (D6).
+---   · carriers <  demand → carriers/demand: degrada de forma continua.
+---     NUNCA llega a 0 con al menos un cargador, porque un factor 0
+---     equivaldría a bloquear el inicio del carry — y una regla que impide
+---     iniciar la interacción está prohibida (D8, C3). El líder siempre
+---     puede engancharlo: se mueve pobre, no se queda quieto.
+---   · perder soporte DEGRADA (vuelve a carriers/demand), no obliga a soltar.
+--- La magnitud concreta cae de la razón demanda/cargadores en vez de una
+--- constante mágica: un large (demand 2) en solitario da 0.5.
+function CarryRules.carryEfficiency(demand: any, carriers: any): number
+    if type(demand) ~= "number" or demand <= 0 then
+        return 1
+    end
+    if type(carriers) ~= "number" or carriers <= 0 then
+        return 0
+    end
+    if carriers >= demand then
+        return 1
+    end
+    return carriers / demand
+end
+
 --- Velocidad efectiva al cargar: aplica el multiplicador solo si es válido
 --- (número en (0,1)). Devuelve la velocidad previa intacta si no aplica.
 --- El caller decide qué hacer con el resultado (DL-027: nunca pisa con constante).

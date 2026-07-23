@@ -4745,4 +4745,71 @@ Libre:       —
 Referencias: §2.8, §5.11, §5.13, DL-059, DL-060, DL-085, DL-090
 ```
 
+### DL-092
+
+```
+ID:          DL-092
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO pidió documentar el cambio de orden del plan y continuar
+             con lo mejor objetivamente.
+Contenido:   CAMBIO DE ORDEN, y su motivo: P20 (implementación diversa, DDC)
+             NO ES EJECUTABLE POR EL AGENTE. Wheeler exige modos de fallo
+             INDEPENDIENTES; los defectos graves de esta sesión fueron
+             CONCEPTUALES —el agente decidió que un sinónimo valía—, no de
+             implementación. Un segundo verificador escrito por el mismo
+             agente codificaría el mismo error conceptual: sería diverso en
+             código y gemelo en criterio. La diversidad tiene que venir de
+             fuera del agente.
+             REENCUADRE de P20: no «escribir un segundo checker» sino
+             «someter un invariante núcleo a un motor cuya SEMÁNTICA no
+             define el agente». Candidato concreto y ya presente:
+             `derivation.dl` existe como modelo Soufflé desde DL-048 y NUNCA
+             SE HA EJECUTADO — es documentación. Correrlo de verdad contra el
+             mismo EDB y comparar veredictos sería DDC legítimo: la semántica
+             la pone Soufflé, no el agente. Requiere la toolchain, que no
+             está instalada; queda declarado, no prometido.
+             EJECUTADO EN SU LUGAR — P6 y P7, que sí eran ejecutables:
+             · P6 / Z5: regla `contract_missing`. §4.13 declara las funciones
+               de cada núcleo puro; ahora se comprueban contra `src/` real. Es
+               el PRIMER chequeo que cruza de los documentos al código.
+               LA MÁQUINA CAZÓ X5 al primer intento:
+               `CarryRules.carryEfficiency` declarada desde DL-047 y ausente
+               del código. Lo que el agente sabía a mano pasó a romper el
+               build.
+             · P7 / X5: `carryEfficiency` implementada DERIVANDO su forma, no
+               eligiendo constantes. carriers ≥ demand → 1 (demanda cubierta,
+               D6); carriers < demand → carriers/demand, que NUNCA es 0 con
+               al menos un cargador porque un factor 0 equivaldría a bloquear
+               el inicio del carry, y una regla que impide iniciar la
+               interacción está PROHIBIDA (D8, C3). La magnitud cae de la
+               razón —un large en solitario da 0.5— en vez de una constante
+               mágica. 5 specs nuevos, 88 en total.
+Hipótesis:   Un chequeo que cruza de documento a código convierte la deriva
+             declaración↔implementación de deuda conocida en imposible de
+             reintroducir en silencio.
+Razón:       CONTINGENCY P5 — «documenta el cambio de orden y continúa con lo
+             mejor objetivamente» (PO, 2026-07-23).
+Impacto:     `contract_missing` (41 reglas); `carryEfficiency` en
+             CarryRules + 5 specs (88 passing). P6 y P7 hechos; P20
+             reencuadrado. Header v5.69.
+             ORDEN RESULTANTE: el frente ejecutable es P11, P12, P13, P14,
+             P16, P19. P3 espera E11 (PO). P18 y P20 dependen de algo
+             externo al agente — el PO en un caso, una toolchain en el otro.
+             NO CIERRA: `contract_missing` compara NOMBRES de función, no
+             comportamiento. Que `carryEfficiency` exista no prueba que haga
+             lo que D6 dice; eso lo cubren los specs, que son casos y no
+             verificación exhaustiva. Z5 baja de deuda a residuo acotado.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      GAM-005
+Modifica:    §5.11
+Libre:       Curva concreta de degradación si el playtest muestra que
+             carriers/demand se siente mal → playtest.
+Referencias: §5.11, §4.13, §3.0, §5.12, DL-047, DL-090, DL-091
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

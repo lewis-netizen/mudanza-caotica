@@ -391,6 +391,7 @@ Implementar `src/server/TruckManager.lua`. Zona de entrega detectada server-side
 
 ```
 Deriva de:   §3.3 (fricción de cooperación) + §4.4 (CarryManager) + DL-027 (WalkSpeed)
+DL-Ref:      DL-047, DL-092 (núcleo puro carryEfficiency ya implementado)
 Domain:      TECH
 Estado:      TODO
 Semana:      2

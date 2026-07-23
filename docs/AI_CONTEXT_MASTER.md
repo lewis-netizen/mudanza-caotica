@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.68 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.69 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -322,7 +322,6 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 |---|---|---|---|---|---|---|
 | Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 | DL-060 |
 | Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | relación → máquina (deuda) | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 | DL-062 |
-| Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | relación → máquina (deuda) | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 | DL-066 |
 | Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 | DL-066 |
 
 **Invariante y variante (DL-071).** Todo el aparato descrito hasta aquí verifica **safety**: que cada estado del corpus sea consistente. No dice nada de la **trayectoria** — si las zonas efectivamente cierran, si las clases de escape acaban teniendo regla, si la tasa de defectos por pasada baja. Los vencimientos eran un sustituto tosco: **un reloj no es una propiedad**; "vence el 11 de agosto" no informa si el sistema tiende a algo.
@@ -343,10 +342,11 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) | zona: Z1 |
 | X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | zona: Z1 |
 | X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068). Instancia regresión-probada por `vocab_banned_term` (DL-074); la clase general (colisiones no declaradas) sigue en Z1 | zona: Z1 |
-| X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | zona: Z5 |
+| X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | regla: contract_missing |
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 | X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
+| X14 | **Guardián decorativo**: una regla enciende en el reporte pero su conteo no suma al total — aparenta cobertura y deja pasar el build | ocurrió DOS veces en una sesión (`vocab_malformed`, `contract_missing`): la regla existía, su mutación existía, y el build seguía verde (DL-092) | regla: auto-chequeo del runner (M11) |
 | X13 | **Defecto auto-consistente**: la falsificación que hace pasar al verificador Y a sus mutaciones — indetectable por auto-verificación (Thompson) | el agente confló `capacidad` con `demanda` para que el detector diera 0: pasó el check y pasaron los tests; lo cazó el PO (DL-085, DL-091). Igual la autoridad sobre sinónimos y sobre el aparato | zona: Z1 |
 | X12 | **Completitud del aparato indecidible**: la adecuación por mutación es relativa por construcción y el mutante equivalente es NP-completo, luego «¿falta algo en el metanivel?» no se infiere | ninguna instancia concreta — es un límite, no un defecto; se acota declarando y encogiendo la TCB (DL-090) | zona: Z1 |
 | X11 | **Modo del validador sin cobertura de mutación**: M9 solo alcanza las reglas del reporte por defecto, luego `--provenance`, `--sensitivity` y `--seals` no tenían ni un test | los tres defectos de aparato de la sesión vivían ahí y los halló un agente leyendo salida, no el aparato (DL-088) | regla: los tres modos con línea base en test.luau (DL-089) |
@@ -359,6 +359,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 |---|---|---|---|
 | Z2 | Relación valor↔eje: que el Valor sea un valor del Eje declarado | DL-060 | DL-064 |
 | Z3 | Realización del gluing: que la fila de §4.15 realice su concepto | DL-060 | DL-062 |
+| Z5 | Realización semántica: que el módulo HAGA lo que su contrato declara, no solo que exista | DL-066 | DL-092 |
 
 **El registro es MEMORIA, no COBERTURA (DL-070).** Un escape ausente significa que **nadie lo notó**, no que no exista: la ausencia de fila no prueba nada. Por su naturaleza, el registro **no puede crear dependencia alguna** — ninguna garantía del sistema se deriva de su estado, ni de que esté completo, ni de que todos sus escapes estén resueltos, y **ninguna regla puede consumirlo como evidencia**. El registro **empuja** (acumula presión sobre una clase que se repite) pero **jamás respalda**. Un mecanismo que dependiera de su completitud heredaría precisamente la dependencia de agente que el registro existe para hacer visible.
 
@@ -1742,7 +1743,7 @@ election_malformed · election_axis_dup · election_compound · election_value_o
 election_axis_unregistered · election_unratified_cited
 axis_malformed · axis_domain_thin
 meta_law_malformed · zone_malformed · zone_expired
-blocked_claim_dangling · vocab_banned_term · vocab_malformed
+blocked_claim_dangling · vocab_banned_term · vocab_malformed · contract_missing
 plan_dangling · plan_uncovered_debt
 rule_missing · rule_undeclared
 ```
@@ -1779,8 +1780,8 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | pendiente |
 | P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | — | disuelto (DL-080) |
 | P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | hecho (DL-085) |
-| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | pendiente |
-| P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | pendiente |
+| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | hecho (DL-092) |
+| P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | hecho (DL-092) |
 | P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | pendiente |
 | P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | pendiente |
 | P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | D20 | pendiente |
@@ -1791,7 +1792,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
 | P16 | Disolver §2.2 (Test Oficial de Diseño) en claims: hoy sus cinco criterios fundan desde prosa, contra M4 | P1 | DL-061 | pendiente |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
-| P20 | Implementación DIVERSA (DDC) del invariante más crítico: un segundo verificador mínimo escrito independientemente — la única defensa conocida contra el defecto auto-consistente | — | X13 | pendiente |
+| P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X13 | pendiente-externo |
 | P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma en §2.7, §2.8, §5.11 y §5.12 | — | X12 | pendiente |
 | P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pendiente-PO |
 

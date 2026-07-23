@@ -404,6 +404,15 @@ local cases = {
 		-- se corrigió a mano en DL-068. Ahora la caza la máquina.
 		-- Columna corrida: el fallo silencioso de parser que ya ocurrió dos
 		-- veces en esta sesión. Mueve al parser de confiado a comprobado.
+		-- El primer chequeo que cruza de documento a código: la deriva
+		-- declaración↔implementación (X5) deja de poder reintroducirse.
+		name = "contract_missing (función declarada y ausente)",
+		expect = "✗ contract_missing",
+		apply = function()
+			replaceOnce("src/shared/Rules/CarryRules.lua", "function CarryRules.carryEfficiency", "function CarryRules.carryEficiencia")
+		end,
+	},
+	{
 		name = "vocab_malformed (celda corrida en §2.9)",
 		expect = "✗ vocab_malformed",
 		apply = function()
@@ -461,7 +470,7 @@ local cases = {
 		name = "plan_uncovered_debt",
 		expect = "✗ plan_uncovered_debt",
 		apply = function()
-			replaceOnce(MASTER, "| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 |", "| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | — |")
+			replaceOnce(MASTER, "el delta del enunciado, no solo su hash y su autor | — | Z4 |", "el delta del enunciado, no solo su hash y su autor | — | — |")
 		end,
 	},
 	{
