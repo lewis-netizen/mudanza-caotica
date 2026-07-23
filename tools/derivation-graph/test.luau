@@ -402,8 +402,16 @@ local cases = {
 		-- sin nombrar ningún ID, y nada lo detectaba.
 		-- Regresión exacta de X4: reintroduce la colisión de vocabulario que
 		-- se corrigió a mano en DL-068. Ahora la caza la máquina.
-		-- Columna corrida: el fallo silencioso de parser que ya ocurrió dos
-		-- veces en esta sesión. Mueve al parser de confiado a comprobado.
+		-- El misparse silencioso, cazado en forma general: una fila con más
+		-- columnas que su cabecera. Así se colaron X10 y las dos derivas de
+		-- §2.9. Un | sin escapar dentro de una celda lo dispara.
+		name = "table_shape (columna corrida en cualquier tabla)",
+		expect = "✗ table_shape",
+		apply = function()
+			replaceOnce(MASTER, "| Contrato | Invariante | Mecanismo |", "| Contrato | Invariante | Mecanismo | X |")
+		end,
+	},
+	{
 		-- El primer chequeo que cruza de documento a código: la deriva
 		-- declaración↔implementación (X5) deja de poder reintroducirse.
 		name = "contract_missing (función declarada y ausente)",

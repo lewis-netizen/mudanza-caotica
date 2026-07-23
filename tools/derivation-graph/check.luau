@@ -443,6 +443,60 @@ do
 	end
 end
 
+-- ── forma de TODA tabla del master (TCB, DL-095) ────────────────────────────
+-- El misparse silencioso es el riesgo dominante de la TCB: una columna
+-- corrida hace que un parser lea celdas equivocadas y dé veredictos falsos
+-- sin avisar. Ya pasó dos veces en §2.9.
+-- En vez de una regla por tabla, el invariante es general y se auto-mantiene:
+-- LA CABECERA DECLARA CUÁNTAS COLUMNAS HAY, y toda fila debe coincidir. Con
+-- esto la clase entera sale de la TCB, para las tablas que existen y las que
+-- se escriban después.
+-- Las barras escapadas (`\|`, p. ej. en firmas `"pickup"\|"drop"`) no separan.
+local tableShape = {}
+do
+	local function columnCount(line)
+		local n, i = 0, 1
+		while i <= #line do
+			local c = line:sub(i, i)
+			if c == "\\" then
+				i += 2
+			else
+				if c == "|" then
+					n += 1
+				end
+				i += 1
+			end
+		end
+		return n - 1
+	end
+	local inFence, expected, headerLine = false, nil, 0
+	local i = 0
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		i += 1
+		if line:match("^```") then
+			inFence = not inFence
+			expected = nil
+		elseif inFence then
+			-- dentro de un bloque de código no hay tablas
+		elseif line:match("^%s*|[%s%-:|]*$") then
+			-- fila separadora (solo barras, guiones, dos puntos): estructura,
+			-- no dato — ningún parser lee sus celdas, luego no es misparse.
+		elseif line:match("^%s*|") then
+			local n = columnCount(line)
+			if expected == nil then
+				expected, headerLine = n, i
+			elseif n ~= expected then
+				table.insert(
+					tableShape,
+					"L" .. i .. " → " .. n .. " columnas; la cabecera (L" .. headerLine .. ") declara " .. expected
+				)
+			end
+		else
+			expected = nil
+		end
+	end
+end
+
 -- ── contrato de función vs firma real (Z5, DL-092) ──────────────────────────
 -- El gluing verificaba que el claim NOMBRE un módulo existente, no que el
 -- módulo HAGA lo que su contrato declara (Z5). §4.13 declara las funciones de
@@ -1696,6 +1750,9 @@ end)
 reportViolations("domain_mismatch (Domain del DL vs nivel que Modifica)", domainMismatch, function(r)
 	return r[1] .. " (Domain " .. r[3] .. ") modifica " .. r[2]
 end)
+reportViolations("table_shape (fila con columnas != cabecera — misparse en potencia)", tableShape, function(r)
+	return r
+end)
 reportViolations("contract_missing (función de §4.13 ausente en src/)", contractMissing, function(r)
 	return r
 end)
@@ -2002,7 +2059,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

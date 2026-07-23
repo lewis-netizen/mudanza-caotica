@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.71 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.72 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -346,6 +346,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 | X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
+| X15 | **Pipe sin escapar dentro de una celda de tabla**: el parser lo lee como separador de columna → misparse silencioso | «Cierre cerrado/abierto» en la descripción de §5.0 partía la fila en 4 columnas; más dos derivas de §2.9 y una fila de complejidad mal cerrada (DL-095) | regla: table_shape |
 | X14 | **Guardián decorativo**: una regla enciende en el reporte pero su conteo no suma al total — aparenta cobertura y deja pasar el build | ocurrió DOS veces en una sesión (`vocab_malformed`, `contract_missing`): la regla existía, su mutación existía, y el build seguía verde (DL-092) | regla: auto-chequeo del runner (M11) |
 | X13 | **Defecto auto-consistente**: la falsificación que hace pasar al verificador Y a sus mutaciones — indetectable por auto-verificación (Thompson) | el agente confló `capacidad` con `demanda` para que el detector diera 0: pasó el check y pasaron los tests; lo cazó el PO (DL-085, DL-091). Igual la autoridad sobre sinónimos y sobre el aparato | zona: Z1 |
 | X12 | **Completitud del aparato indecidible**: la adecuación por mutación es relativa por construcción y el mutante equivalente es NP-completo, luego «¿falta algo en el metanivel?» no se infiere | ninguna instancia concreta — es un límite, no un defecto; se acota declarando y encogiendo la TCB (DL-090) | zona: Z1 |
@@ -1098,7 +1099,7 @@ Las secciones §4.1–§4.11 gobiernan el eje **estructural** ("quién puede qu�
 |---|---|---|
 | `ObjectManager.getObject` / `getObjectPart` / `setState` | O(1) | lookup por `InstanceId` en tabla hash |
 | `ObjectManager.getFreeObjects` / `getAllObjects` | O(n) | enumeración — n = objetos de la ronda |
-| `TruckManager` entrega (`Touched`) | O(1) por evento + O(altura) resolución de ancestría (acotada a 5) |
+| `TruckManager` entrega (`Touched`) | O(altura) | resolución de ancestría acotada a 5 |
 | `PrefabRegistry.resolve` | O(1) | cache `ObjectId → template` |
 | `ClientStateManager` notificación | O(listeners) | por cambio de estado |
 
@@ -1242,7 +1243,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
-| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado (A1–A10): eje bien formado con Cierre cerrado|abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Registrar ≠ ratificar: una elección `sin ratificar` no puede fundar un claim (`election_unratified_cited`) — DL-067. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado (A1–A10): eje bien formado con Cierre cerrado/abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Registrar ≠ ratificar: una elección `sin ratificar` no puede fundar un claim (`election_unratified_cited`) — DL-067. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
 | §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas, acotadas, **tipadas** y **ratificadas** (`zone_malformed` exige descripción, Tipo MT0, camino, vencimiento y celda `PO <fecha>` — DL-062/070; `zone_expired`: zona vencida = violación). El registro de escapes (§2.8) **no aparece aquí**: es heurística e historial, no contrato — no bloquea ni cuenta como violación (DL-070). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
@@ -1744,7 +1745,7 @@ election_axis_unregistered · election_unratified_cited
 axis_malformed · axis_domain_thin
 meta_law_malformed · zone_malformed · zone_expired
 blocked_claim_dangling · vocab_banned_term · vocab_malformed · contract_missing
-plan_dangling · plan_uncovered_debt
+plan_dangling · plan_uncovered_debt · table_shape
 rule_missing · rule_undeclared
 ```
 
@@ -1792,8 +1793,8 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
 | P16 | Disolver §2.2 (Test Oficial de Diseño) en claims: hoy sus cinco criterios fundan desde prosa, contra M4 | P1 | DL-061 | pendiente |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
-| P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X13 | pendiente-externo |
-| P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma en §2.7, §2.8, §5.11 y §5.12 | — | X12 | pendiente |
+| P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X12 · X13 | deuda declarada (PO 2026-07-23) |
+| P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma | — | X12 | hecho (DL-095) |
 | P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pospuesto (PO 2026-07-23) |
 
 La columna **Salda** ancla cada paso a la deuda declarada que resuelve. `plan_uncovered_debt` verifica lo inverso y es la validación de objetividad que el plan sí admite: **toda zona abierta, toda clase de escape sin regla y todo claim bloqueado debe aparecer en algún paso**. Lo que el plan no puede probar sigue siendo su completitud frente a deuda **no declarada** — eso es X8 y no se cierra con más filas.

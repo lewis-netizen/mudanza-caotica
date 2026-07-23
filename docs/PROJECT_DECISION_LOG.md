@@ -4923,4 +4923,56 @@ Libre:       —
 Referencias: §2.7, §3.0, §5.11, DL-084, DL-093
 ```
 
+### DL-095
+
+```
+ID:          DL-095
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P19 — reducir la TCB (§5.13). El PO asumió como responsabilidad
+             suya (implementación diversa, M11) el nivel que P20 cubriría, y
+             pidió meter el esfuerzo en abaratar ese nivel en vez de duplicar
+             el motor. P20 queda como DEUDA DECLARADA, no adquirida: se
+             ejecutará cuando el PO cubra su parte.
+Contenido:   En vez de una regla de forma por tabla —el plan original de P19—,
+             un invariante GENERAL: la CABECERA de cada tabla declara su número
+             de columnas y toda fila de datos debe coincidir. Regla
+             table_shape. Con una sola regla, la clase entera «columna corrida
+             → misparse silencioso» sale de la TCB, para las tablas presentes
+             Y las que se escriban después. Las filas separadoras (`|---|`) se
+             exentan: son estructura, ningún parser lee sus celdas. Las barras
+             escapadas (`\|`) no cuentan como separador.
+             CAZÓ TRES DEFECTOS REALES ya presentes en el corpus:
+             · Un `|` SIN ESCAPAR dentro de la descripción de §5.0 («Cierre
+               cerrado/abierto») partía esa fila en una columna de más. Estaba
+               en la propia descripción de la tabla de reglas.
+             · Una fila de complejidad (§4.12, TruckManager) con dos celdas
+               fundidas en una.
+             · (Y al registrar el escape X15, el agente ESCRIBIÓ el mismo
+               defecto —un `|` literal en la celda— y la regla lo cazó en el
+               acto: la clase se comete al describirla.)
+             Registrado X15 (pipe sin escapar en celda). P19 hecho.
+Hipótesis:   Un invariante que se apoya en la estructura auto-declarada del
+             documento (la cabecera dice cuántas columnas hay) no necesita
+             mantenimiento por tabla y cubre las futuras gratis.
+Razón:       CONTINGENCY P5 — «haz como recomendaste» (PO, 2026-07-23):
+             abaratar el nivel asumido en vez de duplicar el motor.
+Impacto:     table_shape (42 reglas); tres defectos de corpus corregidos;
+             §5.13 con la clase «columna corrida» retirada de la TCB. P19
+             hecho; P20 = deuda declarada, saldará X12 y X13 cuando se
+             ejecute. check 42 reglas, test 54/54. Header v5.72.
+             NO CIERRA: table_shape compara CONTEO de columnas, no CONTENIDO;
+             una celda con el dato equivocado pero bien contada pasa. Reduce
+             la clase de misparse ESTRUCTURAL, no la semántica.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.13, §2.8, §5.0
+Libre:       —
+Referencias: §5.13, §5.12, §2.8, §5.0, DL-090, DL-092
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
