@@ -366,6 +366,15 @@ local cases = {
 		end,
 	},
 	{
+		-- Un plan cuyo paso depende de algo inexistente no ordena nada: es la
+		-- forma en que un plan vuelve a ser prosa sin avisar.
+		name = "plan_dangling",
+		expect = "✗ plan_dangling",
+		apply = function()
+			replaceOnce(MASTER, "| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 |", "| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P99 |")
+		end,
+	},
+	{
 		name = "blocked_claim_dangling (deuda que no apunta a nada)",
 		expect = "✗ blocked_claim_dangling",
 		apply = function()

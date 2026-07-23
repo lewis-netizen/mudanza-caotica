@@ -3947,4 +3947,63 @@ Libre:       Recorrido de la cola de refinamiento → incremental, guiado por
 Referencias: §2.9, §2.8, §3.0, DL-072, DL-075, DL-076, DL-077
 ```
 
+### DL-079
+
+```
+ID:          DL-079
+Fecha:       2026-07-22
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO pidió seguir el orden objetivo de ejecución, no desviarse,
+             y —si no hay orden objetivo— planificarlo y documentarlo.
+             DIAGNÓSTICO HONESTO: NO había orden objetivo documentado. El
+             programa se venía ejecutando turno a turno; cada paso derivado
+             localmente, pero el orden global vivía en la cabeza del agente.
+             Es exactamente el fallo de DL-044 (la propagación declarada en
+             `Impacto:` —prosa— nunca se ejecutó y nadie lo notó), y la causa
+             de la deriva que el PO ya había señalado.
+Contenido:   §5.11 Plan del Programa de Modelado: P1–P10 con DEPENDENCIAS
+             declaradas y estado. Regla plan_dangling (paso sin estado o con
+             dependencia inexistente). El runner computa e imprime el FRENTE
+             ACCIONABLE — los pasos cuyas dependencias están todas `hecho`—,
+             de modo que "qué sigue" se COMPUTA del artefacto en vez de
+             recordarse. Un plan en prosa no es un plan: es una intención.
+             Frente actual: P1 (recorrer la cola de refinamiento, en curso),
+             P4 (postulado N2 — pendiente-PO), P6 (cerrar Z5).
+             DISCIPLINA X8 APLICADA POR ADELANTADO: el plan es MEMORIA de
+             trabajo declarado, no prueba de cobertura. `plan_dangling: 0`
+             dice que las dependencias resuelven, NO que el conjunto de
+             trabajo esté completo — un plan limpio y uno ciego se ven
+             igual. Por eso no gobierna: ordena lo declarado y se lee. Es la
+             tercera vez que esta clase aparece; declararla de entrada en
+             vez de descubrirla después es el uso correcto del registro.
+             SOBRE LA METAHERRAMIENTA: está parcialmente construida —
+             detector (paso contraejemplo, DL-075), cobertura + cola (paso
+             refinamiento dirigido por la brecha, DL-078), triaje MT0
+             (método, DL-076, aún no mecanizado). NO se construye más ahora:
+             una herramienta que produce una cola que nadie recorre no vale
+             nada, y recorrerla es lo que revela qué mecanizar después. Es
+             la disciplina del lazo CEGAR: no se construye un refinador
+             mejor en abstracto, se refina hasta que un contraejemplo exija
+             mejor maquinaria. P1 es esa vuelta.
+Hipótesis:   Con el frente computado del artefacto, la deriva deja de
+             depender de que un agente recuerde el plan entre sesiones.
+Razón:       CONTINGENCY P5 — "sigue el orden objetivo… si no hay, planifícalo
+             y documéntalo" (PO, 2026-07-22).
+Impacto:     §5.11 nueva (P1–P10). check.luau 36 reglas + frente accionable;
+             test.luau 43/43. Header v5.56.
+             NO CIERRA: el plan declara el trabajo CONOCIDO. Trabajo no
+             declarado sigue invisible — misma naturaleza que el registro de
+             escapes.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.11
+Libre:       Orden interno de P1 (qué términos de la cola primero) → lo dicta
+             la frecuencia, ya computada.
+Referencias: §5.11, §2.8, §2.9, DL-044, DL-075, DL-076, DL-078
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

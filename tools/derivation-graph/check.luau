@@ -164,6 +164,53 @@ do
 	end
 end
 
+-- ── plan del programa (§5.11, DL-079) ───────────────────────────────────────
+-- El orden dejó de vivir en prosa (la lección de DL-044): las dependencias se
+-- declaran y el FRENTE ACCIONABLE se computa. No gobierna — ordena y se lee.
+local planSteps = {} -- P-n → { trabajo, deps = {P-n}, estado }
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "5.11" then
+			local id = line:match("^| (P%d+) |")
+			if id then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local deps = {}
+				for d in (cells[3] or ""):gmatch("(P%d+)") do
+					table.insert(deps, d)
+				end
+				planSteps[id] = { trabajo = cells[2] or "", deps = deps, estado = cells[4] or "" }
+			end
+		end
+	end
+end
+local planDangling = {}
+do
+	local ids = {}
+	for id in pairs(planSteps) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local s = planSteps[id]
+		if s.trabajo == "" or s.estado == "" then
+			table.insert(planDangling, id .. " → trabajo o estado vacío")
+		end
+		for _, d in ipairs(s.deps) do
+			if not planSteps[d] then
+				table.insert(planDangling, id .. " → depende de " .. d .. ", que no existe")
+			end
+		end
+	end
+end
+
 -- ── diferimientos autorizados y acotados (DL-050) ───────────────────────────
 local deferrals = {} -- "ticket\0dl" → fecha límite YYYY-MM-DD
 do
@@ -1466,6 +1513,9 @@ end)
 reportViolations("seal_provenance_inconsistent (el DL sellador no declara §3.0)", sealProvenanceInconsistent, function(r)
 	return r
 end)
+reportViolations("plan_dangling (paso del plan §5.11 sin estado o con dependencia inexistente)", planDangling, function(r)
+	return r
+end)
 reportViolations("blocked_claim_dangling (claim bloqueado sin bloqueador existente)", blockedClaimDangling, function(r)
 	return r
 end)
@@ -1602,6 +1652,35 @@ do
 	print("      Fuera de esos términos el detector de procedencia es CIEGO: su 0 no prueba nada ahí.")
 end
 
+do
+	local ids = {}
+	for id in pairs(planSteps) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	local frente = {}
+	for _, id in ipairs(ids) do
+		local s = planSteps[id]
+		if s.estado ~= "hecho" then
+			local ready = true
+			for _, d in ipairs(s.deps) do
+				if planSteps[d] and planSteps[d].estado ~= "hecho" then
+					ready = false
+				end
+			end
+			if ready then
+				table.insert(frente, id .. " (" .. s.estado .. ")")
+			end
+		end
+	end
+	if #frente > 0 then
+		print("\n  · frente accionable del plan (§5.11): " .. table.concat(frente, "  "))
+		print("      Computado de las dependencias declaradas. El plan es memoria, no cobertura: no gobierna.")
+	end
+end
+
 print(
 	string.format(
 		"\n  · VARIANTE del corpus: %d  (zonas abiertas %d + claims bloqueados %d + clases sin regla %d)",
@@ -1644,7 +1723,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

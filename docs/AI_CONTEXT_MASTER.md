@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.55 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.56 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1683,6 +1683,27 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 **Gate automático (Nivel 1).** `Contract: class:a traceability (DL-041)`: si el PR es `class:a`, debe (a) referenciar un `DL-xxx` y (b) tocar `docs/`; si no, falla. Si el cambio no es arquitectónico, se reclasifica a `class:b`.
 
 **Candidato diferido.** Un gate que detecte "el PR añade un directorio/capa nuevo bajo `src/` pero está etiquetado `class:b`" cazaría el caso #44 en origen. Es heurístico (falsos positivos en adiciones `class:b` legítimas) — se registra como candidato a gate futuro, no se implementa aún (mismo criterio que DL-035).
+
+### 5.11 Plan del Programa de Modelado (DL-079)
+
+**Por qué existe.** DL-044 declaró su propagación pendiente en el campo `Impacto:` — prosa — y nunca se ejecutó; el orden se perdió sin que nada chillara y el programa derivó turno a turno. Un plan que vive en prosa (o en la cabeza de un agente) no es un plan: es una intención. Aquí el orden es un **artefacto con dependencias declaradas**, y **el frente accionable se computa**, no se recuerda.
+
+| ID | Trabajo | Depende de | Estado |
+|---|---|---|---|
+| P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer deuda | — | en curso |
+| P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | pendiente |
+| P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | pendiente |
+| P4 | Desbloquear D18: postulado N2 de verificabilidad | — | pendiente-PO |
+| P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | pendiente |
+| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | pendiente |
+| P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | pendiente |
+| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | pendiente |
+| P9 | Re-anclar TICKETS a claims D-n | P8 | pendiente |
+| P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | pendiente |
+
+`plan_dangling` verifica que toda dependencia exista. El runner imprime el **frente accionable** — los pasos cuyas dependencias están todas `hecho`.
+
+**Límite, por disciplina X8.** Este plan es **memoria de trabajo declarado**, no prueba de cobertura: un `plan_dangling: 0` dice que las dependencias resuelven, **no** que el conjunto de trabajo esté completo. Un plan limpio y un plan ciego se ven igual. Por eso no gobierna nada: ordena lo declarado y se lee.
 
 ---
 
