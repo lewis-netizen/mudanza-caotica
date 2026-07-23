@@ -4182,4 +4182,64 @@ Libre:       —
 Referencias: §2.9, §3.0, §2.8, §5.11, DL-078, DL-081
 ```
 
+### DL-083
+
+```
+ID:          DL-083
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P1, segunda tanda. La cola quedó dominada por verbos y palabras
+             genéricas —señal de saturación del vocabulario de predicados—
+             pero con dos términos reales pendientes: `cooperación` y
+             `contrato de UX`. Al modelarlos, el detector expuso dos cosas
+             que llevaban semanas invisibles.
+Contenido:   (1) SUB-MODELACIÓN DEL DETECTOR: una elección aportaba el
+             NOMBRE DE SU EJE pero no su VALOR. E1 daba «valencia del
+             resultado» y no `cooperativa` — justo lo que elige. Por eso D7
+             («la valencia de todo acoplamiento es cooperativa») flotaba
+             citando a E1, que la funda. Corregido: nodeText de una elección
+             = eje + valor.
+             (2) VALENCIA COLADA EN D23 — y es la MISMA CLASE que se corrigió
+             a mano en D3 (DL-068), en un claim creado por ese mismo DL. D23
+             decía «no puede imponerse como obligación DE COOPERAR»
+             derivando de [D4] + C3, ambas neutras de valencia: la
+             cooperación solo la aporta E1, que D23 no cita. Enunciado
+             corregido a la forma neutra —«...no puede imponerse como
+             obligación»—, que es además lo que el claim quiere decir: el
+             argumento es sobre imponer acoplamiento, no sobre cooperar.
+             Re-sellado (592d28 → 149c7f).
+             LO QUE ESTO PRUEBA: al corregir D3 a mano en DL-068 no se barrió
+             la clase; se arregló la instancia visible y se sembró otra en el
+             mismo acto. El detector la encontró en cuanto el término entró
+             al vocabulario. Es evidencia directa de que la cobertura del
+             vocabulario ES la cobertura del detector, y de por qué recorrer
+             la cola paga: cada término modelado ilumina claims que ya
+             estaban mal.
+             (3) `contrato de UX` añadido como definido en D18.
+             Cobertura 36% → 38%.
+Hipótesis:   Las clases de defecto no se cierran corrigiendo instancias: se
+             cierran cuando el aparato puede verlas. Hasta entonces
+             reaparecen, incluso en el DL que las corrige.
+Razón:       CONTINGENCY P5 — P1 en autonomía (PO, 2026-07-23).
+Impacto:     §2.9 +2 términos; detector modela el valor de las elecciones;
+             D23 neutralizado y re-sellado. check 37 reglas, test 44/44.
+             Cobertura 38%. Header v5.60.
+             P1 — LECTURA DE CIERRE: esta tanda expuso dos clases (elección
+             sub-modelada, valencia colada residual). La cola restante son
+             verbos y genéricos; el vocabulario de PREDICADOS está saturado.
+             Se declara P1 cumplido en su criterio —dejar de exponer clases
+             nuevas— sin vaciar la cola: vaciarla sería volumen, y ampliar
+             las stopwords para inflar la cobertura sería X8 en su forma más
+             burda (mejorar el número encogiendo el denominador).
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.9, §3.0
+Libre:       —
+Referencias: §2.9, §3.0, §5.11, DL-068, DL-078, DL-082
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

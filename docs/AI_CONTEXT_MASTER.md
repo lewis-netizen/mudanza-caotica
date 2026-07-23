@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.59 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.60 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -368,6 +368,8 @@ Los claims se construyen de **términos**. Un defecto puede vivir no en ningún 
 | progresión | externo | Acumulación persistente que altera lo que el jugador puede hacer entre rondas. | — | `progresiones` | — |
 | puntuación | externo | Valor numérico asignado a un objeto o a un resultado. | — | `puntuaciones` | — |
 | sincronía | predicado | Ejecutar a la vez sin decidir juntos; polo negativo de la decisión compartida. | — | `en sincronía` | D2 |
+| cooperación | predicado | Acoplamiento cuya valencia es de equipo: el resultado de uno suma al de otro. | — | `cooperativa` · `cooperar` · `cooperativo` | — |
+| contrato de UX | predicado | Condición observable sobre la interfaz, con veredicto binario. | — | `contratos de UX` · `contrato` | D18 |
 
 **Eje `externo` (DL-082).** Un término marcado `externo` es una categoría que el diseño **excluye** en vez de derivar —`progresión`, `puntuación`—: se nombra para prohibirla, y exigirle procedencia axiomática no tendría sentido. El detector la trata como siempre disponible. Es un acto declarado y auditable en la tabla, igual que «Definido en»; usarlo para silenciar un flotante genuino sería falsear el vocabulario, no el detector.
 
@@ -419,7 +421,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f | DL-063 |
 | D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd | DL-069 |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 | DL-065 |
-| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-COMP · [D4] + C3 | 592d28 | DL-068 |
+| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación. | R-COMP · [D4] + C3 | 149c7f | DL-083 |
 
 ### 3.1 Core Loop
 
@@ -1141,7 +1143,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D6 | Pooling por objeto (positivo, puntuado) | `CarryRules` carryEfficiency + `CarryManager` / `CarrySupport` |
 | D7 | Valencia cooperativa | `TruckManager` (conteo de equipo) + `RoundManager` (RoundSummary único) |
 | D8 | Obligación intrínseca, nunca gate | `CarryManager` (el líder siempre puede iniciar — §4.4, DL-047) |
-| D23 | Lo no-acoplado no obliga | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D23 | Lo no-acoplado no obliga (neutral de valencia) | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D9 | Escasez → decisión compartida | timer de `RoundManager` (1 tick/s, §4.12) + `ObjectManager` (spawn disperso) |
 | D10 | Situaciones distintas (bloqueado por E9) | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
 | D11 | Sin ventaja de gameplay | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
@@ -1701,7 +1703,7 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 
 | ID | Trabajo | Depende de | Salda | Estado |
 |---|---|---|---|---|
-| P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer deuda | — | Z1 · X1 | en curso |
+| P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer clases nuevas | — | Z1 · X1 | hecho (DL-083) |
 | P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | DL-064 | pendiente |
 | P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | pendiente |
 | P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | — | disuelto (DL-080) |

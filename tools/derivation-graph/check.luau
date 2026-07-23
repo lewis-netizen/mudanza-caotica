@@ -195,6 +195,9 @@ do
 		end
 	end
 end
+local function planClosed(e)
+	return e:match("^hecho") ~= nil or e:match("^disuelto") ~= nil
+end
 local planDangling = {}
 do
 	local ids = {}
@@ -1073,7 +1076,7 @@ local planUncoveredDebt = {}
 do
 	local covered = {}
 	for _, s in pairs(planSteps) do
-		if s.estado ~= "hecho" and not s.estado:match("^disuelto") then
+		if not planClosed(s.estado) then
 			for d in pairs(s.salda) do
 				covered[d] = true
 			end
@@ -1266,7 +1269,9 @@ if table.find(process.args, "--provenance") then
 	for e, row in pairs(f8ElectionRows) do
 		local ax = axes[row.eje]
 		if ax then
-			nodeText[e] = ax.nombre:lower()
+			-- la elección aporta su EJE y su VALOR: el valor es justamente lo
+			-- que elige, y omitirlo dejaba flotando términos que ella funda.
+			nodeText[e] = (ax.nombre .. " " .. (row.valor:gsub("`", ""))):lower()
 		end
 	end
 	-- Coincidencia con FRONTERA DE PALABRA. La subcadena a secas daba falsos
@@ -1732,13 +1737,10 @@ do
 	local frente = {}
 	for _, id in ipairs(ids) do
 		local s = planSteps[id]
-		local function closed(e)
-			return e == "hecho" or e:match("^disuelto") ~= nil
-		end
-		if not closed(s.estado) then
+		if not planClosed(s.estado) then
 			local ready = true
 			for _, d in ipairs(s.deps) do
-				if planSteps[d] and not closed(planSteps[d].estado) then
+				if planSteps[d] and not planClosed(planSteps[d].estado) then
 					ready = false
 				end
 			end
