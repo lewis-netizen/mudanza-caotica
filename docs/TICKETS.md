@@ -94,7 +94,7 @@ Ticket de alta retroactiva (auditoría 2026-07-12). Foundational implementado en
 ### FND-003 — Versionado de ObjectPrefabs via Rojo
 
 ```
-DL-Ref:      DL-040
+DL-Ref:      DL-040, DL-039 (P17 reconciliación)
 Deriva de:   DL-040 (asset dentro de Rojo)
 Domain:      TECH
 Estado:      TODO
@@ -266,7 +266,7 @@ Verificar que el ciclo completo de persistencia funciona end-to-end: jugador nue
 ### GAM-009 — PrefabRegistry: Resolución ObjectId → asset
 
 ```
-DL-Ref:      DL-031
+DL-Ref:      DL-031, DL-032 (P17 reconciliación)
 Deriva de:   DL-031
 Domain:      TECH
 Estado:      IN_PROGRESS
@@ -317,6 +317,7 @@ Crear al menos un ObjectDefinition concreto por cada Size (`small`, `medium`, `l
 
 ```
 Deriva de:   §4.4 (ObjectManager) + §4.8 (único propietario de ObjectInstance.State)
+DL-Ref:      DL-026,DL-028 (P17 reconciliación)
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -342,6 +343,7 @@ Implementar `src/server/ObjectManager.lua` con spawn de objetos al inicio de ron
 
 ```
 Deriva de:   Principio §2.1 (Dependencia Social) + §4.4 (CarryManager) + DL-027 (WalkSpeed)
+DL-Ref:      DL-029 (P17 reconciliación)
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -366,6 +368,7 @@ Un jugador puede recoger y soltar un objeto small. La interacción se inicia des
 
 ```
 Deriva de:   §4.4 (TruckManager) + §3.1 (core loop: entrega al camión) [D1]
+DL-Ref:      DL-028 (P17 reconciliación)
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -387,11 +390,11 @@ Implementar `src/server/TruckManager.lua`. Zona de entrega detectada server-side
 
 ---
 
-### GAM-005 — CarryManager: Velocidad reducida en objetos medium
+### GAM-005 — CarryManager: carryEfficiency por demanda/cargadores
 
 ```
-Deriva de:   §3.3 (fricción de cooperación) + §4.4 (CarryManager) + DL-027 (WalkSpeed) [D6]
-DL-Ref:      DL-047, DL-092 (núcleo puro carryEfficiency ya implementado)
+Deriva de:   §3.3 (pooling, no penalización individual) + §4.4 (CarryManager) + DL-027 (WalkSpeed) [D6]
+DL-Ref:      DL-046, DL-047, DL-092, DL-101 (núcleo puro carryEfficiency)
 Domain:      TECH
 Estado:      TODO
 Semana:      2
@@ -399,21 +402,19 @@ Depende de:  GAM-003, GAM-001
 ```
 
 **Descripción**
-Cargar un objeto medium reduce el `WalkSpeed` del jugador según `ObjectDefinition.Properties.carrySpeedMultiplier`. La reducción se aplica server-side al iniciar el carry y se restaura al soltar o entregar.
+CarryManager aplica `CarryRules.carryEfficiency(demand, carriers)` como factor de `WalkSpeed`, server-side. **Reemplaza el modelo viejo de penalización individual por multiplicador (DL-047):** un objeto de demanda 1 (small/medium) va **normal con un cargador** — sin penalización. La fricción no vive en el medium sino en el **pooling** de los objetos de demanda > 1 (GAM-006).
 
 **Criterios de Aceptación**
-- [ ] `WalkSpeed` se reduce al recoger un objeto medium según `carrySpeedMultiplier` de la definición
-- [ ] `WalkSpeed` se restaura al valor **previo guardado** al soltar o entregar (DL-027) — nunca a una constante
-- [ ] El valor viene de `ObjectDefinition.Properties` — no hardcodeado en CarryManager
-- [ ] La reducción no pisa otras modificaciones activas de velocidad (DL-027)
-- [ ] Compatible con GAM-003 sin modificar su lógica central
-
----
-
-### GAM-006 — CarryManager: Sistema líder/soporte para objetos large
+- [ ] `WalkSpeed` efectivo = previo guardado × `carryEfficiency(demand, carriers)`; restaurado al soltar/entregar (DL-027), nunca a constante
+- [ ] `demand` viene de `ObjectDefinition.Demand` (§2.3) — no hardcodeado
+- [ ] Un objeto de demanda 1 con un cargador da factor 1 (sin penalización — D6)
+- [ ] El factor nunca es 0 con ≥1 cargador: el líder siempre puede mover (D8)
+- [ ] No pisa otras modificaciones activas de velocidad (DL-027)
+### GAM-006 — CarryManager: pooling líder/soporte para objetos large
 
 ```
-Deriva de:   Principio §2.1 (Dependencia Social — cooperación forzada) + §3.3 [D1]
+Deriva de:   §3.3 (pooling: demanda > capacidad individual) + §4.4 (CarryManager) [D6]
+DL-Ref:      DL-046, DL-047, DL-092 (carryEfficiency), DL-062 (D8: nunca gate), DL-101
 Domain:      TECH
 Estado:      TODO
 Semana:      2
@@ -421,26 +422,27 @@ Depende de:  GAM-003, GAM-001
 ```
 
 **Descripción**
-Un objeto large requiere un jugador líder (inicia el carry) y al menos un jugador soporte en rango. El carry no comienza sin soporte. `ObjectStateChanged` incluye `leaderId` y `supportId`. Sin sincronización física entre clientes, sin Heartbeat.
+Un objeto large (demanda 2) admite un líder y un soporte. **El líder SIEMPRE puede iniciar y mover el large — solo, con eficiencia pobre (`carryEfficiency(2,1)=0.5`); el soporte la sube a normal (`carryEfficiency(2,2)=1`).** No hay compuerta: bloquear el inicio sin soporte es la representación PROHIBIDA por D8 (una regla que impide iniciar la interacción se siente cerradura, no oportunidad — C3). `ObjectStateChanged` incluye `leaderId` y `supportId`. Sin sincronización física entre clientes, sin Heartbeat.
 
 **Criterios de Aceptación**
-- [x] Solo el jugador que inicia la interacción puede ser líder
-- [x] El carry no comienza si no hay soporte dentro de `ObjectDefinition.Properties.supportRange`
-- [x] `ObjectStateChanged` incluye `leaderId` y `supportId` correctamente
-- [x] El objeto se ancla al líder server-side — sin sincronización física entre clientes
-- [x] El sistema no usa Heartbeat para movimiento del objeto
-- [x] Sustituye el rechazo temporal de large de GAM-003 (el slice rechaza pickup de large con log hasta este ticket)
-- [ ] Verificado con 2+ jugadores reales (QA-002 — **manos humanas**; en solo-player solo se puede verificar el rechazo sin soporte)
+- [ ] El líder puede iniciar el carry de un large **sin** soporte, moviéndose a `carryEfficiency(2,1)` (D8 — corrige el gate de la versión previa a DL-047)
+- [ ] Con soporte en `supportRange`, la eficiencia sube a `carryEfficiency(2,2)=1`
+- [ ] Solo el jugador que inicia la interacción puede ser líder
+- [ ] `ObjectStateChanged` incluye `leaderId` y `supportId` correctamente
+- [ ] El objeto se ancla al líder server-side — sin sincronización física entre clientes; sin Heartbeat para movimiento
+- [ ] Sustituye el rechazo temporal de large de GAM-003
+- [ ] Verificado con 2+ jugadores reales (QA-002 — **manos humanas**)
 
 **Notas**
-Elección de soporte pura (`CarryRules.chooseSupport`: el otro jugador más cercano en `supportRange`, excluyendo a quienes ya cargan como líderes). Runtime verificado en solo (MCP): large rechazado sin soporte. El path CON soporte requiere 2 clientes → QA-002.
+Elección de soporte pura (`CarryRules.chooseSupport`). ⚠ La versión previa a DL-047 rechazaba el pickup de large sin soporte (gate) — comportamiento PROHIBIDO por D8. La implementación de CarryManager debe verificarse contra este criterio: si aún rechaza, es X17 (código que contradice un claim).
 
 ---
 
-### GAM-007 — CarryManager: Caída por pérdida de soporte
+### GAM-007 — CarryManager: degradación por pérdida de soporte
 
 ```
-Deriva de:   §3.3 (cooperación con consecuencia) + §4.4 (timeout por definición) [D8]
+Deriva de:   §3.3 (perder soporte degrada, no obliga a soltar) + §4.4 [D6]
+DL-Ref:      DL-046, DL-047, DL-092, DL-101
 Domain:      TECH
 Estado:      TODO
 Semana:      2
@@ -448,17 +450,17 @@ Depende de:  GAM-006
 ```
 
 **Descripción**
-Si el soporte sale del rango por más tiempo que `ObjectDefinition.Properties.supportTimeout`, el objeto vuelve a `free`. El timer de tolerancia es configurable por definición. El loop de verificación debe tener bajo impacto en el servidor.
+Si el soporte sale del rango, la eficiencia del large **vuelve a `carryEfficiency(2,1)=0.5`** — el líder sigue moviéndolo, más lento. **No cae a `free`:** obligar a soltar por perder soporte es la misma cerradura que D8 prohíbe (DL-047: perder soporte DEGRADA, no obliga a soltar). No hace falta timer de tolerancia ni loop por-objeto: la eficiencia es función del número de cargadores presentes, recomputada al cambiar el conjunto.
 
 **Criterios de Aceptación**
-- [ ] Timer de tolerancia configurable desde `ObjectDefinition.Properties.supportTimeout`
-- [ ] Si el soporte vuelve al rango antes del timeout, el carry continúa sin interrupción
-- [ ] Al caer, el objeto vuelve a `free` y se dispara `ObjectStateChanged`
-- [ ] El loop de verificación no genera carga innecesaria — usa `task.wait()` apropiado entre checks (§4.12: sin loops por-objeto por-frame)
+- [ ] Al salir el soporte del rango, la eficiencia baja a `carryEfficiency(2,1)`; el objeto **permanece** `being_carried`
+- [ ] Al volver el soporte, la eficiencia sube a `carryEfficiency(2,2)` sin interrupción
+- [ ] El objeto NUNCA vuelve a `free` por pérdida de soporte (D8 — corrige el modelo de caída previo a DL-047)
+- [ ] La eficiencia se recomputa al cambiar el conjunto de cargadores — sin loop por-objeto por-frame (§4.12)
 - [ ] Se registra StoryEvent via `RoundManager.recordStoryEvent("SupportLost", {instanceId})`
 
----
-
+**Notas**
+⚠ La versión previa a DL-047 devolvía el objeto a `free` tras `supportTimeout` — comportamiento PROHIBIDO por D8. Verificar la implementación contra el criterio de permanencia (X17 si cae).
 ### GAM-008 — Balance: Ajuste de parámetros post-playtest
 
 ```
@@ -515,7 +517,7 @@ Dueño del bug de QA-001. Deriva de la completitud (DL-039): el camino input→i
 ### WLD-000 — MapBootstrap: Harness de layout reproducible
 
 ```
-DL-Ref:      DL-028
+DL-Ref:      DL-028, DL-032 (P17 reconciliación)
 Deriva de:   DL-028 + DL-036 + §4.4 (contrato de tags Layout→Gameplay) + Principio §2.1 (Entidades Estables) + Hito §5.7 Semana 1 [D1]
 Domain:      TECH
 Estado:      IN_PROGRESS
@@ -542,6 +544,7 @@ Implementado en PR #31. Estado real: IN_PROGRESS hasta merge. Ticket de alta ret
 
 ```
 Deriva de:   Principio §2.1 (Compresión Social) + §3.3 + Hito §5.7 Semana 1 [D5]
+DL-Ref:      DL-028,DL-036 (P17 reconciliación)
 Domain:      TECH
 Estado:      TODO
 Semana:      1
@@ -711,7 +714,7 @@ Ajustar layout, nodos del NPC y pool de eventos basándose en playtests de Seman
 ### WLD-008 — Prefabs de objeto: autoría de modelos
 
 ```
-DL-Ref:      DL-040
+DL-Ref:      DL-040, DL-039 (P17 reconciliación)
 Deriva de:   DL-040 (versionado de prefabs) + §4.4 (contrato Arte→PrefabRegistry, DL-031)
 Domain:      TECH
 Estado:      TODO
@@ -746,6 +749,7 @@ Los modelos **funcionales** (caja con cinta, sofá con respaldo/brazos/cojines, 
 
 ```
 Deriva de:   §3.7 (Percepción y Feedback: contrato de estado visible) + Hito §5.7 Semana 1 [D17]
+DL-Ref:      DL-025 (P17 reconciliación)
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1

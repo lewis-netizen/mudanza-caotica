@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.77 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.78 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -350,6 +350,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
 | X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) | zona: Z1 |
+| X17 | **Código que contradice un claim** (deriva de comportamiento): la implementación encoda un modelo que un claim prohíbe, y ni `contract_missing` ni el gluing lo cazan porque es COMPORTAMIENTO, no firma — conformance ontológica M0↔M1 (§2.10) | GAM-006/007 especificaban el gate/caída de large que D8 prohíbe (pre-DL-047); el shell de carry podría aún implementarlo (DL-101) | zona: Z1 |
 | X16 | **Arnés de mutación fuera del gate de pre-commit**: solo el check bloqueaba localmente; una mutación rota (ancla muerta, regla sin mutación) pasaba el commit y solo CI la cazaba | ancla de undeclared_free colisionó con DL-099 real y el commit paso local (DL-100) | regla: contract-validator-mutations en lefthook |
 | X15 | **Pipe sin escapar dentro de una celda de tabla**: el parser lo lee como separador de columna → misparse silencioso | «Cierre cerrado/abierto» en la descripción de §5.0 partía la fila en 4 columnas; más dos derivas de §2.9 y una fila de complejidad mal cerrada (DL-095) | regla: table_shape |
 | X14 | **Guardián decorativo**: una regla enciende en el reporte pero su conteo no suma al total — aparenta cobertura y deja pasar el build | ocurrió DOS veces en una sesión (`vocab_malformed`, `contract_missing`): la regla existía, su mutación existía, y el build seguía verde (DL-092) | regla: auto-chequeo del runner (M11) |
@@ -1810,14 +1811,14 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | hecho (DL-092) |
 | P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | hecho (DL-098) |
 | P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | hecho (DL-099) |
-| P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | D20 | pendiente |
+| P10 | QA-001: playtest que mide lo empírico (D20, D22) y verifica conformance de comportamiento M0↔M1 | P7 | D20 · X17 | pendiente |
 | P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | pendiente |
 | P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 | pendiente |
 | P13 | Cerrar la mitad de obligación de Z4: el delta del enunciado, no solo su hash y su autor | — | Z4 | pendiente |
 | P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
 | P16 | §2.2 (Test Oficial) tipado como conformance M1→M2: deja de fundar desde prosa (M4) | P1 | DL-061 | hecho (DL-097) |
-| P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | pendiente |
+| P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | hecho (DL-101) |
 | P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X12 · X13 | deuda declarada (PO 2026-07-23) |
 | P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | X2 | pendiente |
 | P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma | — | X12 | hecho (DL-095) |

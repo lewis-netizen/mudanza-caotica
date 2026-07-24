@@ -142,10 +142,14 @@ local cases = {
 		end,
 	},
 	{
+		-- Tras P17 (DL-101) deferrals.txt está vacío, así que la mutación
+		-- FABRICA su caso: un DL que afecta a GAM-001 (que no lo cita → stale)
+		-- + un diferimiento VENCIDO para ese par.
 		name = "diferimiento VENCIDO",
 		expect = "✗ diferimiento VENCIDO",
 		apply = function()
-			replaceOnce(DEFER, "GAM-005 DL-046 DL-046 2026-08-11", "GAM-005 DL-046 DL-046 2026-01-01")
+			append(LOG, dlBlock("141", "Ticket:      GAM-001"))
+			append(DEFER, "GAM-001 DL-141 test 2026-01-01\n")
 		end,
 	},
 	{

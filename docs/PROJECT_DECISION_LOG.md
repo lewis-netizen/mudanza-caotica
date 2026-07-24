@@ -5238,4 +5238,66 @@ Libre:       —
 Referencias: §2.8, §5.12, DL-056, DL-087, DL-099
 ```
 
+### DL-101
+
+```
+ID:          DL-101
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P17 — reconciliar los 16 diferimientos de deferrals.txt, que
+             vencían el 2026-08-11 y habrían roto el build en bloque. El
+             riesgo se señaló al inicio de la sesión.
+Contenido:   NO fue reconciliación mecánica. Los diferimientos ESTRUCTURALES
+             (DL-025/026/028/029/032/036/039) se cerraron añadiendo el DL-Ref
+             a su ticket. Pero los de DL-046/047 (re-derivación del carry)
+             REVELARON deuda de diseño real: tres tickets codificaban el
+             modelo que DL-047 REEMPLAZÓ.
+             · GAM-005 «velocidad reducida en medium»: bajo carryEfficiency un
+               medium (demanda 1) NO tiene penalización. Premisa del ticket
+               VOID. Reescrito: el factor es carryEfficiency(demand,carriers);
+               la fricción vive en el pooling de large, no en el medium.
+             · GAM-006 «el carry no comienza sin soporte»: es EXACTAMENTE la
+               cerradura que D8 prohíbe («se siente cerradura, no
+               oportunidad»). Reescrito: el líder SIEMPRE inicia el large solo
+               (eficiencia 0.5); el soporte la sube a 1. Sin gate.
+             · GAM-007 «caída por pérdida de soporte»: DL-047 dice que perder
+               soporte DEGRADA, no obliga a soltar. Reescrito: la eficiencia
+               baja a 0.5, el objeto PERMANECE being_carried.
+             CORRECCIÓN DE UN ERROR DE P9: GAM-006 quedó anclado a [D1] en
+             DL-099 — mal. Es D6 (pooling). Exactamente el juicio ontológico
+             que DL-099 declaró que la regla NO caza; corregido aquí.
+             HALLAZGO REGISTRADO X17: GAM-006/007 spec'eaban comportamiento
+             que D8 prohíbe, y sus criterios [x] sugieren que CarryManager lo
+             IMPLEMENTA. Un módulo cuyo comportamiento contradice un claim no
+             lo caza contract_missing (la función existe) ni el gluing (el
+             módulo está mapeado): es deuda de COMPORTAMIENTO, no de firma —
+             capa ontológica M0↔M1 (§2.10), zona Z5. Los tickets ahora llevan
+             el criterio corregido y una nota ⚠ para verificar la
+             implementación.
+             deferrals.txt queda VACÍO: los 16 saldados, no extendidos.
+Hipótesis:   Reconciliar un diferimiento no es citar el DL: es absorber el
+             cambio que el DL introdujo. Donde el ticket contradecía el DL, la
+             reconciliación honesta reescribe el ticket, no oculta el
+             conflicto tras una cita.
+Razón:       CONTINGENCY P5 — P17 en autonomía (PO, 2026-07-23).
+Impacto:     GAM-005/006/007 reescritos al modelo carryEfficiency;
+             DL-Refs añadidos a 9 tickets; deferrals.txt vacío; X17 registrado
+             (zona Z5). Ancla de «diferimiento VENCIDO» fabrica su caso (archivo
+             vacío). P17 hecho. check 44 reglas, test 56/56. Header v5.78.
+             NO CIERRA: X17 es comportamiento — verificar que CarryManager NO
+             rechaza el large solo ni lo cae por perder soporte requiere leer/
+             correr el código (Z5, playtest QA-002). Los tickets lo exigen; el
+             aparato no lo prueba.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      GAM-005, GAM-006, GAM-007
+Modifica:    §2.8
+Libre:       Curva de degradación (0.5 y 1 son la razón; el playtest puede
+             pedir otra) → playtest.
+Referencias: §2.8, §4.13, §3.0, DL-046, DL-047, DL-092, DL-099
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
