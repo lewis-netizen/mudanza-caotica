@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.79 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.80 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1813,14 +1813,14 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | hecho (DL-099) |
 | P10 | QA-001: playtest que mide lo empírico (D20, D22) y verifica conformance de comportamiento M0↔M1 | P7 | D20 · X17 | pendiente |
 | P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | hecho (DL-102) |
-| P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 · X9 | pendiente |
+| P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 · X9 | hecho (DL-103) |
 | P13 | Cerrar la mitad de obligación de Z4: el delta del enunciado, no solo su hash y su autor | — | Z4 | pendiente |
 | P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
 | P16 | §2.2 (Test Oficial) tipado como conformance M1→M2: deja de fundar desde prosa (M4) | P1 | DL-061 | hecho (DL-097) |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | hecho (DL-101) |
 | P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X12 · X13 | deuda declarada (PO 2026-07-23) |
-| P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | X2 | pendiente |
+| P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | Z1 · X1 · X2 · X9 | pendiente |
 | P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma | — | X12 | hecho (DL-095) |
 | P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pospuesto (PO 2026-07-23) |
 

@@ -1619,6 +1619,37 @@ if table.find(process.args, "--provenance") then
 				if #floating > 0 then
 					flaggedTotal += 1
 					print(string.format("  %-4s %s", id, table.concat(floating, " · ")))
+					-- TRIAJE MT0 (P12, DL-103): por cada término flotante, la
+					-- máquina no DECIDE el cubo —eso es ontológico— sino que
+					-- reúne la EVIDENCIA que lo hace obvio: dónde más vive el
+					-- término. Es abducción (hallar la premisa faltante).
+					--   · aparece en axiomas/claims → cítalos (extraer / cita)
+					--   · en ningún nodo → candidato a PRIMITIVO (ratificación)
+					--   · externo/empírico → medir (no se deriva)
+					for _, ft in ipairs(floating) do
+						local term = ft:gsub("%s*⚠%s*$", "")
+						if termExternal[term] then
+							print(string.format("         └ %s → EMPÍRICO/EXTERNO: se mide o el diseño lo excluye (no se deriva)", term))
+						else
+							local where = {}
+							for ref, txt in pairs(nodeText) do
+								if ref ~= id and (ref:match("^C") or ref:match("^D%d+$")) then
+									for _, f in ipairs(termForms[term] or { term }) do
+										if txt:find(f, 1, true) then
+											table.insert(where, ref)
+											break
+										end
+									end
+								end
+							end
+							table.sort(where)
+							if #where > 0 then
+								print(string.format("         └ %s → REDUCIBLE: vive en %s — candidato a citar", term, table.concat(where, ", ")))
+							else
+								print(string.format("         └ %s → PRIMITIVO?: en ningún nodo — candidato a ratificación (como escasez→E11)", term))
+							end
+						end
+					end
 				end
 			end
 		end

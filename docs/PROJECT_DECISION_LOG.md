@@ -5354,4 +5354,59 @@ Libre:       —
 Referencias: §2.8, §2.10, §3.0, DL-076, DL-080, DL-075
 ```
 
+### DL-103
+
+```
+ID:          DL-103
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P12 — mecanizar el triaje MT0 sobre términos flotantes, el paso
+             que el agente hacía a mano en la metaherramienta y que el PO
+             quiere sistematizado (CEGAR/attribute exploration/abducción).
+Contenido:   El triaje no se AUTOMATIZA —decidir el cubo es ontológico
+             (§2.10)— sino que se convierte en DECISIÓN ASISTIDA: por cada
+             término flotante, la máquina reúne la EVIDENCIA que hace el cubo
+             obvio, en vez de que el agente adivine. Es abducción: hallar
+             dónde vive el término que falta.
+             Tres señales checkables, una por cubo MT0:
+             · REDUCIBLE: el término vive en otro axioma/claim → candidato a
+               CITAR (el fix de D8→C1a, D4→D3). La máquina nombra los nodos.
+             · PRIMITIVO?: el término no vive en ningún nodo → candidato a
+               RATIFICACIÓN (el patrón escasez→E11).
+             · EMPÍRICO/EXTERNO: marcado externo o empírico → se mide o el
+               diseño lo excluye, no se deriva.
+             Sale en --provenance bajo cada flotante. Ejemplos reales sobre el
+             corpus: «ventaja» flota en D11 y vive en D15/D16 → REDUCIBLE;
+             «sincronía» en ningún nodo → PRIMITIVO?.
+             ESTO ES LA METAHERRAMIENTA que el PO describió («cómo saber qué
+             definir»): el detector (DL-075) halla la brecha, la cobertura y
+             la cola (DL-078) la ordenan, y ahora el triaje CLASIFICA cada
+             brecha por su cubo MT0 con evidencia. El agente/PO confirma; la
+             máquina hace el trabajo de búsqueda que antes era a ojo.
+Hipótesis:   Reunir la evidencia (dónde vive el término) elimina el paso de
+             ADIVINACIÓN del triaje sin pretender decidir lo indecidible; la
+             decisión queda, pero informada y acotada a tres opciones con sus
+             candidatos nombrados.
+Razón:       CONTINGENCY P5 — P12 en autonomía (PO, 2026-07-23).
+Impacto:     Triaje MT0 en --provenance (advisory); mutación que fija la
+             clasificación REDUCIBLE. P12 hecho; desbloquea P15 y P21. check
+             44 reglas, test 58/58. Header v5.80.
+             NO CIERRA: la clasificación es LÉXICA —«vive en» es aparición de
+             superficie, no implicación—. REDUCIBLE dice «hay un candidato»,
+             no «este es el premisa correcto»; PRIMITIVO? puede ser un
+             sinónimo no modelado, no un primitivo real. La confirmación es
+             ontológica: agente que modela + PO (M11). El triaje reduce el
+             espacio de búsqueda de infinito a tres cubos con candidatos, no
+             lo colapsa a uno.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, §2.10, §3.0, DL-075, DL-076, DL-078, DL-102
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

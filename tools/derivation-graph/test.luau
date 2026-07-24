@@ -109,6 +109,17 @@ local cases = {
 		-- que la auditoría de bloqueos lo cace: el pool [D17]+[MT0] ya cubre su
 		-- conclusión, luego la frontera era búsqueda incompleta. Valida el
 		-- detector contra la instancia real que un agente marcó mal.
+		-- Triaje MT0 (DL-103): el clasificador debe reunir la evidencia —
+		-- «ventaja» flota en D11 y vive en D15/D16, luego REDUCIBLE—. Fija ese
+		-- comportamiento: si el triaje deja de ver dónde vive el término, la
+		-- metaherramienta perdió su valor.
+		name = "triaje MT0 clasifica REDUCIBLE (ventaja vive en D15)",
+		mode = "--provenance",
+		expect = "ventaja → REDUCIBLE",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
 		name = "X9: bloqueo con premisas ya disponibles (regresión D18)",
 		mode = "--provenance",
 		expect = "⚠ X9 D18",
