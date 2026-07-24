@@ -240,7 +240,7 @@ Implementar `src/server/Persistence/PlayerDataService.lua` como wrapper delgado 
 ### PER-004 — QA: Integración de Persistencia
 
 ```
-Deriva de:   §3.8 (Criterio de Éxito: los datos sobreviven entre sesiones) + Hito §5.7 Semana 1
+Deriva de:   §3.8 (Criterio de Éxito: los datos sobreviven entre sesiones) + Hito §5.7 Semana 1 [D20]
 Domain:      TECH
 Estado:      TODO
 Semana:      1
@@ -365,7 +365,7 @@ Un jugador puede recoger y soltar un objeto small. La interacción se inicia des
 ### GAM-004 — TruckManager: Zona de entrega y conteo
 
 ```
-Deriva de:   §4.4 (TruckManager) + §3.1 (core loop: entrega al camión)
+Deriva de:   §4.4 (TruckManager) + §3.1 (core loop: entrega al camión) [D1]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -390,7 +390,7 @@ Implementar `src/server/TruckManager.lua`. Zona de entrega detectada server-side
 ### GAM-005 — CarryManager: Velocidad reducida en objetos medium
 
 ```
-Deriva de:   §3.3 (fricción de cooperación) + §4.4 (CarryManager) + DL-027 (WalkSpeed)
+Deriva de:   §3.3 (fricción de cooperación) + §4.4 (CarryManager) + DL-027 (WalkSpeed) [D6]
 DL-Ref:      DL-047, DL-092 (núcleo puro carryEfficiency ya implementado)
 Domain:      TECH
 Estado:      TODO
@@ -413,7 +413,7 @@ Cargar un objeto medium reduce el `WalkSpeed` del jugador según `ObjectDefiniti
 ### GAM-006 — CarryManager: Sistema líder/soporte para objetos large
 
 ```
-Deriva de:   Principio §2.1 (Dependencia Social — cooperación forzada) + §3.3
+Deriva de:   Principio §2.1 (Dependencia Social — cooperación forzada) + §3.3 [D1]
 Domain:      TECH
 Estado:      TODO
 Semana:      2
@@ -440,7 +440,7 @@ Elección de soporte pura (`CarryRules.chooseSupport`: el otro jugador más cerc
 ### GAM-007 — CarryManager: Caída por pérdida de soporte
 
 ```
-Deriva de:   §3.3 (cooperación con consecuencia) + §4.4 (timeout por definición)
+Deriva de:   §3.3 (cooperación con consecuencia) + §4.4 (timeout por definición) [D8]
 Domain:      TECH
 Estado:      TODO
 Semana:      2
@@ -462,7 +462,7 @@ Si el soporte sale del rango por más tiempo que `ObjectDefinition.Properties.su
 ### GAM-008 — Balance: Ajuste de parámetros post-playtest
 
 ```
-Deriva de:   §3.2 (DI) + Hito §5.7 Semana 4 (balance post-playtest)
+Deriva de:   §3.2 (DI) + Hito §5.7 Semana 4 (balance post-playtest) [D6]
 Domain:      TECH
 Estado:      TODO
 Semana:      4
@@ -486,7 +486,7 @@ Ajustar los parámetros de `ObjectDefinition.Properties` y cantidades de spawn b
 
 ```
 DL-Ref:      DL-039
-Deriva de:   §4.2/§4.3 (InteractObject cliente→servidor) + §3.1 (core loop) + DL-039 (completitud)
+Deriva de:   §4.2/§4.3 (InteractObject cliente→servidor) + §3.1 (core loop) + DL-039 (completitud) [D1]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -516,7 +516,7 @@ Dueño del bug de QA-001. Deriva de la completitud (DL-039): el camino input→i
 
 ```
 DL-Ref:      DL-028
-Deriva de:   DL-028 + DL-036 + §4.4 (contrato de tags Layout→Gameplay) + Principio §2.1 (Entidades Estables) + Hito §5.7 Semana 1
+Deriva de:   DL-028 + DL-036 + §4.4 (contrato de tags Layout→Gameplay) + Principio §2.1 (Entidades Estables) + Hito §5.7 Semana 1 [D1]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -541,7 +541,7 @@ Implementado en PR #31. Estado real: IN_PROGRESS hasta merge. Ticket de alta ret
 ### WLD-001 — Edificio placeholder: Estructura navegable (Studio)
 
 ```
-Deriva de:   Principio §2.1 (Compresión Social) + §3.3 + Hito §5.7 Semana 1
+Deriva de:   Principio §2.1 (Compresión Social) + §3.3 + Hito §5.7 Semana 1 [D5]
 Domain:      TECH
 Estado:      TODO
 Semana:      1
@@ -565,7 +565,7 @@ Construir el edificio **real** en Studio bajo un contenedor `Workspace/RealMap` 
 ### WLD-002 — Layout: NPCNodes y NPCDropZones (Studio)
 
 ```
-Deriva de:   §4.4 (contrato Layout → NPCManager) + Hito §5.7 Semana 1
+Deriva de:   §4.4 (contrato Layout → NPCManager) + Hito §5.7 Semana 1 [D2]
 Domain:      TECH
 Estado:      TODO
 Semana:      1
@@ -588,7 +588,7 @@ Colocar los nodos de tránsito de NPCs en el layout **real** de Studio (WLD-001)
 ### WLD-003 — Layout final: Compresión Social
 
 ```
-Deriva de:   Principio §2.1 (Compresión Social) + §3.4 (Entropía Social)
+Deriva de:   Principio §2.1 (Compresión Social) + §3.4 (Entropía Social) [D10]
 Domain:      BOTH
 Estado:      TODO
 Semana:      2
@@ -611,7 +611,7 @@ Revisar y ajustar el layout para maximizar Compresión Social antes de los playt
 ### WLD-004 — NPCManager: Movimiento con TweenService
 
 ```
-Deriva de:   §4.4 (NPCManager) + §3.4 (Entropía: NPC vecino)
+Deriva de:   §4.4 (NPCManager) + §3.4 (Entropía: NPC vecino) [D10]
 Domain:      TECH
 Estado:      TODO
 Semana:      3
@@ -639,7 +639,7 @@ NPC placeholder construido en código (arte final = humano, como WLD-008). Orden
 ### WLD-005 — EventManager: Entropía Espacial
 
 ```
-Deriva de:   §3.4 (Entropía Espacial) + §4.4 (EventManager)
+Deriva de:   §3.4 (Entropía Espacial) + §4.4 (EventManager) [D10]
 Domain:      BOTH
 Estado:      IN_PROGRESS
 Semana:      3
@@ -667,7 +667,7 @@ El evento aparca al vecino via Attribute `EventParked` (coordinación por DataMo
 ### WLD-006 — EventManager: Entropía Informacional
 
 ```
-Deriva de:   §3.4 (Entropía Informacional) + §4.4 (EventManager)
+Deriva de:   §3.4 (Entropía Informacional) + §4.4 (EventManager) [D10]
 Domain:      BOTH
 Estado:      IN_PROGRESS
 Semana:      3
@@ -690,7 +690,7 @@ Al menos un evento que modifique lo que los jugadores saben o creen, sin alterar
 ### WLD-007 — Ajuste de DI post-playtest
 
 ```
-Deriva de:   §3.2 (DI) + Hito §5.7 Semana 4
+Deriva de:   §3.2 (DI) + Hito §5.7 Semana 4 [D2]
 Domain:      BOTH
 Estado:      TODO
 Semana:      4
@@ -745,7 +745,7 @@ Los modelos **funcionales** (caja con cinta, sofá con respaldo/brazos/cojines, 
 ### UI-001 — HUD: Timer e indicadores básicos
 
 ```
-Deriva de:   §3.7 (Percepción y Feedback: contrato de estado visible) + Hito §5.7 Semana 1
+Deriva de:   §3.7 (Percepción y Feedback: contrato de estado visible) + Hito §5.7 Semana 1 [D17]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -769,7 +769,7 @@ HUD con timer de ronda en formato `MM:SS` y conteo de objetos entregados. Lee es
 ### UI-002 — HUD: Prompt de interacción contextual
 
 ```
-Deriva de:   §3.7 (feedback: el jugador sabe qué puede interactuar)
+Deriva de:   §3.7 (feedback: el jugador sabe qué puede interactuar) [D18]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      2
@@ -795,7 +795,7 @@ Implementado como `PromptController` (Fusion, §4.14). Runtime verificado (MCP):
 ### UI-003 — Summary Screen
 
 ```
-Deriva de:   §3.7 (¿el Summary narra o informa?) + §3.8 (Summary prioriza eventos memorables)
+Deriva de:   §3.7 (¿el Summary narra o informa?) + §3.8 (Summary prioriza eventos memorables) [D19]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      3
@@ -921,7 +921,7 @@ Implementar `src/server/GameManager.lua`. Punto de entrada del ciclo de vida. Ge
 
 ```
 DL-Ref:      DL-039
-Deriva de:   §4.4 (GameManager gestiona Lobby) + §3.1 (core loop) + DL-039 (completitud)
+Deriva de:   §4.4 (GameManager gestiona Lobby) + §3.1 (core loop) + DL-039 (completitud) [D1]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1
@@ -952,7 +952,7 @@ El lobby completo del ciclo de vida (matchmaking real) queda como horizonte de d
 ### QA-001 — Integración Semana 1: Flujo básico single-player
 
 ```
-Deriva de:   §3.8 (Criterios de Éxito del MVP) + Hito §5.7 Semana 1 (Pipeline P6)
+Deriva de:   §3.8 (Criterios de Éxito del MVP) + Hito §5.7 Semana 1 (Pipeline P6) [D1]
 Domain:      TECH
 Estado:      IN_PROGRESS
 Semana:      1

@@ -497,6 +497,32 @@ do
 	end
 end
 
+-- ── ticket anclado en prosa de diseño (P9, DL-099) ──────────────────────────
+-- Desde DL-061 §3.1–§3.9 son COMENTARIO no normativo: la norma vive en los
+-- claims D-n (§3.0). Un ticket cuyo «Deriva de:» cita una sección §3.x sin
+-- citar el claim que esa sección comenta se ancla en prosa — el mismo M4 que
+-- §2.2 tenía. La norma la carga el claim, no la subsección. QA exento (hitos
+-- transversales, no implementan un claim). El «Deriva de:» conserva la prosa
+-- como contexto legible; solo se exige el ancla D-n junto a ella.
+local ticketDesignProse = {}
+do
+	local cur, derivaLine = nil, nil
+	for _, line in ipairs(readLines("docs/TICKETS.md")) do
+		local t = line:match("^### (%u+%-%d+)")
+		if t then
+			cur, derivaLine = t, nil
+		end
+		local dv = line:match("^Deriva de:%s*(.+)")
+		if dv and cur then
+			derivaLine = dv
+			if not cur:match("^QA%-") and dv:match("§3%.%d") and not dv:match("%f[%w]D%d+%f[%W]") then
+				table.insert(ticketDesignProse, cur .. " → cita §3.x (comentario) sin el claim D-n que la funda")
+			end
+		end
+	end
+end
+table.sort(ticketDesignProse)
+
 -- ── sistema sin claim que lo requiera (P8, DL-098) ──────────────────────────
 -- La INVERSA del gluing: `unglued_claim` exige que todo claim tenga módulo;
 -- esto exige que todo SISTEMA trace a un claim que lo requiera. Es la
@@ -1813,6 +1839,9 @@ end)
 reportViolations("table_shape (fila con columnas != cabecera — misparse en potencia)", tableShape, function(r)
 	return r
 end)
+reportViolations("ticket_design_prose (ticket ancla en §3.x sin claim D-n)", ticketDesignProse, function(r)
+	return r
+end)
 reportViolations("module_underived (sistema en src/ sin claim que lo requiera)", moduleUnderived, function(r)
 	return r
 end)
@@ -2122,7 +2151,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape + #moduleUnderived
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape + #moduleUnderived + #ticketDesignProse
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

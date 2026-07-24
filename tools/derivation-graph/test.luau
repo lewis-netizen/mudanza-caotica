@@ -402,6 +402,16 @@ local cases = {
 		-- sin nombrar ningún ID, y nada lo detectaba.
 		-- Regresión exacta de X4: reintroduce la colisión de vocabulario que
 		-- se corrigió a mano en DL-068. Ahora la caza la máquina.
+		-- Un ticket anclado en prosa de diseño (§3.x, no normativa) sin el
+		-- claim que la funda: el M4 al nivel de ticket. Quitar el ancla D-n
+		-- de un ticket que cita §3.x lo dispara.
+		name = "ticket_design_prose (ancla en §3.x sin claim)",
+		expect = "✗ ticket_design_prose",
+		apply = function()
+			replaceOnce(TICKETS, "+ §3.4 (Entropía Social) [D10]", "+ §3.4 (Entropía Social)")
+		end,
+	},
+	{
 		-- La inversa del gluing: un sistema nuevo en src/server/ que ningún
 		-- claim requiere es herencia no derivada. Es la preocupación del
 		-- inicio de sesión, ahora imposible de reintroducir en silencio.

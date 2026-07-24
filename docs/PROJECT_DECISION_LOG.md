@@ -5148,4 +5148,51 @@ Libre:       —
 Referencias: §4.15, §4.7, §2.10, §5.12, DL-054, DL-085
 ```
 
+### DL-099
+
+```
+ID:          DL-099
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P9 — re-anclar TICKETS a claims D-n. Los tickets derivaban de
+             secciones §3.x, que desde DL-061 son COMENTARIO no normativo:
+             el mismo M4 que §2.2 tenía (DL-097), un nivel más abajo (M0→M1).
+Contenido:   En vez de re-mapear 41 tickets a mano —juicio ontológico
+             error-prone—, se construyó la REGLA primero y ella acotó el
+             trabajo: ticket_design_prose marca todo ticket no-QA que cita
+             §3.x sin citar el claim D-n que esa sección funda. Disparó
+             EXACTAMENTE 17 tickets. Disciplina CEGAR: el check dirige el
+             trabajo en vez de que el agente adivine el alcance.
+             Los 17 anclados con el mapa §3.x→claim ya derivado en §3.0:
+             §3.1→D1 (GAM-004, GAM-010, GM-004), §3.2→D2 (GAM-008, WLD-007),
+             §3.3→D6/D8 (GAM-005/006/007, WLD-001→D5), §3.4→D10 (WLD-003/004/
+             005/006), §3.7→D17/D18/D19 (UI-001/002/003), §3.8→D20 (PER-004).
+             El «Deriva de:» CONSERVA la prosa §3.x como contexto legible; la
+             regla solo exige el ancla D-n junto a ella. QA exento: sus
+             tickets son hitos transversales, no implementan un claim.
+             CONSECUENCIA MOF: el eslabón M0→M1 (implementación→modelo) queda
+             trazado a la forma. Un ticket es trabajo M0; su «Deriva de:»
+             ahora nombra el claim M1 que realiza, no la prosa que lo comenta.
+Hipótesis:   Construir la regla antes que el re-etiquetado convierte un
+             barrido subjetivo de 41 tickets en 17 correcciones dirigidas y
+             verificadas, y deja la propiedad enforzada para tickets futuros.
+Razón:       CONTINGENCY P5 — P9 en autonomía (PO, 2026-07-23).
+Impacto:     ticket_design_prose (44 reglas); 17 tickets con ancla D-n. P9
+             hecho; desbloquea P17 (reconciliar diferimientos). check 44
+             reglas, test 56/56. Header v5.76.
+             NO CIERRA: la regla verifica que el ancla D-n EXISTA, no que sea
+             el claim CORRECTO para ese ticket. Que GAM-005 realmente
+             implemente D6 y no otro claim es juicio ontológico (§2.10) —
+             lingüístico lo que se enforza, ontológico lo que queda.
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §5.12
+Libre:       —
+Referencias: §5.12, §2.10, §3.0, DL-061, DL-097, DL-098
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

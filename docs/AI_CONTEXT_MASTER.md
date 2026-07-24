@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.75 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.76 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -1769,7 +1769,7 @@ election_axis_unregistered · election_unratified_cited
 axis_malformed · axis_domain_thin
 meta_law_malformed · zone_malformed · zone_expired
 blocked_claim_dangling · vocab_banned_term · vocab_malformed · contract_missing
-plan_dangling · plan_uncovered_debt · table_shape · module_underived
+plan_dangling · plan_uncovered_debt · table_shape · module_underived · ticket_design_prose
 rule_missing · rule_undeclared
 ```
 
@@ -1808,7 +1808,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | hecho (DL-092) |
 | P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | hecho (DL-092) |
 | P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | hecho (DL-098) |
-| P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | pendiente |
+| P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | hecho (DL-099) |
 | P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | D20 | pendiente |
 | P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | pendiente |
 | P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 | pendiente |
