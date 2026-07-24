@@ -5571,4 +5571,64 @@ Libre:       Poner enforcement-change como required en el ruleset → PO
 Referencias: §5.12, DL-052
 ```
 
+### DL-107
+
+```
+ID:          DL-107
+Fecha:       2026-07-23
+Domain:      DESIGN
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P14 — Z6: que un eje `cerrado` agote sus valores era «una
+             afirmación semántica que nadie verifica». Se esperaba (como P13/
+             P15) que el núcleo fuera ontológico. Resultó parcialmente falso.
+Contenido:   HALLAZGO: los 5 ejes `cerrado` NO son enumeraciones por
+             inspección — son PARTICIONES LÓGICAS, cuya exhaustividad se
+             PRUEBA por estructura, no se asevera:
+             · A1 valencia = 2×2 de (resultados alineados? × opuestos?):
+               coop/comp/mixta/individual — las 4 celdas.
+             · A3 derrota = árbol: ausente | presente{castigada, no}.
+             · A8 horizonte = dicotomía: solo-MVP vs más-allá.
+             · A9 origen = subconjuntos no vacíos de {sistema, jugadores} = 3.
+             · A10 granularidad = dicotomía: exactamente-2 vs más-de-2.
+             Para una dicotomía {X, ¬X} la exhaustividad es LÓGICA, no
+             semántica: Z6 no era irreducible, era under-definition (faltaba
+             DECLARAR la partición). Cada eje `cerrado` ahora anota su
+             estructura en la celda Cierre; regla closure_unjustified: un
+             `cerrado` sin justificación de partición = enumerado por
+             inspección (la aserción que Z6 nombraba).
+             Z6 CERRADA y movida al historial (DL-107). VARIANTE 9 → 8.
+             DIFERENCIA con P13/P15: allí el núcleo era genuinamente
+             ontológico y la zona quedó abierta. Aquí el «juicio irreducible»
+             era una definición faltante (la estructura de partición) — el
+             patrón under-definition-not-frontier: no todo lo que parece
+             ontológico lo es; hay que TRIAJEAR (MT0) antes de rendirse. Los
+             ejes resultaron reducibles.
+             HALLAZGO 2 (guardián decorativo, 3ª vez): closure_unjustified
+             encendía sin sumar a violaciones. El self-check de M11 debía
+             cazarlo pero el sumatorio no la incluía; corregido. La clase X14
+             reaparece — declararla de entrada (DL-092) no impidió cometerla
+             de nuevo, porque el sumatorio es manual.
+Hipótesis:   Un residuo que parece ontológico puede ser under-definition;
+             declarar la estructura de partición prueba la exhaustividad para
+             particiones lógicas, cerrando lo que parecía irreducible.
+Razón:       CONTINGENCY P5 — P14 en autonomía (PO, 2026-07-23).
+Impacto:     closure_unjustified (46 reglas); 5 ejes con justificación de
+             partición; Z6 cerrada. VARIANTE 8. P14 hecho. check 46 reglas,
+             test 61/61. Header v5.83.
+             NO CIERRA del todo: closure_unjustified verifica que la partición
+             se DECLARE, no que la estructura declarada sea la correcta (¿es
+             A1 realmente el 2×2 de esas dos dimensiones?). Para dicotomías es
+             casi self-evident; para 2×2 requiere confirmar las dimensiones —
+             residuo ontológico menor, del PO. Pero la aserción ya es
+             explícita y auditable, no oculta en un `cerrado` desnudo.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.7, §2.8
+Libre:       —
+Referencias: §2.7, §2.8, §5.12, DL-064, DL-092, DL-096
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

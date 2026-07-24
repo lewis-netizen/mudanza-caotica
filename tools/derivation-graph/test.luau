@@ -348,13 +348,23 @@ local cases = {
 		name = "axis_malformed",
 		expect = "✗ axis_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| cerrado |\n| A2 |", "| quizás |\n| A2 |")
+			replaceOnce(MASTER, "| cerrado — 2×2 de (alineados? × opuestos?) |", "| quizás |")
 		end,
 	},
 	{
 		-- Un eje con un solo valor no es una elección: es una consecuencia
 		-- disfrazada de elección. Sin esta regla, "elegí X" pasaría aunque X
 		-- fuera lo único posible — y el registro mentiría sobre qué es libre.
+		-- Z6 (DL-107): un eje `cerrado` sin justificación de partición es
+		-- «enumerado por inspección» — la aserción que Z6 nombraba. Quitar la
+		-- justificación de A10 lo dispara.
+		name = "closure_unjustified (cerrado sin partición)",
+		expect = "✗ closure_unjustified",
+		apply = function()
+			replaceOnce(MASTER, "| `binaria` · `graduada` | cerrado — dicotomía: exactamente-2 vs más-de-2 |", "| `binaria` · `graduada` | cerrado |")
+		end,
+	},
+	{
 		name = "axis_domain_thin (eje de un solo valor)",
 		expect = "✗ axis_domain_thin",
 		apply = function()
@@ -413,7 +423,7 @@ local cases = {
 		name = "zone_malformed (zona sin Tipo MT0)",
 		expect = "✗ zone_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| formalizable pendiente |", "| |")
+			replaceOnce(MASTER, "| relación → máquina (deuda) |", "| |")
 		end,
 	},
 	{
@@ -552,7 +562,7 @@ local cases = {
 		name = "plan_uncovered_debt",
 		expect = "✗ plan_uncovered_debt",
 		apply = function()
-			replaceOnce(MASTER, "partición demostrada, no enumerada por inspección | P2 | Z6 |", "partición demostrada, no enumerada por inspección | P2 | — |")
+			replaceOnce(MASTER, "| P12 | Z1 · X1 · X2 · X3 · X4 · X9 | pendiente |", "| P12 | Z1 · X1 · X2 · X3 · X4 | pendiente |")
 		end,
 	},
 	{

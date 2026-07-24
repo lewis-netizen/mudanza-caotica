@@ -1203,6 +1203,12 @@ end
 -- mejor valor?" no es respondible. Estas reglas son la precondición del
 -- juicio de optimalidad, no un chequeo de forma más.
 local axisMalformed, axisDomainThin = {}, {}
+-- closure_unjustified (Z6, P14, DL-107): un eje `cerrado` afirma que sus
+-- valores AGOTAN el eje. Sin justificación es «enumerado por inspección» —
+-- la aserción semántica que Z6 nombra—. Con una justificación de PARTICIÓN
+-- (dicotomía, 2×2, subconjuntos, árbol) la exhaustividad se PRUEBA por la
+-- estructura lógica, no se asevera. El eje declara «cerrado — <estructura>».
+local closureUnjustified = {}
 local electionAxisUnregistered, electionValueOffAxis = {}, {}
 do
 	local ids = {}
@@ -1212,7 +1218,11 @@ do
 	table.sort(ids)
 	for _, id in ipairs(ids) do
 		local ax = axes[id]
-		if ax.nombre == "" or (ax.cierre ~= "cerrado" and ax.cierre ~= "abierto") then
+		local base = ax.cierre:match("^(%a+)")
+		if base == "cerrado" and not ax.cierre:match("—%s*%S") then
+			table.insert(closureUnjustified, id .. " → `cerrado` sin justificación de partición (enumerado por inspección — Z6)")
+		end
+		if ax.nombre == "" or (base ~= "cerrado" and base ~= "abierto") then
 			table.insert(axisMalformed, id .. " → sin nombre o Cierre distinto de cerrado|abierto")
 		end
 		-- un eje con un solo valor no es una elección: es una consecuencia
@@ -2091,6 +2101,9 @@ end)
 reportViolations("axis_malformed (eje sin nombre o sin Cierre cerrado|abierto)", axisMalformed, function(r)
 	return r
 end)
+reportViolations("closure_unjustified (eje cerrado sin justificación de partición — Z6)", closureUnjustified, function(r)
+	return r
+end)
 reportViolations("axis_domain_thin (eje con dominio < 2 valores: no es una elección)", axisDomainThin, function(r)
 	return r
 end)
@@ -2331,7 +2344,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
 	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
-	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
+	+ #axisMalformed + #axisDomainThin + #closureUnjustified + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
 	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape + #moduleUnderived + #ticketDesignProse + #resealUndeclared
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch

@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.82 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.83 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -256,16 +256,16 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 
 | ID | Eje | Dominio de valores | Cierre |
 |---|---|---|---|
-| A1 | Valencia del resultado | `cooperativa` · `competitiva` · `mixta` · `individual` | cerrado |
+| A1 | Valencia del resultado | `cooperativa` · `competitiva` · `mixta` · `individual` | cerrado — 2×2 de (alineados? × opuestos?) |
 | A2 | Ancla interpretable | `el objetivo` · `las reglas` · `el rol` · `el espacio` | abierto |
-| A3 | Tratamiento de la derrota | `ausente` · `declarada sin castigo` · `castigada` | cerrado |
+| A3 | Tratamiento de la derrota | `ausente` · `declarada sin castigo` · `castigada` | cerrado — árbol: «ausente» o «presente» (castigada, no) |
 | A4 | Situación ficcional | `mudanza` · `evacuación de incendio` · `naufragio` · `atraco` · `rescate` | abierto |
 | A5 | Forma del objetivo | `maximización acumulativa` · `umbral fijo` · `lista específica` · `supervivencia` | abierto |
 | A6 | Escala del grupo | `individual` (inadmisible: sin varios humanos no hay interacción, C1a) · `pareja` · `grupo pequeño` · `grupo grande` | abierto |
 | A7 | Naturaleza del primer release | `prototipo de validación` · `early access` · `producto shippable` | abierto |
-| A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado |
-| A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado |
-| A10 | Granularidad de la demanda | `binaria` · `graduada` | cerrado |
+| A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado — dicotomía: solo-MVP vs más-allá |
+| A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado — subconjuntos no vacíos de {sistema, jugadores} |
+| A10 | Granularidad de la demanda | `binaria` · `graduada` | cerrado — dicotomía: exactamente-2 vs más-de-2 |
 | A11 | Generador de la decisión compartida | `escasez temporal` · `información oculta` · `complejidad combinatoria` · `interdependencia de roles` | abierto |
 
 **Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *uno* de los valores del dominio de ese eje; elegir otro es revisión de la elección (⚠), no del núcleo. Forma obligatoria: un eje registrado por elección, un valor perteneciente a su dominio, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_axis_unregistered`, `election_value_off_axis`).
@@ -326,7 +326,6 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 |---|---|---|---|---|---|---|
 | Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 | DL-060 |
 | Z4 | Obligación tras remodelar: la naturaleza del cambio (`Resello:`, DL-104) se DECLARA, pero verificar que un resello `normativo` realmente disparó revisión de su realización es ontológico (§2.10) — el delta textual no basta: DL-093 reescribió 5 claims con delta enorme y cero compromiso | relación → máquina (deuda) | El acto declarativo hecho (Resello); la verificación de que un resello normativo se atendió es residuo ontológico → X17/playtest. Re-tipar → PO | 2026-08-11 | PO 2026-07-22 | DL-062 |
-| Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 | DL-066 |
 
 **Invariante y variante (DL-071).** Todo el aparato descrito hasta aquí verifica **safety**: que cada estado del corpus sea consistente. No dice nada de la **trayectoria** — si las zonas efectivamente cierran, si las clases de escape acaban teniendo regla, si la tasa de defectos por pasada baja. Los vencimientos eran un sustituto tosco: **un reloj no es una propiedad**; "vence el 11 de agosto" no informa si el sistema tiende a algo.
 
@@ -366,6 +365,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 |---|---|---|---|
 | Z2 | Relación valor↔eje: que el Valor sea un valor del Eje declarado | DL-060 | DL-064 |
 | Z3 | Realización del gluing: que la fila de §4.15 realice su concepto | DL-060 | DL-062 |
+| Z6 | Exhaustividad de dominio: que un eje `cerrado` agote sus valores | DL-066 | DL-107 |
 | Z5 | Realización semántica: que el módulo HAGA lo que su contrato declara, no solo que exista | DL-066 | DL-092 |
 
 **El registro es MEMORIA, no COBERTURA (DL-070).** Un escape ausente significa que **nadie lo notó**, no que no exista: la ausencia de fila no prueba nada. Por su naturaleza, el registro **no puede crear dependencia alguna** — ninguna garantía del sistema se deriva de su estado, ni de que esté completo, ni de que todos sus escapes estén resueltos, y **ninguna regla puede consumirlo como evidencia**. El registro **empuja** (acumula presión sobre una clase que se repite) pero **jamás respalda**. Un mecanismo que dependiera de su completitud heredaría precisamente la dependencia de agente que el registro existe para hacer visible.
@@ -1768,7 +1768,7 @@ claim_bad_derivation · unknown_rule · unknown_premise · rule_arity · claim_c
 claim_seal_mismatch · seal_unprovenanced · seal_provenance_inconsistent
 election_malformed · election_axis_dup · election_compound · election_value_off_axis
 election_axis_unregistered · election_unratified_cited
-axis_malformed · axis_domain_thin
+axis_malformed · axis_domain_thin · closure_unjustified
 meta_law_malformed · zone_malformed · zone_expired
 blocked_claim_dangling · vocab_banned_term · vocab_malformed · contract_missing
 plan_dangling · plan_uncovered_debt · table_shape · module_underived · ticket_design_prose · reseal_undeclared
@@ -1815,7 +1815,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | hecho (DL-102) |
 | P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 · X9 | hecho (DL-103) |
 | P13 | Mitad de obligación de Z4: acto declarativo Resello (el delta NO deriva la obligación — DL-093; el residuo es ontológico) | — | Z4 | hecho (DL-104) |
-| P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
+| P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | hecho (DL-107) |
 | P15 | Enforcement de las clases de escape: X2 deóntica mecanizada; X8/X12/X13 re-tipados como límites (no deuda); resto ontológico (no admite regla) | P12 | X3 · X4 · X8 | hecho (DL-106) |
 | P16 | §2.2 (Test Oficial) tipado como conformance M1→M2: deja de fundar desde prosa (M4) | P1 | DL-061 | hecho (DL-097) |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | hecho (DL-101) |
