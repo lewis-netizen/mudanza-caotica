@@ -5693,4 +5693,45 @@ Libre:       —
 Referencias: §2.8, §2.10, §5.12, DL-060, DL-092, DL-096, DL-106
 ```
 
+### DL-109
+
+```
+ID:          DL-109
+Fecha:       2026-07-24
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Al mergear la rama de terreno semántico, CI/commitlint falló:
+             dos subjects de gobernanza (P15, P21) exceden los 100 chars por
+             defecto de @commitlint/config-conventional. El pre-commit local
+             no lo cazó (usa commitlint-local.sh, config divergente).
+Contenido:   header-max-length elevado a 120 en .github/commitlintrc.yml. NO
+             es aflojar enforcement: la config YA relajó body/footer a 0
+             «porque el campo puede ser detallado», y olvidó el header. Los
+             subjects citan DL-xxx + resumen multi-cláusula; 120 los acomoda
+             manteniendo el header escaneable. Es cerrar un hueco de la
+             config, consistente con su propia intención.
+             HALLAZGO: el pre-commit local y CI usan CONFIGS DISTINTAS —el
+             comentario del workflow dice «fuente única de verdad:
+             commitlintrc.yml» pero el hook local usa commitlint-local.sh—.
+             Esa divergencia es la que dejó pasar los subjects largos en
+             local. Queda anotada como deuda (armonizar hook↔CI).
+Hipótesis:   Una regla de longitud que contradice la convención real del
+             proyecto genera falsos bloqueos; alinearla con el estilo DL
+             elimina el falso positivo sin perder la escaneabilidad.
+Razón:       CONTINGENCY P5 — CI falló al mergear la rama (PO: «mergea»,
+             2026-07-24).
+Impacto:     header-max-length 120. Habilita el merge de la rama. Header sin
+             cambio (solo este DL). Deuda anotada: divergencia hook↔CI.
+             NO CIERRA: la divergencia commitlint-local.sh ↔ commitlintrc.yml
+             sigue; armonizarla es trabajo aparte (candidato a ticket).
+Ejecución:   CONFIRM
+Costo:       C1
+Pipeline:    P5
+Ticket:      —
+Modifica:    —
+Libre:       Armonizar hook local con CI (misma config) → candidato a ticket.
+Referencias: §5.10, DL-108
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
