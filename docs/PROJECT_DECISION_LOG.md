@@ -5093,4 +5093,59 @@ Libre:       —
 Referencias: §2.2, §2.10, §2.3, §5.11, DL-044, DL-096
 ```
 
+### DL-098
+
+```
+ID:          DL-098
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P8 — derivar el conjunto de sistemas de §4 en una pasada
+             holística. Era la preocupación del inicio de la sesión: los
+             sistemas (CarryManager, etc.) se HEREDARON del bootstrap, no se
+             derivaron de lo que los claims requieren.
+Contenido:   El gluing (§4.15) ya garantiza la dirección claim→módulo
+             (unglued_claim = 0). P8 añade la INVERSA: todo SISTEMA debe
+             trazar a un claim que lo requiera. Regla module_underived — un
+             módulo de server/ o client/ que no aparece en §4.15 es herencia
+             no derivada, y ahora rompe el build.
+             RESULTADO, como en P5 (entidades): el conjunto heredado es
+             DERIVABLE. Los 14 sistemas de server/client trazan todos a un
+             claim. Derivar no cambió el set; lo CONFIRMÓ y lo dejó
+             enforzado hacia el futuro.
+             Exenciones POR NATURALEZA (no son sistemas): Definitions/ (datos
+             de entidad), Config/ · Lib/ · Constants/ · Persistence/
+             (infraestructura), Rules/ (núcleos puros — su shell imperativo
+             es el glueado), Main/init (arranque).
+             DOS DERIVAS SALDADAS al aplicar la regla:
+             · PrefabRegistry estaba en src/server/ SIN declararse en ningún
+               sitio —ni gluing ni registro de infraestructura—: herencia
+               invisible. Declarado como infraestructura de resolución de
+               assets (§4.6).
+             · ProfileStoreConfig: §4.15 lo marcaba ⚠ desde DL-054 (existe en
+               Persistence/ pero §4.7 no lo declaraba). Documentado como
+               infraestructura de persistencia (§2.5). La ⚠ se retira.
+Hipótesis:   Una regla inversa al gluing convierte «los sistemas se heredaron»
+             de sospecha recurrente en propiedad enforzada: un sistema sin
+             claim que lo pida no puede entrar en silencio.
+Razón:       CONTINGENCY P5 — P8 en autonomía (PO, 2026-07-23).
+Impacto:     module_underived (43 reglas); PrefabRegistry y ProfileStoreConfig
+             declarados; ⚠ de §4.15 retirada. P8 hecho; desbloquea P9
+             (re-anclar TICKETS a claims). check 43 reglas, test 55/55.
+             Header v5.75.
+             NO CIERRA: module_underived verifica que un sistema APAREZCA en
+             el gluing, no que el módulo HAGA lo que su claim pide —eso es
+             contract_missing (una función) y los specs (comportamiento). La
+             derivación es de PRESENCIA, no de adecuación: lingüística, no
+             ontológica (§2.10).
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §4.15, §5.12
+Libre:       —
+Referencias: §4.15, §4.7, §2.10, §5.12, DL-054, DL-085
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

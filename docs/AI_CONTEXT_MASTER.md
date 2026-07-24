@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.74 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.75 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -993,7 +993,7 @@ releasePlayer(player)  → Profile:EndSession(). Solo en PlayerRemoving.
 La sesión vive mientras el jugador está conectado — nunca se cierra por
 transiciones de ronda.
 
-**MigrationService** detecta la versión de PlayerData al cargar y aplica las migraciones necesarias. Esto sigue siendo lógica específica del proyecto — ProfileStore no migra schemas, solo gestiona el ciclo de vida del DataStore.
+**ProfileStoreConfig** centraliza la configuración de conexión a ProfileStore (nombre del store, schema por defecto) — es infraestructura de persistencia, no un módulo de dominio (§2.5). **MigrationService** detecta la versión de PlayerData al cargar y aplica las migraciones necesarias. Esto sigue siendo lógica específica del proyecto — ProfileStore no migra schemas, solo gestiona el ciclo de vida del DataStore.
 
 La versión actual de PlayerData es `Version = 1`. Cualquier cambio al schema requiere incrementar la versión y añadir una migración en MigrationService.
 
@@ -1212,7 +1212,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D21 | Evolución: interacción o creación | — normativo (roadmap §5.7) |
 | D22 | Calidad del loop = frecuencia | — empírico → playtest (métrica de avance, §3.2; medida con el criterio de D2) |
 
-**Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`. (⚠ `ProfileStoreConfig` existe en `src/server/Persistence/` pero §4.7 declara solo PlayerDataService y MigrationService como módulos propios — prosa desactualizada; armonizar en la re-derivación holística de §4.)
+**Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`, `PrefabRegistry` (resolución `ObjectId`→asset, §4.6).
 
 **Exenciones del registro:** `src/shared/Tests/` (specs — verifican, no son sistemas), `src/shared/Definitions/` (contenido de entidades — §2.4 prohíbe que el master se acople a nombres concretos de objetos), `Main.*` e `init` (infraestructura de arranque).
 
@@ -1769,7 +1769,7 @@ election_axis_unregistered · election_unratified_cited
 axis_malformed · axis_domain_thin
 meta_law_malformed · zone_malformed · zone_expired
 blocked_claim_dangling · vocab_banned_term · vocab_malformed · contract_missing
-plan_dangling · plan_uncovered_debt · table_shape
+plan_dangling · plan_uncovered_debt · table_shape · module_underived
 rule_missing · rule_undeclared
 ```
 
@@ -1807,7 +1807,7 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | hecho (DL-085) |
 | P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | hecho (DL-092) |
 | P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | hecho (DL-092) |
-| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | pendiente |
+| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | hecho (DL-098) |
 | P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | pendiente |
 | P10 | QA-001: playtest que mide lo empírico (D20, D22) | P7 | D20 | pendiente |
 | P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | pendiente |

@@ -402,6 +402,16 @@ local cases = {
 		-- sin nombrar ningún ID, y nada lo detectaba.
 		-- Regresión exacta de X4: reintroduce la colisión de vocabulario que
 		-- se corrigió a mano en DL-068. Ahora la caza la máquina.
+		-- La inversa del gluing: un sistema nuevo en src/server/ que ningún
+		-- claim requiere es herencia no derivada. Es la preocupación del
+		-- inicio de sesión, ahora imposible de reintroducir en silencio.
+		name = "module_underived (sistema sin claim que lo pida)",
+		expect = "✗ module_underived",
+		apply = function()
+			write("src/server/OverlordManager.lua", "return {}\n")
+		end,
+	},
+	{
 		-- El misparse silencioso, cazado en forma general: una fila con más
 		-- columnas que su cabecera. Así se colaron X10 y las dos derivas de
 		-- §2.9. Un | sin escapar dentro de una celda lo dispara.

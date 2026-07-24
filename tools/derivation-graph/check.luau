@@ -497,6 +497,66 @@ do
 	end
 end
 
+-- ── sistema sin claim que lo requiera (P8, DL-098) ──────────────────────────
+-- La INVERSA del gluing: `unglued_claim` exige que todo claim tenga módulo;
+-- esto exige que todo SISTEMA trace a un claim que lo requiera. Es la
+-- preocupación del inicio de sesión —¿los sistemas se derivaron o se
+-- heredaron del bootstrap?— vuelta regla: un sistema nuevo sin claim que lo
+-- pida es herencia no derivada, y ahora rompe el build.
+-- Exentos por NATURALEZA (no son sistemas): datos de entidad (Definitions/),
+-- configuración (Config/), infraestructura transversal (Lib/, Constants/,
+-- Persistence/), núcleos puros (Rules/ — su shell imperativo es el que se
+-- gluea), y los entry points Main/init. Lo que queda son los sistemas de
+-- server/ y client/, que DEBEN aparecer en el gluing.
+local moduleUnderived = {}
+do
+	local glued = {}
+	do
+		local region = nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region = (h:gsub("%.$", ""))
+			end
+			if region == "4.15" then
+				for name in line:gmatch("`(%u%w+)`") do
+					glued[name] = true
+				end
+			end
+		end
+	end
+	local function scan(dir, exemptDir)
+		local ok, entries = pcall(fs.readDir, dir)
+		if not ok then
+			return
+		end
+		for _, name in ipairs(entries) do
+			local p = dir .. "/" .. name
+			if fs.isDir(p) then
+				local ex = exemptDir
+					or name == "Definitions"
+					or name == "Config"
+					or name == "Lib"
+					or name == "Constants"
+					or name == "Persistence"
+					or name == "Rules"
+					or name == "Tests"
+				scan(p, ex)
+			else
+				local base = name:match("^(.+)%.luau?$")
+				if base and not base:match("%.spec$") then
+					base = base:gsub("%.server$", ""):gsub("%.client$", "")
+					if not exemptDir and base ~= "Main" and base ~= "init" and not glued[base] then
+						table.insert(moduleUnderived, base .. " → sistema en src/ que ningún claim de §4.15 requiere")
+					end
+				end
+			end
+		end
+	end
+	scan("src", false)
+end
+table.sort(moduleUnderived)
+
 -- ── contrato de función vs firma real (Z5, DL-092) ──────────────────────────
 -- El gluing verificaba que el claim NOMBRE un módulo existente, no que el
 -- módulo HAGA lo que su contrato declara (Z5). §4.13 declara las funciones de
@@ -1753,6 +1813,9 @@ end)
 reportViolations("table_shape (fila con columnas != cabecera — misparse en potencia)", tableShape, function(r)
 	return r
 end)
+reportViolations("module_underived (sistema en src/ sin claim que lo requiera)", moduleUnderived, function(r)
+	return r
+end)
 reportViolations("contract_missing (función de §4.13 ausente en src/)", contractMissing, function(r)
 	return r
 end)
@@ -2059,7 +2122,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape + #moduleUnderived
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
