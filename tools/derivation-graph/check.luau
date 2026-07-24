@@ -1983,9 +1983,16 @@ print(
 local emittedRules = {}
 
 local anyReported = false
+-- Total acumulado POR reportViolations (P21, DL-108): el gate ya no se
+-- suma a mano. Un sumatorio de 40+ términos hand-maintained era la causa del
+-- guardián decorativo (X14) reaparecido 3 veces: olvidar un término dejaba
+-- una regla encendiendo sin bloquear. Ahora toda regla que reporta cuenta,
+-- por construcción — auto-aplicación de la disciplina al propio gate.
+local totalViolations = 0
 
 local function reportViolations(name, rows, fmt)
 	emittedRules[(name:match("^(%S+)"))] = true
+	totalViolations += #rows
 	if #rows > 0 then
 		anyReported = true
 	end
@@ -2338,16 +2345,9 @@ reportViolations("rule_undeclared (regla emitida sin declarar en §5.12)", ruleU
 	return r
 end)
 
-local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
-	+ #ruleMissing + #ruleUndeclared
-	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
-	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
-	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
-	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
-	+ #axisMalformed + #axisDomainThin + #closureUnjustified + #electionAxisUnregistered + #electionValueOffAxis
-	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape + #moduleUnderived + #ticketDesignProse + #resealUndeclared
-	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
+-- El gate es el total ACUMULADO por reportViolations — no un sumatorio a
+-- mano (DL-108). Toda regla que reporta bloquea, por construcción.
+local violations = totalViolations
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)

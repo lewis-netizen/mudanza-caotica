@@ -5631,4 +5631,66 @@ Libre:       —
 Referencias: §2.7, §2.8, §5.12, DL-064, DL-092, DL-096
 ```
 
+### DL-108
+
+```
+ID:          DL-108
+Fecha:       2026-07-24
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P21 — clasificar cada regla lingüística/ontológica y generalizar
+             el metamodelado estricto. Y una deuda de P14: el guardián
+             decorativo (X14) reapareció por 3ª vez porque el sumatorio del
+             gate era MANUAL (40+ términos), y olvidar uno dejaba una regla
+             encendiendo sin bloquear.
+Contenido:   (1) EL GATE SE AUTO-ACUMULA. reportViolations suma cada #rows a
+             un total; el gate usa ese total, no un sumatorio a mano. Toda
+             regla que reporta bloquea POR CONSTRUCCIÓN. X14 pasa de «regla:
+             auto-chequeo» a estructuralmente imposible: es auto-aplicación
+             de la disciplina al propio gate. La clase muere de raíz, no por
+             vigilancia.
+             (2) LA CLASIFICACIÓN ES ESTRUCTURAL, no anotada caso por caso.
+             Recorrido el conjunto: TODA regla que gatea (reportViolations,
+             §5.12) es LINGÜÍSTICA —forma, decidible—; TODA la capa
+             ONTOLÓGICA vive en los DETECTORES (--provenance: procedencia,
+             bloqueos, deóntica, triaje), que empujan, no gatean. Esto es lo
+             que hace sostenible el perímetro binario (DL-060): NINGÚN gate
+             descansa en juicio ontológico. Documentado en §2.10.
+             (3) LAS CLASES ONTOLÓGICAS RE-TIPADAS. X1–X4 y X9 (premisa
+             colada, salto modal, contradicción, colisión, bloqueo) no son
+             deuda-pendiente-de-regla: son el FRENTE ONTOLÓGICO permanente.
+             Re-tipadas «límite: ontológico» —detector-asistido, verificación
+             del PO (M11)—. VARIANTE 8 → 3. Z1 (su zona) pasa a P10:
+             conformance ontológica = playtest/PO.
+             (4) METAMODELADO ESTRICTO generalizado: la premisa colada
+             (contenido cross-nivel sin citar) la enforza
+             election_unratified_cited (elecciones) y la detecta --provenance
+             (todo término traza a premisa citada). No hace falta regla nueva:
+             ya estaba, repartida.
+Hipótesis:   Un gate que se computa de las reglas emitidas no puede tener
+             guardianes decorativos; y la partición lingüístico/ontológico,
+             al ser estructural (gate vs detector), no necesita mantenerse —
+             emerge de dónde vive cada chequeo.
+Razón:       CONTINGENCY P5 — P21 en autonomía (PO, 2026-07-24).
+Impacto:     Gate auto-acumulado (fin del sumatorio manual); X14 estructural;
+             §2.10 documenta la clasificación; X1–X4/X9 re-tipados como
+             límites; Z1→P10. VARIANTE 3. P21 hecho. check 46 reglas, test
+             61/61. Header v5.84.
+             FRENTE RESULTANTE: solo P10 (playtest — Studio) y P20 (deuda
+             declarada del PO). El programa de MODELADO queda SIN pasos
+             ejecutables por el agente: lo que resta es del PO (verificación
+             ontológica, playtest) o su nivel adquirido (diversidad P20).
+             NO CIERRA: la capa ontológica (Z1, X1–X4, X9, X17) no se cierra
+             —es inherente (§2.10)—; se ACOTA (detector + PO). El agente
+             agotó lo lingüísticamente mecanizable.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §2.10
+Libre:       —
+Referencias: §2.8, §2.10, §5.12, DL-060, DL-092, DL-096, DL-106
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

@@ -562,7 +562,7 @@ local cases = {
 		name = "plan_uncovered_debt",
 		expect = "✗ plan_uncovered_debt",
 		apply = function()
-			replaceOnce(MASTER, "| P12 | Z1 · X1 · X2 · X3 · X4 · X9 | pendiente |", "| P12 | Z1 · X1 · X2 · X3 · X4 | pendiente |")
+			replaceOnce(MASTER, "| P7 | D20 · X17 · Z4 · Z1 | pendiente |", "| P7 | D20 · X17 · Z4 | pendiente |")
 		end,
 	},
 	{
