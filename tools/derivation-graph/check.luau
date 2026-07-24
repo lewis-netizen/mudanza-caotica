@@ -1625,6 +1625,41 @@ if table.find(process.args, "--provenance") then
 	end
 	print(string.format("\n  %d claim(s) con términos flotantes — cada uno: premisa colada O sinonimia no modelada.", flaggedTotal))
 
+	-- AUDITORÍA DE BLOQUEOS (X9, DL-102). Un claim marcado «— bloqueado»
+	-- afirma que le falta una premisa (una elección, un postulado). Pero un
+	-- bloqueo es legítimo solo si NINGUNA combinación de premisas DISPONIBLES
+	-- cubre su conclusión. Aquí se computa el pool completo —todos los axiomas,
+	-- todos los claims, MT0 y meta-leyes— y se pregunta: ¿sus términos ya
+	-- cubren la conclusión del bloqueado? Si sí, la frontera es sospechosa:
+	-- las premisas existen y no se buscaron (X9 — el caso de D18). DETECTOR,
+	-- no reja: cobertura léxica es necesaria, no suficiente (§2.10 ontológico).
+	local poolTerms = {}
+	for ref, txt in pairs(nodeText) do
+		if ref:match("^C") or ref:match("^D%d+$") or ref == "MT0" or ref:match("^M%d+$") then
+			for t in pairs(termsIn(txt)) do
+				poolTerms[t] = true
+			end
+		end
+	end
+	local blockedAudit = 0
+	for _, id in ipairs(ids) do
+		if designClaims[id].deriv:match("^—%s*bloqueado") then
+			local uncovered = {}
+			for t in pairs(termsIn(nodeText[id])) do
+				if not poolTerms[t] then
+					table.insert(uncovered, t)
+				end
+			end
+			if #uncovered == 0 then
+				blockedAudit += 1
+				print(string.format("\n  ⚠ X9 %s: BLOQUEADO pero el pool de premisas cubre su conclusión — la frontera puede ser búsqueda incompleta (revisar si D18/DL-080).", id))
+			end
+		end
+	end
+	if blockedAudit == 0 then
+		print("\n  Auditoría de bloqueos: ningún claim bloqueado con premisas ya disponibles (X9 limpio).")
+	end
+
 	-- COLA DE REFINAMIENTO (DL-078). El movimiento de CEGAR: la brecha entre
 	-- lo modelado y lo real dirige qué definir después. El orden es por
 	-- frecuencia — el término más usado gana más cobertura al definirse, que

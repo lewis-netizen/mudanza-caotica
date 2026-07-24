@@ -105,6 +105,23 @@ local cases = {
 		apply = function() end,
 	},
 	{
+		-- X9 (DL-102): re-bloquear D18 —el caso histórico de DL-080— y exigir
+		-- que la auditoría de bloqueos lo cace: el pool [D17]+[MT0] ya cubre su
+		-- conclusión, luego la frontera era búsqueda incompleta. Valida el
+		-- detector contra la instancia real que un agente marcó mal.
+		name = "X9: bloqueo con premisas ya disponibles (regresión D18)",
+		mode = "--provenance",
+		expect = "⚠ X9 D18",
+		expectPass = true,
+		apply = function()
+			replaceOnce(
+				MASTER,
+				"| Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-COMP · [D17] + [MT0]",
+				"| Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: exige un postulado"
+			)
+		end,
+	},
+	{
 		-- El detector RESPONDE: un término en la conclusión que ninguna premisa
 		-- aporta debe flotar. Sin este caso, un detector que nunca marca nada
 		-- pasaría la línea base por estar roto.

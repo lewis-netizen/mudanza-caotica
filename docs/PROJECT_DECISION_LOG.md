@@ -5300,4 +5300,58 @@ Libre:       Curva de degradación (0.5 y 1 son la razón; el playtest puede
 Referencias: §2.8, §4.13, §3.0, DL-046, DL-047, DL-092, DL-099
 ```
 
+### DL-102
+
+```
+ID:          DL-102
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P11 — mecanizar la detección de X9 (búsqueda incompleta
+             presentada como frontera). El caso real fue D18 (DL-080):
+             marcado «bloqueado, exige un postulado» cuando derivaba de
+             [D17]+[MT0], premisas que ya existían. El PO lo cazó por el olor
+             de una palabra; el aparato no.
+Contenido:   Auditoría de bloqueos en --provenance: para cada claim «—
+             bloqueado», se computa el POOL COMPLETO de premisas disponibles
+             (todos los axiomas, todos los claims, MT0, meta-leyes) y se
+             pregunta si sus términos ya cubren la conclusión del bloqueado.
+             Si la cubren, la frontera es sospechosa: las premisas existen y
+             no se buscaron (X9).
+             DISCIPLINA CEGAR RESPETADA: hay 0 claims bloqueados ahora, luego
+             ningún contraejemplo VIVO. No se construye un refinador en el
+             aire: se VALIDA contra la instancia HISTÓRICA. La mutación
+             re-bloquea D18 con el texto exacto de DL-080 y exige que la
+             auditoría lo cace. Cae: el pool [D17]+[MT0] cubre su conclusión.
+             El mecanismo queda probado contra el defecto que un agente
+             cometió, no contra uno inventado.
+             DETECTOR, no reja (§2.10): la cobertura léxica del pool es
+             NECESARIA, no suficiente —una premisa puede cubrir los términos
+             sin sostener la inferencia—. Por eso no gatea; empuja. X9 sigue
+             en zona Z1 (ontológico): el detector halla la instancia, no
+             previene la clase. Igual que --provenance con X1.
+Hipótesis:   Un bloqueo es legítimo solo si el pool de premisas no cubre la
+             conclusión; hacer esa cobertura computable convierte «declaré una
+             frontera» en «declaré una frontera Y el pool no la cubre»,
+             cazando la delegación indebida al PO en el momento en que se
+             escribe.
+Razón:       CONTINGENCY P5 — P11 en autonomía (PO, 2026-07-23).
+Impacto:     Auditoría de bloqueos en --provenance; mutación de regresión D18;
+             X9 anota el detector (sigue en Z1). P11 hecho; desbloquea P15
+             (junto con P12). check 44 reglas, test 57/57. Header v5.79.
+             NO CIERRA: 0 bloqueados hoy = salida vacía. El detector está
+             ARMADO para el futuro; su valor se realiza cuando un claim se
+             marque bloqueado y él verifique el bloqueo. Y es léxico: la
+             suficiencia semántica sigue siendo del PO (implementación diversa,
+             M11).
+Ejecución:   CONFIRM
+Costo:       C2
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, §2.10, §3.0, DL-076, DL-080, DL-075
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
