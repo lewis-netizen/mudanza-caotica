@@ -113,11 +113,23 @@ local cases = {
 		-- «ventaja» flota en D11 y vive en D15/D16, luego REDUCIBLE—. Fija ese
 		-- comportamiento: si el triaje deja de ver dónde vive el término, la
 		-- metaherramienta perdió su valor.
-		name = "triaje MT0 clasifica REDUCIBLE (ventaja vive en D15)",
+		name = "triaje MT0 clasifica REDUCIBLE (progresión vive en D15)",
 		mode = "--provenance",
-		expect = "ventaja → REDUCIBLE",
+		expect = "progresión → REDUCIBLE",
 		expectPass = true,
 		apply = function() end,
+	},
+	{
+		-- X2 deóntica (DL-106): re-anclar D11 a solo C1a —el defecto que un
+		-- agente cometió en DL-069— debe disparar la auditoría: una prohibición
+		-- («ninguna… otorga») desde un axioma descriptivo es el salto ser→deber.
+		name = "X2: prohibición desde premisa descriptiva (regresión D11)",
+		mode = "--provenance",
+		expect = "⚠ X2 D11",
+		expectPass = true,
+		apply = function()
+			replaceOnce(MASTER, "no por la interacción. | R-COMP · C1a + [Expresión sobre Ventaja] |", "no por la interacción. | R-ESP · C1a |")
+		end,
 	},
 	{
 		name = "X9: bloqueo con premisas ya disponibles (regresión D18)",

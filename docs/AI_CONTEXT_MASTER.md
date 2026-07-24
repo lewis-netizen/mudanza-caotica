@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.81 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.82 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -343,7 +343,7 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | ID | Clase de error | Hallado en | Resolución |
 |---|---|---|---|
 | X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069); D4 acoplamiento hallado por `--provenance` (DL-075); D8 → faltaba C1a, corregido; D6 → depende de §2.3 (Object/demanda), localizado (DL-076) | zona: Z1 |
-| X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) | zona: Z1 |
+| X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) (auditoría deóntica de --provenance caza el salto ser→deber, DL-106; cazó D11) | zona: Z1 |
 | X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | zona: Z1 |
 | X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068). Instancia regresión-probada por `vocab_banned_term` (DL-074); la clase general (colisiones no declaradas) sigue en Z1 | zona: Z1 |
 | X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | regla: contract_missing |
@@ -354,11 +354,11 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 | X16 | **Arnés de mutación fuera del gate de pre-commit**: solo el check bloqueaba localmente; una mutación rota (ancla muerta, regla sin mutación) pasaba el commit y solo CI la cazaba | ancla de undeclared_free colisionó con DL-099 real y el commit paso local (DL-100) | regla: contract-validator-mutations en lefthook |
 | X15 | **Pipe sin escapar dentro de una celda de tabla**: el parser lo lee como separador de columna → misparse silencioso | «Cierre cerrado/abierto» en la descripción de §5.0 partía la fila en 4 columnas; más dos derivas de §2.9 y una fila de complejidad mal cerrada (DL-095) | regla: table_shape |
 | X14 | **Guardián decorativo**: una regla enciende en el reporte pero su conteo no suma al total — aparenta cobertura y deja pasar el build | ocurrió DOS veces en una sesión (`vocab_malformed`, `contract_missing`): la regla existía, su mutación existía, y el build seguía verde (DL-092) | regla: auto-chequeo del runner (M11) |
-| X13 | **Defecto auto-consistente**: la falsificación que hace pasar al verificador Y a sus mutaciones — indetectable por auto-verificación (Thompson) | el agente confló `capacidad` con `demanda` para que el detector diera 0: pasó el check y pasaron los tests; lo cazó el PO (DL-085, DL-091). Igual la autoridad sobre sinónimos y sobre el aparato | zona: Z1 |
-| X12 | **Completitud del aparato indecidible**: la adecuación por mutación es relativa por construcción y el mutante equivalente es NP-completo, luego «¿falta algo en el metanivel?» no se infiere | ninguna instancia concreta — es un límite, no un defecto; se acota declarando y encogiendo la TCB (DL-090) | zona: Z1 |
+| X13 | **Defecto auto-consistente**: la falsificación que hace pasar al verificador Y a sus mutaciones — indetectable por auto-verificación (Thompson) | el agente confló `capacidad` con `demanda` para que el detector diera 0: pasó el check y pasaron los tests; lo cazó el PO (DL-085, DL-091). Igual la autoridad sobre sinónimos y sobre el aparato | límite: defecto auto-consistente (Thompson) — la diversidad del PO es la única defensa (M11) |
+| X12 | **Completitud del aparato indecidible**: la adecuación por mutación es relativa por construcción y el mutante equivalente es NP-completo, luego «¿falta algo en el metanivel?» no se infiere | ninguna instancia concreta — es un límite, no un defecto; se acota declarando y encogiendo la TCB (DL-090) | límite: completitud indecidible (mutación relativa; equivalente NP-completo) — se acota con la TCB (DL-090) |
 | X11 | **Modo del validador sin cobertura de mutación**: M9 solo alcanza las reglas del reporte por defecto, luego `--provenance`, `--sensitivity` y `--seals` no tenían ni un test | los tres defectos de aparato de la sesión vivían ahí y los halló un agente leyendo salida, no el aparato (DL-088) | regla: los tres modos con línea base en test.luau (DL-089) |
 | X10 | **Coincidencia léxica sin frontera de palabra**: un término casa dentro de otro y produce un flotante falso | `entidad` casaba dentro de `identidad` y marcaba a D16 (DL-082) | regla: --provenance con frontera UTF-8 |
-| X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | zona: Z1 |
+| X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | límite: ceguera del instrumento — inherente, se acota midiendo cobertura (DL-078), no se cierra |
 
 **Historial de zonas cerradas (DL-072)** — una zona cerrada sale del registro vigente, y sin este historial sus eventos de apertura y cierre sobrevivirían solo en prosa. Con `Abierta por` en el registro y esta tabla, **descubrimiento y cierre se vuelven eventos distinguibles**, que es lo que la variante necesita para significar convergencia en vez de resolución del instrumento. Como el registro de escapes: es **memoria y no gobierna nada**.
 
@@ -462,7 +462,7 @@ Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, 
 | D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone lo que no emana de la entidad. | R-COMP · [D23] + C1a + C3 | 28e853 | DL-093 |
 | D9 | §3.3 | La escasez vuelve inevitable la decisión compartida: sin recursos para todo, qué salvar se elige en conjunto. | R-ELEC · C2′ + E11 | 4ac818 | DL-094 |
 | D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C1a + E2 | 4a98c3 | DL-069 |
-| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
+| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-COMP · C1a + [Expresión sobre Ventaja] | dd790a | DL-069 |
 | D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-COMP · C1b + [Object] — el valor reside en la interdependencia, no en la cosa | fea1c9 | DL-068 |
 | D13 | §3.5 | Una mecánica que afecta solo al individuo no produce valor y no entra. | R-COMP · C1b + [Simplicidad Mecánica] | 7b1a32 | DL-069 |
 | D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b | DL-063 |
@@ -1816,11 +1816,11 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 · X9 | hecho (DL-103) |
 | P13 | Mitad de obligación de Z4: acto declarativo Resello (el delta NO deriva la obligación — DL-093; el residuo es ontológico) | — | Z4 | hecho (DL-104) |
 | P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
-| P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
+| P15 | Enforcement de las clases de escape: X2 deóntica mecanizada; X8/X12/X13 re-tipados como límites (no deuda); resto ontológico (no admite regla) | P12 | X3 · X4 · X8 | hecho (DL-106) |
 | P16 | §2.2 (Test Oficial) tipado como conformance M1→M2: deja de fundar desde prosa (M4) | P1 | DL-061 | hecho (DL-097) |
 | P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | hecho (DL-101) |
 | P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X12 · X13 | deuda declarada (PO 2026-07-23) |
-| P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | Z1 · X1 · X2 · X9 | pendiente |
+| P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | Z1 · X1 · X2 · X3 · X4 · X9 | pendiente |
 | P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma | — | X12 | hecho (DL-095) |
 | P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pospuesto (PO 2026-07-23) |
 

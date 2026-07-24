@@ -5471,4 +5471,57 @@ Libre:       —
 Referencias: §2.8, §2.10, §3.0, DL-053, DL-063, DL-073, DL-093
 ```
 
+### DL-106
+
+```
+ID:          DL-106
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    P15 — «dar regla a las clases de escape que no la tienen». Al
+             examinarlas, la premisa de P15 se refuta (como P13): la mayoría
+             de los escapes son ONTOLÓGICOS (X1, X3, X4-general, X17) o
+             LÍMITES INHERENTES (X8 ceguera, X12 completitud, X13 Thompson).
+             Un límite no es deuda-pendiente-de-regla: es la naturaleza del
+             problema. Que sean escapes ES porque el aparato lingüístico no
+             los caza (§2.10).
+Contenido:   (1) TIPO «límite:» en el registro de escapes. X8/X12/X13 pasan
+             de «zona: Z1» a «límite: …» — inherentes, no admiten regla. La
+             variante y plan_uncovered_debt los EXCLUYEN: un límite no es
+             deuda. VARIANTE 11 → 9 (bajada legítima: nunca fueron defectos
+             resolubles, solo estaban mal contados).
+             (2) LA ÚNICA CLASE MECANIZABLE: X2, el salto ser→deber (Hume).
+             Auditoría deóntica en --provenance: una conclusión PROHIBITIVA
+             («prohibid…», «no puede», «ninguna… otorga») debe citar una
+             premisa que CARGUE la norma —C3, una elección, un principio §2.1
+             o un claim prohibitivo—. Si todas son descriptivas, es el salto.
+             CAZÓ D11, un defecto que el agente introdujo en DL-069: «ninguna
+             progresión otorga ventaja» derivaba de R-ESP · C1a (descriptivo);
+             el razonamiento anti-poder estaba INLINE como comentario en vez
+             de citar [Expresión sobre Ventaja]. Corregido a R-COMP · C1a +
+             [Expresión sobre Ventaja]: C1a cubre «interacción», el principio
+             carga la prohibición. Es la lógica deóntica que §2.10 anticipó.
+             DETECTOR, no reja: el marcador léxico de prohibición tiene falsos
+             positivos; empuja, no gatea.
+Hipótesis:   Distinguir límite de deuda deja de inflar la variante con lo
+             inherente; y la única clase deóntica sí mecanizable cierra el
+             hueco ser→deber que el resto de escapes, por ontológicos, no
+             pueden cerrar.
+Razón:       CONTINGENCY P5 — P15 en autonomía (PO, 2026-07-23).
+Impacto:     Tipo límite: en el registro; X8/X12/X13 re-tipados; auditoría
+             deóntica (X2) en --provenance; D11 corregido. VARIANTE 9. P15
+             hecho. check 45 reglas, test 60/60. Header v5.82.
+             NO CIERRA: X1/X3/X4-general/X17 siguen ontológicos (detector-
+             asistidos, en Z1). P15 no les dio regla porque NO PUEDEN
+             tenerla — ese es el hallazgo, no un pendiente.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8, §3.0
+Libre:       —
+Referencias: §2.8, §2.10, §3.0, DL-069, DL-078, DL-090, DL-091
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

@@ -1367,7 +1367,7 @@ do
 		end
 	end
 	for x, e in pairs(escapes) do
-		if not e.resol:match("^regla:") then
+		if not e.resol:match("^regla:") and not e.resol:match("^límite:") then
 			table.insert(debt, x)
 		end
 	end
@@ -1396,7 +1396,8 @@ for _, c in pairs(designClaims) do
 	end
 end
 for _, x in pairs(escapes) do
-	if not x.resol:match("^regla:") then
+	-- un límite inherente (DL-106) no es deuda: no cuenta en la variante.
+	if not x.resol:match("^regla:") and not x.resol:match("^límite:") then
 		variantEscapes += 1
 	end
 end
@@ -1745,6 +1746,59 @@ if table.find(process.args, "--provenance") then
 		print("\n  Auditoría de bloqueos: ningún claim bloqueado con premisas ya disponibles (X9 limpio).")
 	end
 
+	-- AUDITORÍA DEÓNTICA (X2, P15, DL-106). El salto ser→deber (Hume): una
+	-- conclusión PROHIBITIVA no puede derivar solo de premisas DESCRIPTIVAS.
+	-- Un claim cuyo enunciado prohíbe («prohibid…», «no puede», «no entra»,
+	-- «nunca…») debe citar una premisa que CARGUE la norma: C3 (restricción),
+	-- una elección (E-n), un principio §2.1, u otro claim prohibitivo. Si
+	-- todas sus premisas son descriptivas (C1a/C1b/C2′, claims no
+	-- prohibitivos), es el salto modal. DETECTOR (léxico, §2.10), no reja.
+	local function isProhibitive(txt)
+		if not txt then
+			return false
+		end
+		return txt:find("prohibid", 1, true) ~= nil
+			or txt:find("no puede", 1, true) ~= nil
+			or txt:find("no entra", 1, true) ~= nil
+			or txt:find("no castiga", 1, true) ~= nil
+			or txt:find("nunca", 1, true) ~= nil
+			or txt:find("ninguna", 1, true) ~= nil
+			or txt:find("impide", 1, true) ~= nil
+	end
+	local deonticFlags = 0
+	for _, id in ipairs(ids) do
+		local c = designClaims[id]
+		if isProhibitive((c.enunciado or ""):lower()) and not c.deriv:match("^—") then
+			local premStr = c.deriv:match("·%s*(.+)$")
+			if premStr then
+				premStr = (premStr:gsub(" — .*$", ""))
+				local grounded = false
+				for tok in premStr:gmatch("[^+]+") do
+					tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+					local ref = tok:match("^%[(.+)%]$") or tok
+					-- C3 (restricción), elección, principio §2.1 (claim no-D),
+					-- u otro claim prohibitivo → carga la norma.
+					if ref == "C3" or ref:match("^E%d+$") then
+						grounded = true
+					elseif ref:match("^D%d+$") then
+						if isProhibitive((designClaims[ref] and designClaims[ref].enunciado or ""):lower()) then
+							grounded = true
+						end
+					elseif f8Claims[ref] and not ref:match("^D%d+$") then
+						grounded = true -- principio §2.1 (normativo por ratificación)
+					end
+				end
+				if not grounded then
+					deonticFlags += 1
+					print(string.format("\n  ⚠ X2 %s: conclusión PROHIBITIVA sin premisa que cargue la norma (C3/elección/principio) — posible salto ser→deber.", id))
+				end
+			end
+		end
+	end
+	if deonticFlags == 0 then
+		print("\n  Auditoría deóntica: ninguna prohibición desde solo premisas descriptivas (X2 limpio).")
+	end
+
 	-- COLA DE REFINAMIENTO (DL-078). El movimiento de CEGAR: la brecha entre
 	-- lo modelado y lo real dirige qué definir después. El orden es por
 	-- frecuencia — el término más usado gana más cobertura al definirse, que
@@ -2083,6 +2137,11 @@ do
 		else
 			local regla = x.resol:match("^regla: (%S+)$")
 			local zona = x.resol:match("^zona: (Z%d+)$")
+			-- «límite:» (DL-106) — una clase de escape que es INHERENTE, no un
+			-- defecto pendiente: la ceguera del instrumento (X8), la
+			-- completitud indecidible (X12), el defecto auto-consistente de
+			-- Thompson (X13). No admite regla por naturaleza, y no es deuda.
+			local limite = x.resol:match("^límite: (.+)$")
 			if regla then
 				if not emittedRules[regla] then
 					table.insert(escapeUnresolved, id .. " → regla \"" .. regla .. "\" no existe")
@@ -2091,8 +2150,8 @@ do
 				if not zones[zona] then
 					table.insert(escapeUnresolved, id .. " → zona " .. zona .. " no registrada")
 				end
-			else
-				table.insert(escapeUnresolved, id .. " → resolución no es `regla: X` ni `zona: Z-n`")
+			elseif not limite then
+				table.insert(escapeUnresolved, id .. " → resolución no es `regla: X`, `zona: Z-n` ni `límite: …`")
 			end
 		end
 	end
