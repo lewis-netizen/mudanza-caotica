@@ -23,6 +23,14 @@ rules:
   subject-case:
     - 0
 
+  # Header hasta 120 — los subjects de gobernanza citan DL-xxx + resumen
+  # multi-cláusula. Consistente con body/footer=0: se optó por mensajes
+  # descriptivos. 120 mantiene el header escaneable sin cortar el DL-ref.
+  header-max-length:
+    - 2
+    - always
+    - 120
+
   # No length limit on body — reason: field can be detailed
   body-max-line-length:
     - 0

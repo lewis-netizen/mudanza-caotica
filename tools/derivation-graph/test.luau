@@ -14,6 +14,7 @@ local LOG = "docs/PROJECT_DECISION_LOG.md"
 local MASTER = "docs/AI_CONTEXT_MASTER.md"
 local TICKETS = "docs/TICKETS.md"
 local DEFER = "tools/derivation-graph/deferrals.txt"
+local CHECK = "tools/derivation-graph/check.luau"
 
 local function rmrf(path)
 	if fs.isDir(path) then
@@ -61,6 +62,105 @@ end
 local cases = {
 	{ name = "control — el corpus real pasa", expect = nil, apply = function() end },
 	{
+		-- LÍNEA BASE DEL DETECTOR. Fija su veredicto sobre el corpus real: si
+		-- un cambio del aparato altera cómo casa términos —como la coincidencia
+		-- por subcadena que marcaba a D16 (X10)— el conteo se mueve y esto
+		-- falla. Cambiar el veredicto del detector pasa a ser un acto declarado
+		-- (se actualiza esta cifra en el diff), no un efecto colateral.
+		name = "línea base de --provenance (veredicto pinneado)",
+		mode = "--provenance",
+		expect = "5 claim(s) con términos flotantes",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
+		-- MUTACIÓN DEL APARATO, no del corpus. Las dos reglas guardianas se
+		-- comprueban antes de reportarse: sin su pre-registro se auto-eximen y
+		-- un guardián exento de su propia guardia no guarda (DL-087). Quitarlo
+		-- debe encender rule_missing — declaradas en §5.12 y no emitidas.
+		name = "guardián auto-eximido (regresión de DL-087)",
+		expect = "✗ rule_missing",
+		apply = function()
+			replaceOnce(CHECK, '\temittedRules["rule_missing"] = true\n', "")
+		end,
+	},
+	{
+		-- Línea base de --seals: el sello es la identidad del enunciado. Si el
+		-- hash cambiara sin que cambie el texto, todo el mecanismo de DL-063
+		-- mentiría en silencio.
+		name = "línea base de --seals",
+		mode = "--seals",
+		expect = "D1   a6ec39",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
+		-- Línea base de --sensitivity: el radio de explosión de C1b. Mide qué
+		-- sostiene el axioma; un cambio silencioso en el cierre transitivo lo
+		-- falsearía sin que nada más lo note.
+		name = "línea base de --sensitivity",
+		mode = "--sensitivity",
+		expect = "axioma    14",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
+		-- X9 (DL-102): re-bloquear D18 —el caso histórico de DL-080— y exigir
+		-- que la auditoría de bloqueos lo cace: el pool [D17]+[MT0] ya cubre su
+		-- conclusión, luego la frontera era búsqueda incompleta. Valida el
+		-- detector contra la instancia real que un agente marcó mal.
+		-- Triaje MT0 (DL-103): el clasificador debe reunir la evidencia —
+		-- «ventaja» flota en D11 y vive en D15/D16, luego REDUCIBLE—. Fija ese
+		-- comportamiento: si el triaje deja de ver dónde vive el término, la
+		-- metaherramienta perdió su valor.
+		name = "triaje MT0 clasifica REDUCIBLE (progresión vive en D15)",
+		mode = "--provenance",
+		expect = "progresión → REDUCIBLE",
+		expectPass = true,
+		apply = function() end,
+	},
+	{
+		-- X2 deóntica (DL-106): re-anclar D11 a solo C1a —el defecto que un
+		-- agente cometió en DL-069— debe disparar la auditoría: una prohibición
+		-- («ninguna… otorga») desde un axioma descriptivo es el salto ser→deber.
+		name = "X2: prohibición desde premisa descriptiva (regresión D11)",
+		mode = "--provenance",
+		expect = "⚠ X2 D11",
+		expectPass = true,
+		apply = function()
+			replaceOnce(MASTER, "no por la interacción. | R-COMP · C1a + [Expresión sobre Ventaja] |", "no por la interacción. | R-ESP · C1a |")
+		end,
+	},
+	{
+		name = "X9: bloqueo con premisas ya disponibles (regresión D18)",
+		mode = "--provenance",
+		expect = "⚠ X9 D18",
+		expectPass = true,
+		apply = function()
+			replaceOnce(
+				MASTER,
+				"| Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-COMP · [D17] + [MT0]",
+				"| Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: exige un postulado"
+			)
+		end,
+	},
+	{
+		-- El detector RESPONDE: un término en la conclusión que ninguna premisa
+		-- aporta debe flotar. Sin este caso, un detector que nunca marca nada
+		-- pasaría la línea base por estar roto.
+		name = "--provenance responde a un término sin premisa",
+		mode = "--provenance",
+		expect = "6 claim(s) con términos flotantes",
+		expectPass = true,
+		apply = function()
+			replaceOnce(
+				MASTER,
+				"El reto del loop vive en la decisión compartida, no en la ejecución individual.",
+				"El reto del loop vive en la decisión compartida y en la sincronía, no en la ejecución individual."
+			)
+		end,
+	},
+	{
 		name = "dangling",
 		expect = "✗ dangling",
 		apply = function()
@@ -82,10 +182,14 @@ local cases = {
 		end,
 	},
 	{
+		-- Tras P17 (DL-101) deferrals.txt está vacío, así que la mutación
+		-- FABRICA su caso: un DL que afecta a GAM-001 (que no lo cita → stale)
+		-- + un diferimiento VENCIDO para ese par.
 		name = "diferimiento VENCIDO",
 		expect = "✗ diferimiento VENCIDO",
 		apply = function()
-			replaceOnce(DEFER, "GAM-005 DL-046 DL-046 2026-08-11", "GAM-005 DL-046 DL-046 2026-01-01")
+			append(LOG, dlBlock("141", "Ticket:      GAM-001"))
+			append(DEFER, "GAM-001 DL-141 test 2026-01-01\n")
 		end,
 	},
 	{
@@ -130,7 +234,7 @@ local cases = {
 		name = "undeclared_free",
 		expect = "✗ undeclared_free",
 		apply = function()
-			append(LOG, dlBlock("093", "Modifica:    §5.0\nReferencias: §5.0"))
+			append(LOG, dlBlock("140", "Modifica:    §5.0\nReferencias: §5.0"))
 		end,
 	},
 	{
@@ -244,13 +348,23 @@ local cases = {
 		name = "axis_malformed",
 		expect = "✗ axis_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| cerrado |\n| A2 |", "| quizás |\n| A2 |")
+			replaceOnce(MASTER, "| cerrado — 2×2 de (alineados? × opuestos?) |", "| quizás |")
 		end,
 	},
 	{
 		-- Un eje con un solo valor no es una elección: es una consecuencia
 		-- disfrazada de elección. Sin esta regla, "elegí X" pasaría aunque X
 		-- fuera lo único posible — y el registro mentiría sobre qué es libre.
+		-- Z6 (DL-107): un eje `cerrado` sin justificación de partición es
+		-- «enumerado por inspección» — la aserción que Z6 nombraba. Quitar la
+		-- justificación de A10 lo dispara.
+		name = "closure_unjustified (cerrado sin partición)",
+		expect = "✗ closure_unjustified",
+		apply = function()
+			replaceOnce(MASTER, "| `binaria` · `graduada` | cerrado — dicotomía: exactamente-2 vs más-de-2 |", "| `binaria` · `graduada` | cerrado |")
+		end,
+	},
+	{
 		name = "axis_domain_thin (eje de un solo valor)",
 		expect = "✗ axis_domain_thin",
 		apply = function()
@@ -309,7 +423,7 @@ local cases = {
 		name = "zone_malformed (zona sin Tipo MT0)",
 		expect = "✗ zone_malformed",
 		apply = function()
-			replaceOnce(MASTER, "| formalizable pendiente |", "| |")
+			replaceOnce(MASTER, "| relación → máquina (deuda) |", "| |")
 		end,
 	},
 	{
@@ -332,8 +446,8 @@ local cases = {
 		apply = function()
 			replaceOnce(
 				MASTER,
-				"derivar la obligación del cambio | 2026-08-11 |",
-				"derivar la obligación del cambio | 2026-01-01 |"
+				"Re-tipar → PO | 2026-08-11 |",
+				"Re-tipar → PO | 2026-01-01 |"
 			)
 		end,
 	},
@@ -342,17 +456,73 @@ local cases = {
 		-- sin nombrar ningún ID, y nada lo detectaba.
 		-- Regresión exacta de X4: reintroduce la colisión de vocabulario que
 		-- se corrigió a mano en DL-068. Ahora la caza la máquina.
+		-- Un ticket anclado en prosa de diseño (§3.x, no normativa) sin el
+		-- claim que la funda: el M4 al nivel de ticket. Quitar el ancla D-n
+		-- de un ticket que cita §3.x lo dispara.
+		name = "ticket_design_prose (ancla en §3.x sin claim)",
+		expect = "✗ ticket_design_prose",
+		apply = function()
+			replaceOnce(TICKETS, "+ §3.4 (Entropía Social) [D10]", "+ §3.4 (Entropía Social)")
+		end,
+	},
+	{
+		-- Un DL que selló claims sin declarar la naturaleza del cambio: la
+		-- obligación (¿re-implementar?) queda sin acto declarado. Quitar el
+		-- Resello de DL-093 (el resello cosmético) lo dispara.
+		name = "reseal_undeclared (sella §3.0 sin Resello)",
+		expect = "✗ reseal_undeclared",
+		apply = function()
+			replaceOnce(LOG, "Resello:     cosmético", "")
+		end,
+	},
+	{
+		-- La inversa del gluing: un sistema nuevo en src/server/ que ningún
+		-- claim requiere es herencia no derivada. Es la preocupación del
+		-- inicio de sesión, ahora imposible de reintroducir en silencio.
+		name = "module_underived (sistema sin claim que lo pida)",
+		expect = "✗ module_underived",
+		apply = function()
+			write("src/server/OverlordManager.lua", "return {}\n")
+		end,
+	},
+	{
+		-- El misparse silencioso, cazado en forma general: una fila con más
+		-- columnas que su cabecera. Así se colaron X10 y las dos derivas de
+		-- §2.9. Un | sin escapar dentro de una celda lo dispara.
+		name = "table_shape (columna corrida en cualquier tabla)",
+		expect = "✗ table_shape",
+		apply = function()
+			replaceOnce(MASTER, "| Contrato | Invariante | Mecanismo |", "| Contrato | Invariante | Mecanismo | X |")
+		end,
+	},
+	{
+		-- El primer chequeo que cruza de documento a código: la deriva
+		-- declaración↔implementación (X5) deja de poder reintroducirse.
+		name = "contract_missing (función declarada y ausente)",
+		expect = "✗ contract_missing",
+		apply = function()
+			replaceOnce("src/shared/Rules/CarryRules.lua", "function CarryRules.carryEfficiency", "function CarryRules.carryEficiencia")
+		end,
+	},
+	{
+		name = "vocab_malformed (celda corrida en §2.9)",
+		expect = "✗ vocab_malformed",
+		apply = function()
+			replaceOnce(MASTER, "| interacción | predicado |", "| interacción | predicado | extra |")
+		end,
+	},
+	{
 		name = "vocab_banned_term (regresión de X4)",
 		expect = "✗ vocab_banned_term",
 		apply = function()
-			replaceOnce(MASTER, "El espacio acopla por contención: rival y pervasivo.", "El espacio acopla por contención: acoplamiento negativo y pervasivo.")
+			replaceOnce(MASTER, "El espacio acopla por interferencia: rival y pervasivo.", "El espacio acopla por interferencia: acoplamiento negativo y pervasivo.")
 		end,
 	},
 	{
 		name = "seal_unprovenanced",
 		expect = "✗ seal_unprovenanced",
 		apply = function()
-			replaceOnce(MASTER, "| 677030 | DL-063 |", "| 677030 | |")
+			replaceOnce(MASTER, "| 67816b | DL-093 |", "| 67816b | |")
 		end,
 	},
 	{
@@ -362,14 +532,51 @@ local cases = {
 		name = "seal_provenance_inconsistent (procedencia que miente)",
 		expect = "✗ seal_provenance_inconsistent",
 		apply = function()
-			replaceOnce(MASTER, "| 677030 | DL-063 |", "| 677030 | DL-050 |")
+			replaceOnce(MASTER, "| 67816b | DL-093 |", "| 67816b | DL-050 |")
+		end,
+	},
+	{
+		-- Un plan cuyo paso depende de algo inexistente no ordena nada: es la
+		-- forma en que un plan vuelve a ser prosa sin avisar.
+		-- La única completitud que el plan admite probar: que ninguna deuda
+		-- YA DECLARADA quede sin paso. Frente a deuda no declarada sigue
+		-- ciego — eso es X8 y no se cierra con filas.
+		-- La asimetría en acción: borrar una regla del runner sin borrar su
+		-- declaración = el aflojamiento silencioso que §5.12 impide.
+		-- La otra mitad: emitir una regla sin declararla deja el registro
+		-- desincronizado, y un registro que no refleja el runner no guarda nada.
+		name = "rule_undeclared",
+		expect = "✗ rule_undeclared",
+		apply = function()
+			replaceOnce(MASTER, "blocked_claim_dangling · vocab_banned_term", "blocked_claim_dangling")
+		end,
+	},
+	{
+		name = "rule_missing (aflojar el aparato en silencio)",
+		expect = "✗ rule_missing",
+		apply = function()
+			replaceOnce(MASTER, "blocked_claim_dangling · vocab_banned_term", "blocked_claim_dangling · vocab_banned_term · regla_fantasma")
+		end,
+	},
+	{
+		name = "plan_uncovered_debt",
+		expect = "✗ plan_uncovered_debt",
+		apply = function()
+			replaceOnce(MASTER, "| P7 | D20 · X17 · Z4 · Z1 | pendiente |", "| P7 | D20 · X17 · Z4 | pendiente |")
+		end,
+	},
+	{
+		name = "plan_dangling",
+		expect = "✗ plan_dangling",
+		apply = function()
+			replaceOnce(MASTER, "| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 |", "| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P99 |")
 		end,
 	},
 	{
 		name = "blocked_claim_dangling (deuda que no apunta a nada)",
 		expect = "✗ blocked_claim_dangling",
 		apply = function()
-			replaceOnce(MASTER, "— bloqueado: la escasez es E11, sin ratificar", "— bloqueado: pendiente de decidir")
+			replaceOnce(MASTER, "| — empírico → playtest | ac7a1f |", "| — bloqueado: pendiente de decidir | ac7a1f |")
 		end,
 	},
 	{
@@ -415,8 +622,17 @@ local cases = {
 -- ── runner ──────────────────────────────────────────────────────────────────
 local exec = (process :: any).exec or (process :: any).spawn
 
-local function runCheck()
-	local r = exec("lune", { "run", "tools/derivation-graph/check.luau" }, { cwd = SANDBOX })
+-- Los MODOS (--provenance, --sensitivity, --seals) no tenían ninguna
+-- cobertura: M9 solo alcanza las reglas del reporte por defecto. Los tres
+-- defectos de aparato de esta sesión vivían ahí, en código que ningún test
+-- tocaba, y los halló un agente leyendo salida — la dependencia que el
+-- proyecto existe para eliminar (DL-088).
+local function runCheck(mode)
+	local args = { "run", "tools/derivation-graph/check.luau" }
+	if mode then
+		table.insert(args, mode)
+	end
+	local r = exec("lune", args, { cwd = SANDBOX })
 	return r.code, (r.stdout or "") .. (r.stderr or "")
 end
 
@@ -426,10 +642,13 @@ local failures = 0
 for _, case in ipairs(cases) do
 	freshSandbox()
 	case.apply()
-	local code, out = runCheck()
+	local code, out = runCheck(case.mode)
 	local ok
 	if case.expect == nil then
 		ok = (code == 0)
+	elseif case.expectPass then
+		-- los MODOS salen con 0: se juzga su salida, no su código.
+		ok = out:find(case.expect, 1, true) ~= nil
 	else
 		ok = (code ~= 0) and out:find(case.expect, 1, true) ~= nil
 	end

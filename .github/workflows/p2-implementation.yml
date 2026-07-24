@@ -398,6 +398,19 @@ jobs:
       - uses: actions/github-script@v9
         with:
           script: |
+            // Dependabot no puede añadir labels y sus PRs son bumps de
+            // VERSIÓN (actions, paquetes), no evolución de la lógica de
+            // enforcement —que vive en tools/derivation-graph/ y no la toca—.
+            // Sin esta exención, requerir el contrato bloquearía todo bump
+            // que edite .github/workflows/ (DL-105). El maintainer revisa el
+            // bump al mergear; la explicitud que DL-052 exige es para cambios
+            // DELIBERADOS del sistema formal, no para actualizaciones
+            // automáticas de dependencias.
+            const actor = context.payload.pull_request.user.login;
+            if (actor === 'dependabot[bot]') {
+              core.info('PR de dependabot (bump de versión): exento de enforcement-change.');
+              return;
+            }
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner: context.repo.owner,
               repo: context.repo.repo,

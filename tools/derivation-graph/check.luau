@@ -140,6 +140,84 @@ do
 	end
 end
 
+-- ── entidades como premisas citables (§2.3, DL-077) ─────────────────────────
+-- Las entidades fundamentales son PRIMITIVOS: nunca se derivaron (deuda de
+-- ontología conocida). Hacerlas citables no las deriva — hace VISIBLE que un
+-- claim se apoya en ellas, en vez de que la dependencia entre por debajo.
+local entities = {} -- nombre → texto de su bloque en §2.3
+do
+	local region, cur = nil, nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region, cur = (h:gsub("%.$", "")), nil
+		end
+		if region == "2.3" then
+			local name = line:match("^%*%*(%u%w+)%*%*")
+			if name then
+				cur = name
+				entities[cur] = line
+			elseif cur then
+				entities[cur] = entities[cur] .. " " .. line
+			end
+		end
+	end
+end
+
+-- ── plan del programa (§5.11, DL-079) ───────────────────────────────────────
+-- El orden dejó de vivir en prosa (la lección de DL-044): las dependencias se
+-- declaran y el FRENTE ACCIONABLE se computa. No gobierna — ordena y se lee.
+local planSteps = {} -- P-n → { trabajo, deps = {P-n}, estado }
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "5.11" then
+			local id = line:match("^| (P%d+) |")
+			if id then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local deps = {}
+				for d in (cells[3] or ""):gmatch("(P%d+)") do
+					table.insert(deps, d)
+				end
+				local salda = {}
+				for s in (cells[4] or ""):gmatch("([ZXD]%d+)") do
+					salda[s] = true
+				end
+				planSteps[id] = { trabajo = cells[2] or "", deps = deps, salda = salda, estado = cells[5] or "" }
+			end
+		end
+	end
+end
+local function planClosed(e)
+	return e:match("^hecho") ~= nil or e:match("^disuelto") ~= nil or e:match("^pospuesto") ~= nil
+end
+local planDangling = {}
+do
+	local ids = {}
+	for id in pairs(planSteps) do
+		table.insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do
+		local s = planSteps[id]
+		if s.trabajo == "" or s.estado == "" then
+			table.insert(planDangling, id .. " → trabajo o estado vacío")
+		end
+		for _, d in ipairs(s.deps) do
+			if not planSteps[d] then
+				table.insert(planDangling, id .. " → depende de " .. d .. ", que no existe")
+			end
+		end
+	end
+end
+
 -- ── diferimientos autorizados y acotados (DL-050) ───────────────────────────
 local deferrals = {} -- "ticket\0dl" → fecha límite YYYY-MM-DD
 do
@@ -335,6 +413,7 @@ table.sort(implLeak)
 -- de §3 = colisión léxica. Mismo patrón que impl_leak — scan de superficie,
 -- sin etiquetar qué claim usa qué término (eso sería dependencia de agente).
 -- Las formas se leen de §2.9, que NO se escanea (vive en §2).
+local vocabSurfaces = {} -- todas las formas modeladas (pref + sinónimos)
 local bannedForms = {} -- forma prohibida (minúsculas) → término preferido
 do
 	local region = nil
@@ -352,8 +431,326 @@ do
 			for form in (cells[4] or ""):gmatch("`([^`]+)`") do
 				bannedForms[form:lower()] = pref
 			end
+			-- superficies MODELADAS: lo único que el detector de procedencia
+			-- puede ver. Fuera de aquí está su ceguera (DL-078).
+			if pref ~= "" then
+				table.insert(vocabSurfaces, pref:lower())
+				for s in (cells[5] or ""):gmatch("`([^`]+)`") do
+					table.insert(vocabSurfaces, s:lower())
+				end
+			end
 		end
 	end
+end
+
+-- ── forma de TODA tabla del master (TCB, DL-095) ────────────────────────────
+-- El misparse silencioso es el riesgo dominante de la TCB: una columna
+-- corrida hace que un parser lea celdas equivocadas y dé veredictos falsos
+-- sin avisar. Ya pasó dos veces en §2.9.
+-- En vez de una regla por tabla, el invariante es general y se auto-mantiene:
+-- LA CABECERA DECLARA CUÁNTAS COLUMNAS HAY, y toda fila debe coincidir. Con
+-- esto la clase entera sale de la TCB, para las tablas que existen y las que
+-- se escriban después.
+-- Las barras escapadas (`\|`, p. ej. en firmas `"pickup"\|"drop"`) no separan.
+local tableShape = {}
+do
+	local function columnCount(line)
+		local n, i = 0, 1
+		while i <= #line do
+			local c = line:sub(i, i)
+			if c == "\\" then
+				i += 2
+			else
+				if c == "|" then
+					n += 1
+				end
+				i += 1
+			end
+		end
+		return n - 1
+	end
+	local inFence, expected, headerLine = false, nil, 0
+	local i = 0
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		i += 1
+		if line:match("^```") then
+			inFence = not inFence
+			expected = nil
+		elseif inFence then
+			-- dentro de un bloque de código no hay tablas
+		elseif line:match("^%s*|[%s%-:|]*$") then
+			-- fila separadora (solo barras, guiones, dos puntos): estructura,
+			-- no dato — ningún parser lee sus celdas, luego no es misparse.
+		elseif line:match("^%s*|") then
+			local n = columnCount(line)
+			if expected == nil then
+				expected, headerLine = n, i
+			elseif n ~= expected then
+				table.insert(
+					tableShape,
+					"L" .. i .. " → " .. n .. " columnas; la cabecera (L" .. headerLine .. ") declara " .. expected
+				)
+			end
+		else
+			expected = nil
+		end
+	end
+end
+
+-- ── naturaleza del re-sello (Z4 obligación, P13, DL-104) ────────────────────
+-- El sello (DL-063) hace VISIBLE que un claim cambió; «Sellado por» (DL-073)
+-- lo atribuye a un DL. La OBLIGACIÓN del cambio —¿exige re-implementar?— NO se
+-- deriva del delta textual: DL-093 reescribió 5 claims con delta enorme y
+-- CERO cambio de compromiso. Esa derivación es ONTOLÓGICA (§2.10).
+-- Lo decidible es el ACTO: todo DL que sella un claim de §3.0 declara la
+-- NATURALEZA del cambio (`Resello: nuevo | cosmético | normativo`). No valida
+-- que el juicio sea correcto —eso es del PO/agente (M11)— valida que se hizo,
+-- como undeclared_free. Un resello `normativo` marca que la realización del
+-- claim puede necesitar revisión (X17).
+local resealUndeclared = {}
+do
+	local sealers = {}
+	do
+		local region = nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region = (h:gsub("%.$", ""))
+			end
+			if region == "3.0" then
+				local dl = line:match("^| D%d+ | §3.-| (DL%-%d+) |%s*$")
+				if dl then
+					sealers[dl] = true
+				end
+			end
+		end
+	end
+	local declared = {}
+	do
+		local cur = nil
+		for _, line in ipairs(readLines("docs/PROJECT_DECISION_LOG.md")) do
+			local dl = line:match("^### (DL%-%d+)")
+			if dl then
+				cur = dl
+			end
+			local r = line:match("^Resello:%s*(%S+)")
+			if r and cur and (r == "nuevo" or r == "cosmético" or r == "normativo") then
+				declared[cur] = true
+			end
+		end
+	end
+	local ids = {}
+	for dl in pairs(sealers) do
+		table.insert(ids, dl)
+	end
+	table.sort(ids)
+	for _, dl in ipairs(ids) do
+		if not declared[dl] then
+			table.insert(resealUndeclared, dl .. " → sella claims de §3.0 sin declarar `Resello:` (nuevo|cosmético|normativo)")
+		end
+	end
+end
+
+-- ── ticket anclado en prosa de diseño (P9, DL-099) ──────────────────────────
+-- Desde DL-061 §3.1–§3.9 son COMENTARIO no normativo: la norma vive en los
+-- claims D-n (§3.0). Un ticket cuyo «Deriva de:» cita una sección §3.x sin
+-- citar el claim que esa sección comenta se ancla en prosa — el mismo M4 que
+-- §2.2 tenía. La norma la carga el claim, no la subsección. QA exento (hitos
+-- transversales, no implementan un claim). El «Deriva de:» conserva la prosa
+-- como contexto legible; solo se exige el ancla D-n junto a ella.
+local ticketDesignProse = {}
+do
+	local cur, derivaLine = nil, nil
+	for _, line in ipairs(readLines("docs/TICKETS.md")) do
+		local t = line:match("^### (%u+%-%d+)")
+		if t then
+			cur, derivaLine = t, nil
+		end
+		local dv = line:match("^Deriva de:%s*(.+)")
+		if dv and cur then
+			derivaLine = dv
+			if not cur:match("^QA%-") and dv:match("§3%.%d") and not dv:match("%f[%w]D%d+%f[%W]") then
+				table.insert(ticketDesignProse, cur .. " → cita §3.x (comentario) sin el claim D-n que la funda")
+			end
+		end
+	end
+end
+table.sort(ticketDesignProse)
+
+-- ── sistema sin claim que lo requiera (P8, DL-098) ──────────────────────────
+-- La INVERSA del gluing: `unglued_claim` exige que todo claim tenga módulo;
+-- esto exige que todo SISTEMA trace a un claim que lo requiera. Es la
+-- preocupación del inicio de sesión —¿los sistemas se derivaron o se
+-- heredaron del bootstrap?— vuelta regla: un sistema nuevo sin claim que lo
+-- pida es herencia no derivada, y ahora rompe el build.
+-- Exentos por NATURALEZA (no son sistemas): datos de entidad (Definitions/),
+-- configuración (Config/), infraestructura transversal (Lib/, Constants/,
+-- Persistence/), núcleos puros (Rules/ — su shell imperativo es el que se
+-- gluea), y los entry points Main/init. Lo que queda son los sistemas de
+-- server/ y client/, que DEBEN aparecer en el gluing.
+local moduleUnderived = {}
+do
+	local glued = {}
+	do
+		local region = nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region = (h:gsub("%.$", ""))
+			end
+			if region == "4.15" then
+				for name in line:gmatch("`(%u%w+)`") do
+					glued[name] = true
+				end
+			end
+		end
+	end
+	local function scan(dir, exemptDir)
+		local ok, entries = pcall(fs.readDir, dir)
+		if not ok then
+			return
+		end
+		for _, name in ipairs(entries) do
+			local p = dir .. "/" .. name
+			if fs.isDir(p) then
+				local ex = exemptDir
+					or name == "Definitions"
+					or name == "Config"
+					or name == "Lib"
+					or name == "Constants"
+					or name == "Persistence"
+					or name == "Rules"
+					or name == "Tests"
+				scan(p, ex)
+			else
+				local base = name:match("^(.+)%.luau?$")
+				if base and not base:match("%.spec$") then
+					base = base:gsub("%.server$", ""):gsub("%.client$", "")
+					if not exemptDir and base ~= "Main" and base ~= "init" and not glued[base] then
+						table.insert(moduleUnderived, base .. " → sistema en src/ que ningún claim de §4.15 requiere")
+					end
+				end
+			end
+		end
+	end
+	scan("src", false)
+end
+table.sort(moduleUnderived)
+
+-- ── contrato de función vs firma real (Z5, DL-092) ──────────────────────────
+-- El gluing verificaba que el claim NOMBRE un módulo existente, no que el
+-- módulo HAGA lo que su contrato declara (Z5). §4.13 declara las funciones de
+-- cada núcleo puro; aquí se comprueban contra `src/` de verdad. Es el primer
+-- chequeo que cruza de los documentos al código.
+local contractMissing = {}
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "4.13" then
+			local mod = line:match("^| `(%u%w+)` |")
+			if mod then
+				local body = line:match("^| `%u%w+` |(.*)")
+				local src = nil
+				for _, dir in ipairs({ "src/shared/Rules/", "src/shared/Lib/", "src/server/", "src/client/" }) do
+					local p = dir .. mod .. ".lua"
+					if fs.isFile(p) then
+						src = fs.readFile(p)
+						break
+					end
+				end
+				if src then
+					local seen = {}
+					for fn in (body or ""):gmatch("`(%a[%w_]*)%(") do
+						if not seen[fn] then
+							seen[fn] = true
+							if not src:find("function " .. mod .. "." .. fn, 1, true) and not src:find("function " .. mod .. ":" .. fn, 1, true) then
+								table.insert(contractMissing, mod .. "." .. fn .. " → declarada en §4.13, ausente en src/")
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+table.sort(contractMissing)
+
+-- ── forma de las filas de §2.9 (TCB, DL-090) ────────────────────────────────
+-- El fallo más peligroso de un parser es leer celdas CORRIDAS en silencio: el
+-- veredicto sale mal sin que nada avise. §3.0 ya está protegida por la forma
+-- de sus celdas (sello hex, `Sellado por` = DL-nnn); §2.9 no tenía nada, y sus
+-- columnas se movieron dos veces en esta sesión. Validar la forma de cada
+-- celda mueve al parser de «confiado» a «comprobado»: TCB más pequeña.
+local VOCAB_EJES = { mecanismo = true, polaridad = true, predicado = true, entidad = true, externo = true }
+local vocabMalformed = {}
+do
+	local region = nil
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region = (h:gsub("%.$", ""))
+		end
+		if region == "2.9" and line:match("^| ") and not line:match("^| Término") and not line:match("^|%-") then
+			local cells = {}
+			for cell in line:gmatch("|([^|]*)") do
+				table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+			end
+			local term = cells[1] or "?"
+			local eje = (cells[2] or ""):lower()
+			local ratif = cells[7] or ""
+			-- 7 columnas + el vacío tras la barra final. El conteo es lo que
+			-- caza una columna CORRIDA: los valores desplazados pueden caer
+			-- en celdas que parecen válidas por casualidad.
+			if #cells ~= 8 then
+				table.insert(vocabMalformed, term .. " → " .. (#cells - 1) .. " columnas, se esperaban 7")
+			else			if not VOCAB_EJES[eje] then
+				table.insert(vocabMalformed, term .. " → eje \"" .. eje .. "\" desconocido")
+			elseif ratif ~= "—" and not ratif:match("^PO %d%d%d%d%-%d%d%-%d%d$") then
+				table.insert(vocabMalformed, term .. " → Ratificada \"" .. ratif .. "\" no es «—» ni «PO <fecha>»")
+			end
+			end
+		end
+	end
+end
+table.sort(vocabMalformed)
+
+-- ── cobertura del vocabulario (DL-078) ──────────────────────────────────────
+-- El detector `--provenance` solo ve términos MODELADOS. Un 0 suyo puede
+-- significar "limpio" o "ciego", y son indistinguibles sin medir la brecha.
+-- Es la segunda instancia de esa clase: la variante (DL-072) valía 0 durante
+-- 32 versiones por falta de instrumento, no por salud.
+-- El conjunto NO cubierto no es ruido: es la COLA DE TRABAJO — qué definir a
+-- continuación, ordenado por frecuencia (más uso = más cobertura ganada).
+-- Es el movimiento de CEGAR (la brecha dirige el refinamiento) y de
+-- attribute exploration (preguntar lo mínimo que completa la teoría).
+local STOP = {}
+for w in
+	(
+		"para pero como cuando donde entre sobre desde hasta segun sino solo "
+		.. "cada todo toda todos todas otro otra otros otras mismo misma este esta "
+		.. "esto ese esa eso aquel aquella algun alguna ningun ninguna mas menos "
+		.. "muy tanto tanta poco poca gran grande mayor menor bien vive vive "
+		.. "existe existen tiene tienen puede pueden debe deben hace hacen dice "
+		.. "estan esta son ser sido siendo haber habia sera seran cuenta cuentan "
+		.. "genera generan produce producen vale valen basta requiere requieren "
+		.. "porque aunque mientras ademas tambien nunca siempre nada algo"
+	):gmatch("%S+")
+do
+	STOP[w] = true
+end
+
+local function contentWords(txt)
+	local out = {}
+	for w in txt:lower():gmatch("[^%s%.,;:%(%)%[%]%-—«»\"'?!/]+") do
+		if #w >= 6 and not STOP[w] and not w:match("%d") then
+			table.insert(out, w)
+		end
+	end
+	return out
 end
 local vocabBanned = {}
 do
@@ -692,6 +1089,9 @@ for name, c in pairs(f8Claims) do
 				if f8Claims[claimRef] then
 					otherN += 1
 					table.insert(f8Edges[name], claimRef)
+				elseif entities[claimRef] then
+					-- primitivo de §2.3: hoja del grafo, sin arista de ciclo
+					otherN += 1
 				else
 					table.insert(f8UnknownPremise, name .. " → [" .. claimRef .. "]")
 				end
@@ -803,6 +1203,12 @@ end
 -- mejor valor?" no es respondible. Estas reglas son la precondición del
 -- juicio de optimalidad, no un chequeo de forma más.
 local axisMalformed, axisDomainThin = {}, {}
+-- closure_unjustified (Z6, P14, DL-107): un eje `cerrado` afirma que sus
+-- valores AGOTAN el eje. Sin justificación es «enumerado por inspección» —
+-- la aserción semántica que Z6 nombra—. Con una justificación de PARTICIÓN
+-- (dicotomía, 2×2, subconjuntos, árbol) la exhaustividad se PRUEBA por la
+-- estructura lógica, no se asevera. El eje declara «cerrado — <estructura>».
+local closureUnjustified = {}
 local electionAxisUnregistered, electionValueOffAxis = {}, {}
 do
 	local ids = {}
@@ -812,7 +1218,11 @@ do
 	table.sort(ids)
 	for _, id in ipairs(ids) do
 		local ax = axes[id]
-		if ax.nombre == "" or (ax.cierre ~= "cerrado" and ax.cierre ~= "abierto") then
+		local base = ax.cierre:match("^(%a+)")
+		if base == "cerrado" and not ax.cierre:match("—%s*%S") then
+			table.insert(closureUnjustified, id .. " → `cerrado` sin justificación de partición (enumerado por inspección — Z6)")
+		end
+		if ax.nombre == "" or (base ~= "cerrado" and base ~= "abierto") then
 			table.insert(axisMalformed, id .. " → sin nombre o Cierre distinto de cerrado|abierto")
 		end
 		-- un eje con un solo valor no es una elección: es una consecuencia
@@ -943,6 +1353,43 @@ for id, c in pairs(designClaims) do
 end
 table.sort(blockedClaimDangling)
 
+-- Validación de objetividad del plan (DL-081): toda deuda DECLARADA —zona
+-- abierta, clase de escape sin regla, claim bloqueado— debe estar saldada por
+-- algún paso. Es la única completitud que el plan admite probar; frente a
+-- deuda NO declarada sigue siendo ciego, y eso es X8, no se cierra con filas.
+local planUncoveredDebt = {}
+do
+	local covered = {}
+	for _, s in pairs(planSteps) do
+		if not planClosed(s.estado) then
+			for d in pairs(s.salda) do
+				covered[d] = true
+			end
+		end
+	end
+	local debt = {}
+	for z in pairs(zones) do
+		table.insert(debt, z)
+	end
+	for id, c in pairs(designClaims) do
+		if c.deriv:match("^—%s*bloqueado") then
+			table.insert(debt, id)
+		end
+	end
+	for x, e in pairs(escapes) do
+		if not e.resol:match("^regla:") and not e.resol:match("^límite:") then
+			table.insert(debt, x)
+		end
+	end
+	table.sort(debt)
+	for _, id in ipairs(debt) do
+		if not covered[id] then
+			table.insert(planUncoveredDebt, id .. " → ningún paso del plan lo salda")
+		end
+	end
+end
+
+
 -- VARIANTE del corpus (Event-B): la deuda abierta como número. Safety son
 -- invariantes; la convergencia es una VARIANTE bien fundada que decrece.
 -- Nuestras fechas de vencimiento eran un sustituto malo: un reloj no dice si
@@ -959,7 +1406,8 @@ for _, c in pairs(designClaims) do
 	end
 end
 for _, x in pairs(escapes) do
-	if not x.resol:match("^regla:") then
+	-- un límite inherente (DL-106) no es deuda: no cuenta en la variante.
+	if not x.resol:match("^regla:") and not x.resol:match("^límite:") then
 		variantEscapes += 1
 	end
 end
@@ -988,6 +1436,401 @@ table.sort(claimSealMismatch)
 -- 0 no sostiene nada; uno con radio alto es donde el diseño se juega.
 -- No es una regla: no hay umbral correcto, luego no hay violación que
 -- reportar. Es medición, y se lee.
+-- Cobertura del detector: qué fracción del vocabulario real de los claims
+-- está modelada. Sin esto, un 0 de `--provenance` es indistinguible de
+-- ceguera (DL-078).
+local vocabCovered, vocabUncovered, vocabFreq = 0, 0, {}
+do
+	local seen = {}
+	for _, c in pairs(designClaims) do
+		for _, w in ipairs(contentWords(c.enunciado or "")) do
+			local isCovered = false
+			for _, s in ipairs(vocabSurfaces) do
+				if s:find(w, 1, true) then
+					isCovered = true
+					break
+				end
+			end
+			if not seen[w] then
+				seen[w] = true
+				if isCovered then
+					vocabCovered += 1
+				else
+					vocabUncovered += 1
+				end
+			end
+			if not isCovered then
+				vocabFreq[w] = (vocabFreq[w] or 0) + 1
+			end
+		end
+	end
+end
+
+-- `--provenance` (Z1, DL-075): procedencia de términos. Para cada claim
+-- derivado, ¿qué términos de la CONCLUSIÓN no aparecen en ninguna PREMISA?
+-- Es la propiedad de subfórmula: una derivación sana no introduce vocabulario
+-- de la nada. PERO es DETECTOR, no reja: un término flotante puede ser una
+-- premisa colada (defecto) O una paráfrasis de un término de premisa cuya
+-- sinonimia no está modelada (falso positivo). Distinguirlos exige la capa de
+-- sinonimia — que es CONTENIDO, no relación pura. Por eso no bloquea: empuja.
+if table.find(process.args, "--provenance") then
+	local termForms = {} -- término preferido → { formas de superficie }
+	local termDefinedIn = {} -- término → claim que lo define (extensión conservativa)
+	local termRatified = {} -- término → sus sinónimos y marcadores están ratificados
+	local termExternal = {} -- eje «externo»: categoría que el diseño EXCLUYE, no deriva
+	do
+		local region = nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region = (h:gsub("%.$", ""))
+			end
+			if region == "2.9" and line:match("^| ") and not line:match("^| Término") and not line:match("^|%-") then
+				local cells = {}
+				for cell in line:gmatch("|([^|]*)") do
+					table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+				end
+				local pref = (cells[1] or ""):lower()
+				if pref ~= "" then
+					-- El PERÍMETRO BINARIO también rige el vocabulario (DL-086).
+					-- Un SINÓNIMO es una afirmación de equivalencia semántica, y
+					-- un marcador («Definido en», eje `externo`) silencia un
+					-- flotante: ambos CAMBIAN VEREDICTOS. Autorados por un
+					-- agente, harían del agente el titular de la garantía —
+					-- justo lo que M2 prohíbe. Sin ratificar son INERTES, no
+					-- bloqueantes: el claim que dependía de ellos vuelve a
+					-- flotar, que es el estado honesto («no sabemos que esté
+					-- provenido»). La forma PREFERIDA no necesita ratificación:
+					-- nombrar no es afirmar equivalencia.
+					local ratified = (cells[7] or ""):match("^PO %d%d%d%d%-%d%d%-%d%d$") ~= nil
+					local forms = { pref }
+					-- La máquina distingue MORFOLOGÍA de AFIRMACIÓN SEMÁNTICA
+					-- (DL-093). `interfieren`/`interferencia` es la misma
+					-- palabra flexionada: comprobable por raíz común, no es
+					-- una afirmación y no necesita ratificación. `pooling` ≈
+					-- `acoplamiento acumulativo` SÍ afirma algo, y sin la
+					-- celda `PO <fecha>` queda inerte. Así el PO solo decide
+					-- lo que de verdad es una decisión.
+					local prefWords = {}
+					for w in pref:gmatch("[^%s]+") do
+						table.insert(prefWords, w)
+					end
+					local function sharesStem(a, b)
+						local n = math.min(#a, #b)
+						if n < 5 then
+							return false
+						end
+						return a:sub(1, math.min(5, n)) == b:sub(1, math.min(5, n))
+					end
+					local function isMorph(form)
+						if form:find(pref, 1, true) then
+							return true
+						end
+						for w in form:gmatch("[^%s]+") do
+							if #w >= 5 then
+								local ok = false
+								for _, pw in ipairs(prefWords) do
+									if sharesStem(w, pw) then
+										ok = true
+									end
+								end
+								if not ok then
+									return false
+								end
+							end
+						end
+						return true
+					end
+					for s in (cells[5] or ""):gmatch("`([^`]+)`") do
+						s = s:lower()
+						if isMorph(s) or ratified then
+							table.insert(forms, s)
+						end
+					end
+					termForms[pref] = forms
+					termRatified[pref] = ratified
+					-- «Definido en»: el claim que INTRODUCE el término. Un
+					-- término no flota en su propia definición — eso es una
+					-- extensión conservativa (nombrar una configuración de
+					-- términos ya presentes), no una premisa colada.
+					if ratified and (cells[2] or ""):lower() == "externo" then
+						termExternal[pref] = true
+					end
+					local def = ratified and (cells[6] or ""):match("^(D%d+)$") or nil
+					if def then
+						termDefinedIn[pref] = def
+					end
+				end
+			end
+		end
+	end
+	-- texto por nodo: axiomas (§2.1 N0) y claims (§3.0 enunciado)
+	local nodeText = {}
+	do
+		local region, nivel = nil, nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region, nivel = (h:gsub("%.$", "")), nil
+			end
+			local nv = line:match("^#### Nivel (%d)")
+			if nv then
+				nivel = tonumber(nv)
+			end
+			if region == "2.1" and nivel == 0 then
+				local id = line:match("%((C[%w′]+)%)")
+				if id then
+					nodeText[id] = line:lower()
+				end
+			elseif region == "2.1" and (nivel == 1 or nivel == 2) then
+				-- claims N1/N2 por nombre: nombre + definición como texto
+				if line:match("^|") and not line:match("^|%-") and not line:match("^| Principio") then
+					local cells = {}
+					for cell in line:gmatch("|([^|]*)") do
+						table.insert(cells, (cell:gsub("^%s+", ""):gsub("%s+$", "")))
+					end
+					local nm = (cells[1] or ""):gsub("%s*⚠%s*$", "")
+					if nm ~= "" then
+						nodeText[nm] = ((cells[1] or "") .. " " .. (cells[2] or "")):lower()
+					end
+				end
+			end
+		end
+	end
+	for id, c in pairs(designClaims) do
+		nodeText[id] = (c.enunciado or ""):lower()
+	end
+	-- una elección introduce el término de SU EJE (A-n): E1 sobre A1
+	-- "valencia del resultado" aporta el término «valencia».
+	for n, txt in pairs(entities) do
+		nodeText[n] = txt:lower()
+	end
+	for e, row in pairs(f8ElectionRows) do
+		local ax = axes[row.eje]
+		if ax then
+			-- la elección aporta su EJE y su VALOR: el valor es justamente lo
+			-- que elige, y omitirlo dejaba flotando términos que ella funda.
+			nodeText[e] = (ax.nombre .. " " .. (row.valor:gsub("`", ""))):lower()
+		end
+	end
+	-- Coincidencia con FRONTERA DE PALABRA. La subcadena a secas daba falsos
+	-- positivos reales: `entidad` casaba dentro de `identidad` y marcaba a D16.
+	-- Los bytes ≥ 128 son continuación UTF-8, luego cuentan como letra.
+	local function isWordByte(ch)
+		return ch ~= "" and (ch:match("[%w]") ~= nil or ch:byte() >= 128)
+	end
+	local function containsWord(txt, form)
+		local init = 1
+		while true do
+			local s, e = txt:find(form, init, true)
+			if not s then
+				return false
+			end
+			local before = s > 1 and txt:sub(s - 1, s - 1) or ""
+			if not isWordByte(before) and not isWordByte(txt:sub(e + 1, e + 1)) then
+				return true
+			end
+			init = s + 1
+		end
+	end
+
+	local function termsIn(txt)
+		local present = {}
+		for term, forms in pairs(termForms) do
+			for _, f in ipairs(forms) do
+				if txt and containsWord(txt, f) then
+					present[term] = true
+					break
+				end
+			end
+		end
+		return present
+	end
+
+	print("Procedencia de términos — conclusión \\ premisas (DETECTOR, no reja)\n")
+	local ids = {}
+	for id in pairs(designClaims) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	local flaggedTotal = 0
+	for _, id in ipairs(ids) do
+		local deriv = designClaims[id].deriv
+		if not deriv:match("^—") then -- salta bloqueados/empíricos
+			local premStr = deriv:match("·%s*(.+)$")
+			if premStr then
+				premStr = (premStr:gsub(" — .*$", ""))
+				local premTerms = {}
+				for tok in premStr:gmatch("[^+]+") do
+					tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+					local ref = tok:match("^%[(.+)%]$") or tok
+					local txt = nodeText[ref]
+					if txt then
+						for t in pairs(termsIn(txt)) do
+							premTerms[t] = true
+						end
+					end
+				end
+				local concl = termsIn(nodeText[id])
+				local floating = {}
+				for t in pairs(concl) do
+					if not premTerms[t] and termDefinedIn[t] ~= id and not termExternal[t] then
+						table.insert(floating, t .. (termRatified[t] and "" or " ⚠"))
+					end
+				end
+				table.sort(floating)
+				if #floating > 0 then
+					flaggedTotal += 1
+					print(string.format("  %-4s %s", id, table.concat(floating, " · ")))
+					-- TRIAJE MT0 (P12, DL-103): por cada término flotante, la
+					-- máquina no DECIDE el cubo —eso es ontológico— sino que
+					-- reúne la EVIDENCIA que lo hace obvio: dónde más vive el
+					-- término. Es abducción (hallar la premisa faltante).
+					--   · aparece en axiomas/claims → cítalos (extraer / cita)
+					--   · en ningún nodo → candidato a PRIMITIVO (ratificación)
+					--   · externo/empírico → medir (no se deriva)
+					for _, ft in ipairs(floating) do
+						local term = ft:gsub("%s*⚠%s*$", "")
+						if termExternal[term] then
+							print(string.format("         └ %s → EMPÍRICO/EXTERNO: se mide o el diseño lo excluye (no se deriva)", term))
+						else
+							local where = {}
+							for ref, txt in pairs(nodeText) do
+								if ref ~= id and (ref:match("^C") or ref:match("^D%d+$")) then
+									for _, f in ipairs(termForms[term] or { term }) do
+										if txt:find(f, 1, true) then
+											table.insert(where, ref)
+											break
+										end
+									end
+								end
+							end
+							table.sort(where)
+							if #where > 0 then
+								print(string.format("         └ %s → REDUCIBLE: vive en %s — candidato a citar", term, table.concat(where, ", ")))
+							else
+								print(string.format("         └ %s → PRIMITIVO?: en ningún nodo — candidato a ratificación (como escasez→E11)", term))
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	print(string.format("\n  %d claim(s) con términos flotantes — cada uno: premisa colada O sinonimia no modelada.", flaggedTotal))
+
+	-- AUDITORÍA DE BLOQUEOS (X9, DL-102). Un claim marcado «— bloqueado»
+	-- afirma que le falta una premisa (una elección, un postulado). Pero un
+	-- bloqueo es legítimo solo si NINGUNA combinación de premisas DISPONIBLES
+	-- cubre su conclusión. Aquí se computa el pool completo —todos los axiomas,
+	-- todos los claims, MT0 y meta-leyes— y se pregunta: ¿sus términos ya
+	-- cubren la conclusión del bloqueado? Si sí, la frontera es sospechosa:
+	-- las premisas existen y no se buscaron (X9 — el caso de D18). DETECTOR,
+	-- no reja: cobertura léxica es necesaria, no suficiente (§2.10 ontológico).
+	local poolTerms = {}
+	for ref, txt in pairs(nodeText) do
+		if ref:match("^C") or ref:match("^D%d+$") or ref == "MT0" or ref:match("^M%d+$") then
+			for t in pairs(termsIn(txt)) do
+				poolTerms[t] = true
+			end
+		end
+	end
+	local blockedAudit = 0
+	for _, id in ipairs(ids) do
+		if designClaims[id].deriv:match("^—%s*bloqueado") then
+			local uncovered = {}
+			for t in pairs(termsIn(nodeText[id])) do
+				if not poolTerms[t] then
+					table.insert(uncovered, t)
+				end
+			end
+			if #uncovered == 0 then
+				blockedAudit += 1
+				print(string.format("\n  ⚠ X9 %s: BLOQUEADO pero el pool de premisas cubre su conclusión — la frontera puede ser búsqueda incompleta (revisar si D18/DL-080).", id))
+			end
+		end
+	end
+	if blockedAudit == 0 then
+		print("\n  Auditoría de bloqueos: ningún claim bloqueado con premisas ya disponibles (X9 limpio).")
+	end
+
+	-- AUDITORÍA DEÓNTICA (X2, P15, DL-106). El salto ser→deber (Hume): una
+	-- conclusión PROHIBITIVA no puede derivar solo de premisas DESCRIPTIVAS.
+	-- Un claim cuyo enunciado prohíbe («prohibid…», «no puede», «no entra»,
+	-- «nunca…») debe citar una premisa que CARGUE la norma: C3 (restricción),
+	-- una elección (E-n), un principio §2.1, u otro claim prohibitivo. Si
+	-- todas sus premisas son descriptivas (C1a/C1b/C2′, claims no
+	-- prohibitivos), es el salto modal. DETECTOR (léxico, §2.10), no reja.
+	local function isProhibitive(txt)
+		if not txt then
+			return false
+		end
+		return txt:find("prohibid", 1, true) ~= nil
+			or txt:find("no puede", 1, true) ~= nil
+			or txt:find("no entra", 1, true) ~= nil
+			or txt:find("no castiga", 1, true) ~= nil
+			or txt:find("nunca", 1, true) ~= nil
+			or txt:find("ninguna", 1, true) ~= nil
+			or txt:find("impide", 1, true) ~= nil
+	end
+	local deonticFlags = 0
+	for _, id in ipairs(ids) do
+		local c = designClaims[id]
+		if isProhibitive((c.enunciado or ""):lower()) and not c.deriv:match("^—") then
+			local premStr = c.deriv:match("·%s*(.+)$")
+			if premStr then
+				premStr = (premStr:gsub(" — .*$", ""))
+				local grounded = false
+				for tok in premStr:gmatch("[^+]+") do
+					tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+					local ref = tok:match("^%[(.+)%]$") or tok
+					-- C3 (restricción), elección, principio §2.1 (claim no-D),
+					-- u otro claim prohibitivo → carga la norma.
+					if ref == "C3" or ref:match("^E%d+$") then
+						grounded = true
+					elseif ref:match("^D%d+$") then
+						if isProhibitive((designClaims[ref] and designClaims[ref].enunciado or ""):lower()) then
+							grounded = true
+						end
+					elseif f8Claims[ref] and not ref:match("^D%d+$") then
+						grounded = true -- principio §2.1 (normativo por ratificación)
+					end
+				end
+				if not grounded then
+					deonticFlags += 1
+					print(string.format("\n  ⚠ X2 %s: conclusión PROHIBITIVA sin premisa que cargue la norma (C3/elección/principio) — posible salto ser→deber.", id))
+				end
+			end
+		end
+	end
+	if deonticFlags == 0 then
+		print("\n  Auditoría deóntica: ninguna prohibición desde solo premisas descriptivas (X2 limpio).")
+	end
+
+	-- COLA DE REFINAMIENTO (DL-078). El movimiento de CEGAR: la brecha entre
+	-- lo modelado y lo real dirige qué definir después. El orden es por
+	-- frecuencia — el término más usado gana más cobertura al definirse, que
+	-- es la heurística práctica de "preguntar lo mínimo" (attribute
+	-- exploration). No es una lista de defectos: es qué mirar a continuación.
+	local queue = {}
+	for w, n in pairs(vocabFreq) do
+		table.insert(queue, { w, n })
+	end
+	table.sort(queue, function(a, b)
+		if a[2] ~= b[2] then
+			return a[2] > b[2]
+		end
+		return a[1] < b[1]
+	end)
+	print(string.format("\n  Cola de refinamiento — %d términos sin modelar (top 15 por uso):\n", #queue))
+	for i = 1, math.min(15, #queue) do
+		print(string.format("    %-28s ×%d", queue[i][1], queue[i][2]))
+	end
+	process.exit(0)
+end
+
 if table.find(process.args, "--sensitivity") then
 	-- dependientes directos: premisa → claims que la citan
 	local dependents = {}
@@ -1139,8 +1982,20 @@ print(
 -- clase de error solo puede declararse resuelta por una regla QUE EXISTA.
 local emittedRules = {}
 
+local anyReported = false
+-- Total acumulado POR reportViolations (P21, DL-108): el gate ya no se
+-- suma a mano. Un sumatorio de 40+ términos hand-maintained era la causa del
+-- guardián decorativo (X14) reaparecido 3 veces: olvidar un término dejaba
+-- una regla encendiendo sin bloquear. Ahora toda regla que reporta cuenta,
+-- por construcción — auto-aplicación de la disciplina al propio gate.
+local totalViolations = 0
+
 local function reportViolations(name, rows, fmt)
 	emittedRules[(name:match("^(%S+)"))] = true
+	totalViolations += #rows
+	if #rows > 0 then
+		anyReported = true
+	end
 	if #rows == 0 then
 		print(string.format("  ✓ %s: 0", name))
 	else
@@ -1172,6 +2027,24 @@ end)
 reportViolations("domain_mismatch (Domain del DL vs nivel que Modifica)", domainMismatch, function(r)
 	return r[1] .. " (Domain " .. r[3] .. ") modifica " .. r[2]
 end)
+reportViolations("table_shape (fila con columnas != cabecera — misparse en potencia)", tableShape, function(r)
+	return r
+end)
+reportViolations("reseal_undeclared (DL sella §3.0 sin declarar Resello:)", resealUndeclared, function(r)
+	return r
+end)
+reportViolations("ticket_design_prose (ticket ancla en §3.x sin claim D-n)", ticketDesignProse, function(r)
+	return r
+end)
+reportViolations("module_underived (sistema en src/ sin claim que lo requiera)", moduleUnderived, function(r)
+	return r
+end)
+reportViolations("contract_missing (función de §4.13 ausente en src/)", contractMissing, function(r)
+	return r
+end)
+reportViolations("vocab_malformed (fila de §2.9 con eje o ratificación fuera de forma)", vocabMalformed, function(r)
+	return r
+end)
 reportViolations("vocab_banned_term (forma léxica prohibida en §3 — §2.9)", vocabBanned, function(r)
 	return r
 end)
@@ -1197,6 +2070,12 @@ reportViolations("seal_unprovenanced (claim sin DL que declare su sellado)", sea
 	return r
 end)
 reportViolations("seal_provenance_inconsistent (el DL sellador no declara §3.0)", sealProvenanceInconsistent, function(r)
+	return r
+end)
+reportViolations("plan_uncovered_debt (deuda declarada que ningún paso del plan salda)", planUncoveredDebt, function(r)
+	return r
+end)
+reportViolations("plan_dangling (paso del plan §5.11 sin estado o con dependencia inexistente)", planDangling, function(r)
 	return r
 end)
 reportViolations("blocked_claim_dangling (claim bloqueado sin bloqueador existente)", blockedClaimDangling, function(r)
@@ -1227,6 +2106,9 @@ reportViolations("election_axis_dup (dos elecciones sobre el mismo eje)", electi
 	return r
 end)
 reportViolations("axis_malformed (eje sin nombre o sin Cierre cerrado|abierto)", axisMalformed, function(r)
+	return r
+end)
+reportViolations("closure_unjustified (eje cerrado sin justificación de partición — Z6)", closureUnjustified, function(r)
 	return r
 end)
 reportViolations("axis_domain_thin (eje con dominio < 2 valores: no es una elección)", axisDomainThin, function(r)
@@ -1275,6 +2157,11 @@ do
 		else
 			local regla = x.resol:match("^regla: (%S+)$")
 			local zona = x.resol:match("^zona: (Z%d+)$")
+			-- «límite:» (DL-106) — una clase de escape que es INHERENTE, no un
+			-- defecto pendiente: la ceguera del instrumento (X8), la
+			-- completitud indecidible (X12), el defecto auto-consistente de
+			-- Thompson (X13). No admite regla por naturaleza, y no es deuda.
+			local limite = x.resol:match("^límite: (.+)$")
 			if regla then
 				if not emittedRules[regla] then
 					table.insert(escapeUnresolved, id .. " → regla \"" .. regla .. "\" no existe")
@@ -1283,8 +2170,8 @@ do
 				if not zones[zona] then
 					table.insert(escapeUnresolved, id .. " → zona " .. zona .. " no registrada")
 				end
-			else
-				table.insert(escapeUnresolved, id .. " → resolución no es `regla: X` ni `zona: Z-n`")
+			elseif not limite then
+				table.insert(escapeUnresolved, id .. " → resolución no es `regla: X`, `zona: Z-n` ni `límite: …`")
 			end
 		end
 	end
@@ -1318,6 +2205,50 @@ do
 		table.insert(parts, d .. ":" .. churn[d])
 	end
 	print("\n  · churn de claims por DL: " .. table.concat(parts, "  "))
+end
+
+do
+	local total = vocabCovered + vocabUncovered
+	local pct = total > 0 and math.floor(vocabCovered / total * 100) or 0
+	print(
+		string.format(
+			"\n  · cobertura del vocabulario: %d%% (%d/%d términos de claims modelados) — %d sin modelar",
+			pct,
+			vocabCovered,
+			total,
+			vocabUncovered
+		)
+	)
+	print("      Fuera de esos términos el detector de procedencia es CIEGO: su 0 no prueba nada ahí.")
+end
+
+do
+	local ids = {}
+	for id in pairs(planSteps) do
+		table.insert(ids, id)
+	end
+	table.sort(ids, function(a, b)
+		return tonumber(a:sub(2)) < tonumber(b:sub(2))
+	end)
+	local frente = {}
+	for _, id in ipairs(ids) do
+		local s = planSteps[id]
+		if not planClosed(s.estado) then
+			local ready = true
+			for _, d in ipairs(s.deps) do
+				if planSteps[d] and not planClosed(planSteps[d].estado) then
+					ready = false
+				end
+			end
+			if ready then
+				table.insert(frente, id .. " (" .. s.estado .. ")")
+			end
+		end
+	end
+	if #frente > 0 then
+		print("\n  · frente accionable del plan (§5.11): " .. table.concat(frente, "  "))
+		print("      Computado de las dependencias declaradas. El plan es memoria, no cobertura: no gobierna.")
+	end
 end
 
 print(
@@ -1355,15 +2286,68 @@ if #deferred > 0 then
 	end
 end
 
-local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pins
-	+ #levelSkip + #domainMismatch + #implLeak + #undeclaredFree
-	+ #moduleUndeclared + #ungluedClaim + #glueDangling + #unclaimedSection
-	+ #f8BadDeriv + #f8UnknownRule + #f8UnknownPremise + #f8Arity + #f8Cycle
-	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
-	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
-	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned
-	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
+-- ── asimetría de enforcement (§5.12, DL-087) ────────────────────────────────
+-- El conjunto declarado y el emitido deben coincidir. Borrar una regla exige
+-- borrar su fila del registro: acto normativo en docs/, no diff de código.
+-- El agente puede APRETAR (declarar + emitir una regla nueva) pero no AFLOJAR
+-- sin que la eliminación quede como cambio constitucional visible.
+local ruleMissing, ruleUndeclared = {}, {}
+do
+	-- Estas dos se registran a mano: se comprueban ANTES de reportarse, luego
+	-- se auto-eximirían. Un guardián exento de su propia guardia no guarda.
+	emittedRules["rule_missing"] = true
+	emittedRules["rule_undeclared"] = true
+	local declared = {}
+	local region, inBlock = nil, false
+	for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+		local h = line:match("^#+%s+(%d[%d%.]*)")
+		if h then
+			region, inBlock = (h:gsub("%.$", "")), false
+		end
+		if region == "5.12" then
+			if line:match("^```") then
+				inBlock = not inBlock
+			elseif inBlock then
+				for r in line:gmatch("[^·%s][^·]*") do
+					r = r:gsub("^%s+", ""):gsub("%s+$", "")
+					if r ~= "" then
+						declared[r] = true
+					end
+				end
+			end
+		end
+	end
+	for r in pairs(declared) do
+		if not emittedRules[r] and not emittedRules[(r:match("^(%S+)"))] then
+			table.insert(ruleMissing, r .. " → declarada en §5.12, no emitida por el runner")
+		end
+	end
+	for r in pairs(emittedRules) do
+		local ok = declared[r]
+		if not ok then
+			for d in pairs(declared) do
+				if d:match("^" .. r:gsub("%-", "%%-")) then
+					ok = true
+				end
+			end
+		end
+		if not ok then
+			table.insert(ruleUndeclared, r .. " → emitida, no declarada en §5.12")
+		end
+	end
+	table.sort(ruleMissing)
+	table.sort(ruleUndeclared)
+end
+reportViolations("rule_missing (regla declarada en §5.12 que el runner no emite)", ruleMissing, function(r)
+	return r
+end)
+reportViolations("rule_undeclared (regla emitida sin declarar en §5.12)", ruleUndeclared, function(r)
+	return r
+end)
+
+-- El gate es el total ACUMULADO por reportViolations — no un sumatorio a
+-- mano (DL-108). Toda regla que reporta bloquea, por construcción.
+local violations = totalViolations
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))
 	process.exit(1)

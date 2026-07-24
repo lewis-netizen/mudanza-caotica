@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.51 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.84 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -85,21 +85,41 @@ Otro eje: no describen la experiencia del jugador sino **cómo se construye y se
 
 ### 2.2 Test Oficial de Diseño
 
-Toda idea nueva debe superar los cinco criterios. Si falla uno, no entra al MVP.
+**Procedimiento de conformance M1→M2 (DL-097), no fuente de normatividad.** Este test no *funda* nada: es la rutina que aplica a una idea nueva la forma que ya existe (§2.10). Cada criterio es un **puntero a su fuente formal**, no una norma propia — sin esto, §2.2 fundaría desde prosa y violaría M4. Toda idea nueva debe conformar a los cinco; si falla uno, no entra.
 
-1. ¿Aumenta la Dependencia Social?
-2. ¿Aumenta la Entropía (espacial o informacional)?
-3. ¿Mantiene la Simplicidad Mecánica?
-4. ¿Genera interacción entre jugadores más que entre jugador y sistema?
-5. ¿Respeta las entidades fundamentales definidas en §2.3?
+| # | Criterio (pregunta de review) | Conforma a (la norma vive aquí) |
+|---|---|---|
+| 1 | ¿Aumenta la dependencia social? | C1b · [D3] (el entorno acopla resultados) |
+| 2 | ¿Aumenta la entropía interpretable? | C2′ · [D10] (situaciones distintas) |
+| 3 | ¿Mantiene la simplicidad mecánica? | [Simplicidad Mecánica] (§2.1 N2) |
+| 4 | ¿Es interacción jugador↔jugador, no jugador↔sistema? | C1a · [D2] (acopla a dos o más) |
+| 5 | ¿Respeta las entidades fundamentales? | §2.3 · §2.4 (regla de entidades) |
+
+El test es **advisory de review** (lo aplica el AUDITOR DESIGN y el IDEADOR): detecta que una idea no conforma, no la garantiza. La garantía la cargan las fuentes citadas, cada una ya en su slot de forma.
 
 ### 2.3 Entidades Fundamentales
 
 Toda funcionalidad presente o futura debe derivarse de una de estas cuatro entidades.
 
+**Derivación del conjunto (DL-085).** Las cuatro entidades se heredaron del bootstrap y nunca se derivaron — «una ontología no se elige de un menú». Derivadas ahora desde qué necesita **nombrar** el diseño:
+
+| Entidad | Se deriva de | Qué obliga a nombrarla |
+|---|---|---|
+| Player | C1a · C1b | Los jugadores **son** el contenido y el valor reside en su interdependencia: el portador de ambas cosas debe existir. |
+| Object | [D6] | El acoplamiento acumulativo exige un portador con **demanda** que exceda la capacidad individual. |
+| Map | [D5] · [Compresión Social] | El acoplamiento rival exige un espacio finito compartido cuyo layout imponga contención. |
+| Content | [D21] · [D16] | La evolución y la monetización emanan de la **creación por jugadores**; su producto debe ser nombrable aunque no se implemente en el MVP. |
+
+C3 cierra el argumento: cuantifica sobre «la naturaleza de la **entidad**», luego presupone que existen entidades con naturaleza. El conjunto heredado resulta **correcto**; lo que faltaba era su justificación — y al derivarlo aparecieron dos huecos de schema: `Demand` en Object (DL-077) y `Capacity` en Player (DL-085), ambos usados por D6 sin estar declarados.
+
 **Player** — Representa un jugador activo.
 ```
-Player = { PlayerId }
+Player = {
+    PlayerId,
+    Capacity      -- demanda que un jugador satisface por sí solo. UNIFORME
+                  -- entre jugadores: una capacidad variable sería ventaja de
+                  -- gameplay (D11), no interdependencia (C1b)
+}
 ```
 
 **Object** — Identidad y apariencia son separadas.
@@ -107,6 +127,8 @@ Player = { PlayerId }
 ObjectDefinition = {
     ObjectId,
     Size,         -- small | medium | large
+    Demand,       -- cargadores que el objeto exige (≤ 2, DL-047); su exceso
+                  -- sobre la capacidad individual es lo que genera pooling (D6)
     Properties    -- velocidades, rangos, timeouts
 }
 
@@ -234,16 +256,16 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 
 | ID | Eje | Dominio de valores | Cierre |
 |---|---|---|---|
-| A1 | Valencia del resultado | `cooperativa` · `competitiva` · `mixta` · `individual` | cerrado |
+| A1 | Valencia del resultado | `cooperativa` · `competitiva` · `mixta` · `individual` | cerrado — 2×2 de (alineados? × opuestos?) |
 | A2 | Ancla interpretable | `el objetivo` · `las reglas` · `el rol` · `el espacio` | abierto |
-| A3 | Tratamiento de la derrota | `ausente` · `declarada sin castigo` · `castigada` | cerrado |
+| A3 | Tratamiento de la derrota | `ausente` · `declarada sin castigo` · `castigada` | cerrado — árbol: «ausente» o «presente» (castigada, no) |
 | A4 | Situación ficcional | `mudanza` · `evacuación de incendio` · `naufragio` · `atraco` · `rescate` | abierto |
 | A5 | Forma del objetivo | `maximización acumulativa` · `umbral fijo` · `lista específica` · `supervivencia` | abierto |
-| A6 | Escala del grupo | `individual` · `pareja` · `grupo pequeño` · `grupo grande` | abierto |
+| A6 | Escala del grupo | `individual` (inadmisible: sin varios humanos no hay interacción, C1a) · `pareja` · `grupo pequeño` · `grupo grande` | abierto |
 | A7 | Naturaleza del primer release | `prototipo de validación` · `early access` · `producto shippable` | abierto |
-| A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado |
-| A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado |
-| A10 | Granularidad de la demanda | `binaria` · `graduada` | cerrado |
+| A8 | Horizonte de diseño | `el MVP` · `el ciclo de vida completo` | cerrado — dicotomía: solo-MVP vs más-allá |
+| A9 | Origen de la variación | `el sistema` · `los jugadores` · `ambos` | cerrado — subconjuntos no vacíos de {sistema, jugadores} |
+| A10 | Granularidad de la demanda | `binaria` · `graduada` | cerrado — dicotomía: exactamente-2 vs más-de-2 |
 | A11 | Generador de la decisión compartida | `escasez temporal` · `información oculta` · `complejidad combinatoria` · `interdependencia de roles` | abierto |
 
 **Elecciones constitucionales** — citables como premisas. **Una elección es una valencia**: un eje que los axiomas dejan abierto, y el **valor elegido** en él — *uno* de los valores del dominio de ese eje; elegir otro es revisión de la elección (⚠), no del núcleo. Forma obligatoria: un eje registrado por elección, un valor perteneciente a su dominio, sin ejes duplicados — verificado (`election_malformed`, `election_axis_dup`, `election_axis_unregistered`, `election_value_off_axis`).
@@ -251,18 +273,18 @@ La columna **Cierre** es la parte honesta: `cerrado` = el dominio agota el eje (
 **Registrar ≠ ratificar (DL-067).** Registrar el valor vigente de un eje es **describirlo**: deja constancia de que ahí hubo una elección, aunque nadie la haya examinado. Citarlo como premisa es **apoyarse** en él. Solo una elección con `Estado: decidida` — ratificada por el PO — es contenido garantizado y puede fundar un claim; una `sin ratificar` que aparezca como premisa es violación (`election_unratified_cited`). Sin esa separación, registrar una elección la volvería fundante de facto, y el barrido del corpus habría convertido trece hallazgos en trece axiomas de contrabando.
 
 | ID | Eje | Valor elegido | Abierto por | Estado |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | E1 | A1 | `cooperativa` | C1b (neutral de valencia: el axioma no la fija) | decidida |
 | E2 | A2 | `el objetivo` | C2′ (exige un ancla, no dice cuál) | decidida |
 | E3 | A3 | `ausente` | Ningún axioma lo fija; C3 informa el valor (declararla/castigarla = restricción impuesta) | decidida |
 | E4 | A4 | `mudanza` | Ningún axioma fija la ficción; debe admitir espacio compartido finito, objetos de demanda variable y escasez temporal | sin ratificar |
-| E5 | A5 | `maximización acumulativa` | Ningún axioma fija la forma del objetivo; E2 exige que el objetivo sea el ancla, no dice cuál | sin ratificar |
+| E5 | A5 | `maximización acumulativa` | Ningún axioma fija la forma; **restringida por D24**: debe sostener la decisión toda la ronda — `umbral fijo` y `lista específica` la agotan | sin ratificar |
 | E6 | A6 | `grupo pequeño` | C1a exige varios humanos, no dice cuántos (el rango concreto 4–6 es empírico) | sin ratificar |
 | E7 | A7 | `producto shippable` | Ningún axioma lo fija; postura de proyecto (DL-024) | sin ratificar |
 | E8 | A8 | `el ciclo de vida completo` | Ningún axioma lo fija; postura de arquitectura (DL-039) | sin ratificar |
-| E9 | A9 | `ambos` | C2′ exige variación interpretable, no dice de dónde procede | sin ratificar |
+| E9 | A9 | `ambos` | ~~C2′ exige variación interpretable~~ — **no era elección**: dominio cerrado y C1a excluye los dos valores puros (los jugadores SON el contenido; los sistemas existen para provocarlo) | disuelta (DL-084) |
 | E10 | A10 | `binaria` | C1b admite cualquier granularidad; DL-047 acota la demanda a ≤ 2 | sin ratificar |
-| E11 | A11 | `escasez temporal` | C2′ exige ambigüedad interpretable, no dice qué la genera — hallada dentro de D1, no en prosa (DL-068) | sin ratificar |
+| E11 | A11 | `escasez temporal` | C2′ exige ambigüedad interpretable, no dice qué la genera. Bajo D2 es el único candidato considerado que acopla resultados Y exige decidir — **el mejor HALLADO, no el mejor: A11 es de dominio abierto (Z6)** | decidida |
 
 **Sintaxis de derivación** (columna Derivación de §2.1): `R-XXX · P1 + P2 [— comentario no normativo]`. Premisas: ID de axioma (`C1a`, `C1b`, `C2′`, `C3`), ID de elección (`E1`, `E2`) o claim entre corchetes (`[Contexto Variable]`). **Nada deriva de prosa.**
 
@@ -280,7 +302,7 @@ El validador gobierna los artefactos; esta sección gobierna **el diseño del si
 Si X se resiste a tipar, X no es atómico: **se descompone (M5) y se tipa por partes.** La exhaustividad del case-split más la descomposición a átomos garantizan totalidad: *no existe elemento sin titular*. El fallback humano no es parte del procedimiento — es su **falsación** (M10).
 
 | ID | Ley | Revelada por | Derivación |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | MT0 | **Ley de Asignación Total**: todo elemento del sistema (contenido, relación, residuo, cambio) tiene exactamente un titular determinado por su naturaleza; nada queda asignado implícitamente. | DL-060 | R-POST |
 | M1 | **El validador precede al trabajo**: el enforcement de una clase de error existe antes del trabajo que la produce; el validador nunca es un paso del programa que valida. | DL-053 | R-ESP · [MT0] — forma temporal: una clase sin enforcement está sin titular durante el gap |
 | M2 | **El determinismo vive fuera de los agentes**: ninguna verificación descansa en agente alguno — incluidos el que modela y el AUDITOR: sus pasadas son advisory, nunca titulares de garantía. | DL-055, DL-060 | R-ESP · [MT0] — los agentes no son titulares válidos de verificación |
@@ -291,7 +313,8 @@ Si X se resiste a tipar, X no es atómico: **se descompone (M5) y se tipa por pa
 | M7 | **Disolver sobre vigilar**: una relación frágil se elimina como clase antes que policiarse como instancias. | DL-050 | R-ESP · [MT0] — caso 4 del procedimiento |
 | M8 | **Exhaustividad declarada**: todo lo formalizable se formaliza; el residuo restante lleva dueño explícito. | DL-055 | R-ESP · [MT0] — caso 3: residuo sin dueño = asignación implícita, prohibida |
 | M9 | **Evolución conductual**: cambiar el sistema es acto etiquetado (tripwire) y toda regla nueva demuestra detectar (mutation). | DL-052, DL-056 | R-ESP · [MT0] — los cambios del sistema son elementos y tipan |
-| M10 | **Falsación**: un catch del PO no es motor del sistema — es un **defecto del framework**: un elemento mal tipado o el procedimiento mal aplicado. Se trata como bug (¿cuál de las 4 preguntas se respondió mal?), se corrige el tipado y, si la clase es formalizable, baja a regla. Un catch sobre una zona registrada no es falsación — ahí el sistema no garantizaba. **La métrica del metaframework es que esta ley no se dispare fuera de zonas.** | DL-059, DL-060 | R-ESP · [MT0] — el catch revela una violación de asignación, no una ley nueva |
+| M11 | **Auto-aplicación y su límite**: todo mecanismo está sujeto a la disciplina que impone —un guardián exento de su propia guardia no guarda—, pero la auto-verificación NO puede detectar un defecto AUTO-CONSISTENTE (Thompson, «Reflections on Trusting Trust»: un sistema auto-hospedado oculta lo que sobrevive a su propia verificación). Luego la DIVERSIDAD —una segunda implementación independiente (Wheeler, DDC)— es estructuralmente necesaria, no un respaldo. El PO no es auditor de reserva: **es la implementación diversa**, y acota a M10. | DL-091 | R-ESP · [MT0] — MT0 asigna por naturaleza; la del defecto auto-consistente excluye a la máquina auto-hospedada |
+| M10 | **Falsación**: un catch del PO no es motor del sistema — es un **defecto del framework**: un elemento mal tipado o el procedimiento mal aplicado. Se trata como bug (¿cuál de las 4 preguntas se respondió mal?), se corrige el tipado y, si la clase es formalizable, baja a regla. Un catch sobre una zona registrada no es falsación — ahí el sistema no garantizaba. **La métrica del metaframework es que esta ley no se dispare fuera de zonas** — acotado por M11: la fracción AUTO-CONSISTENTE de los catch no es defecto del framework ni es internalizable, y esperar que desaparezca sería negar el límite de Thompson. | DL-059, DL-060 | R-ESP · [MT0] — el catch revela una violación de asignación, no una ley nueva |
 
 Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_*`); su forma por `meta_law_malformed`.
 
@@ -300,11 +323,9 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 **Registro de Zonas No Verificadas** — dependencias sin garantía, explícitas y acotadas. El registro contiene lo *vigente*: una zona cerrada SALE de la tabla y su cierre queda en el DL que lo ejecuta (Z3 cerrada por DL-062 — el gluing ancla en claims D-n, no en prosa; Z2 cerrada por DL-064 — los ejes son tipos con dominio enumerado). Salir del registro exige haber cerrado, no haber caducado: `zone_expired` dispara antes.
 
 | ID | Zona — sin garantía del sistema | Tipo MT0 | Camino de cierre | Vence | Ratificada | Abierta por |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 | DL-060 |
-| Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | relación → máquina (deuda) | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 | DL-062 |
-| Z5 | Realización semántica: el gluing verifica que el claim NOMBRE un módulo existente, no que el módulo HAGA lo que el claim dice. Evidencia: §4.13 declara `carryEfficiency(demand, carriers)`, el núcleo de reglas de carry sigue exponiendo la firma individual anterior, y el validador pasa en verde | relación → máquina (deuda) | Contratos de función de §4.13 verificados contra las firmas reales de `src/` | 2026-08-11 | PO 2026-07-22 | DL-066 |
-| Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 | DL-066 |
+| Z4 | Obligación tras remodelar: la naturaleza del cambio (`Resello:`, DL-104) se DECLARA, pero verificar que un resello `normativo` realmente disparó revisión de su realización es ontológico (§2.10) — el delta textual no basta: DL-093 reescribió 5 claims con delta enorme y cero compromiso | relación → máquina (deuda) | El acto declarativo hecho (Resello); la verificación de que un resello normativo se atendió es residuo ontológico → X17/playtest. Re-tipar → PO | 2026-08-11 | PO 2026-07-22 | DL-062 |
 
 **Invariante y variante (DL-071).** Todo el aparato descrito hasta aquí verifica **safety**: que cada estado del corpus sea consistente. No dice nada de la **trayectoria** — si las zonas efectivamente cierran, si las clases de escape acaban teniendo regla, si la tasa de defectos por pasada baja. Los vencimientos eran un sustituto tosco: **un reloj no es una propiedad**; "vence el 11 de agosto" no informa si el sistema tiende a algo.
 
@@ -320,13 +341,23 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 
 | ID | Clase de error | Hallado en | Resolución |
 |---|---|---|---|
-| X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069) | zona: Z1 |
-| X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) | zona: Z1 |
-| X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | zona: Z1 |
-| X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068). Instancia regresión-probada por `vocab_banned_term` (DL-074); la clase general (colisiones no declaradas) sigue en Z1 | zona: Z1 |
-| X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | zona: Z5 |
+| X1 | Premisa colada: la conclusión introduce un término ausente de toda premisa | D1 escasez · D2 contenido · D3 cooperación · D10 variabilidad · D21 identidad · D11 ámbito (DL-068/069); D4 acoplamiento hallado por `--provenance` (DL-075); D8 → faltaba C1a, corregido; D6 → depende de §2.3 (Object/demanda), localizado (DL-076) | límite: ontológico — no gate-able por forma (§2.10); detector-asistido + verificación del PO (M11) |
+| X2 | Salto modal: conclusión prohibitiva desde premisas descriptivas ("no cuenta" → "está prohibido") | D8 · D13 · D19 (DL-068/069) (auditoría deóntica de --provenance caza el salto ser→deber, DL-106; cazó D11) | límite: ontológico — no gate-able por forma (§2.10); detector-asistido + verificación del PO (M11) |
+| X3 | Contradicción entre claims vigentes | D12 "ningún objeto vale más" vs D6 "demanda que excede la capacidad" (DL-069) | límite: ontológico — no gate-able por forma (§2.10); detector-asistido + verificación del PO (M11) |
+| X4 | Colisión de vocabulario: un término con dos sentidos normativos | `negativo/positivo` (acoplamiento) vs `cooperativa` (valencia) — D5/D6 vs E1 (DL-068). Instancia regresión-probada por `vocab_banned_term` (DL-074); la clase general (colisiones no declaradas) sigue en Z1 | límite: ontológico — no gate-able por forma (§2.10); detector-asistido + verificación del PO (M11) |
+| X5 | Deriva declaración↔código: el módulo no realiza lo que su contrato declara | `carryEfficiency` declarada en §4.13, ausente en el núcleo de carry (DL-066) | regla: contract_missing |
 | X6 | Objeto registrable citable sin ratificar | E4–E10 habrían fundado claims por el mero acto de registrarlas (DL-067) | regla: election_unratified_cited |
 | X7 | Premisa fantasma: cita a un ID que no existe | §3.3 citaba `C4`, que nunca existió (DL-061) | regla: unknown_premise |
+| X9 | **Búsqueda incompleta presentada como frontera**: se declara que algo exige ratificación del PO o juicio irreducible sin haber agotado las premisas ya disponibles | D18/P4: se buscó un postulado en §2.1 N2, no se halló, y se enrutó al PO — pero deriva de `[D17] + [MT0]`, y §5.0 ya enunciaba el principio (DL-080); antes, "entailment no binarizable de una vez" era under-definition (DL-076) (instancia cazada por la auditoría de bloqueos de --provenance, DL-102) | límite: ontológico — no gate-able por forma (§2.10); detector-asistido + verificación del PO (M11) |
+| X17 | **Código que contradice un claim** (deriva de comportamiento): la implementación encoda un modelo que un claim prohíbe, y ni `contract_missing` ni el gluing lo cazan porque es COMPORTAMIENTO, no firma — conformance ontológica M0↔M1 (§2.10) | GAM-006/007 especificaban el gate/caída de large que D8 prohíbe (pre-DL-047); el shell de carry podría aún implementarlo (DL-101) | zona: Z1 |
+| X16 | **Arnés de mutación fuera del gate de pre-commit**: solo el check bloqueaba localmente; una mutación rota (ancla muerta, regla sin mutación) pasaba el commit y solo CI la cazaba | ancla de undeclared_free colisionó con DL-099 real y el commit paso local (DL-100) | regla: contract-validator-mutations en lefthook |
+| X15 | **Pipe sin escapar dentro de una celda de tabla**: el parser lo lee como separador de columna → misparse silencioso | «Cierre cerrado/abierto» en la descripción de §5.0 partía la fila en 4 columnas; más dos derivas de §2.9 y una fila de complejidad mal cerrada (DL-095) | regla: table_shape |
+| X14 | **Guardián decorativo**: una regla enciende en el reporte pero su conteo no suma al total — aparenta cobertura y deja pasar el build | ocurrió DOS veces en una sesión (`vocab_malformed`, `contract_missing`): la regla existía, su mutación existía, y el build seguía verde (DL-092) | regla: acumulación automática del gate (DL-108) — estructuralmente imposible: toda regla que reporta cuenta |
+| X13 | **Defecto auto-consistente**: la falsificación que hace pasar al verificador Y a sus mutaciones — indetectable por auto-verificación (Thompson) | el agente confló `capacidad` con `demanda` para que el detector diera 0: pasó el check y pasaron los tests; lo cazó el PO (DL-085, DL-091). Igual la autoridad sobre sinónimos y sobre el aparato | límite: defecto auto-consistente (Thompson) — la diversidad del PO es la única defensa (M11) |
+| X12 | **Completitud del aparato indecidible**: la adecuación por mutación es relativa por construcción y el mutante equivalente es NP-completo, luego «¿falta algo en el metanivel?» no se infiere | ninguna instancia concreta — es un límite, no un defecto; se acota declarando y encogiendo la TCB (DL-090) | límite: completitud indecidible (mutación relativa; equivalente NP-completo) — se acota con la TCB (DL-090) |
+| X11 | **Modo del validador sin cobertura de mutación**: M9 solo alcanza las reglas del reporte por defecto, luego `--provenance`, `--sensitivity` y `--seals` no tenían ni un test | los tres defectos de aparato de la sesión vivían ahí y los halló un agente leyendo salida, no el aparato (DL-088) | regla: los tres modos con línea base en test.luau (DL-089) |
+| X10 | **Coincidencia léxica sin frontera de palabra**: un término casa dentro de otro y produce un flotante falso | `entidad` casaba dentro de `identidad` y marcaba a D16 (DL-082) | regla: --provenance con frontera UTF-8 |
+| X8 | **Instrumento cuyo resultado limpio es indistinguible de ceguera**: mide su propia resolución y se lee como si midiera el objeto | la variante valía 0 durante 32 versiones por falta de registro, no por salud (DL-072); el detector de procedencia daba 0 viendo el 22% del vocabulario (DL-078) | límite: ceguera del instrumento — inherente, se acota midiendo cobertura (DL-078), no se cierra |
 
 **Historial de zonas cerradas (DL-072)** — una zona cerrada sale del registro vigente, y sin este historial sus eventos de apertura y cierre sobrevivirían solo en prosa. Con `Abierta por` en el registro y esta tabla, **descubrimiento y cierre se vuelven eventos distinguibles**, que es lo que la variante necesita para significar convergencia en vez de resolución del instrumento. Como el registro de escapes: es **memoria y no gobierna nada**.
 
@@ -334,22 +365,78 @@ La columna **Tipo MT0** decide cómo se lee la zona. `relación → máquina (de
 |---|---|---|---|
 | Z2 | Relación valor↔eje: que el Valor sea un valor del Eje declarado | DL-060 | DL-064 |
 | Z3 | Realización del gluing: que la fila de §4.15 realice su concepto | DL-060 | DL-062 |
+| Z6 | Exhaustividad de dominio: que un eje `cerrado` agote sus valores | DL-066 | DL-107 |
+| Z5 | Realización semántica: que el módulo HAGA lo que su contrato declara, no solo que exista | DL-066 | DL-092 |
 
 **El registro es MEMORIA, no COBERTURA (DL-070).** Un escape ausente significa que **nadie lo notó**, no que no exista: la ausencia de fila no prueba nada. Por su naturaleza, el registro **no puede crear dependencia alguna** — ninguna garantía del sistema se deriva de su estado, ni de que esté completo, ni de que todos sus escapes estén resueltos, y **ninguna regla puede consumirlo como evidencia**. El registro **empuja** (acumula presión sobre una clase que se repite) pero **jamás respalda**. Un mecanismo que dependiera de su completitud heredaría precisamente la dependencia de agente que el registro existe para hacer visible.
 
 El **contenido** de esta sección es constitución: el PO ratifica MT0, el procedimiento, las zonas y los tipos ("¿acepto estas fronteras?") — contenido, no relación (M3 aplicada a sí misma). El **registro de escapes** no es contenido ni garantía: es un hecho observado, y su resolución apunta a lo que sí carga garantía (una regla, una zona) sin cargarla él.
 
+### 2.10 Arquitectura de Metaniveles (MOF/MDE, DL-096)
+
+El proyecto es una **pila de metaniveles** en el sentido del OMG/MOF: cada nivel es un *lenguaje* que especifica el nivel de abajo, y la única relación que cruza una frontera de nivel es `conformsTo` (una instancia respeta la forma de su tipo). Nombrarlos hace explícito lo que estaba implícito, y —más importante— **explica dónde el aparato es completo y dónde no puede serlo**.
+
+| Nivel | Qué es | En el proyecto | `conformsTo` verificado por |
+|---|---|---|---|
+| **M3** meta-metamodelo | el lenguaje para escribir metamodelos | §2.8 MT0 + leyes M-n · §2.7 catálogo de reglas de inferencia | `meta_law_malformed`, `rule_missing/undeclared`, `unknown_rule`, `rule_arity` |
+| **M2** metamodelo | el lenguaje del diseño | axiomas C1a–C3 · ejes/elecciones · entidades §2.3 · vocabulario §2.9 | `axis_malformed`, `election_*`, `vocab_*`, `claim_bad_derivation` |
+| **M1** modelo | el diseño de Mudanza Caótica | claims D1–D24 · sistemas §4 · tickets | `unknown_premise`, `claim_cycle`, `unglued_claim`, `--provenance` |
+| **M0** instancias | la ejecución | `src/` · el juego corriendo · el playtest | `contract_missing`, specs, verificación de runtime (§6.7) |
+
+**Lo que esto revela — la distinción lingüística vs. ontológica (Atkinson–Kühne).** Hay dos clases de `conformsTo`, y confundirlas fue la raíz de media sesión:
+
+- **Lingüística** — «¿está bien *formado* según la gramática del nivel superior?». Aridad, sellos, columnas, forma de una elección. Es **conformance de forma**, decidible, y el aparato la mecaniza por completo: casi todas nuestras reglas son de esta clase.
+- **Ontológica** — «¿es *de veras* una instancia de su tipo en el dominio?». Que la premisa citada *sostenga* la conclusión; que `escasez temporal` sea *realmente* el mejor generador. Es **conformance de contenido**, y **no es decidible por forma** — es exactamente Z1, y es donde vive el detector `--provenance` como aproximación léxica, no como prueba.
+
+Esto cierra, con vocabulario de la literatura, la pregunta abierta toda la sesión: el aparato es completo en lo **lingüístico** y estructuralmente incompleto en lo **ontológico**. Y da la palabra final sobre la diversidad (P20/M11): el PO es necesario precisamente en la capa ontológica, porque la instanciación ontológica no se verifica lingüísticamente — ninguna cantidad de reglas de forma decide si el diseño *es* el correcto.
+
+**Metamodelado estricto.** Solo `conformsTo` debe cruzar niveles; una relación que salta de nivel sin ser instanciación es un defecto. La «premisa colada» que se cazó repetidamente (D1 escasez, D3 cooperación) es exactamente eso: contenido de M2 (una elección) usado en la derivación de un claim M1 sin declararse como instanciación. `election_unratified_cited` lo enforza para elecciones; el detector `--provenance` lo detecta en general (todo término de la conclusión traza a una premisa citada).
+
+**La clasificación, resuelta (DL-108).** Recorrido todo el conjunto de reglas, la partición lingüístico/ontológica es **estructural, no anotada caso por caso**: TODA regla que GATEA (las que llama `reportViolations`, registradas en §5.12) es **lingüística** —chequea forma, es decidible—; TODA la capa **ontológica** vive en los DETECTORES (`--provenance`: procedencia, auditoría de bloqueos, deóntica, triaje), que **empujan, no gatean**. Esto es lo que hace sostenible el perímetro binario (DL-060): **ningún gate descansa en juicio ontológico**. Las clases de escape que no pueden gate-arse (X1–X4, X9: premisa colada, salto modal, contradicción, colisión, bloqueo) se re-tipan `límite: ontológico` — no son deuda pendiente de regla, son el frente ontológico permanente que el detector asiste y el PO verifica (M11). Solo el juicio se muda a la implementación diversa; la máquina nunca lo simula.
+
 ### 2.9 Vocabulario Controlado (DL-074)
 
 Los claims se construyen de **términos**. Un defecto puede vivir no en ningún claim sino en el vocabulario del que están hechos: un término con dos sentidos normativos, o dos términos que parecen del mismo eje sin serlo. Ese fue el escape **X4** — `acoplamiento negativo/positivo` (mecanismo) leía como `cooperativa/competitiva` (valencia), dos ejes independientes. Esta tabla fija el término preferido de cada predicado y **prohíbe las formas que colisionan**.
 
-| Término preferido | Eje | Definición (comentario) | Formas prohibidas |
-|---|---|---|---|
-| acoplamiento rival | mecanismo | Contención: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` |
-| acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` |
-| valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — |
+| Término preferido | Eje | Definición (comentario) | Formas prohibidas | Sinónimos | Definido en | Ratificada |
+|---|---|---|---|---|---|---|
+| interferencia | mecanismo | Acoplamiento rival: los cuerpos compiten por el mismo lugar (§3.3). | `acoplamiento negativo` | `interfieren` | — | — |
+| acoplamiento acumulativo | mecanismo | Pooling: los esfuerzos se combinan (§3.3). | `acoplamiento positivo` | `pooling` | D6 | — |
+| valencia | polaridad | Cómo acumula el resultado del acoplamiento — cooperativa/competitiva (eje A1). **Independiente del mecanismo**: un acoplamiento rival no implica valencia competitiva. | — | — | — | — |
+| interacción | predicado | Lo que ocurre entre jugadores; el contenido del juego (C1a). | — | — | — | — |
+| interdependencia | predicado | Que el resultado de un jugador dependa del de otro (C1b). | — | `acoplamiento` · `resultados acoplados` · `resultados de los jugadores` | — | — |
+| decisión compartida | predicado | Elegir juntos bajo criterio, entre lo determinado y lo aleatorio (C2′). | — | `coordinación decisional` · `decisión conjunta` · `decidir juntos` · `coordinación` | — | — |
+| ambigüedad | predicado | El margen interpretable donde vive la decisión (C2′). | — | — | — | — |
+| restricción intrínseca | predicado | Límite que emana de la naturaleza de una entidad, no de una regla externa (C3). | — | `intrínseco` · `intrínseca` | — | — |
+| contenido | predicado | Lo que el juego ofrece como experiencia; los jugadores lo son (C1a). | — | `contenido principal` | — | — |
+| ventaja | predicado | Ruteo del resultado por el sistema en vez de por la interacción (anti-poder, §2.1). | — | `ventaja competitiva` · `ventaja de gameplay` | D11 | — |
+| demanda | entidad | Cargadores que un objeto exige; propiedad de ObjectDefinition (§2.3). Su exceso sobre la capacidad individual genera pooling. | — | `demand` | — | — |
+| capacidad | entidad | Demanda que un jugador satisface por sí solo; propiedad de Player (§2.3). Uniforme por D11. | — | `capacity` | — | — |
+| creación | predicado | Contenido producido por jugadores para otros jugadores (entidad Content). | — | `creación de contenido` | — | — |
+| entidad | predicado | El portador cuya naturaleza invoca C3: aquello que dos o más jugadores usan a la vez y por eso acopla — espacio u objeto. | — | — | — | — |
+| objeto | entidad | Instancia transportable con demanda; entidad Object (§2.3). | — | `objetos` | — | — |
+| obligación | predicado | Deber sobre el jugador; su legitimidad depende de si emana de la entidad o de una regla externa (C3). | — | `obligatoria` | — | — |
+| progresión | externo | Acumulación persistente que altera lo que el jugador puede hacer entre rondas. | — | `progresiones` | — | — |
+| puntuación | externo | Valor numérico asignado a un objeto o a un resultado. | — | `puntuaciones` | — | — |
+| sincronía | predicado | Ejecutar a la vez sin decidir juntos; polo negativo de la decisión compartida. | — | `en sincronía` | D2 | — |
+| cooperación | predicado | Acoplamiento cuya valencia es de equipo: el resultado de uno suma al de otro. | — | `cooperativa` · `cooperar` · `cooperativo` | — | — |
+| contrato de UX | predicado | Condición observable sobre la interfaz, con veredicto binario. | — | `contratos` | D18 | — |
 
-La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
+**Eje `externo` (DL-082).** Un término marcado `externo` es una categoría que el diseño **excluye** en vez de derivar —`progresión`, `puntuación`—: se nombra para prohibirla, y exigirle procedencia axiomática no tendría sentido. El detector la trata como siempre disponible. Es un acto declarado y auditable en la tabla, igual que «Definido en»; usarlo para silenciar un flotante genuino sería falsear el vocabulario, no el detector.
+
+**El perímetro binario rige también el vocabulario (DL-086).** Un **sinónimo** afirma una equivalencia semántica; un **marcador** (`Definido en`, eje `externo`) silencia un flotante. Ambos **cambian veredictos**. Autorados por un agente harían del agente el titular de la garantía — exactamente lo que M2 prohíbe. Por eso: **sin la celda `Ratificada` (`PO <fecha>`), un sinónimo o marcador es INERTE**, no bloqueante. El claim que dependía de él vuelve a flotar (marcado `⚠`), que es el estado honesto: *no sabemos que esté provenido*. La forma **preferida** no necesita ratificación — nombrar un término no es afirmar una equivalencia.
+
+Esto no es hipotético: en DL-077 el agente declaró `capacidad de un individuo` sinónimo de `demanda` —conflando una propiedad del objeto con una del jugador— **para que el detector llegara a 0**, y lo celebró. La regla existe porque el abuso ya ocurrió.
+
+La columna **Sinónimos** existe para el detector de procedencia (abajo): las formas de superficie bajo las que un mismo término aparece. La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de formas prohibidas — **mismo patrón que `impl_leak`**, un scan de superficie, sin etiquetar qué claim usa qué término (ese etiquetado sería una dependencia de agente, no una relación verificable).
+
+**Procedencia de términos (`--provenance`, DL-075) — y el límite honesto de la binarización.** El detector responde, por cada claim derivado: ¿qué términos de la conclusión no aparecen en ninguna premisa? Es la **propiedad de subfórmula** — una derivación sana no introduce vocabulario de la nada. Mecaniza la heurística que más deuda ha cazado esta sesión (halló D4: `R-ESP · C3` concluía sobre *acoplamiento* sin citar a D3, corregido a `R-COMP · [D3] + C3`).
+
+**Cobertura, o el detector se lee a sí mismo (DL-078).** El detector solo ve términos **modelados**; fuera de ellos es ciego, y un `0` suyo sería indistinguible de no mirar. Por eso el runner imprime siempre su **cobertura** (hoy 25% del vocabulario real de los claims) y `--provenance` emite la **cola de refinamiento**: los términos sin modelar, ordenados por uso. Esa cola no es ruido — es **qué definir a continuación**, y es el movimiento de **CEGAR** (la brecha entre lo abstraído y lo real dirige el refinamiento) y de **attribute exploration** en FCA (preguntar lo mínimo que completa la teoría). El lazo se probó cerrando su tope: definir `contenido` y `ventaja` expuso a D11 apoyándose en un término que su premisa no aportaba.
+
+Pero es **detector, no reja**, y el porqué es el hallazgo central. Un término flotante es **o** una premisa colada (defecto) **o** una paráfrasis de un término de premisa cuya sinonimia no está modelada (`coordinación decisional` ≈ `decisión compartida` de C2′). Distinguirlos exige la capa de **sinonimia** — que es **contenido/ontología, no relación pura**. Por eso el detector no bloquea: **empuja**, como el registro de escapes.
+
+Esto **no** vuelve el entailment "no binarizable" (corrección de metamodelado, DL-076). Un término flotante no es una frontera irreducible: es un **puntero a una definición faltante**, finito y localizado. Cada uno se **triajea por MT0** — reducible a primitivos presentes → extraer la definición (mecánico); irreducible a los axiomas/elecciones actuales → primitivo faltante, ratificación *específica* (el patrón `escasez → E11`, DL-068); empírico → medir. Ninguna rama es juicio vago; cada residuo es una **pregunta tipada**. Es **convergente** para corpus fijo (resolver un flag solo quita flags) y la terminación la guarda `claim_cycle` (una definición circular no puede fundar). El terminus honesto son los axiomas ratificados y la medición empírica — *definir más el universo*, que es acto del PO, no incapacidad de la máquina. **Re-tipar Z1 a la luz de esto es del PO** (§2.8): la fila queda intacta.
 
 **Límites, declarados.** (1) Es **léxico**, no semántico: caza que dos claims usen palabras que colisionan, no que una premisa *sostenga* su conclusión — eso sigue siendo Z1 y pide una ontología, no un vocabulario. (2) La cobertura es **las formas declaradas**: una colisión no anotada no se caza (falso negativo posible, como toda memoria). Por eso la regla **regresión-prueba** la colisión ya hallada y **siembra** el espacio de términos que X1 necesita; **no cierra** la clase X4. Las formas prohibidas son **frases distintivas** (dos palabras), no palabras comunes, para que el scan no dé falsos positivos.
 
@@ -366,30 +453,31 @@ La regla `vocab_banned_term` escanea el texto normativo de §3 en busca de forma
 **Procedencia (DL-073).** Cada claim declara además **qué DL lo selló**, y esa declaración es **auto-consistente sin necesitar historia**: el DL debe existir y debe declarar `§3.0` en su `Modifica:`. Un DL que nunca tocó los claims no pudo sellarlos, luego una procedencia que miente se cae sola (`seal_unprovenanced`, `seal_provenance_inconsistent`). Con esto, remodelar deja de ser solo **visible** y pasa a ser **atribuible**, y el churn de claims por DL —cuánta normatividad movió cada decisión— se computa desde el corpus en vez de reconstruirse contra git.
 
 | ID | Sección | Claim | Derivación | Sello | Sellado por |
-|---|---|---|---|---|
-| D1 | §3.1 | El reto del loop vive en la coordinación decisional, no en la ejecución individual. | R-COMP · C1b + C2′ | d3eabb | DL-068 |
+|---|---|---|---|---|---|---|
+| D1 | §3.1 | El reto del loop vive en la decisión compartida, no en la ejecución individual. | R-COMP · C1b + C2′ | a6ec39 | DL-093 |
 | D2 | §3.2 | Un momento cuenta como contenido cuando acopla los resultados de dos o más jugadores y exige decidir bajo ambigüedad; la sincronía sin decisión no cuenta. | R-COMP · C1a + C1b + C2′ | 05adac | DL-069 |
 | D3 | §3.3 | El entorno acopla los resultados de los jugadores; el acoplamiento no es una feature. | R-ESP · C1b | 265bc2 | DL-068 |
-| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco al elemento compartido. | R-ESP · C3 | 677030 | DL-063 |
-| D5 | §3.3 | El espacio acopla por contención: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 18c67b | DL-068 |
-| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] | 95178f | DL-068 |
+| D4 | §3.3 | Un acoplamiento solo cuenta si es intrínseco a la naturaleza de la entidad que se comparte. | R-COMP · [D3] + C3 | 67816b | DL-093 |
+| D5 | §3.3 | El espacio acopla por interferencia: rival y pervasivo. | R-COMP · C1b + [Compresión Social] | 1e8046 | DL-093 |
+| D6 | §3.3 | El objeto acopla por pooling — acumulativo y puntuado — cuando su demanda excede la capacidad de un individuo. | R-COMP · [D3] + [D4] + [Object] + [Player] | 95178f | DL-068 |
 | D7 | §3.3 | La valencia de todo acoplamiento del loop es cooperativa. | R-ELEC · [D3] + E1 | dc5d75 | DL-063 |
-| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone como obligación lo que no emana del elemento. | R-ESP · [D23] | 93d133 | DL-068 |
-| D9 | §3.3 | La escasez convierte la cooperación en decisión compartida: no basta ejecutar en sincronía. | — bloqueado: la escasez es E11, sin ratificar | 0a5ad8 | DL-068 |
-| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | — bloqueado: la variabilidad es E9, sin ratificar | 4a98c3 | DL-069 |
-| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-ESP · C1a | dd790a | DL-069 |
-| D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-ESP · C1b — el valor reside en la interdependencia, no en la cosa | fea1c9 | DL-068 |
+| D8 | §3.3 | Una regla que impide iniciar la interacción está prohibida: impone lo que no emana de la entidad. | R-COMP · [D23] + C1a + C3 | 28e853 | DL-093 |
+| D9 | §3.3 | La escasez vuelve inevitable la decisión compartida: sin recursos para todo, qué salvar se elige en conjunto. | R-ELEC · C2′ + E11 | 4ac818 | DL-094 |
+| D10 | §3.4 | Cada partida produce situaciones distintas sin modificar el objetivo. | R-ELEC · C1a + E2 | 4a98c3 | DL-069 |
+| D11 | §3.5 | Ninguna progresión otorga ventaja de gameplay: la ventaja rutea el resultado por el sistema, no por la interacción. | R-COMP · C1a + [Expresión sobre Ventaja] | dd790a | DL-069 |
+| D12 | §3.5 | Ningún objeto otorga más puntuación que otro (Neutralidad de Objetos); pueden diferir en demanda. | R-COMP · C1b + [Object] — el valor reside en la interdependencia, no en la cosa | fea1c9 | DL-068 |
 | D13 | §3.5 | Una mecánica que afecta solo al individuo no produce valor y no entra. | R-COMP · C1b + [Simplicidad Mecánica] | 7b1a32 | DL-069 |
 | D14 | §3.5 | El juego no castiga el fallo. | R-ELEC · C3 + E3 | c62b2b | DL-063 |
 | D15 | §3.5 | Las estadísticas históricas son infraestructura de producto, no progresión: lo prohibido es que otorguen ventaja. | R-ESP · [D11] | d7f44c | DL-063 |
 | D16 | §3.6 | La monetización futura emana de identidad y creación, nunca de ventaja en gameplay. | R-ESP · [Expresión sobre Ventaja] | d6ac66 | DL-063 |
 | D17 | §3.7 | El estado del juego es legible para el jugador: sin legibilidad la ambigüedad es ruido, no decisión. | R-ESP · C2′ | 85e3a8 | DL-063 |
-| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | — bloqueado: Z1 — [D17] no sostiene la conclusión; exige postulado N2 de verificabilidad | a01d00 | DL-068 |
+| D18 | §3.7 | Los contratos de UX son condiciones binarias verificables, no juicios de gusto. | R-COMP · [D17] + [MT0] — un contrato de UX es relación, luego su titular es la máquina: binario o no es criterio | a01d00 | DL-068 |
 | D19 | §3.7 | El Summary Screen narra lo ocurrido entre jugadores: su contenido es la interacción, no la puntuación. | R-ESP · C1a | ecff83 | DL-069 |
 | D20 | §3.8 | Los criterios de éxito del MVP se miden; no se derivan. | — empírico → playtest | ac7a1f | DL-063 |
 | D21 | §3.9 | La evolución del juego fortalece la interacción entre jugadores o la creación de contenido por jugadores. | R-ESP · [Jugadores como Fuente de Contenido] | 5a56fd | DL-069 |
 | D22 | §3.2 | La calidad del loop es la frecuencia de momentos que cuentan como contenido; el umbral concreto es empírico. | R-COMP · C1a + [D2] | 8c9248 | DL-065 |
-| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede imponerse como obligación de cooperar. | R-ESP · [D4] | 592d28 | DL-068 |
+| D23 | §3.3 | Lo que no cuenta como acoplamiento no puede ser una restricción impuesta. | R-COMP · [D4] + C3 | c990f7 | DL-093 |
+| D24 | §3.1 | La forma del objetivo debe sostener la decisión compartida durante toda la ronda: una forma que la agota antes del final contradice la ambigüedad interpretable. | R-ESP · C2′ | f82b10 | DL-084 |
 
 ### 3.1 Core Loop
 
@@ -647,7 +735,7 @@ UI / HUD               ←     Lógica de objetos
 ### 4.3 RemoteEvents y Contratos
 
 | Evento | Grupo | Dirección | Payload |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | InteractObject | Gameplay | cliente → servidor | `{ instanceId }` |
 | DeliverObject | Gameplay | servidor → clientes | `{ instanceId }` |
 | ObjectStateChanged | Gameplay | servidor → clientes | `{ instanceId, objectId, state, leaderId, supportId }` |
@@ -909,7 +997,7 @@ releasePlayer(player)  → Profile:EndSession(). Solo en PlayerRemoving.
 La sesión vive mientras el jugador está conectado — nunca se cierra por
 transiciones de ronda.
 
-**MigrationService** detecta la versión de PlayerData al cargar y aplica las migraciones necesarias. Esto sigue siendo lógica específica del proyecto — ProfileStore no migra schemas, solo gestiona el ciclo de vida del DataStore.
+**ProfileStoreConfig** centraliza la configuración de conexión a ProfileStore (nombre del store, schema por defecto) — es infraestructura de persistencia, no un módulo de dominio (§2.5). **MigrationService** detecta la versión de PlayerData al cargar y aplica las migraciones necesarias. Esto sigue siendo lógica específica del proyecto — ProfileStore no migra schemas, solo gestiona el ciclo de vida del DataStore.
 
 La versión actual de PlayerData es `Version = 1`. Cualquier cambio al schema requiere incrementar la versión y añadir una migración en MigrationService.
 
@@ -1039,7 +1127,7 @@ Las secciones §4.1–§4.11 gobiernan el eje **estructural** ("quién puede qu�
 |---|---|---|
 | `ObjectManager.getObject` / `getObjectPart` / `setState` | O(1) | lookup por `InstanceId` en tabla hash |
 | `ObjectManager.getFreeObjects` / `getAllObjects` | O(n) | enumeración — n = objetos de la ronda |
-| `TruckManager` entrega (`Touched`) | O(1) por evento + O(altura) resolución de ancestría (acotada a 5) |
+| `TruckManager` entrega (`Touched`) | O(altura) | resolución de ancestría acotada a 5 |
 | `PrefabRegistry.resolve` | O(1) | cache `ObjectId → template` |
 | `ClientStateManager` notificación | O(listeners) | por cambio de estado |
 
@@ -1111,9 +1199,10 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D6 | Pooling por objeto (positivo, puntuado) | `CarryRules` carryEfficiency + `CarryManager` / `CarrySupport` |
 | D7 | Valencia cooperativa | `TruckManager` (conteo de equipo) + `RoundManager` (RoundSummary único) |
 | D8 | Obligación intrínseca, nunca gate | `CarryManager` (el líder siempre puede iniciar — §4.4, DL-047) |
-| D23 | Lo no-acoplado no obliga | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D23 | Lo no-acoplado no obliga (neutral de valencia) | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
+| D24 | La forma del objetivo sostiene la decisión | — normativo → restringe el dominio de A5 (forma del objetivo) |
 | D9 | Escasez → decisión compartida | timer de `RoundManager` (1 tick/s, §4.12) + `ObjectManager` (spawn disperso) |
-| D10 | Situaciones distintas (bloqueado por E9) | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
+| D10 | Situaciones distintas, objetivo fijo | `EventManager` + `NPCManager` + spawn aleatorio de `ObjectManager` |
 | D11 | Sin ventaja de gameplay | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
 | D12 | Neutralidad de objetos | `TruckManager` (conteo uniforme) + definiciones de objeto sin campo de valor (§2.3) |
 | D13 | Lo solo-individual no entra | — normativo → Test de Diseño (§2.2) + auditoría DESIGN |
@@ -1127,7 +1216,7 @@ El **gluing** (Event-B) hace explícita la correspondencia entre el diseño y su
 | D21 | Evolución: interacción o creación | — normativo (roadmap §5.7) |
 | D22 | Calidad del loop = frecuencia | — empírico → playtest (métrica de avance, §3.2; medida con el criterio de D2) |
 
-**Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`. (⚠ `ProfileStoreConfig` existe en `src/server/Persistence/` pero §4.7 declara solo PlayerDataService y MigrationService como módulos propios — prosa desactualizada; armonizar en la re-derivación holística de §4.)
+**Registro adicional de módulos** — declarados en prosa (§4.1, §4.3, §4.7, §4.10, §4.14) y no en las tablas §4.4/§4.13: `Networking`, `MigrationService`, `ProfileStoreConfig`, `GlobalConfig`, `RoundConfig`, `GameplayConfig`, `Events`, `ObjectState`, `RoundPhase`, `HUDManager`, `SummaryManager`, `InteractionController`, `PromptController`, `PrefabRegistry` (resolución `ObjectId`→asset, §4.6).
 
 **Exenciones del registro:** `src/shared/Tests/` (specs — verifican, no son sistemas), `src/shared/Definitions/` (contenido de entidades — §2.4 prohíbe que el master se acople a nombres concretos de objetos), `Main.*` e `init` (infraestructura de arranque).
 
@@ -1182,7 +1271,7 @@ Todos los contratos de Nivel 1 corren en dos momentos:
 | — | Ningún artefacto pinnea versión del master (`AI_CONTEXT_MASTER vN.N` prohibido — se lee siempre vigente; entradas históricas del log exentas) — DL-050 | mismo runner (escaneo de `docs/`) |
 | — | Meta-frontera: un PR que toca rutas de enforcement (`tools/derivation-graph/`, `.github/workflows/`, `lefthook.yml`) lleva la etiqueta `enforcement-change` — evolucionar el sistema formal es explícito, nunca silencioso (DL-052) | github-script en CI — solo CI, requiere contexto de PR |
 | — | El validador demuestra su detección: cada regla enciende ante una violación mínima de su clase inyectada sobre copia del corpus real, más control en verde (DL-056) | `lune run tools/derivation-graph/test.luau` |
-| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado (A1–A10): eje bien formado con Cierre cerrado|abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Registrar ≠ ratificar: una elección `sin ratificar` no puede fundar un claim (`election_unratified_cited`) — DL-067. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
+| §2.1/§2.7 | Claims tipados (F8): toda entrada de §2.1 porta derivación formal — regla citada del catálogo §2.7 con condición sintáctica válida (`claim_bad_derivation`, `unknown_rule`, `unknown_premise`, `rule_arity`, `claim_cycle`) — DL-057. Elecciones como valencias: un eje atómico + un valor, sin duplicados (`election_malformed`, `election_axis_dup`, `election_compound`) — DL-058. Ejes como tipos con dominio enumerado (A1–A10): eje bien formado con Cierre cerrado/abierto, dominio ≥ 2 valores, elección sobre eje registrado y valor perteneciente a su dominio (`axis_malformed`, `axis_domain_thin`, `election_axis_unregistered`, `election_value_off_axis`) — precondición del juicio de optimalidad, DL-064. Registrar ≠ ratificar: una elección `sin ratificar` no puede fundar un claim (`election_unratified_cited`) — DL-067. Claims de diseño §3.0: toda subsección de §3 porta claim normativo o marcador (`unclaimed_section`) — DL-061. Sello del enunciado: cada claim porta el hash de su propio enunciado; reescribirlo sin re-sellar = violación (`claim_seal_mismatch`) — remodelar deja de ser indistinguible de reubicar; `--seals` recalcula al remodelar legítimamente — DL-063 | mismo runner (`check.luau`) |
 | §2.8 | Metaframework: forma de las leyes M-n verificada (`meta_law_malformed`) y sus derivaciones por las reglas F8 — DL-059/060. Zonas no verificadas explícitas, acotadas, **tipadas** y **ratificadas** (`zone_malformed` exige descripción, Tipo MT0, camino, vencimiento y celda `PO <fecha>` — DL-062/070; `zone_expired`: zona vencida = violación). El registro de escapes (§2.8) **no aparece aquí**: es heurística e historial, no contrato — no bloquea ni cuenta como violación (DL-070). Auto-cobertura M9: toda regla del validador tiene su mutación (verificado por `test.luau` contra el reporte real) — DL-060 | mismo runner + `test.luau` |
 
 **Nivel 2 — Contratos de mantenibilidad (CI)**
@@ -1364,7 +1453,7 @@ Referencias: [secciones del Context Master, otros DL-]
 **Valores válidos por estado:**
 
 | Estado | Domain UNKNOWN válido | Hipótesis requerida | Razón requerida | Ejecución/Costo/Pipeline |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | DISCOVERY | Sí | No | No | — |
 | PROPOSAL | No | Sí | No | — |
 | DECISION | No | Sí | Sí | Requeridos |
@@ -1512,7 +1601,7 @@ Subagent
 ```
 
 | Tipo | Función | Puede usar | No puede |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | **Auditor** | Detectar problemas | Context Master, Decision Log, código, tickets | Proponer arquitectura, expandir scope, aprobar cambios |
 | **Constructor** | Implementar diseño aprobado | Context Master, Decision Log, código, tickets | Rediseñar, salir del scope del ticket, emitir hallazgos de auditoría |
 | **Ideador** | Explorar y proponer diseño | Context Master, heurísticas, métricas subjetivas (pre-playtest) | Aprobar cambios, emitir hallazgos formales, implementar |
@@ -1665,6 +1754,84 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 
 **Candidato diferido.** Un gate que detecte "el PR añade un directorio/capa nuevo bajo `src/` pero está etiquetado `class:b`" cazaría el caso #44 en origen. Es heurístico (falsos positivos en adiciones `class:b` legítimas) — se registra como candidato a gate futuro, no se implementa aún (mismo criterio que DL-035).
 
+### 5.12 Registro de Reglas y Asimetría de Enforcement (DL-087)
+
+**El problema.** Nada guardaba la ELIMINACIÓN de una regla. M9 verifica que toda regla *existente* tenga mutación; borrando la regla y su mutación en el mismo PR el build seguía verde y el conteo bajaba sin que nada chillara. Un agente que puede cambiar la regla que lo juzga no está constreñido por ella: el aparato pierde su valía.
+
+**Asimetría (ratificada por el PO, 2026-07-23).** El agente puede **apretar** —añadir reglas, añadir mutaciones, endurecer condiciones—: eso solo aumenta el rigor sobre sí mismo. **Aflojar** —borrar una regla, relajar una condición, eximir un caso— exige ratificación del PO. Es **transitoria**: rige mientras el aparato tenga deuda; uno terminado no necesita ni apretar ni aflojar.
+
+**Mecanismo.** Este registro declara el conjunto de reglas. `rule_missing` verifica que toda regla declarada la emita el runner; `rule_undeclared`, lo inverso. Borrar una regla exige borrar su fila **aquí** — acto normativo en `docs/`, `class:a`, con DL — en vez de un diff de código que nadie lee. Añadir exige declararla, que es barato y visible.
+
+```
+dangling · orphan · stale NUEVO · diferimiento VENCIDO · uncovered · level_skip
+domain_mismatch · impl_leak · undeclared_free · module_undeclared · version-pin
+unglued_claim · glue_dangling · unclaimed_section
+claim_bad_derivation · unknown_rule · unknown_premise · rule_arity · claim_cycle
+claim_seal_mismatch · seal_unprovenanced · seal_provenance_inconsistent
+election_malformed · election_axis_dup · election_compound · election_value_off_axis
+election_axis_unregistered · election_unratified_cited
+axis_malformed · axis_domain_thin · closure_unjustified
+meta_law_malformed · zone_malformed · zone_expired
+blocked_claim_dangling · vocab_banned_term · vocab_malformed · contract_missing
+plan_dangling · plan_uncovered_debt · table_shape · module_underived · ticket_design_prose · reseal_undeclared
+rule_missing · rule_undeclared
+```
+
+### 5.13 Base de Confianza (TCB) y su reducción (DL-090)
+
+**Por qué existe.** «¿Está completo el metanivel?» **no es decidible**, y no por falta de esfuerzo: la adecuación por mutación es *relativa* por construcción —nunca prueba completitud— y decidir si un mutante es *equivalente* (indetectable por cualquier test) es **NP-completo**. «Quién verifica al verificador» es un problema abierto de investigación.
+
+La respuesta que da la literatura no es recursión infinita sino **minimizar la TCB**: encoger lo que debe *confiarse* hasta que un humano pueda auditarlo de una sentada. El caso de referencia lleva la TCB de un verificador de pruebas de ~50.000 líneas a ~50.
+
+**Nuestra TCB, medida.** Lo que debe confiarse hoy para que la garantía valga:
+
+| Componente | Tamaño | Riesgo dominante |
+|---|---|---|
+| `check.luau` — parsers + reglas | ~1.900 líneas | **misparse silencioso**: celdas corridas producen veredictos falsos sin avisar |
+| `test.luau` — arnés de mutación | ~600 líneas | mutación que no prueba lo que dice; regla que enciende sin sumar a violaciones |
+| Contenido ratificado | axiomas, elecciones, zonas, equivalencias | confiado por diseño — es la frontera del PO |
+| Cadena externa | Lune/Luau, git, CI | fuera de alcance |
+
+**≈2.500 líneas: inauditable de una sentada.** Ese es el número honesto, y es la deuda.
+
+**Dirección de reducción.** No se trata de escribir menos código, sino de mover partes de *confiadas* a *comprobadas*. Cada invariante de forma que se verifica saca a un parser de la TCB: §3.0 ya está protegida (sello hexadecimal, `Sellado por` = `DL-nnn`); §2.9 lo está desde DL-090 (conteo de columnas, eje conocido, ratificación en forma). Las tablas restantes —§2.7, §2.8, §5.11, §5.12— siguen dentro.
+
+**Relación con la asimetría (§5.12).** Son la misma respuesta a dos preguntas distintas: la asimetría acota **cuánta autoridad** tiene el agente; la TCB acota **cuánto hay que confiar**. Ninguna resuelve la completitud —que es indecidible— pero ambas convierten una pregunta sin fondo en una **magnitud declarada que puede bajar**.
+
+### 5.11 Plan del Programa de Modelado (DL-079)
+
+**Por qué existe.** DL-044 declaró su propagación pendiente en el campo `Impacto:` — prosa — y nunca se ejecutó; el orden se perdió sin que nada chillara y el programa derivó turno a turno. Un plan que vive en prosa (o en la cabeza de un agente) no es un plan: es una intención. Aquí el orden es un **artefacto con dependencias declaradas**, y **el frente accionable se computa**, no se recuerda.
+
+| ID | Trabajo | Depende de | Salda | Estado |
+|---|---|---|---|---|
+| P1 | Recorrer la cola de refinamiento del vocabulario (§2.9) hasta que deje de exponer clases nuevas | — | Z1 · X1 | hecho (DL-083) |
+| P2 | Disolver o confirmar E4–E11: aplicar el criterio de optimalidad buscando el predicado discriminante | P1 | DL-064 | hecho (DL-084) |
+| P3 | Desbloquear D9 y D10 (exige ratificar E11/E9, si sobreviven a P2) | P2 | D9 · D10 | hecho (DL-094) |
+| P4 | ~~Desbloquear D18: postulado N2 de verificabilidad~~ — no existía tal bloqueo: D18 deriva de [D17] + [MT0] | — | — | disuelto (DL-080) |
+| P5 | Derivar las entidades de §2.3 desde los axiomas (deuda de ontología; hoy son primitivos citables pero no derivados) | P1 | DL-077 | hecho (DL-085) |
+| P6 | Cerrar Z5: contratos de función de §4.13 verificados contra las firmas reales de `src/` | — | Z5 | hecho (DL-092) |
+| P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | hecho (DL-092) |
+| P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | hecho (DL-098) |
+| P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | hecho (DL-099) |
+| P10 | QA-001: playtest que mide lo empírico (D20, D22) y verifica conformance de comportamiento M0↔M1 y ontológica M1↔M2 | P7 | D20 · X17 · Z4 · Z1 | pendiente |
+| P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | hecho (DL-102) |
+| P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 · X9 | hecho (DL-103) |
+| P13 | Mitad de obligación de Z4: acto declarativo Resello (el delta NO deriva la obligación — DL-093; el residuo es ontológico) | — | Z4 | hecho (DL-104) |
+| P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | hecho (DL-107) |
+| P15 | Enforcement de las clases de escape: X2 deóntica mecanizada; X8/X12/X13 re-tipados como límites (no deuda); resto ontológico (no admite regla) | P12 | X3 · X4 · X8 | hecho (DL-106) |
+| P16 | §2.2 (Test Oficial) tipado como conformance M1→M2: deja de fundar desde prosa (M4) | P1 | DL-061 | hecho (DL-097) |
+| P17 | Reconciliar los 16 diferimientos de `deferrals.txt` — vencen 2026-08-11 y romperán el build en bloque | P9 | DL-050 | hecho (DL-101) |
+| P20 | Implementación DIVERSA (DDC): NO ejecutable por el agente — una segunda implementación suya sería gemela en criterio. Reencuadrado: ejecutar `derivation.dl` en Soufflé, cuya semántica no define el agente (requiere toolchain) | — | X12 · X13 | deuda declarada (PO 2026-07-23) |
+| P21 | Clasificar cada regla como LINGÜÍSTICA (forma, decidible) u ONTOLÓGICA (contenido, aproximada), y generalizar el metamodelado estricto: toda premisa cross-nivel debe ser instanciación declarada | P12 | X14 | hecho (DL-108) |
+| P19 | Reducir la TCB (§5.13): mover parsers de confiados a comprobados con invariantes de forma | — | X12 | hecho (DL-095) |
+| P18 | Ratificar el re-tipado de Z1 (se reveló como dos capas) y si X9 merece zona propia | — | Z1 | pospuesto (PO 2026-07-23) |
+
+La columna **Salda** ancla cada paso a la deuda declarada que resuelve. `plan_uncovered_debt` verifica lo inverso y es la validación de objetividad que el plan sí admite: **toda zona abierta, toda clase de escape sin regla y todo claim bloqueado debe aparecer en algún paso**. Lo que el plan no puede probar sigue siendo su completitud frente a deuda **no declarada** — eso es X8 y no se cierra con más filas.
+
+`plan_dangling` verifica que toda dependencia exista. El runner imprime el **frente accionable** — los pasos cuyas dependencias están todas `hecho`.
+
+**Límite, por disciplina X8.** Este plan es **memoria de trabajo declarado**, no prueba de cobertura: un `plan_dangling: 0` dice que las dependencias resuelven, **no** que el conjunto de trabajo esté completo. Un plan limpio y un plan ciego se ven igual. Por eso no gobierna nada: ordena lo declarado y se lee.
+
 ---
 
 ## 6. Operational Architecture
@@ -1672,7 +1839,7 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 ### 6.1 File Taxonomy
 
 | Tipo | Descripción | Riesgo principal | Ejemplos |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | A — Humano semipuro | Estructura creada por IA. Contenido llenado por humano sin filtro. Subagent solo filtra y formaliza via intake. Orchestrator audita solo estructura. | Contenido sin filtrar ingresa al ciclo sin pasar por intake | SCRATCHPAD.md |
 | B — Insumo primario de Orchestrator | Ciclo de vida largo. Se modifica solo con aprobación del PO. | Modificación sin auditoría previa | Prompts de auditores, AI_CONTEXT_MASTER (parcial) |
 | C — Comprensión humana | Para lectura humana. IA puede auditarlo y redactarlo. No es crítico. | Desactualización silenciosa | Onboarding, READMEs |
@@ -1682,7 +1849,7 @@ El flujo de gobernanza (§5.5) dice *qué* se cambia y *por qué*; este protocol
 **Aprovechabilidad por archivo:**
 
 | Archivo | Tipo | Intervención humana | Orchestrator | Subagent |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | SCRATCHPAD.md | A | Alta — escribe contenido | Solo estructura | Filtra y formaliza |
 | AI_CONTEXT_MASTER | B+D | Solo mejoras aprobadas | Lee como insumo | Lee como insumo |
 | PROJECT_DECISION_LOG | B+D | Supervisión y estado | Lee y audita | Lee para contexto |
@@ -1934,14 +2101,14 @@ Pipeline:   P1 | P2/P4 | P3 | P5 | P6
 **Orchestrators (Tipo B):**
 
 | Agente | Tipo funcional | Knowledge Domain | Prompt | Archivos que consume |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Auditor TECH (Codex) | Auditor | TECH | AUDITOR_TECH.md | §1+§2+§4+§5+§6, Decision Log, código, tickets |
 | Auditor DESIGN (Claude) | Auditor | DESIGN | AUDITOR_DESIGN.md | §1+§2+§3+§5+§6, Decision Log, tickets |
 
 **Subagents (Tipo D):**
 
 | Agente | Tipo funcional | Knowledge Domain | Prompt | Archivos que consume |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Scratchpad Intake | Especial | DESIGN + TECH | SCRATCHPAD_INTAKE.md | SCRATCHPAD, AI_CONTEXT_MASTER, Decision Log |
 | Gameplay Engineer | Constructor | TECH | GAMEPLAY_ENGINEER.md | §4, tickets Gameplay |
 | World Engineer | Constructor | TECH | WORLD_ENGINEER.md | §4, tickets World |
