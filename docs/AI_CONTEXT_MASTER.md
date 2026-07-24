@@ -1,6 +1,6 @@
 ﻿# AI_CONTEXT_MASTER — Mudanza Caótica
 
-**Versión:** 5.80 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
+**Versión:** 5.81 | **Plataforma:** Roblox | **Plazo:** vertical slice completo al **2026-08-11** (reloj reiniciado el 2026-07-11 — DL-024)
 
 Este documento es la **única fuente de verdad** del proyecto. Los agentes deben leerlo completo antes de responder cualquier petición. No existe documento externo que lo complemente o contradiga.
 
@@ -325,7 +325,7 @@ Las derivaciones de esta tabla pasan por las mismas reglas F8 que §2.1 (`claim_
 | ID | Zona — sin garantía del sistema | Tipo MT0 | Camino de cierre | Vence | Ratificada | Abierta por |
 |---|---|---|---|---|---|---|
 | Z1 | Contenido semántico de claims: que la premisa citada sostenga la conclusión (la forma no lo carga) | relación → máquina (deuda) | Descomposición (M5) + catálogo más fino; contradicciones como relación explícita | 2026-08-11 | PO 2026-07-19 | DL-060 |
-| Z4 | Obligación tras remodelar: el sello (DL-063) hace VISIBLE que un claim cambió, pero no genera deber de implementación — el grafo no guarda historia, luego no sabe qué sello había antes. §3.0 sigue exenta de obligación de ticket | relación → máquina (deuda) | Procedencia del sello: registrar qué DL cambió cada sello y derivar la obligación del cambio | 2026-08-11 | PO 2026-07-22 | DL-062 |
+| Z4 | Obligación tras remodelar: la naturaleza del cambio (`Resello:`, DL-104) se DECLARA, pero verificar que un resello `normativo` realmente disparó revisión de su realización es ontológico (§2.10) — el delta textual no basta: DL-093 reescribió 5 claims con delta enorme y cero compromiso | relación → máquina (deuda) | El acto declarativo hecho (Resello); la verificación de que un resello normativo se atendió es residuo ontológico → X17/playtest. Re-tipar → PO | 2026-08-11 | PO 2026-07-22 | DL-062 |
 | Z6 | Exhaustividad de dominio: que un eje marcado `cerrado` (§2.7) realmente agote sus valores es una afirmación semántica que nadie verifica. Un dominio cerrado de más convierte "no dominado" en "óptimo" sin derecho a ello | formalizable pendiente | Derivar el dominio desde el eje como partición demostrada, en vez de enumerarlo por inspección | 2026-08-11 | PO 2026-07-22 | DL-066 |
 
 **Invariante y variante (DL-071).** Todo el aparato descrito hasta aquí verifica **safety**: que cada estado del corpus sea consistente. No dice nada de la **trayectoria** — si las zonas efectivamente cierran, si las clases de escape acaban teniendo regla, si la tasa de defectos por pasada baja. Los vencimientos eran un sustituto tosco: **un reloj no es una propiedad**; "vence el 11 de agosto" no informa si el sistema tiende a algo.
@@ -1771,7 +1771,7 @@ election_axis_unregistered · election_unratified_cited
 axis_malformed · axis_domain_thin
 meta_law_malformed · zone_malformed · zone_expired
 blocked_claim_dangling · vocab_banned_term · vocab_malformed · contract_missing
-plan_dangling · plan_uncovered_debt · table_shape · module_underived · ticket_design_prose
+plan_dangling · plan_uncovered_debt · table_shape · module_underived · ticket_design_prose · reseal_undeclared
 rule_missing · rule_undeclared
 ```
 
@@ -1811,10 +1811,10 @@ La respuesta que da la literatura no es recursión infinita sino **minimizar la 
 | P7 | Saldar X5: alinear el núcleo de carry con el contrato `carryEfficiency` | P6 | X5 | hecho (DL-092) |
 | P8 | Derivar el conjunto de sistemas de §4 en una pasada holística | P3 · P5 | DL-053 | hecho (DL-098) |
 | P9 | Re-anclar TICKETS a claims D-n | P8 | DL-061 | hecho (DL-099) |
-| P10 | QA-001: playtest que mide lo empírico (D20, D22) y verifica conformance de comportamiento M0↔M1 | P7 | D20 · X17 | pendiente |
+| P10 | QA-001: playtest que mide lo empírico (D20, D22) y verifica conformance de comportamiento M0↔M1 | P7 | D20 · X17 · Z4 | pendiente |
 | P11 | Mecanizar la detección de X9: para un claim bloqueado, buscar si alguna combinación de premisas existentes cubriría su conclusión | P1 | X9 | hecho (DL-102) |
 | P12 | Mecanizar el triaje MT0 sobre términos flotantes (extraer definición · primitivo faltante · empírico) — el paso que aún hace el agente a mano en la metaherramienta | P1 | Z1 · X1 · X2 · X9 | hecho (DL-103) |
-| P13 | Cerrar la mitad de obligación de Z4: el delta del enunciado, no solo su hash y su autor | — | Z4 | pendiente |
+| P13 | Mitad de obligación de Z4: acto declarativo Resello (el delta NO deriva la obligación — DL-093; el residuo es ontológico) | — | Z4 | hecho (DL-104) |
 | P14 | Cerrar Z6: derivar el dominio de cada eje como partición demostrada, no enumerada por inspección | P2 | Z6 | pendiente |
 | P15 | Dar enforcement determinista a las clases de escape sin él: REGLA para defectos del corpus, MUTACIÓN DE REGRESIÓN para defectos del aparato | P12 | X3 · X4 · X8 | pendiente |
 | P16 | §2.2 (Test Oficial) tipado como conformance M1→M2: deja de fundar desde prosa (M4) | P1 | DL-061 | hecho (DL-097) |

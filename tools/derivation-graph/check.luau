@@ -497,6 +497,60 @@ do
 	end
 end
 
+-- ── naturaleza del re-sello (Z4 obligación, P13, DL-104) ────────────────────
+-- El sello (DL-063) hace VISIBLE que un claim cambió; «Sellado por» (DL-073)
+-- lo atribuye a un DL. La OBLIGACIÓN del cambio —¿exige re-implementar?— NO se
+-- deriva del delta textual: DL-093 reescribió 5 claims con delta enorme y
+-- CERO cambio de compromiso. Esa derivación es ONTOLÓGICA (§2.10).
+-- Lo decidible es el ACTO: todo DL que sella un claim de §3.0 declara la
+-- NATURALEZA del cambio (`Resello: nuevo | cosmético | normativo`). No valida
+-- que el juicio sea correcto —eso es del PO/agente (M11)— valida que se hizo,
+-- como undeclared_free. Un resello `normativo` marca que la realización del
+-- claim puede necesitar revisión (X17).
+local resealUndeclared = {}
+do
+	local sealers = {}
+	do
+		local region = nil
+		for _, line in ipairs(readLines("docs/AI_CONTEXT_MASTER.md")) do
+			local h = line:match("^#+%s+(%d[%d%.]*)")
+			if h then
+				region = (h:gsub("%.$", ""))
+			end
+			if region == "3.0" then
+				local dl = line:match("^| D%d+ | §3.-| (DL%-%d+) |%s*$")
+				if dl then
+					sealers[dl] = true
+				end
+			end
+		end
+	end
+	local declared = {}
+	do
+		local cur = nil
+		for _, line in ipairs(readLines("docs/PROJECT_DECISION_LOG.md")) do
+			local dl = line:match("^### (DL%-%d+)")
+			if dl then
+				cur = dl
+			end
+			local r = line:match("^Resello:%s*(%S+)")
+			if r and cur and (r == "nuevo" or r == "cosmético" or r == "normativo") then
+				declared[cur] = true
+			end
+		end
+	end
+	local ids = {}
+	for dl in pairs(sealers) do
+		table.insert(ids, dl)
+	end
+	table.sort(ids)
+	for _, dl in ipairs(ids) do
+		if not declared[dl] then
+			table.insert(resealUndeclared, dl .. " → sella claims de §3.0 sin declarar `Resello:` (nuevo|cosmético|normativo)")
+		end
+	end
+end
+
 -- ── ticket anclado en prosa de diseño (P9, DL-099) ──────────────────────────
 -- Desde DL-061 §3.1–§3.9 son COMENTARIO no normativo: la norma vive en los
 -- claims D-n (§3.0). Un ticket cuyo «Deriva de:» cita una sección §3.x sin
@@ -1905,6 +1959,9 @@ end)
 reportViolations("table_shape (fila con columnas != cabecera — misparse en potencia)", tableShape, function(r)
 	return r
 end)
+reportViolations("reseal_undeclared (DL sella §3.0 sin declarar Resello:)", resealUndeclared, function(r)
+	return r
+end)
 reportViolations("ticket_design_prose (ticket ancla en §3.x sin claim D-n)", ticketDesignProse, function(r)
 	return r
 end)
@@ -2217,7 +2274,7 @@ local violations = #dangling + #orphan + #newStale + #expired + #uncovered + #pi
 	+ #electionMalformed + #electionAxisDup + #electionCompound + #metaLawMalformed
 	+ #axisMalformed + #axisDomainThin + #electionAxisUnregistered + #electionValueOffAxis
 	+ #electionUnratifiedCited + #blockedClaimDangling
-	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape + #moduleUnderived + #ticketDesignProse
+	+ #sealUnprovenanced + #sealProvenanceInconsistent + #vocabBanned + #planDangling + #planUncoveredDebt + #vocabMalformed + #contractMissing + #tableShape + #moduleUnderived + #ticketDesignProse + #resealUndeclared
 	+ #zoneMalformed + #zoneExpired + #claimSealMismatch
 if violations > 0 then
 	print(string.format("\n%d violación(es) — el grafo de derivación NO está íntegro.", violations))

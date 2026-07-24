@@ -424,8 +424,8 @@ local cases = {
 		apply = function()
 			replaceOnce(
 				MASTER,
-				"derivar la obligación del cambio | 2026-08-11 |",
-				"derivar la obligación del cambio | 2026-01-01 |"
+				"Re-tipar → PO | 2026-08-11 |",
+				"Re-tipar → PO | 2026-01-01 |"
 			)
 		end,
 	},
@@ -441,6 +441,16 @@ local cases = {
 		expect = "✗ ticket_design_prose",
 		apply = function()
 			replaceOnce(TICKETS, "+ §3.4 (Entropía Social) [D10]", "+ §3.4 (Entropía Social)")
+		end,
+	},
+	{
+		-- Un DL que selló claims sin declarar la naturaleza del cambio: la
+		-- obligación (¿re-implementar?) queda sin acto declarado. Quitar el
+		-- Resello de DL-093 (el resello cosmético) lo dispara.
+		name = "reseal_undeclared (sella §3.0 sin Resello)",
+		expect = "✗ reseal_undeclared",
+		apply = function()
+			replaceOnce(LOG, "Resello:     cosmético", "")
 		end,
 	},
 	{
@@ -530,7 +540,7 @@ local cases = {
 		name = "plan_uncovered_debt",
 		expect = "✗ plan_uncovered_debt",
 		apply = function()
-			replaceOnce(MASTER, "el delta del enunciado, no solo su hash y su autor | — | Z4 |", "el delta del enunciado, no solo su hash y su autor | — | — |")
+			replaceOnce(MASTER, "partición demostrada, no enumerada por inspección | P2 | Z6 |", "partición demostrada, no enumerada por inspección | P2 | — |")
 		end,
 	},
 	{

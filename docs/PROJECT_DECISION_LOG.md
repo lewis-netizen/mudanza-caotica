@@ -2923,6 +2923,7 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    §3.0, §5.0
 Libre:       Alcance re-acotado de Z4 tras el sello (mitad de obligación) →
+Resello:     nuevo
              PO. Idem el registro de las zonas propuestas Z5/Z6 → PO.
 Referencias: §3.0, §2.8, §5.0, DL-044, DL-056, DL-060, DL-061, DL-062
 ```
@@ -3059,6 +3060,7 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    §3.0, §3.2, §4.15
 Libre:       Umbral de la banda (10–15 s) → playtest. Granularidad del
+Resello:     normativo
              predicado de D2 si el playtest muestra momentos de peso muy
              desigual → playtest.
 Referencias: §3.0, §3.2, §4.15, §2.7, DL-061, DL-063, DL-064
@@ -3266,6 +3268,7 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    §3.0, §3.1, §3.3, §2.7, §4.15
 Libre:       Valor de A11 → PO. Postulado N2 de verificabilidad → PO.
+Resello:     normativo
 Referencias: §3.0, §2.7, §2.1, §4.15, DL-046, DL-061, DL-064, DL-067
 ```
 
@@ -3346,6 +3349,7 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    §3.0, §3.4, §3.9, §4.15
 Libre:       Valor de A9 → PO (desbloquea D10). Dominios de evolución como
+Resello:     normativo
              eje, si se decide registrarlo → PO.
 Referencias: §3.0, §3.4, §3.9, §2.1, §4.15, DL-065, DL-067, DL-068
 ```
@@ -4314,6 +4318,7 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    §2.7, §3.0, §4.15
 Libre:       Valores de E4–E8, E10, E11 → PO. Rango del grupo → playtest.
+Resello:     nuevo
 Referencias: §2.7, §3.0, §4.15, §5.11, DL-064, DL-067, DL-078
 ```
 
@@ -4875,6 +4880,7 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    §3.0, §2.9
 Libre:       Ratificación de los cinco marcadores → PO.
+Resello:     cosmético
 Referencias: §3.0, §2.9, §5.11, DL-086, DL-090
 ```
 
@@ -4920,6 +4926,7 @@ Pipeline:    P5
 Ticket:      —
 Modifica:    §2.7, §3.0, §5.11
 Libre:       —
+Resello:     normativo
 Referencias: §2.7, §3.0, §5.11, DL-084, DL-093
 ```
 
@@ -5407,6 +5414,61 @@ Ticket:      —
 Modifica:    §2.8
 Libre:       —
 Referencias: §2.8, §2.10, §3.0, DL-075, DL-076, DL-078, DL-102
+```
+
+### DL-104
+
+```
+ID:          DL-104
+Fecha:       2026-07-23
+Domain:      BOTH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Resello:     nuevo
+Contexto:    P13 — la mitad de OBLIGACIÓN de Z4: el sello (DL-063) hace
+             visible el cambio, la atribución (DL-073) dice qué DL, pero
+             ninguno dice si el cambio EXIGE re-implementar.
+Contenido:   HALLAZGO QUE INVALIDA LA PREMISA DE P13: el plan proponía
+             «guardar el delta del enunciado» para derivar la obligación.
+             Pero el delta textual NO determina la obligación — DL-093
+             reescribió 5 claims (D1,D4,D5,D8,D23) con delta enorme y CERO
+             cambio de compromiso. La obligación-desde-el-cambio es
+             ONTOLÓGICA (§2.10), no mecanizable por forma. Misma lección que
+             §2.2, Z1, Z6: el naive-mechanism es incorrecto, el núcleo es
+             ontológico.
+             Lo DECIDIBLE es el ACTO declarativo: todo DL que sella un claim
+             de §3.0 declara `Resello: nuevo | cosmético | normativo`. Regla
+             reseal_undeclared. No valida el juicio —eso es del PO/agente
+             (M11)— valida que se hizo, patrón exacto de undeclared_free
+             (DL-053). Un resello `normativo` marca que la realización del
+             claim puede necesitar revisión (X17).
+             Backfill de los 7 selladores actuales, con el juicio real:
+             DL-063 nuevo (sellado inicial), DL-084 nuevo (D24 creado),
+             DL-093 COSMÉTICO (el contraejemplo), DL-065/068/069/094
+             normativos (re-derivaciones que cambiaron compromiso).
+             Z4 re-descrita: el acto declarativo queda hecho; verificar que un
+             resello normativo se atendió es residuo ontológico → X17/
+             playtest. Re-tipar el residuo es del PO.
+Hipótesis:   Forzar la declaración cosmético-vs-normativo en cada resello
+             elimina la clase «remodelé y nadie sabe si hay que
+             re-implementar» en el momento del resello, sin pretender decidir
+             lo ontológico.
+Razón:       CONTINGENCY P5 — P13 en autonomía (PO, 2026-07-23).
+Impacto:     reseal_undeclared (45 reglas); Resello backfilled en 7 DLs; Z4
+             re-descrita. P13 hecho (su mitad decidible). check 45 reglas,
+             test 59/59. Header v5.81.
+             NO CIERRA: el residuo ontológico de Z4 (¿el resello normativo
+             disparó revisión real de la realización?) es X17 —comportamiento,
+             no forma— y sigue en la capa que solo el PO/playtest cierra. La
+             premisa original de P13 («el delta deriva la obligación») queda
+             REFUTADA, no implementada.
+Ejecución:   CONFIRM
+Costo:       C3
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, §2.10, §3.0, DL-053, DL-063, DL-073, DL-093
 ```
 
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
