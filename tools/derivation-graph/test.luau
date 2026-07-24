@@ -190,7 +190,7 @@ local cases = {
 		name = "undeclared_free",
 		expect = "✗ undeclared_free",
 		apply = function()
-			append(LOG, dlBlock("099", "Modifica:    §5.0\nReferencias: §5.0"))
+			append(LOG, dlBlock("140", "Modifica:    §5.0\nReferencias: §5.0"))
 		end,
 	},
 	{

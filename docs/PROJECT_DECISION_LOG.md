@@ -5195,4 +5195,47 @@ Libre:       —
 Referencias: §5.12, §2.10, §3.0, DL-061, DL-097, DL-098
 ```
 
+### DL-100
+
+```
+ID:          DL-100
+Fecha:       2026-07-23
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    Al cerrar P9, un mutation test quedó roto (el ancla de
+             undeclared_free usaba dlBlock("099"), que colisionó con el
+             DL-099 real recién escrito) y el COMMIT PASÓ IGUAL localmente.
+             Diagnóstico: el pre-commit corre check.luau pero NO test.luau. El
+             arnés que valida que el validador es confiable vivía solo en CI.
+Contenido:   Hueco de auto-aplicación (M11): el mecanismo que verifica al
+             validador no estaba sujeto al mismo gate que el validador. Un
+             ancla muerta o una regla sin mutación pasaba el pre-commit en
+             silencio y solo CI —tras el push— lo cazaba. Registrado X16.
+             FIX: contract-validator-mutations añadido al pre-commit, mismo
+             glob que el check (docs, tools/derivation-graph, src). El arnés
+             es ahora gate local además de CI.
+             Y el defecto que lo reveló, saldado: el ancla de undeclared_free
+             movida a un id libre (140) que no colisiona con DLs reales.
+Hipótesis:   Un arnés que solo corre en CI deja una ventana entre commit y
+             push donde el validador puede estar roto sin señal; cerrarla en
+             pre-commit hace la auto-aplicación simétrica.
+Razón:       CONTINGENCY P5 — defecto observado al cerrar P9 (PO 2026-07-23),
+             tratado como deuda de metanivel (cada error del aparato es
+             deuda).
+Impacto:     lefthook.yml gana contract-validator-mutations; X16 registrado;
+             ancla de undeclared_free re-numerada. test 56/56. Header v5.77.
+             NO CIERRA: el pre-commit puede saltarse (--no-verify); el gate
+             REAL sigue siendo CI. El pre-commit reduce la ventana, no la
+             elimina — pero mueve el fallo de «tras el push» a «antes del
+             commit», que es donde el autor aún mira.
+Ejecución:   CONFIRM
+Costo:       C1
+Pipeline:    P5
+Ticket:      —
+Modifica:    §2.8
+Libre:       —
+Referencias: §2.8, §5.12, DL-056, DL-087, DL-099
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->

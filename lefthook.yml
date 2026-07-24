@@ -108,6 +108,13 @@ pre-commit:
       glob: "{docs/**/*.md,tools/derivation-graph/*,src/**/*.lua}"
       run: lune run tools/derivation-graph/check.luau
 
+    # El arnés de mutación (DL-056) valida que el validador sea CONFIABLE.
+    # Antes solo corría en CI: un ancla muerta o una regla sin mutación pasaba
+    # el pre-commit en silencio (X16, DL-100). Ahora es gate local también.
+    - name: contract-validator-mutations
+      glob: "{docs/**/*.md,tools/derivation-graph/*,src/**/*.lua}"
+      run: lune run tools/derivation-graph/test.luau
+
 commit-msg:
   jobs:
     # ── Convención de commits ────────────────────────────────────────────────
