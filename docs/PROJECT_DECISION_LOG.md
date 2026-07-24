@@ -5524,4 +5524,51 @@ Libre:       —
 Referencias: §2.8, §2.10, §3.0, DL-069, DL-078, DL-090, DL-091
 ```
 
+### DL-105
+
+```
+ID:          DL-105
+Fecha:       2026-07-23
+Domain:      TECH
+Tipo:        PROPOSAL
+Estado:      DECISION
+Contexto:    El PO observó que un PR de bump de dependabot FALLA el contrato
+             enforcement-change pero no bloquea (no es required en branch
+             protection), y preguntó si debía hacerlo required.
+Contenido:   ANÁLISIS: hacerlo required tal cual BLOQUEARÍA los bumps de
+             dependabot. El contrato guarda `.github/workflows/` como ruta de
+             enforcement; un bump de una GitHub Action (setup-node) edita ahí,
+             luego trip el guard, y dependabot no puede añadir labels. Es un
+             FALSO POSITIVO del contrato —deuda, no gobernanza—: un bump de
+             VERSIÓN no es evolución de la lógica de enforcement, que vive en
+             tools/derivation-graph/ y dependabot no toca.
+             DISCIPLINA «refinar antes de requerir» (como table_shape antes de
+             P19): el contrato exime a PRs de dependabot[bot] —la fuente que
+             no puede etiquetar y cuyos edits son bumps—. El maintainer revisa
+             el bump al mergear. La explicitud que DL-052 exige es para
+             cambios DELIBERADOS del sistema formal, no para actualizaciones
+             automáticas.
+             RECOMENDACIÓN AL PO: con esta exención en pie, YA es seguro poner
+             enforcement-change como required en el ruleset. Sin ella, no.
+Hipótesis:   Un tripwire advisory es toothless (DL-052 quiere explicitud); un
+             tripwire required con falsos positivos bloquea mantenimiento
+             legítimo. La exención de la fuente automatizada resuelve ambos.
+Razón:       CONTINGENCY P5 — observación del PO sobre branch protection
+             (2026-07-23).
+Impacto:     p2-implementation.yml: contract-enforcement-change exime a
+             dependabot[bot]. Habilita hacerlo required sin bloquear bumps.
+             Header sin cambio (no toca el master salvo este DL).
+             NO CIERRA: poner el contrato como required en el ruleset es
+             acción del PO en GitHub settings (el agente no toca branch
+             protection). Este DL solo hace la exención que lo vuelve seguro.
+Ejecución:   CONFIRM
+Costo:       C1
+Pipeline:    P5
+Ticket:      —
+Modifica:    —
+Libre:       Poner enforcement-change como required en el ruleset → PO
+             (acción en GitHub, fuera del alcance del agente).
+Referencias: §5.12, DL-052
+```
+
 <!-- Entradas rechazadas por SCRATCHPAD_INTAKE. No eliminar hasta revisión del PO. -->
